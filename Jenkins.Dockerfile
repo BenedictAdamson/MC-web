@@ -3,14 +3,14 @@
 
 # © Copyright Benedict Adamson 2018.
 # 
-# This file is part of MC-des.
+# This file is part of MC.
 #
-# MC-des is free software: you can redistribute it and/or modify
+# MC is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# MC-des is distributed in the hope that it will be useful,
+# MC is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
