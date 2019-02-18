@@ -60,7 +60,7 @@ pipeline {
     }
     post {
         success {
-            archiveArtifacts artifacts: 'pom.xml', fingerprint: true
+            archiveArtifacts artifacts: 'target/MC-*.jar', fingerprint: true
         }
     }
 }
