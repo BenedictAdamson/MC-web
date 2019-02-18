@@ -23,7 +23,6 @@
   * Jenkins plugins used:
   * Config File Provider
   *     - Should configure the file settings.xml with ID 'maven-settings' as the Maven settings file
-  * JUnit
   * Warnings 5
   */
  
@@ -78,8 +77,7 @@ pipeline {
             script {
                 def spotbugs = scanForIssues tool: [$class: 'SpotBugs'], pattern: 'target/spotbugsXml.xml'
                 publishIssues issues:[spotbugs]
-            }
-            junit 'target/surefire-reports/**/*.xml' 
+            } 
         }
         success {
             archiveArtifacts artifacts: 'target/MC-*.jar', fingerprint: true
