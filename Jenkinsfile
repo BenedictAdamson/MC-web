@@ -77,7 +77,8 @@ pipeline {
             script {
                 def spotbugs = scanForIssues tool: [$class: 'SpotBugs'], pattern: 'target/spotbugsXml.xml'
                 publishIssues issues:[spotbugs]
-            } 
+            }
+            junit 'target/surefire-reports/**/*.xml'  
         }
         success {
             archiveArtifacts artifacts: 'target/MC-*.jar', fingerprint: true
