@@ -29,7 +29,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M3</version>
 				<dependencies>
 					<dependency>
 						<groupId>org.apache.maven.surefire</groupId>
@@ -37,6 +36,18 @@
 						<version>3.0.0-M3</version>
 					</dependency>
 				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<!-- Ensure uses static inner test classes. -->
+					<excludes>
+						<exclude />
+					</excludes>
+					<!-- Work around OpenJDK bug: -->
+					<useSystemClassLoader>false</useSystemClassLoader>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
