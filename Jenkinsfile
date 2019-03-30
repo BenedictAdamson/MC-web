@@ -23,7 +23,10 @@
   * Jenkins plugins used:
   * Config File Provider
   *     - Should configure the file settings.xml with ID 'maven-settings' as the Maven settings file
+  * Pipeline Utility Steps
   * Warnings 5
+  *
+  * An administrator will need to permit scripts to use method org.apache.maven.model.Model getVersion.
   */
  
 pipeline { 
@@ -68,6 +71,12 @@ pipeline {
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
                     sh 'mvn -s $MAVEN_SETTINGS -DskipTests=true deploy'
+                }
+                sh 'cp Dockerfile target'
+     			script {
+     				def VERSION = readMavenPom().getVersion()
+                   	def image = docker.build("benedictadamson/mc:${VERSION}", "--build-arg VERSION=${VERSION} target")
+                   	image.push()
                 }
             }
         }
