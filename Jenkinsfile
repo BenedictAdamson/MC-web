@@ -60,7 +60,7 @@ pipeline {
         stage('Test') { 
             steps {
                configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){   
-                   sh 'mvn -s $MAVEN_SETTINGS test'
+                   sh 'mvn -s $MAVEN_SETTINGS test failsafe:integration-test'
                }
             }
         }
