@@ -25,6 +25,8 @@
   *     - Should configure the file settings.xml with ID 'maven-settings' as the Maven settings file
   * Pipeline Utility Steps
   * Warnings 5
+  *
+  * An administrator will need to permit scripts to use method org.apache.maven.model.Model getVersion.
   */
  
 pipeline { 
