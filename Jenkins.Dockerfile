@@ -19,7 +19,22 @@
 # along with MC-des.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+# Need Docker, Java 11 and Maven
+
 FROM ubuntu:18.04
 RUN apt-get -y update && apt-get -y install \
+   apt-transport-https \
+   ca-certificates \
+   curl \
+   gnupg-agent \
    maven \
-   openjdk-11-jdk-headless
+   openjdk-11-jdk-headless \
+   software-properties-common
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+RUN add-apt-repository -y \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+RUN apt-get -y update && apt-get -y install \
+   containerd.io \
+   docker-ce \
+   docker-ce-cli
+   
