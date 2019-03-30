@@ -23,6 +23,7 @@
   * Jenkins plugins used:
   * Config File Provider
   *     - Should configure the file settings.xml with ID 'maven-settings' as the Maven settings file
+  * Pipeline Utility Steps
   * Warnings 5
   */
  
@@ -69,6 +70,13 @@ pipeline {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
                     sh 'mvn -s $MAVEN_SETTINGS -DskipTests=true deploy'
                 }
+                withDockerRegistry([ credentialsId: "DOCKER_CREDENTIALS", url: "localhost:8081/repository/badamson/" ]) {
+     				script {
+     					def VERSION = readMavenPom().getVersion()
+                    	def image = docker.build("mc:${VERSION}", "-f ../Dockerfile target")
+                    	image.push()
+                	}
+   				}
             }
         }
     }
