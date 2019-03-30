@@ -36,6 +36,9 @@ pipeline {
             args '-v $HOME/.m2:/root/.m2 --network="host"'
         }
     }
+    triggers {
+        pollSCM('H */4 * * *')
+    }
     environment {
         JAVA_HOME = '/usr/lib/jvm/java-11-openjdk-amd64'
     }
