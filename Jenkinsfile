@@ -72,7 +72,7 @@ pipeline {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
                     sh 'mvn -s $MAVEN_SETTINGS -DskipTests=true deploy'
                 }
-                sh 'Dockerfile target'
+                sh 'cp Dockerfile target'
      			script {
      				def VERSION = readMavenPom().getVersion()
                    	def image = docker.build("mc:${VERSION}", "target")
