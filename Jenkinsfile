@@ -75,7 +75,7 @@ pipeline {
                 sh 'cp Dockerfile target'
      			script {
      				def VERSION = readMavenPom().getVersion()
-                   	def image = docker.build("mc:${VERSION}", "target")
+                   	def image = docker.build("mc:${VERSION}", "--build-arg MC_VERSION=${VERSION} target")
                    	image.push("benedictadamson/mc:${VERSION}")
                 }
             }
