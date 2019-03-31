@@ -66,10 +66,7 @@ pipeline {
         }
         stage('Deploy') {
             when {
-                anyOf{
-                    branch 'develop';
-                    branch 'master';
-                }
+                branch 'master';
             }
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
