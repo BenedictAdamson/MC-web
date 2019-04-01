@@ -56,7 +56,7 @@ pipeline {
         }
         stage('Build, Unit Test, Package and Verify') { 
             when {
-                branch 'development';
+                branch 'develop';
             }
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
