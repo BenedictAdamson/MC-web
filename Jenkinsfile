@@ -47,10 +47,20 @@ pipeline {
         JAVA_HOME = '/usr/lib/jvm/java-11-openjdk-amd64'
     }
     stages {
-        stage('Build') { 
+        stage('Clean') { 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
-                    sh 'mvn -s $MAVEN_SETTINGS -DskipTests=true clean package'
+                    sh 'mvn -s $MAVEN_SETTINGS clean'
+                }
+            }
+        }
+        stage('Build, Unit Test, Package and Verify') { 
+            when {
+                branch 'development';
+            }
+            steps {
+                configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
+                    sh 'mvn -s $MAVEN_SETTINGS verify'
                 }
             }
         }
@@ -61,20 +71,13 @@ pipeline {
                 }
             }
         }
-        stage('Test') { 
-            steps {
-               configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){   
-                   sh 'mvn -s $MAVEN_SETTINGS test failsafe:integration-test'
-               }
-            }
-        }
         stage('Deploy') {
             when {
                 branch 'master';
             }
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
-                    sh 'mvn -s $MAVEN_SETTINGS -DskipTests=true deploy'
+                    sh 'mvn -s $MAVEN_SETTINGS deploy'
                 }
             }
         }
