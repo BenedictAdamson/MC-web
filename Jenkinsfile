@@ -54,13 +54,10 @@ pipeline {
                 }
             }
         }
-        stage('Build, Unit Test, Package and Verify') { 
-            when {
-                branch 'develop';
-            }
+        stage('Compile') { 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
-                    sh 'mvn -s $MAVEN_SETTINGS verify'
+                    sh 'mvn -s $MAVEN_SETTINGS compile'
                 }
             }
         }
@@ -68,6 +65,16 @@ pipeline {
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){  
                     sh 'mvn -s $MAVEN_SETTINGS spotbugs:spotbugs'
+                }
+            }
+        }
+        stage('Build, Unit Test, Package and Verify') { 
+            when {
+                branch 'develop';
+            }
+            steps {
+                configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
+                    sh 'mvn -s $MAVEN_SETTINGS verify'
                 }
             }
         }
