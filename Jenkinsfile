@@ -54,10 +54,10 @@ pipeline {
                 }
             }
         }
-        stage('Compile') { 
+        stage('Build') { 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
-                    sh 'mvn -s $MAVEN_SETTINGS compile'
+                    sh 'mvn -s $MAVEN_SETTINGS -DskipTests=true clean package'
                 }
             }
         }
@@ -68,13 +68,10 @@ pipeline {
                 }
             }
         }
-        stage('Build, Unit Test, Package and Verify') { 
-            when {
-                branch 'develop';
-            }
+        stage('Test') { 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
-                    sh 'mvn -s $MAVEN_SETTINGS verify'
+                    sh 'mvn -s $MAVEN_SETTINGS test verify'
                 }
             }
         }
@@ -84,7 +81,13 @@ pipeline {
             }
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
-                    sh 'mvn -s $MAVEN_SETTINGS deploy'
+                    sh 'mvn -s $MAVEN_SETTINGS -DskipTests=true deploy'
+                }
+                sh 'cp Dockerfile target'
+     			script {
+     				def VERSION = readMavenPom().getVersion()
+                   	def image = docker.build("benedictadamson/mc:${VERSION}", "--build-arg VERSION=${VERSION}")
+                   	image.push()
                 }
             }
         }
