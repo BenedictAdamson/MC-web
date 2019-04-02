@@ -8,7 +8,7 @@
 		<version>1.4.1</version>
 	</parent>
 	<artifactId>MC</artifactId>
-	<version>1.7.3</version>
+	<version>1.7.4-SNAPSHOT</version>
 	<organization>
 		<name>Benedict Adamson</name>
 	</organization>
@@ -27,27 +27,6 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>com.spotify</groupId>
-				<artifactId>dockerfile-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>default</id>
-						<goals>
-							<goal>build</goal>
-							<goal>tag</goal>
-							<goal>push</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<repository>benedictadamson/mc</repository>
-					<tag>${project.version}</tag>
-					<buildArgs>
-						<VERSION>${project.version}</VERSION>
-					</buildArgs>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<executions>
@@ -62,6 +41,14 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<dependencies>
+					<!-- Force use of JUnit 4 -->
+					<dependency>
+						<groupId>org.apache.maven.surefire</groupId>
+						<artifactId>surefire-junit47</artifactId>
+						<version>3.0.0-M3</version>
+					</dependency>
+				</dependencies>
 				<configuration>
 					<!-- Ensure uses static inner test classes. -->
 					<excludes>

@@ -47,6 +47,13 @@ pipeline {
         JAVA_HOME = '/usr/lib/jvm/java-11-openjdk-amd64'
     }
     stages {
+        stage('Clean') { 
+            steps {
+                configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
+                    sh 'mvn -s $MAVEN_SETTINGS clean'
+                }
+            }
+        }
         stage('Build') { 
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
@@ -63,9 +70,9 @@ pipeline {
         }
         stage('Test') { 
             steps {
-               configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){   
-                   sh 'mvn -s $MAVEN_SETTINGS test failsafe:integration-test'
-               }
+                configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
+                    sh 'mvn -s $MAVEN_SETTINGS test verify'
+                }
             }
         }
         stage('Deploy') {
@@ -75,6 +82,12 @@ pipeline {
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
                     sh 'mvn -s $MAVEN_SETTINGS -DskipTests=true deploy'
+                }
+                sh 'cp Dockerfile target'
+     			script {
+     				def VERSION = readMavenPom().getVersion()
+                   	def image = docker.build("benedictadamson/mc:${VERSION}", "--build-arg VERSION=${VERSION}")
+                   	image.push()
                 }
             }
         }
