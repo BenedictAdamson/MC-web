@@ -75,18 +75,32 @@ pipeline {
                 }
             }
         }
-        stage('Deploy') {
-            when {
-                branch 'master';
-            }
+        stage('Maven Deploy') {
             steps {
                 configFileProvider([configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]){ 
                     sh 'mvn -s $MAVEN_SETTINGS -DskipTests=true deploy'
                 }
-                sh 'cp Dockerfile target'
+            }
+        }
+        stage('Docker Build') {
+            when {
+                branch 'develop';
+            }
+            steps {
      			script {
      				def VERSION = readMavenPom().getVersion()
-                   	def image = docker.build("benedictadamson/mc:${VERSION}", "--build-arg VERSION=${VERSION}")
+                   	def image = docker.build("benedictadamson/mc:${VERSION}", "--build-arg VERSION=${VERSION} .")
+                }
+            }
+        }
+        stage('Docker Build and Push') {
+            when {
+                branch 'master';
+            }
+            steps {
+     			script {
+     				def VERSION = readMavenPom().getVersion()
+                   	def image = docker.build("benedictadamson/mc:${VERSION}", "--build-arg VERSION=${VERSION} .")
                    	image.push()
                 }
             }
