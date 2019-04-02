@@ -41,6 +41,14 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<dependencies>
+					<!-- Force use of JUnit 4 -->
+					<dependency>
+						<groupId>org.apache.maven.surefire</groupId>
+						<artifactId>surefire-junit47</artifactId>
+						<version>3.0.0-M3</version>
+					</dependency>
+				</dependencies>
 				<configuration>
 					<!-- Ensure uses static inner test classes. -->
 					<excludes>
