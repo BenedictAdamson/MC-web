@@ -113,6 +113,7 @@ pipeline {
                 publishIssues issues:[spotbugs]
             }
             junit 'target/surefire-reports/**/*.xml'  
+            junit 'target/failsafe-reports/**/*.xml'  
         }
         success {
             archiveArtifacts artifacts: 'target/MC-*.jar', fingerprint: true
