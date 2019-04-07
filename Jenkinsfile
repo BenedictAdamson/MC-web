@@ -37,7 +37,7 @@ pipeline {
     agent {
         dockerfile {
             filename 'Jenkins.Dockerfile'
-            args '-v $HOME/.m2:/root/.m2 --network="host"'
+            args '-v $HOME/.m2:/root/.m2 -v /var/run/docker.sock:/var/run/docker.sock --network="host"'
         }
     }
     triggers {
