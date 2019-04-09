@@ -30,9 +30,9 @@ RUN apt-get -y update && apt-get -y install \
    maven \
    openjdk-11-jdk-headless \
    software-properties-common
-RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 RUN add-apt-repository -y \
-   "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+   "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
 RUN apt-get -y update && apt-get -y install \
    containerd.io \
    docker-ce \
