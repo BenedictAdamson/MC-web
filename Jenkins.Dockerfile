@@ -21,7 +21,7 @@
 
 # Need Docker, Java 11 and Maven
 
-FROM ubuntu:18.04
+FROM debian:stretch-backports
 RUN apt-get -y update && apt-get -y install \
    apt-transport-https \
    ca-certificates \
