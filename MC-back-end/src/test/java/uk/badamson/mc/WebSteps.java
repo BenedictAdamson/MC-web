@@ -198,9 +198,7 @@ public class WebSteps {
       Objects.requireNonNull(client, "client");
       setRequestUri(path);
       final HttpMethod method = HttpMethod.valueOf(verb);
-      if (method == null) {
-         throw new IllegalArgumentException("verb " + verb);
-      }
+      assert method != null;
       response = client.method(method).uri(requestUri.getPath())
                .contentType(MediaType.APPLICATION_JSON_UTF8).exchange();
    }
