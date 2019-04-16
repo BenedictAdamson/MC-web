@@ -26,6 +26,6 @@
 		<url>https://github.com/BenedictAdamson/MC</url>
 	</scm>
 	<modules>
-		<module>back-end</module>
+		<module>MC-back-end</module>
 	</modules>
 </project>
