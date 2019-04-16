@@ -5,10 +5,10 @@
 	<parent>
 		<groupId>uk.badamson.mc</groupId>
 		<artifactId>MC-parent</artifactId>
-		<version>1.4.3</version>
+		<version>1.4.4</version>
 	</parent>
 	<artifactId>MC</artifactId>
-	<version>1.9.0</version>
+	<version>1.9.1-SNAPSHOT</version>
 	<organization>
 		<name>Benedict Adamson</name>
 	</organization>
