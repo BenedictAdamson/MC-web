@@ -64,12 +64,12 @@ public class SolitaryIT {
       }
    }
    private static final Path JAR = TARGET_DIR
-            .resolve("MC-" + SUT_VERSION + ".jar");
+            .resolve("MC-back-end-" + SUT_VERSION + ".jar");
 
    @Container
    private final GenericContainer<?> container = new GenericContainer<>(
             new ImageFromDockerfile().withFileFromPath("Dockerfile", DOCKERFILE)
-                     .withFileFromPath("target/MC-.jar", JAR));
+                     .withFileFromPath("target/MC-back-end-.jar", JAR));
 
    @Test
    public void start() {

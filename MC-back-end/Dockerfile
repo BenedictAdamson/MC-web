@@ -29,7 +29,6 @@ RUN groupadd -g 1024 mc
 RUN useradd -c "Mission Command server" --create-home -u 1024 -g 1024 mc
 USER mc
 WORKDIR /home/mc
-COPY target/MC-${VERSION}.jar MC.jar
-ENTRYPOINT ["java","-jar","MC.jar"]
+COPY target/MC-back-end-${VERSION}.jar MC-back-end.jar
+ENTRYPOINT ["java","-jar","MC-back-end.jar"]
 CMD []
-HEALTHCHECK --interval=5m --timeout=3s CMD curl -f http://localhost:8080/ || exit 1

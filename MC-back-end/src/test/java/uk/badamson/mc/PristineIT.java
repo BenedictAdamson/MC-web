@@ -67,7 +67,7 @@ public class PristineIT {
       }
    }
    private static final Path JAR = TARGET_DIR
-            .resolve("MC-" + SUT_VERSION + ".jar");
+            .resolve("MC-back-end-" + SUT_VERSION + ".jar");
 
    private final Network containersNetwork = Network.newNetwork();
 
@@ -79,7 +79,7 @@ public class PristineIT {
    @Container
    private final GenericContainer<?> mcContainer = new GenericContainer<>(
             new ImageFromDockerfile().withFileFromPath("Dockerfile", DOCKERFILE)
-                     .withFileFromPath("target/MC-.jar", JAR))
+                     .withFileFromPath("target/MC-back-end-.jar", JAR))
                               .withNetwork(containersNetwork)
                               .withNetworkAliases("mc")
                               .withCommand("--spring.data.mongodb.host=db")
