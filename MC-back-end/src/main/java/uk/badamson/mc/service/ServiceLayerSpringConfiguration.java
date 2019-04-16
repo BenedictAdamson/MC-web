@@ -53,6 +53,13 @@ public class ServiceLayerSpringConfiguration {
       return provider;
    }
 
+   /**
+    * <p>
+    * Create the the service layer.
+    * </p>
+    *
+    * @return the service layer.
+    */
    @Bean
    public Service service(@NonNull final PasswordEncoder passwordEncoder,
             @NonNull final PlayerRepository playerRepository,

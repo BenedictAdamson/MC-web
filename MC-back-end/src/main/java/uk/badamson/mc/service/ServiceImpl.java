@@ -118,6 +118,8 @@ public class ServiceImpl implements Service {
     * <ul>
     * <li>Always have a (non null) player repository.</li>
     * </ul>
+    *
+    * @return the repository.
     */
    public final PlayerRepository getPlayerRepository() {
       return playerRepository;

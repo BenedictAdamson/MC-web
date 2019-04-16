@@ -33,7 +33,7 @@ import org.springframework.security.core.GrantedAuthority;
 public enum Authority implements GrantedAuthority {
    /**
     * <p>
-    * May {@linkplain Service#add(Player) add a player}.
+    * May add a player.
     * </p>
     */
    ROLE_ADMIN;

@@ -29,6 +29,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class HomeController {
 
+   /**
+    * <p>
+    * Behaviour of the GET verb for the home page.
+    * </p>
+    *
+    * @return The response.
+    */
    @GetMapping("/")
    public String get() {
       return "Hello";

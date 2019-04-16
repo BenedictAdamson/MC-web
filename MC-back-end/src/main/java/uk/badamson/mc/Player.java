@@ -100,21 +100,22 @@ public final class Player implements UserDetails {
     * equivalent} {@linkplain #getUsername() usernames}.</li>
     * </ul>
     *
-    * @param obj
-    * @return
+    * @param that
+    *           The object to compare with this.
+    * @return Whether this is equivalent to that.
     */
    @Override
-   public boolean equals(final Object obj) {
-      if (this == obj) {
+   public boolean equals(final Object that) {
+      if (this == that) {
          return true;
       }
-      if (obj == null) {
+      if (that == null) {
          return false;
       }
-      if (!(obj instanceof Player)) {
+      if (!(that instanceof Player)) {
          return false;
       }
-      final Player other = (Player) obj;
+      final Player other = (Player) that;
       return username.equals(other.username);
    }
 

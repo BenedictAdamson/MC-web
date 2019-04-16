@@ -62,6 +62,15 @@ public class PlayerController {
       this.service = Objects.requireNonNull(service, "service");
    }
 
+   /**
+    * <p>
+    * Behaviour of the POST verb for the players list.
+    * </p>
+    *
+    * @param player
+    *           The body of the request
+    * @return The response.
+    */
    @PostMapping("/player")
    @ResponseStatus(HttpStatus.CREATED)
    public Flux<Player> add(@RequestBody final Player player) {
@@ -69,6 +78,13 @@ public class PlayerController {
       return getAll();
    }
 
+   /**
+    * <p>
+    * Behaviour of the GET verb for the players list.
+    * </p>
+    *
+    * @return The response.
+    */
    @GetMapping("/player")
    public Flux<Player> getAll() {
       return service.getPlayers();
