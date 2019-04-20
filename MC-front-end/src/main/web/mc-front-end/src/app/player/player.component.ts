@@ -1,6 +1,5 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Location } from '@angular/common';
 import { PlayerService } from '../player.service';
 import { Player } from '../player';
 
@@ -11,12 +10,11 @@ import { Player } from '../player';
 })
 export class PlayerComponent implements OnInit {
 
-    @Input() player: Player;
+    player: Player;
 
     constructor(
         private route: ActivatedRoute,
-        private playerService: PlayerService,
-        private location: Location) { }
+        private playerService: PlayerService) { }
 
     ngOnInit() {
         this.getPlayer();
