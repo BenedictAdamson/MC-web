@@ -43,6 +43,16 @@
 						</configuration>
 					</execution>
 					<execution>
+						<id>javascript tests</id>
+						<goals>
+							<goal>karma</goal>
+						</goals>
+						<phase>test</phase>
+						<configuration>
+							<karmaConfPath>src/karma.conf.headless.js</karmaConfPath>
+						</configuration>
+					</execution>
+					<execution>
 						<id>prod</id>
 						<goals>
 							<goal>npm</goal>
