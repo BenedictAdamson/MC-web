@@ -1,11 +1,11 @@
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 
 import { Player } from '../player';
 import { PlayerComponent } from './player.component';
 import { PlayerService } from '../player.service';
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 describe('PlayerComponent', () => {
     let component: PlayerComponent;
@@ -14,7 +14,7 @@ describe('PlayerComponent', () => {
     const PLAYER_A = { username: 'Administrator', password: null, authorities: ['ROLE_ADMIN'] };
     const PLAYER_B = { username: 'Benedict', password: null, authorities: [] };
 
-    const canCreate = (testPlayer: Player) => {
+    const setUp = (testPlayer: Player) => {
         const playerServiceStub = jasmine.createSpyObj('PlayerService', ['getPlayer']);
         playerServiceStub.getPlayer.and.returnValue(of(testPlayer));
 
@@ -35,6 +35,9 @@ describe('PlayerComponent', () => {
         fixture = TestBed.createComponent(PlayerComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
+    };
+    const canCreate = (testPlayer: Player) => {
+        setUp(testPlayer);
 
         expect(component).toBeTruthy();
         expect(component.player).toBe(testPlayer);
