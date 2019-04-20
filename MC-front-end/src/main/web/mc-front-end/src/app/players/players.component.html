@@ -1,6 +1,8 @@
 <h2>Players</h2>
 <ul class="players">
     <li *ngFor="let player of players">
-        {{player.username}}
+        <a routerLink="/player/{{player.username}}">
+            {{player.username}}
+        </a>
     </li>
 </ul>

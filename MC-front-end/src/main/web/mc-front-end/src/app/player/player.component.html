@@ -1,3 +1,7 @@
-<p>
-  player works!
-</p>
+<h2>{{player.username}}</h2>
+<p>Authorities:</p>
+<ul class="authorities">
+    <li *ngFor="let authority of player.authorities">
+        {{authority}}
+    </li>
+</ul>

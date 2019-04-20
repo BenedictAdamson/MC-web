@@ -14,4 +14,8 @@ export class PlayerService {
     getPlayers(): Observable<Player[]> {
         return of(this.players);
     }
+
+    getPlayer(username: string): Observable<Player> {
+        return of(this.players.find(player => player.username === username));
+    }
 }
