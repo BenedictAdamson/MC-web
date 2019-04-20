@@ -11,13 +11,6 @@ module.exports = function (config) {
     config.set({
         singleRun: true,
         autoWatch: false,
-        browsers: ['FirefoxHeadless'],
-        frameworks: ['jasmine'],
-        reporters: ['junit'],
-        junitReporter: {
-            outputDir: '../../../../../target/karma-reports',
-            outputFile: 'TEST-mc-front-end.xml',
-            useBrowserName: false,
-        }
+        browsers: ['FirefoxHeadless']
     });
 };

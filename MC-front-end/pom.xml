@@ -45,11 +45,11 @@
 					<execution>
 						<id>javascript tests</id>
 						<goals>
-							<goal>karma</goal>
+							<goal>npm</goal>
 						</goals>
 						<phase>test</phase>
 						<configuration>
-							<karmaConfPath>src/karma.conf.headless.js</karmaConfPath>
+							<arguments>run-script test-headless</arguments>
 						</configuration>
 					</execution>
 					<execution>
