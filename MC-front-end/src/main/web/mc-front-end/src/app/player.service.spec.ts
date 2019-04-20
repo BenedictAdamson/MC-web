@@ -5,9 +5,13 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { PlayerService } from './player.service';
 import { Player } from './player';
 
+
 describe('PlayerService', () => {
     let httpClient: HttpClient;
     let httpTestingController: HttpTestingController;
+
+    const ADMINISTRATOR = { username: 'Administrator', password: null, authorities: ['ROLE_ADMIN'] };
+    const PLAYER = { username: 'Benedict', password: null, authorities: [] };
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -27,7 +31,7 @@ describe('PlayerService', () => {
     });
 
     it('can get players', () => {
-        const testPlayers: Player[] = [{ username: 'Administrator', password: null, authorities: ['ROLE_ADMIN'] }];
+        const testPlayers: Player[] = [ADMINISTRATOR];
         const service: PlayerService = TestBed.get(PlayerService);
 
         service.getPlayers().subscribe(players => expect(players).toEqual(testPlayers));
@@ -36,5 +40,24 @@ describe('PlayerService', () => {
         expect(request.request.method).toEqual('GET');
         request.flush(testPlayers);
         httpTestingController.verify();
+    });
+
+    let canGetPlayer: CallableFunction;
+    canGetPlayer = (testPlayer: Player) => {
+        const username = testPlayer.username;
+        const service: PlayerService = TestBed.get(PlayerService);
+
+        service.getPlayer(username).subscribe(player => expect(player).toEqual(testPlayer));
+
+        const request = httpTestingController.expectOne(`/api/player/${username}`);
+        expect(request.request.method).toEqual('GET');
+        request.flush(testPlayer);
+        httpTestingController.verify();
+    };
+    it('can get the administrator', () => {
+        canGetPlayer(ADMINISTRATOR);
+    });
+    it('can get other player', () => {
+        canGetPlayer(PLAYER);
     });
 });
