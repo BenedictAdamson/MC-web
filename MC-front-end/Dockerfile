@@ -1,4 +1,4 @@
-# Dockerfile for the MC-back-end project,
+# Dockerfile for the MC-front-end project,
 # to produce the MC server in a container.
 
 # © Copyright Benedict Adamson 2018-19.
@@ -19,16 +19,11 @@
 # along with MC-des.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-FROM openjdk:11
+FROM httpd:2.4-alpine
 ARG VERSION
 LABEL version="${VERSION}"
 LABEL description="The Mission Command game back-end server."
 LABEL maintainer="badamson@spamcop.net"
-EXPOSE 8080
-RUN groupadd -g 1024 mc
-RUN useradd -c "Mission Command server" --create-home -u 1024 -g 1024 mc
-USER mc
-WORKDIR /home/mc
-COPY target/MC-back-end-${VERSION}.jar MC-back-end.jar
-ENTRYPOINT ["java","-jar","MC-back-end.jar"]
-CMD []
+RUN rm -r /usr/local/apache2/htdocs/*
+COPY src/main/resources/ /
+COPY src/main/web/mc-front-end/dist/mc-front-end/ /usr/local/apache2/htdocs/
