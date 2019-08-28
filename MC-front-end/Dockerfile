@@ -20,10 +20,22 @@
 #
 
 FROM httpd:2.4-alpine
+LABEL description="The Mission Command game front-end server."
+LABEL maintainer="badamson@spamcop.net"
+
+RUN apk --no-cache add curl
+HEALTHCHECK --interval=7s --timeout=3s CMD curl --fail http://localhost:80/ || exit
+
 ARG VERSION
 LABEL version="${VERSION}"
-LABEL description="The Mission Command game back-end server."
-LABEL maintainer="badamson@spamcop.net"
+
+COPY src/main/resources/usr/local/apache2/conf/ /usr/local/apache2/conf/
+RUN chown -R root:daemon /usr/local/apache2/conf/
+RUN find /usr/local/apache2/conf/ -type f -exec chmod ug=r {} \;
+RUN find /usr/local/apache2/conf/ -type d -exec chmod ug=rx {} \;
+
 RUN rm -r /usr/local/apache2/htdocs/*
-COPY src/main/resources/ /
 COPY src/main/web/mc-front-end/dist/mc-front-end/ /usr/local/apache2/htdocs/
+RUN chown -R root:daemon /usr/local/apache2/htdocs/*
+RUN find /usr/local/apache2/htdocs/ -mindepth 1 -type f -exec chmod ug=r {} \;
+RUN find /usr/local/apache2/htdocs/ -mindepth 1 -type d -exec chmod ug=rx {} \;
