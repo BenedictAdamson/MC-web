@@ -96,6 +96,7 @@
 				<configuration>
 					<repository>benedictadamson/mc-front-end</repository>
 					<tag>${project.version}</tag>
+					<useMavenSettingsForAuth>true</useMavenSettingsForAuth>
 				</configuration>
 			</plugin>
 		</plugins>
