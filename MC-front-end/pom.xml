@@ -9,7 +9,6 @@
 	</parent>
 	<artifactId>MC-front-end</artifactId>
 	<version>${parent.version}</version>
-	<packaging>jar</packaging>
 	<build>
 		<plugins>
 			<plugin>
@@ -61,6 +60,24 @@
 							<arguments>run-script build</arguments>
 						</configuration>
 						<phase>generate-resources</phase>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>src/main/assembly/assembly.xml</descriptor>
+					</descriptors>
+					<tarLongFileMode>posix</tarLongFileMode>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
