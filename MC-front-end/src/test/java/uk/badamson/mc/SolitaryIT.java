@@ -47,7 +47,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 public class SolitaryIT {
 
-   public static final String EXPECTED_STARTED_MESSAGE = "Started Application";
+   public static final String EXPECTED_STARTED_MESSAGE = "AH00094: Command line";
 
    private static final String SUT_VERSION;
    static {
