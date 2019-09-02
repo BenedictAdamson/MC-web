@@ -1,8 +1,8 @@
 # Docker Compose file for the MC project,
 # to produce the MC server in a container.
-
+version: '2'
 # © Copyright Benedict Adamson 2019.
-# 
+#
 # This file is part of MC.
 #
 # MC is free software: you can redistribute it and/or modify
@@ -18,23 +18,25 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with MC.  If not, see <https://www.gnu.org/licenses/>.
 #
-version: '2'
 services:
-  db:
-    image: mongo:4
-    command: -e MONGO_INITDB_ROOT_USERNAME=admin -e MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/mongo-root
-    volumes:
+   db:
+      image: mongo:4
+      command: -e MONGO_INITDB_ROOT_USERNAME=admin -e MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/mongo-root
+      volumes:
       - db-data:/data/db
-      - db-secret:/run/secrets/mongo-root
-  be:
-    image: index.docker.io/benedictadamson/mc-back-end:${VERSION}
-    command: --spring.data.mongodb.host=db
-    depends_on:
+      - db-secrets:/run/secrets
+   be:
+      image: index.docker.io/benedictadamson/mc-back-end:${VERSION}
+      command: --spring.data.mongodb.host=db
+      depends_on:
       - db
-  fe:
-    image: index.docker.io/benedictadamson/mc-front-end:${VERSION}
-    depends_on:
+   fe:
+      image: index.docker.io/benedictadamson/mc-front-end:${VERSION}
+      depends_on:
       - be
+      volumes:
+      - fe-configs:/config/httpd-local.conf
 volumes:
-  db-data:
-  db-secret:
+   db-data: null
+   db-secrets: null
+   fe-configs: null
