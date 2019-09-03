@@ -21,21 +21,23 @@ version: '2'
 services:
    db:
       image: mongo:4
-      command: -e MONGO_INITDB_ROOT_USERNAME=admin -e MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/mongo-root
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: admin
+        MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/mongo-root
       volumes:
-      - db-data:/data/db
-      - db-secrets:/run/secrets
+        - db-data:/data/db
+        - db-secrets:/run/secrets
    be:
       image: index.docker.io/benedictadamson/mc-back-end:${VERSION}
       command: --spring.data.mongodb.host=db
       depends_on:
-      - db
+        - db
    fe:
       image: index.docker.io/benedictadamson/mc-front-end:${VERSION}
       depends_on:
-      - be
+        - be
       volumes:
-      - fe-configs:/config/httpd-local.conf
+        - fe-configs:/config/httpd-local.conf
 volumes:
    db-data: null
    db-secrets: null
