@@ -46,6 +46,8 @@ public class PristineIT {
 
    public static final String FRONT_END_SERVICE_NAME = "fe_1";
 
+   public static final String EXPECTED_FRONT_END_STARTED_MESSAGE = "AH00094: Command line";
+
    public static final Path DOCKER_COMPOSE_FILE = Paths
             .get("docker-compose.yml");
 
@@ -62,8 +64,10 @@ public class PristineIT {
             DOCKER_COMPOSE_FILE.toFile()).withEnv("VERSION", SUT_VERSION)
                      .withExposedService(FRONT_END_SERVICE_NAME,
                               FRONT_END_LISTENING_PORT,
-                              Wait.forListeningPort().withStartupTimeout(
-                                       Duration.ofSeconds(30)));
+                              Wait.forLogMessage(
+                                       EXPECTED_FRONT_END_STARTED_MESSAGE, 1)
+                                       .withStartupTimeout(
+                                                Duration.ofSeconds(30)));
 
    private WebTestClient connectWebTestClient(final String path,
             final String query, final String fragment) {
