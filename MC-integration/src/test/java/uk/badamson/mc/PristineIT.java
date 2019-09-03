@@ -44,7 +44,7 @@ public class PristineIT {
 
    public static final int FRONT_END_LISTENING_PORT = 80;
 
-   public static final String FRONT_END_SERVICE_NAME = "fe";
+   public static final String FRONT_END_SERVICE_NAME = "fe_1";
 
    public static final Path DOCKER_COMPOSE_FILE = Paths
             .get("docker-compose.yml");
