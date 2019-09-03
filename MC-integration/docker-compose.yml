@@ -23,7 +23,8 @@ services:
       image: mongo:4
       environment:
         MONGO_INITDB_ROOT_USERNAME: admin
-        MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/mongo-root
+#TODO        MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/mongo-root
+        MONGO_INITDB_ROOT_PASSWORD: password123
       volumes:
         - db-data:/data/db
         - db-secrets:/run/secrets
