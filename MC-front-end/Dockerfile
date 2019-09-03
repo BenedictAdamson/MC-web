@@ -16,12 +16,13 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with MC-des.  If not, see <https://www.gnu.org/licenses/>.
+# along with MC.  If not, see <https://www.gnu.org/licenses/>.
 #
 
 FROM httpd:2.4-alpine
 LABEL description="The Mission Command game front-end server."
 LABEL maintainer="badamson@spamcop.net"
+EXPOSE 80
 
 RUN apk --no-cache add curl
 HEALTHCHECK --interval=7s --timeout=3s CMD curl --fail http://localhost:80/ || exit
