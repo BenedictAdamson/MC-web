@@ -36,7 +36,7 @@ services:
    fe:
       image: index.docker.io/benedictadamson/mc-front-end:${VERSION}
       ports:
-      - 80
+      - 80:80
       depends_on:
       - be
       volumes:
