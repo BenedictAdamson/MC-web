@@ -23,7 +23,6 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -37,24 +36,18 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * <p>
- * Basic system test for the MC back-end, testing it operating alone without any
- * needed servers.
+ * Basic system test for the MC front-end, testing it operating alone without
+ * any needed servers.
  * </p>
  * <p>
- * The MC back-end expects and needs a database server to be present, so this
- * tests that it provides useful diagnostic messages if the database is missing
- * or misbehaving. The test builds the Docker image using the real Dockerfile,
- * so this also tests that Dockerfile.
+ * The test builds the Docker image using the real Dockerfile, so this tests
+ * that Dockerfile.
  * </p>
  */
 @Testcontainers
 public class SolitaryIT {
 
-   public static final String EXPECTED_STARTED_MESSAGE = "Started Application";
-   public static final String EXPECTED_ERROR_MESSAGE = "Connection refused";
-
-   private static final Path TARGET_DIR = Paths.get("target");
-   private static final Path DOCKERFILE = Paths.get("Dockerfile");
+   public static final String EXPECTED_STARTED_MESSAGE = "AH00094: Command line";
 
    private static final String SUT_VERSION;
    static {
@@ -63,13 +56,10 @@ public class SolitaryIT {
          throw new IllegalStateException("setVersion property not set");
       }
    }
-   private static final Path JAR = TARGET_DIR
-            .resolve("MC-back-end-" + SUT_VERSION + ".jar");
 
    @Container
    private final GenericContainer<?> container = new GenericContainer<>(
-            new ImageFromDockerfile().withFileFromPath("Dockerfile", DOCKERFILE)
-                     .withFileFromPath("target/MC-back-end-.jar", JAR));
+            new ImageFromDockerfile().withFileFromPath("/", Paths.get(".")));
 
    @Test
    public void start() {
@@ -87,7 +77,6 @@ public class SolitaryIT {
       final var logs = container.getLogs();
       assertAll("Log suitable messages",
                () -> assertThat(logs, containsString(EXPECTED_STARTED_MESSAGE)),
-               () -> assertThat(logs, containsString(EXPECTED_ERROR_MESSAGE)),
-               () -> assertThat(logs, not(containsString("Unable to start"))));
+               () -> assertThat(logs, not(containsString("error"))));
    }
 }
