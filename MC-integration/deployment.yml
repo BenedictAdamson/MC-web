@@ -1,4 +1,4 @@
-# Docker Compose file for the MC project,
+# Kubernetres kubectl configuration file for the MC project,
 # to produce the MC server in a container.
 # © Copyright Benedict Adamson 2019.
 #
@@ -17,31 +17,127 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with MC.  If not, see <https://www.gnu.org/licenses/>.
 #
-version: '2'
-services:
-   db:
-      image: mongo:4
-#TODO      environment:
-#TODO         MONGO_INITDB_ROOT_USERNAME: admin
-#TODO        MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/mongo-root
-#TODO         MONGO_INITDB_ROOT_PASSWORD: password123
-      volumes:
-      - db-data:/data/db
-      - db-secrets:/run/secrets
-   be:
-      image: index.docker.io/benedictadamson/mc-back-end:${VERSION}
-      command: --spring.data.mongodb.host=db
-      depends_on:
-      - db
-   fe:
-      image: index.docker.io/benedictadamson/mc-front-end:${VERSION}
-      ports:
-      - 80:80
-      depends_on:
-      - be
-      volumes:
-      - fe-configs:/config/httpd-local.conf
-volumes:
-   db-data: null
-   db-secrets: null
-   fe-configs: null
+apiVersion: apps/v1
+kind: Service
+metadata:
+   name: mc-service
+spec:
+   type: NodePort
+   selector:
+      app: MC
+   ports:
+   -  protocol: TCP
+      port: 80
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Secret
+metadata:
+   name: mc-db-root-pasword-secret
+type: Opaque
+stringData:
+   ?  db-password: null
+   : null
+---
+apiVersion: apps/v1
+kind: ConfigMap
+metadata:
+   name: mc-fe-config
+data:
+   httpd-local.conf: ''
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   name: mc-mongo-deployment
+spec:
+   replicas: 1
+   selector:
+      matchLabels:
+         app: MC
+   template:
+      metadata:
+         labels:
+            app: mc
+      spec:
+         hostAliases: db
+         containers:
+         -  name: mc-db
+            image: mongo:4
+            env:
+            -  name: MONGO_INITDB_ROOT_USERNAME
+               value: admin
+            volumeMounts:
+            -  mountPath: /data/db
+               name: mc-data-db
+            -  mountPath: /run/secrets
+               name: mc-db-secrets
+               readOnly: true
+         volumes:
+         -  name: mc-db-secrets
+            secret:
+               secretName: mc-db-secret
+               items:
+               -  key: mc-db-root-pasword-secret
+                  path: mongo-root
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   name: mc-be-deployment
+spec:
+   replicas: 1
+   selector:
+      matchLabels:
+         app: MC
+   template:
+      metadata:
+         labels:
+            app: mc
+      spec:
+         hostAliases: be
+         containers:
+         -  name: mc-back-end
+            image: benedictadamson/mc-back-end:2.0.1-SNAPSHOT
+            command: --spring.data.mongodb.host=db
+            livenessProbe:
+               httpGet:
+                  path: /api/players
+                  port: 8080
+               initialDelaySeconds: 20
+               periodSeconds: 13
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   name: mc-fe-deployment
+spec:
+   replicas: 1
+   selector:
+      matchLabels:
+         app: MC
+   template:
+      metadata:
+         labels:
+            app: mc
+      spec:
+         hostAliases: fe
+         containers:
+         -  name: mc-front-end
+            image: benedictadamson/mc-front-end:2.0.1-SNAPSHOT
+            volumeMounts:
+            -  mountPath: /config
+               name: mc-fe-config
+               readOnly: true
+            livenessProbe:
+               httpGet:
+                  path: /
+                  port: 80
+               initialDelaySeconds: 20
+               periodSeconds: 13
+            ports:
+            -  containerPort: 80
+               name: http
+         volumes:
+         -  name: mc-fe-config
+            configMap: mc-fe-config
