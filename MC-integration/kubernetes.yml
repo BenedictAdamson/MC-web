@@ -139,4 +139,5 @@ spec:
                name: http
          volumes:
          -  name: mc-fe-config
-            configMap: mc-fe-config
+            configMap:
+               name: mc-fe-config
