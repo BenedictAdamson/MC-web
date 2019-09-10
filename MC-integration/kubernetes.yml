@@ -36,8 +36,7 @@ metadata:
    name: mc-db-root-pasword-secret
 type: Opaque
 stringData:
-   ?  db-password: null
-   : null
+   db-password: "FIXME"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -46,7 +45,7 @@ metadata:
 data:
    httpd-local.conf: ''
 ---
-apiVersion: v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
    name: mc-mongo-deployment
@@ -81,7 +80,7 @@ spec:
                -  key: mc-db-root-pasword-secret
                   path: mongo-root
 ---
-apiVersion: v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
    name: mc-be-deployment
@@ -107,7 +106,7 @@ spec:
                initialDelaySeconds: 20
                periodSeconds: 13
 ---
-apiVersion: v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
    name: mc-fe-deployment
