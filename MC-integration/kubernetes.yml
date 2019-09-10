@@ -36,7 +36,7 @@ metadata:
    name: mc-db-root-pasword-secret
 type: Opaque
 stringData:
-   db-password: "FIXME"
+   db-password: FIXME
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -79,6 +79,8 @@ spec:
                items:
                -  key: mc-db-root-pasword-secret
                   path: mongo-root
+         -  name: mc-data-db
+            emptyDir: {}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -98,7 +100,8 @@ spec:
          containers:
          -  name: mc-back-end
             image: benedictadamson/mc-back-end:2.0.1-SNAPSHOT
-            command: ["--spring.data.mongodb.host=db"]
+            command:
+            - --spring.data.mongodb.host=db
             livenessProbe:
                httpGet:
                   path: /api/players
