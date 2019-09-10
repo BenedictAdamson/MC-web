@@ -56,10 +56,10 @@ spec:
          app: MC
    template:
       metadata:
+         name: db
          labels:
             app: mc
       spec:
-         hostAliases: db
          containers:
          -  name: mc-db
             image: mongo:4
@@ -91,10 +91,10 @@ spec:
          app: MC
    template:
       metadata:
+         name: be
          labels:
             app: mc
       spec:
-         hostAliases: be
          containers:
          -  name: mc-back-end
             image: benedictadamson/mc-back-end:2.0.1-SNAPSHOT
@@ -117,10 +117,10 @@ spec:
          app: MC
    template:
       metadata:
+         name: fe
          labels:
             app: mc
       spec:
-         hostAliases: fe
          containers:
          -  name: mc-front-end
             image: benedictadamson/mc-front-end:2.0.1-SNAPSHOT
