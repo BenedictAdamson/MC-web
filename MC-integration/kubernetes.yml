@@ -58,7 +58,7 @@ spec:
       metadata:
          name: db
          labels:
-            app: mc
+            app: MC
       spec:
          containers:
          -  name: mc-db
@@ -93,7 +93,7 @@ spec:
       metadata:
          name: be
          labels:
-            app: mc
+            app: MC
       spec:
          containers:
          -  name: mc-back-end
@@ -119,7 +119,7 @@ spec:
       metadata:
          name: fe
          labels:
-            app: mc
+            app: MC
       spec:
          containers:
          -  name: mc-front-end
