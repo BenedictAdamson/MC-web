@@ -98,7 +98,7 @@ spec:
          containers:
          -  name: mc-back-end
             image: benedictadamson/mc-back-end:2.0.1-SNAPSHOT
-            command: --spring.data.mongodb.host=db
+            command: ["--spring.data.mongodb.host=db"]
             livenessProbe:
                httpGet:
                   path: /api/players
