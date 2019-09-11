@@ -102,10 +102,7 @@ spec:
          volumes:
          -  name: mc-db-secrets
             secret:
-               secretName: mc-db-secret
-               items:
-               -  key: mc-db-root-pasword-secret
-                  path: mongo-root
+               secretName: mc-db-root-pasword-secret
          -  name: mc-data-db
             emptyDir: {}
 ---
