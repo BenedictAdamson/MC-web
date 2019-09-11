@@ -128,7 +128,7 @@ spec:
             image: benedictadamson/mc-back-end:2.0.1-SNAPSHOT
             ports:
             -  containerPort: 8080
-            command:
+            args:
             - --spring.data.mongodb.host=db
             readinessProbe:
                tcpSocket:
