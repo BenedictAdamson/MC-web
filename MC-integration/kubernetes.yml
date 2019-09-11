@@ -93,8 +93,11 @@ spec:
             env:
             -  name: MONGO_INITDB_ROOT_USERNAME
                value: admin
-            -  name: MONGO_INITDB_ROOT_PASSWORD_FILE
-               value: /var/secrets/db-password
+            -  name: MONGO_INITDB_ROOT_PASSWORD
+               valueFrom:
+                  secretKeyRef:
+                     name: mc-db-root-pasword-secret
+                     key: db-password
             volumeMounts:
             -  mountPath: /data/db
                name: mc-data-db
@@ -130,6 +133,13 @@ spec:
             -  containerPort: 8080
             args:
             - --spring.data.mongodb.host=db
+            - --spring.data.mongodb.username=admin
+            env:
+            -  name: SPRING_DATA_MONGODB_PASSWORD
+               valueFrom:
+                  secretKeyRef:
+                     name: mc-db-root-pasword-secret
+                     key: db-password
             readinessProbe:
                tcpSocket:
                   port: 8080
