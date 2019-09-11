@@ -96,7 +96,7 @@ spec:
             volumeMounts:
             -  mountPath: /data/db
                name: mc-data-db
-            -  mountPath: /run/secrets
+            -  mountPath: /var/secrets
                name: mc-db-secrets
                readOnly: true
          volumes:
