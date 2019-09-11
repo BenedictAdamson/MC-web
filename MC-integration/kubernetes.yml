@@ -93,6 +93,8 @@ spec:
             env:
             -  name: MONGO_INITDB_ROOT_USERNAME
                value: admin
+            -  name: MONGO_INITDB_ROOT_PASSWORD_FILE
+               value: /var/secrets/db-password
             volumeMounts:
             -  mountPath: /data/db
                name: mc-data-db
