@@ -49,6 +49,7 @@ spec:
    ports:
    -  protocol: TCP
       port: 80
+   type: LoadBalancer
 ---
 apiVersion: v1
 kind: Secret
