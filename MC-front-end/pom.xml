@@ -8,7 +8,6 @@
 		<version>2.2.2-SNAPSHOT</version>
 	</parent>
 	<artifactId>MC-front-end</artifactId>
-	<version>${parent.version}</version>
 	<build>
 		<plugins>
 			<plugin>
