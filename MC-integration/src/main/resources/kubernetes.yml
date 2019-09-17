@@ -85,8 +85,8 @@ spec:
          -  name: mc-db
             image: mongo:4
             args:
-            -  --bind_ip
-            -  0.0.0.0
+            - --bind_ip
+            - 0.0.0.0
             ports:
             -  containerPort: 27017
             readinessProbe:
@@ -151,7 +151,7 @@ spec:
                periodSeconds: 5
             livenessProbe:
                httpGet:
-                  path: /api/players
+                  path: /actuator/health
                   port: 8080
                initialDelaySeconds: 20
                periodSeconds: 59
