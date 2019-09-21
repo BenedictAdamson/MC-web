@@ -32,9 +32,9 @@ spec:
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
-      name: db
       labels:
-            app: MC
+        app.kubernetes.io/name: {{ include "mc.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
       -  name: mc-db
