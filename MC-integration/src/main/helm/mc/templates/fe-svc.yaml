@@ -26,7 +26,8 @@ metadata:
   app.kubernetes.io/component: front-end
 spec:
   selector:
-    app: MC
+    app.kubernetes.io/name: {{ include "mc.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
   ports:
   - protocol: TCP
     port: 80
