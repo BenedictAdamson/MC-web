@@ -20,6 +20,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mc-fe-config
+  name: {{ .Release.Name }}-mc-fe-cm
+  labels:
+{{ include "mc.labels" . | indent 4 }}
+  app.kubernetes.io/component: front-end
 data:
   httpd-local.conf: ''
