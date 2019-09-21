@@ -1,5 +1,11 @@
 apiVersion: v1
 appVersion: "2.3.1-SNAPSHOT"
-description: A Helm chart for Kubernetes
+description: The Mission Command game.
 name: mc
 version: 2.3.1
+sources:
+  - https://github.com/BenedictAdamson/MC
+maintainers:
+  - name: Benedict Adamson
+    email: badamson@spamcop.net
+    url: https://github.com/BenedictAdamson
