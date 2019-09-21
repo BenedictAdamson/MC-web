@@ -28,7 +28,8 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: MC
+      app.kubernetes.io/name: {{ include "mc.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       name: be
