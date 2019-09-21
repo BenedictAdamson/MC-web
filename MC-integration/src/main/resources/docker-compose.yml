@@ -19,29 +19,29 @@
 #
 version: '2'
 services:
-   db:
-      image: mongo:4
+  db:
+    image: mongo:4
 #TODO      environment:
 #TODO         MONGO_INITDB_ROOT_USERNAME: admin
 #TODO        MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/mongo-root
 #TODO         MONGO_INITDB_ROOT_PASSWORD: password123
-      volumes:
-      - db-data:/data/db
-      - db-secrets:/run/secrets
-   be:
-      image: index.docker.io/benedictadamson/mc-back-end:${VERSION}
-      command: --spring.data.mongodb.host=db
-      depends_on:
-      - db
-   fe:
-      image: index.docker.io/benedictadamson/mc-front-end:${VERSION}
-      ports:
-      - 80:80
-      depends_on:
-      - be
-      volumes:
-      - fe-configs:/config/httpd-local.conf
+    volumes:
+    - db-data:/data/db
+    - db-secrets:/run/secrets
+  be:
+    image: index.docker.io/benedictadamson/mc-back-end:${VERSION}
+    command: --spring.data.mongodb.host=db
+    depends_on:
+    - db
+  fe:
+    image: index.docker.io/benedictadamson/mc-front-end:${VERSION}
+    ports:
+    - 80:80
+    depends_on:
+    - be
+    volumes:
+    - fe-configs:/config/httpd-local.conf
 volumes:
-   db-data: null
-   db-secrets: null
-   fe-configs: null
+  db-data: null
+  db-secrets: null
+  fe-configs: null

@@ -25,46 +25,46 @@ metadata:
 {{ include "mc.labels" . | indent 4 }}
   app.kubernetes.io/component: db
 spec:
-   replicas: 1
-   selector:
-      matchLabels:
-         app: MC
-   template:
-      metadata:
-         name: db
-         labels:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: MC
+  template:
+    metadata:
+      name: db
+      labels:
             app: MC
-      spec:
-         containers:
-         -  name: mc-db
-            image: mongo:4
-            args:
-            - --bind_ip
-            - 0.0.0.0
-            ports:
-            -  containerPort: 27017
-            readinessProbe:
-               tcpSocket:
-                  port: 27017
-               initialDelaySeconds: 11
-               periodSeconds: 3
-            env:
-            -  name: MONGO_INITDB_ROOT_USERNAME
-               value: admin
-            -  name: MONGO_INITDB_ROOT_PASSWORD
-               valueFrom:
-                  secretKeyRef:
-                     name: mc-db-root-pasword-secret
-                     key: db-password
-            volumeMounts:
-            -  mountPath: /data/db
-               name: mc-data-db
-            -  mountPath: /var/secrets
-               name: mc-db-secrets
-               readOnly: true
-         volumes:
-         -  name: mc-db-secrets
-            secret:
-               secretName: mc-db-root-pasword-secret
-         -  name: mc-data-db
-            emptyDir: {}
+    spec:
+      containers:
+      -  name: mc-db
+         image: mongo:4
+         args:
+         - --bind_ip
+         - 0.0.0.0
+         ports:
+         -  containerPort: 27017
+         readinessProbe:
+           tcpSocket:
+             port: 27017
+           initialDelaySeconds: 11
+           periodSeconds: 3
+         env:
+         -  name: MONGO_INITDB_ROOT_USERNAME
+            value: admin
+         -  name: MONGO_INITDB_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                 name: mc-db-root-pasword-secret
+                 key: db-password
+         volumeMounts:
+         -  mountPath: /data/db
+            name: mc-data-db
+         -  mountPath: /var/secrets
+            name: mc-db-secrets
+            readOnly: true
+      volumes:
+      -  name: mc-db-secrets
+         secret:
+           secretName: mc-db-root-pasword-secret
+      -  name: mc-data-db
+         emptyDir: {}

@@ -25,9 +25,9 @@ metadata:
 {{ include "mc.labels" . | indent 4 }}
   app.kubernetes.io/component: front-end
 spec:
-   selector:
-      app: MC
-   ports:
-   -  protocol: TCP
-      port: 80
-   type: LoadBalancer
+  selector:
+    app: MC
+  ports:
+  - protocol: TCP
+    port: 80
+  type: LoadBalancer

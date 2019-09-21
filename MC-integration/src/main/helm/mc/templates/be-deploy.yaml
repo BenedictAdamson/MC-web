@@ -25,38 +25,38 @@ metadata:
 {{ include "mc.labels" . | indent 4 }}
   app.kubernetes.io/component: back-end
 spec:
-   replicas: 1
-   selector:
-      matchLabels:
-         app: MC
-   template:
-      metadata:
-         name: be
-         labels:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: MC
+  template:
+    metadata:
+      name: be
+      labels:
             app: MC
-      spec:
-         containers:
-         -  name: mc-back-end
-            image: benedictadamson/mc-back-end:2.0.1-SNAPSHOT
-            ports:
-            -  containerPort: 8080
-            args:
-            - --spring.data.mongodb.host=db
-            - --spring.data.mongodb.username=admin
-            env:
-            -  name: SPRING_DATA_MONGODB_PASSWORD
-               valueFrom:
-                  secretKeyRef:
-                     name: mc-db-root-pasword-secret
-                     key: db-password
-            readinessProbe:
-               tcpSocket:
-                  port: 8080
-               initialDelaySeconds: 13
-               periodSeconds: 5
-            livenessProbe:
-               httpGet:
-                  path: /actuator/health
-                  port: 8080
-               initialDelaySeconds: 20
-               periodSeconds: 59
+    spec:
+      containers:
+      -  name: mc-back-end
+         image: benedictadamson/mc-back-end:2.0.1-SNAPSHOT
+         ports:
+         -  containerPort: 8080
+         args:
+         - --spring.data.mongodb.host=db
+         - --spring.data.mongodb.username=admin
+         env:
+         - name: SPRING_DATA_MONGODB_PASSWORD
+           valueFrom:
+             secretKeyRef:
+               name: mc-db-root-pasword-secret
+               key: db-password
+         readinessProbe:
+           tcpSocket:
+             port: 8080
+           initialDelaySeconds: 13
+           periodSeconds: 5
+         livenessProbe:
+           httpGet:
+             path: /actuator/health
+             port: 8080
+           initialDelaySeconds: 20
+           periodSeconds: 59

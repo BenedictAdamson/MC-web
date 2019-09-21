@@ -25,8 +25,8 @@ metadata:
 {{ include "mc.labels" . | indent 4 }}
   app.kubernetes.io/component: back-end
 spec:
-   selector:
-      app: MC
-   ports:
-   -  protocol: TCP
-      port: 8080
+  selector:
+    app: MC
+  ports:
+  - protocol: TCP
+    port: 8080

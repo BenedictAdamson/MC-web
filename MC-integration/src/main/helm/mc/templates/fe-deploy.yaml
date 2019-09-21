@@ -25,33 +25,33 @@ metadata:
 {{ include "mc.labels" . | indent 4 }}
   app.kubernetes.io/component: front-end
 spec:
-   replicas: 1
-   selector:
-      matchLabels:
-         app: MC
-   template:
-      metadata:
-         name: fe
-         labels:
-            app: MC
-      spec:
-         containers:
-         -  name: mc-front-end
-            image: benedictadamson/mc-front-end:2.0.1-SNAPSHOT
-            ports:
-            -  containerPort: 80
-               name: http
-            volumeMounts:
-            -  mountPath: /config
-               name: mc-fe-config
-               readOnly: true
-            livenessProbe:
-               httpGet:
-                  path: /
-                  port: 80
-               initialDelaySeconds: 20
-               periodSeconds: 13
-         volumes:
-         -  name: mc-fe-config
-            configMap:
-               name: mc-fe-config
+  replicas: 1
+  selector:
+    matchLabels:
+      app: MC
+  template:
+    metadata:
+      name: fe
+      labels:
+        app: MC
+    spec:
+      containers:
+      -  name: mc-front-end
+         image: benedictadamson/mc-front-end:2.0.1-SNAPSHOT
+         ports:
+         -  containerPort: 80
+            name: http
+         volumeMounts:
+         -  mountPath: /config
+            name: mc-fe-config
+            readOnly: true
+         livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 20
+            periodSeconds: 13
+      volumes:
+      -  name: mc-fe-config
+         configMap:
+           name: mc-fe-config
