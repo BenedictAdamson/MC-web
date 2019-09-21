@@ -42,13 +42,13 @@ spec:
          ports:
          -  containerPort: 8080
          args:
-         - --spring.data.mongodb.host=db
+         - --spring.data.mongodb.host={{ .Release.Name }}-mc-db-svc
          - --spring.data.mongodb.username=admin
          env:
          - name: SPRING_DATA_MONGODB_PASSWORD
            valueFrom:
              secretKeyRef:
-               name: mc-db-root-pasword-secret
+               name: {{ .Release.Name }}-mc-db-password-secret
                key: db-password
          readinessProbe:
            tcpSocket:
