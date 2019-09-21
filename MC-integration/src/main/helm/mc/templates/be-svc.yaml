@@ -20,7 +20,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-   name: {{ .Release.Name }}-mc-be-svc
+  name: {{ .Release.Name }}-mc-be-svc
+  labels:
+{{ include "mc.labels" . | indent 4 }}
+  app.kubernetes.io/component: back-end
 spec:
    selector:
       app: MC

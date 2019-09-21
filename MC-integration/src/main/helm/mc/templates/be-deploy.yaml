@@ -20,7 +20,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-   name: {{ .Release.Name }}-mc-be-deploy
+  name: {{ .Release.Name }}-mc-be-deploy
+  labels:
+{{ include "mc.labels" . | indent 4 }}
+  app.kubernetes.io/component: back-end
 spec:
    replicas: 1
    selector:
