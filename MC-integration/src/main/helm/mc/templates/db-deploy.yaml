@@ -20,7 +20,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-   name: mc-db-deployment
+   name: {{ .Release.Name }}-mc-db-deploy
 spec:
    replicas: 1
    selector:

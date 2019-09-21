@@ -20,7 +20,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-   name: be
+   name: {{ .Release.Name }}-mc-be-svc
 spec:
    selector:
       app: MC
