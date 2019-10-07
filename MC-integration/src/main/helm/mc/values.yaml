@@ -22,6 +22,7 @@ ingress:
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
 
+  host: example.com
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
