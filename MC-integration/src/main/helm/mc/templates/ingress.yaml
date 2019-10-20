@@ -25,10 +25,6 @@ spec:
     - host: {{ .Values.ingress.host | quote }}
     - http:
         paths:
-          - path: /(api/.*)
-            backend:
-              serviceName: {{ .Release.Name }}-mc-be-svc
-              servicePort: 8080
           - path: /(.*)
             backend:
               serviceName: {{ .Release.Name }}-mc-http-svc
