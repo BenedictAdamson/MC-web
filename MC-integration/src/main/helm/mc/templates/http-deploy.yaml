@@ -52,6 +52,30 @@ spec:
               port: 80
             initialDelaySeconds: 20
             periodSeconds: 13
+      -  name: mc-back-end
+         image: benedictadamson/mc-back-end:2.0.1-SNAPSHOT
+         ports:
+         -  containerPort: 8080
+         args:
+         - --spring.data.mongodb.host={{ .Release.Name }}-mc-db-svc
+         - --spring.data.mongodb.username=admin
+         env:
+         - name: SPRING_DATA_MONGODB_PASSWORD
+           valueFrom:
+             secretKeyRef:
+               name: {{ .Release.Name }}-mc-db-password-secret
+               key: db-password
+         readinessProbe:
+           tcpSocket:
+             port: 8080
+           initialDelaySeconds: 13
+           periodSeconds: 5
+         livenessProbe:
+           httpGet:
+             path: /actuator/health
+             port: 8080
+           initialDelaySeconds: 20
+           periodSeconds: 59
       volumes:
       -  name: mc-http-config
          configMap:
