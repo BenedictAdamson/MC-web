@@ -44,7 +44,7 @@ spec:
             name: http
          volumeMounts:
          -  mountPath: /config
-            name: mc-fe-config
+            name: mc-http-config
             readOnly: true
          livenessProbe:
             httpGet:
@@ -53,6 +53,6 @@ spec:
             initialDelaySeconds: 20
             periodSeconds: 13
       volumes:
-      -  name: mc-fe-config
+      -  name: mc-http-config
          configMap:
-           name: mc-fe-config
+           name: mc-http-config
