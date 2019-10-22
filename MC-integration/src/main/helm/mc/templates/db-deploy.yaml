@@ -1,0 +1,65 @@
+# Helm resource file for the MC project,
+# declaring part of the MC application in a cluster.
+# © Copyright Benedict Adamson 2019.
+#
+# This file is part of MC.
+#
+# MC is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# MC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with MC.  If not, see <https://www.gnu.org/licenses/>.
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-mc-db-deploy
+  labels:
+{{ include "mc.labels" . | indent 4 }}
+  app.kubernetes.io/component: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "mc.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "mc.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+      -  name: mc-db
+         image: mongo:4
+         args:
+         - --bind_ip
+         - 0.0.0.0
+         ports:
+         -  containerPort: 27017
+         readinessProbe:
+           tcpSocket:
+             port: 27017
+           initialDelaySeconds: 11
+           periodSeconds: 3
+         env:
+         -  name: MONGO_INITDB_ROOT_USERNAME
+            value: admin
+         -  name: MONGO_INITDB_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                 name: {{ .Release.Name }}-mc-db-password-secret
+                 key: db-password
+         volumeMounts:
+         -  mountPath: /data/db
+            name: mc-data-db
+      volumes:
+      -  name: mc-data-db
+         emptyDir: {}
