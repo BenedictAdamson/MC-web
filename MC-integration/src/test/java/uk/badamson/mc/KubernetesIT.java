@@ -1,10 +1,6 @@
 package uk.badamson.mc;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -38,10 +34,8 @@ public class KubernetesIT {
 
    private static final String clusterName = "kind";
 
-   private static String kubeConfigPath;
-
-   private static void createCluster()
-            throws IOException, InterruptedException {
+   @BeforeAll
+   public static void createCluster() throws IOException, InterruptedException {
       final int status = new ProcessBuilder("kind", "create", "cluster",
                "--name", clusterName).start().waitFor();
       if (status != 0) {
@@ -49,40 +43,8 @@ public class KubernetesIT {
       }
    }
 
-   private static void initHelm() throws IOException, InterruptedException {
-      final int status = new ProcessBuilder("helm", "init", "--kube-context",
-               kubeConfigPath).start().waitFor();
-      if (status != 0) {
-         throw new IOException("Helm initialisation error status " + status);
-      }
-   }
-
-   private static void setKubeConfigPath()
-            throws IOException, InterruptedException {
-      final var process = new ProcessBuilder("kind", "get", "kubeconfig-path",
-               "--name", clusterName).start();
-      final StringWriter writer = new StringWriter();
-      try (final Reader reader = new InputStreamReader(process.getInputStream(),
-               StandardCharsets.UTF_8)) {
-         reader.transferTo(writer);
-      }
-      ;
-      final int status = process.waitFor();
-      if (status != 0) {
-         throw new IOException("Cluster config query status " + status);
-      }
-      kubeConfigPath = writer.toString();
-   }
-
-   @BeforeAll
-   public static void setUp() throws IOException, InterruptedException {
-      createCluster();
-      setKubeConfigPath();
-      initHelm();
-   }
-
    @AfterAll
-   public static void tearDown() throws IOException, InterruptedException {
+   public static void deleteCluster() throws IOException, InterruptedException {
       final int status = new ProcessBuilder("kind", "delete", "cluster",
                "--name", clusterName).start().waitFor();
       if (status != 0) {
