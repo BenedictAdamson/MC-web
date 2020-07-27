@@ -1,6 +1,6 @@
 # Docker Compose file for the MC project,
 # to produce the MC server in a container.
-# © Copyright Benedict Adamson 2019.
+# © Copyright Benedict Adamson 2019-20.
 #
 # This file is part of MC.
 #
