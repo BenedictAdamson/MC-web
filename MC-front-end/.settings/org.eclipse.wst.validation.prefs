@@ -1,0 +1,9 @@
+DELEGATES_PREFERENCE=delegateValidatorList
+USER_BUILD_PREFERENCE=enabledBuildValidatorList
+USER_MANUAL_PREFERENCE=enabledManualValidatorList
+USER_PREFERENCE=overrideGlobalPreferencestruedisableAllValidationfalseversion1.2.800.v201904082137
+eclipse.preferences.version=1
+override=true
+suspend=false
+vals/org.eclipse.wst.json.core.json/groups=0107include02111contentType136org.eclipse.wst.json.core.jsonsourceT07fileext04jsonF0107exclude0404file130src/main/web/mc-front-end/nodeF0204file138src/main/web/mc-front-end/node_modulesF0204file189src/main/web/mc-front-end/node_modules/@angular-devkit/core/src/workspace/json/test/casesF0204file171src/main/web/mc-front-end/node_modules/selenium-webdriver/lib/test/dataF02
+vf.version=3
