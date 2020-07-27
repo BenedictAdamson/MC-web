@@ -1,6 +1,6 @@
 # Helm resource file for the MC project,
 # declaring part of the MC application in a cluster.
-# © Copyright Benedict Adamson 2019.
+# © Copyright Benedict Adamson 2019-20.
 #
 # This file is part of MC.
 #
@@ -53,7 +53,7 @@ spec:
             initialDelaySeconds: 20
             periodSeconds: 13
       -  name: mc-back-end
-         image: benedictadamson/mc-back-end:2.4.0
+         image: benedictadamson/mc-back-end:2.4.1-SNAPSHOT
          ports:
          -  containerPort: 8080
          args:
