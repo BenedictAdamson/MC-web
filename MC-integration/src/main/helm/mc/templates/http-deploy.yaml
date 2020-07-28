@@ -66,13 +66,14 @@ spec:
                name: {{ .Release.Name }}-mc-db-password-secret
                key: db-password
          readinessProbe:
-           tcpSocket:
+           httpGet:
+             path: /actuator/health/readiness
              port: 8080
            initialDelaySeconds: 13
            periodSeconds: 5
          livenessProbe:
            httpGet:
-             path: /actuator/health
+             path: /actuator/health/liveness
              port: 8080
            initialDelaySeconds: 20
            periodSeconds: 59
