@@ -22,8 +22,8 @@ kind: Service
 metadata:
   name: {{ .Release.Name }}-mc-db-svc
   labels:
+    app.kubernetes.io/component: database
 {{ include "mc.labels" . | indent 4 }}
-  app.kubernetes.io/component: database
 spec:
   selector:
     app.kubernetes.io/name: {{ include "mc.name" . }}

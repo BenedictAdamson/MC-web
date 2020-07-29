@@ -22,7 +22,7 @@ kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-mc-http-cm
   labels:
+    app.kubernetes.io/component: front-end
 {{ include "mc.labels" . | indent 4 }}
-  app.kubernetes.io/component: front-end
 data:
   httpd-local.conf: ''

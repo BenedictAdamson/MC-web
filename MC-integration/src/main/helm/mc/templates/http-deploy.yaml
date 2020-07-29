@@ -22,8 +22,8 @@ kind: Deployment
 metadata:
   name: {{ .Release.Name }}-mc-http-deploy
   labels:
+    app.kubernetes.io/component: front-end
 {{ include "mc.labels" . | indent 4 }}
-  app.kubernetes.io/component: front-end
 spec:
   replicas: 1
   selector:

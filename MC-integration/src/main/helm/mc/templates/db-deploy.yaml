@@ -22,8 +22,8 @@ kind: Deployment
 metadata:
   name: {{ .Release.Name }}-mc-db-deploy
   labels:
+    app.kubernetes.io/component: database
 {{ include "mc.labels" . | indent 4 }}
-  app.kubernetes.io/component: database
 spec:
   replicas: 1
   selector:
