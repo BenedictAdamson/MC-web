@@ -11,6 +11,35 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>com.kiwigrid</groupId>
+				<artifactId>helm-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>dependency-build</goal>
+							<goal>package</goal>
+							<goal>lint</goal>
+							<goal>upload</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<chartDirectory>${project.basedir}/src/main/helm</chartDirectory>
+					<chartVersion>${project.version}</chartVersion>
+					<useLocalHelmBinary>true</useLocalHelmBinary>
+					<uploadRepoStable>
+						<name>stable-helm-repo</name>
+						<url>http://localhost:8082/api/charts</url>
+						<type>CHARTMUSEUM</type>
+					</uploadRepoStable>
+					<uploadRepoSnapshot>
+						<name>snapshot-helm-repo</name>
+						<url>http://localhost:8082/api/charts</url>
+						<type>CHARTMUSEUM</type>
+					</uploadRepoSnapshot>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>com.github.spotbugs</groupId>
 				<artifactId>spotbugs-maven-plugin</artifactId>
 				<executions>
