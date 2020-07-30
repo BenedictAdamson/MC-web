@@ -38,7 +38,7 @@ spec:
     spec:
       containers:
       -  name: mc-front-end
-         image: benedictadamson/mc-front-end-srv:2.4.0
+         image: benedictadamson/mc-front-end-srv:{{ .Chart.AppVersion }}
          ports:
          -  containerPort: 80
             name: http
@@ -53,7 +53,7 @@ spec:
             initialDelaySeconds: 20
             periodSeconds: 13
       -  name: mc-back-end
-         image: benedictadamson/mc-back-end:2.4.1-SNAPSHOT
+         image: benedictadamson/mc-back-end:{{ .Chart.AppVersion }}
          ports:
          -  containerPort: 8080
          args:
