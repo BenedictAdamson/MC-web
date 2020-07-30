@@ -20,7 +20,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-mc-db-deploy
+  name: {{ .Release.Name }}-db-deploy
   labels:
     app.kubernetes.io/component: database
 {{ include "mc.labels" . | indent 4 }}
@@ -55,7 +55,7 @@ spec:
          -  name: MONGO_INITDB_ROOT_PASSWORD
             valueFrom:
               secretKeyRef:
-                 name: {{ .Release.Name }}-mc-db-password-secret
+                 name: {{ .Release.Name }}-db-password-secret
                  key: db-password
          volumeMounts:
          -  mountPath: /data/db
