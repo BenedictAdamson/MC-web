@@ -144,12 +144,8 @@
 				</executions>
 				<configuration>
 					<image>
-						<registry>index.docker.io</registry>
-						<name>benedictadamson/mc-front-end-srv</name>
+						<name>benedictadamson/mc-front-end-srv:${project.version}</name>
 						<build>
-							<tags>
-								<tag>${project.version}</tag>
-							</tags>
 							<dockerFile>Dockerfile</dockerFile>
 						</build>
 					</image>
