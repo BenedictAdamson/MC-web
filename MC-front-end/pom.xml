@@ -8,6 +8,9 @@
 		<version>2.4.4-SNAPSHOT</version>
 	</parent>
 	<artifactId>MC-front-end</artifactId>
+	<properties>
+		<docker.buildArg.VERSION>${project.version}</docker.buildArg.VERSION>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>
@@ -119,21 +122,37 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>com.spotify</groupId>
-				<artifactId>dockerfile-maven-plugin</artifactId>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>default</id>
+						<id>Docker-build</id>
+						<!-- The plugin binds the docker:build goal to the install phase by 
+							default, but we need it to run in the package phase so the subsequent Helm 
+							packaging, in MC-integration, can make use of the Docker image built here. -->
+						<phase>package</phase>
 						<goals>
 							<goal>build</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>Docker-push</id>
+						<goals>
 							<goal>push</goal>
 						</goals>
 					</execution>
 				</executions>
 				<configuration>
-					<repository>index.docker.io/benedictadamson/mc-front-end-srv</repository>
-					<tag>${project.version}</tag>
-					<useMavenSettingsForAuth>true</useMavenSettingsForAuth>
+					<image>
+						<registry>index.docker.io</registry>
+						<name>benedictadamson/mc-front-end-srv</name>
+						<build>
+							<tags>
+								<tag>${project.version}</tag>
+							</tags>
+							<dockerFile>Dockerfile</dockerFile>
+						</build>
+					</image>
 				</configuration>
 			</plugin>
 		</plugins>
