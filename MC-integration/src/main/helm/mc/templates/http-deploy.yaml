@@ -38,7 +38,7 @@ spec:
     spec:
       containers:
       -  name: mc-front-end
-         image: benedictadamson/mc-front-end:2.4.0
+         image: benedictadamson/mc-front-end-srv:2.4.0
          ports:
          -  containerPort: 80
             name: http
