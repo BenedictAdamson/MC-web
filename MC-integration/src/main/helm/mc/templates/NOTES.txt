@@ -1,8 +1,10 @@
 The mc Helm chart packages the server components of an installation of MC. The chart provides two Kubernetes *deployments* (pods):
-* one for the (MongoDB) database ({{ .Release.Name }}-db-deploy)
-* one for the two HTTPD servers ({{ .Release.Name }}-http-deploy).
+* one for the (MongoDB) database, {{ .Release.Name }}-db-deploy
+* one for the front-end and back-end HTTPD servers, {{ .Release.Name }}-http-deploy.
 
-1. Get the application URL by running these commands:
+For an installation of mc to act as a game server, access to the front-end HTTPD server must be made available through an application URL. How to do that depends on your chosen *service type*, which is {{.Values.service.type}} in this case. 
+
+Get the application URL by running these commands:
 {{- if contains "NodePort" .Values.service.type }}
   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "mc.fullname" . }})
   export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
