@@ -5,78 +5,30 @@
 	<parent>
 		<groupId>uk.badamson.mc</groupId>
 		<artifactId>MC</artifactId>
-		<version>2.4.2</version>
+		<version>2.4.3-SNAPSHOT</version>
 	</parent>
 	<artifactId>MC-integration</artifactId>
+	<packaging>helm</packaging>
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>com.github.spotbugs</groupId>
-				<artifactId>spotbugs-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<phase>package</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-pmd-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<phase>package</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-					</execution>
-				</executions>
+				<groupId>com.kiwigrid</groupId>
+				<artifactId>helm-maven-plugin</artifactId>
+				<extensions>true</extensions> <!-- Allow POM to have helm packaging -->
 				<configuration>
-					<systemPropertyVariables>
-						<sutVersion>${project.version}</sutVersion>
-					</systemPropertyVariables>
+					<chartDirectory>${project.basedir}/src/main/helm</chartDirectory>
+					<chartVersion>${project.version}</chartVersion>
+					<useLocalHelmBinary>true</useLocalHelmBinary>
+					<uploadRepoStable>
+						<name>stable-helm-repo</name>
+						<url>http://localhost:8082/api/charts</url>
+						<type>CHARTMUSEUM</type>
+					</uploadRepoStable>
+					<uploadRepoSnapshot>
+						<name>snapshot-helm-repo</name>
+						<url>http://localhost:8082/api/charts</url>
+						<type>CHARTMUSEUM</type>
+					</uploadRepoSnapshot>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -93,34 +45,5 @@
 			<version>${project.parent.version}</version>
 		</dependency>
 		<!-- Third-party dependencies: -->
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.platform</groupId>
-			<artifactId>junit-platform-runner</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.opentest4j</groupId>
-			<artifactId>opentest4j</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.testcontainers</groupId>
-			<artifactId>junit-jupiter</artifactId>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 </project>
