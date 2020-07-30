@@ -37,47 +37,47 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
-      -  name: mc-front-end
-         image: benedictadamson/mc-front-end-srv:{{ .Chart.AppVersion }}
-         ports:
-         -  containerPort: 80
-            name: http
-         volumeMounts:
-         -  mountPath: /config
-            name: mc-http-config
-            readOnly: true
-         livenessProbe:
-            httpGet:
-              path: /
-              port: 80
-            initialDelaySeconds: 20
-            periodSeconds: 13
-      -  name: mc-back-end
-         image: benedictadamson/mc-back-end:{{ .Chart.AppVersion }}
-         ports:
-         -  containerPort: 8080
-         args:
-         - --spring.data.mongodb.host={{ .Release.Name }}-mc-db-svc
-         - --spring.data.mongodb.username=admin
-         env:
-         - name: SPRING_DATA_MONGODB_PASSWORD
-           valueFrom:
-             secretKeyRef:
-               name: {{ .Release.Name }}-db-password-secret
-               key: db-password
-         readinessProbe:
-           httpGet:
-             path: /actuator/health/readiness
-             port: 8080
-           initialDelaySeconds: 13
-           periodSeconds: 5
-         livenessProbe:
-           httpGet:
-             path: /actuator/health/liveness
-             port: 8080
-           initialDelaySeconds: 20
-           periodSeconds: 59
+      - name: mc-front-end
+        image: benedictadamson/mc-front-end-srv:{{ .Chart.AppVersion }}
+        ports:
+        - containerPort: 80
+          name: http
+        volumeMounts:
+        - mountPath: /config
+          name: mc-http-config
+          readOnly: true
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 20
+          periodSeconds: 13
+      - name: mc-back-end
+        image: benedictadamson/mc-back-end:{{ .Chart.AppVersion }}
+        ports:
+        - containerPort: 8080
+        args:
+        - --spring.data.mongodb.host={{ .Release.Name }}-mc-db-svc
+        - --spring.data.mongodb.username=admin
+        env:
+        - name: SPRING_DATA_MONGODB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-db-password-secret
+              key: db-password
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 13
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 20
+          periodSeconds: 59
       volumes:
-      -  name: mc-http-config
-         configMap:
-           name: {{ .Release.Name }}-http-cm
+      - name: mc-http-config
+        configMap:
+          name: {{ .Release.Name }}-http-cm

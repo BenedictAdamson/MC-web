@@ -37,29 +37,29 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
-      -  name: mc-db
-         image: mongo:4
-         args:
-         - --bind_ip
-         - 0.0.0.0
-         ports:
-         -  containerPort: 27017
-         readinessProbe:
-           tcpSocket:
-             port: 27017
-           initialDelaySeconds: 11
-           periodSeconds: 3
-         env:
-         -  name: MONGO_INITDB_ROOT_USERNAME
-            value: admin
-         -  name: MONGO_INITDB_ROOT_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                 name: {{ .Release.Name }}-db-password-secret
-                 key: db-password
-         volumeMounts:
-         -  mountPath: /data/db
-            name: mc-data-db
+      - name: mc-db
+        image: mongo:4
+        args:
+        - --bind_ip
+        - 0.0.0.0
+        ports:
+        - containerPort: 27017
+        readinessProbe:
+          tcpSocket:
+            port: 27017
+          initialDelaySeconds: 11
+          periodSeconds: 3
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: admin
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-db-password-secret
+              key: db-password
+        volumeMounts:
+        - mountPath: /data/db
+          name: mc-data-db
       volumes:
-      -  name: mc-data-db
-         emptyDir: {}
+      - name: mc-data-db
+        emptyDir: {}
