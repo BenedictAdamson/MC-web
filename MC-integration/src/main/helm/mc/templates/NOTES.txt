@@ -8,3 +8,7 @@ Separately to installing the mc Helm chart you must set up a Kubernetes *ingress
 For minikube, you can do that using the command
 
 minikube addons enable ingress
+
+And after installation of the chart, get the IP address through which to access MC through the minikube ingress controller using the command
+
+kubectl get ingress
