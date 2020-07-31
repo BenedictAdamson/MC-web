@@ -31,5 +31,3 @@ spec:
   ports:
   - protocol: TCP
     port: 80
-  externalTrafficPolicy: Local
-  type: {{ .Values.service.type }}

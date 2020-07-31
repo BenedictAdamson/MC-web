@@ -13,10 +13,6 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-service:
-  type: LoadBalancer
-  port: 80
-
 resources: {}
   # Do not specify default resources, to leave as a conscious
   # choice for the user. This increases chances charts run on environments with little
