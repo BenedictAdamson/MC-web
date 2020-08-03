@@ -31,4 +31,3 @@ spec:
   ports:
   - protocol: TCP
     port: 80
-  type: {{ .Values.service.type }}
