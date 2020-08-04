@@ -19,7 +19,7 @@
 # along with MC-des.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-FROM mongo:4
+FROM mongo:4.2
 ARG VERSION
 LABEL version="${VERSION}"
 LABEL description="The Mission Command game database server."
