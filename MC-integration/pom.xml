@@ -8,13 +8,21 @@
 		<version>2.5.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>MC-integration</artifactId>
-	<packaging>helm</packaging>
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>com.kiwigrid</groupId>
 				<artifactId>helm-maven-plugin</artifactId>
-				<extensions>true</extensions> <!-- Allow POM to have helm packaging -->
+				<executions>
+					<execution>
+						<goals>
+							<goal>dependency-build</goal>
+							<goal>package</goal>
+							<goal>lint</goal>
+							<goal>upload</goal>
+						</goals>
+					</execution>
+				</executions>
 				<configuration>
 					<chartDirectory>${project.basedir}/src/main/helm</chartDirectory>
 					<chartVersion>${project.version}</chartVersion>
