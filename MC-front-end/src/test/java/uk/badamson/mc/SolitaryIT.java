@@ -23,14 +23,12 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.WaitingConsumer;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -45,21 +43,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * </p>
  */
 @Testcontainers
+@Tag("IT")
 public class SolitaryIT {
 
    public static final String EXPECTED_STARTED_MESSAGE = "AH00094: Command line";
 
-   private static final String SUT_VERSION;
-   static {
-      SUT_VERSION = System.getProperty("sutVersion", "");
-      if (SUT_VERSION == null || SUT_VERSION.isEmpty()) {
-         throw new IllegalStateException("setVersion property not set");
-      }
-   }
-
    @Container
-   private final GenericContainer<?> container = new GenericContainer<>(
-            new ImageFromDockerfile().withFileFromPath("/", Paths.get(".")));
+   private final McFrontEndContainer container = new McFrontEndContainer();
 
    @Test
    public void start() {
