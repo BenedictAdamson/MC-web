@@ -93,20 +93,29 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-failsafe-plugin</artifactId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<!-- For running tests that do not need external (Maven controlled) setup 
+					and tear-down steps. This project uses the plugin to run integration tests 
+					that use Testcontainers. -->
 				<executions>
 					<execution>
+						<id>JUnit-integration-test</id>
+						<phase>integration-test</phase>
 						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
+							<goal>test</goal>
 						</goals>
+						<configuration>
+							<includes>
+								<include>**/*IT.java</include>
+							</includes>
+							<excludes>
+								<include>**/Abstract*.java</include>
+							</excludes>
+							<!-- Work around OpenJDK bug: -->
+							<useSystemClassLoader>false</useSystemClassLoader>
+						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<systemPropertyVariables>
-						<sutVersion>${project.version}</sutVersion>
-					</systemPropertyVariables>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

@@ -45,8 +45,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * <p>
- * Basic system test for the MC back-end, testing it operating as a pristine
- * (fresh) installation.
+ * Basic system test for the MC containers operating together, testing it
+ * operating as a pristine (fresh) installation.
  * </p>
  */
 @TestMethodOrder(OrderAnnotation.class)
@@ -60,11 +60,8 @@ public class PristineIT {
 
    private final Network containersNetwork = Network.newNetwork();
 
-   /**
-    * By default the MongoDB instance starts without authentication enabled.
-    */
    @Container
-   private final MongoDBContainer dbContainer = new MongoDBContainer("mongo:4.2")
+   private final MongoDBContainer dbContainer = new McDatabaseContainer()
             .withNetwork(containersNetwork).withNetworkAliases("db");
 
    @Container
