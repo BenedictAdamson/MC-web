@@ -113,7 +113,8 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<!-- For running tests that do not need external (Maven controlled) setup 
 					and tear-down steps. This project uses the plugin to run integration tests 
-					that use Testcontainers. -->
+					that use Testcontainers. These tests use Docker images of the components 
+					of MC, which the other modules should have build during the package phase. -->
 				<executions>
 					<execution>
 						<id>JUnit-integration-test</id>
