@@ -8,6 +8,7 @@
 		<version>2.5.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>MC-integration</artifactId>
+	<packaging>helm</packaging>
 	<build>
 		<resources>
 			<resource>
@@ -25,16 +26,7 @@
 			<plugin>
 				<groupId>com.kiwigrid</groupId>
 				<artifactId>helm-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>dependency-build</goal>
-							<goal>package</goal>
-							<goal>lint</goal>
-							<goal>upload</goal>
-						</goals>
-					</execution>
-				</executions>
+				<extensions>true</extensions> <!-- Allow POM to have helm packaging -->
 				<configuration>
 					<chartDirectory>${project.basedir}/src/main/helm</chartDirectory>
 					<chartVersion>${project.version}</chartVersion>
@@ -154,6 +146,7 @@
 		<dependency>
 			<groupId>uk.badamson.mc</groupId>
 			<artifactId>MC-database</artifactId>
+			<type>pom</type>
 			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
