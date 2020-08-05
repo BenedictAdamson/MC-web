@@ -45,30 +45,29 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * <p>
- * Basic system test for the MC back-end, testing it operating as a pristine
- * (fresh) installation.
+ * Basic system test for the MC database and MC backend containers operating
+ * together, testing it operating as a pristine (fresh) installation.
  * </p>
  */
 @TestMethodOrder(OrderAnnotation.class)
 @Testcontainers
 @Tag("IT")
-public class PristineIT {
+public class PristineDbAndBeImagesIT {
 
    public static final int MC_LISTENING_PORT = 8080;
 
    public static final String EXPECTED_STARTED_MESSAGE = "Started Application";
 
+   public static final String EXPECTED_CONNECTION_MESSAGE = "successfully connected to server";
+
    private final Network containersNetwork = Network.newNetwork();
 
-   /**
-    * By default the MongoDB instance starts without authentication enabled.
-    */
    @Container
-   private final MongoDBContainer dbContainer = new MongoDBContainer("mongo:4")
+   private final MongoDBContainer dbContainer = new McDatabaseContainer()
             .withNetwork(containersNetwork).withNetworkAliases("db");
 
    @Container
-   private final McBackEndContainer mcContainer = new McBackEndContainer()
+   private final McBackEndContainer beContainer = new McBackEndContainer()
             .withNetwork(containersNetwork).withNetworkAliases("mc")
             .withCommand("--spring.data.mongodb.host=db")
             .withExposedPorts(MC_LISTENING_PORT);
@@ -77,12 +76,20 @@ public class PristineIT {
       assertThat(logs, not(containsString("ERROR")));
    }
 
+   private void awaitBeLogMessage(final String message)
+            throws TimeoutException {
+      final var consumer = new WaitingConsumer();
+      beContainer.followOutput(consumer);
+      consumer.waitUntil(frame -> frame.getUtf8String().contains(message), 30,
+               TimeUnit.SECONDS);
+   }
+
    private WebTestClient connectWebTestClient(final String path,
             final String query, final String fragment) {
       final var scheme = "http";
       final String userInfo = null;
-      final String host = mcContainer.getContainerIpAddress();
-      final int port = mcContainer.getMappedPort(8080);
+      final String host = beContainer.getContainerIpAddress();
+      final int port = beContainer.getMappedPort(8080);
       final URI uri;
       try {
          uri = new URI(scheme, userInfo, host, port, path, query, fragment);
@@ -94,18 +101,18 @@ public class PristineIT {
 
    @Test
    @Order(2)
-   public void getHealthCheck() {
-      waitUntilStarted();
+   public void getHealthCheck() throws TimeoutException {
+      waitUntilReady();
       getJson("/actuator/health", null, null).expectStatus().isOk();
-      assertThatNoErrorMessagesLogged(mcContainer.getLogs());
+      assertThatNoErrorMessagesLogged(beContainer.getLogs());
    }
 
    @Test
    @Order(2)
-   public void getHomePage() {
-      waitUntilStarted();
+   public void getHomePage() throws TimeoutException {
+      waitUntilReady();
       getJson("/", null, null).expectStatus().isOk();
-      assertThatNoErrorMessagesLogged(mcContainer.getLogs());
+      assertThatNoErrorMessagesLogged(beContainer.getLogs());
    }
 
    private ResponseSpec getJson(final String path, final String query,
@@ -116,39 +123,31 @@ public class PristineIT {
 
    @Test
    @Order(2)
-   public void getPlayerDirectory() {
-      waitUntilStarted();
+   public void getPlayerDirectory() throws TimeoutException {
+      waitUntilReady();
       final var response = getJson("/api/player", null, null);
 
-      assertThatNoErrorMessagesLogged(mcContainer.getLogs());
+      assertThatNoErrorMessagesLogged(beContainer.getLogs());
       response.expectStatus().isOk();
    }
 
    @Test
    @Order(1)
-   public void start() {
-      waitUntilStarted();
+   public void start() throws TimeoutException {
+      waitUntilReady();
 
-      final var logs = mcContainer.getLogs();
+      final var logs = beContainer.getLogs();
       assertAll("Log suitable messages",
                () -> assertThat(logs, containsString(EXPECTED_STARTED_MESSAGE)),
                () -> assertThat(logs,
-                        containsString("successfully connected to server")),
+                        containsString(EXPECTED_CONNECTION_MESSAGE)),
                () -> assertThatNoErrorMessagesLogged(logs),
                () -> assertThat(logs, not(containsString("Unable to start"))));
    }
 
-   private void waitUntilStarted() {
+   private void waitUntilReady() throws TimeoutException {
       assertTrue(dbContainer.isRunning(), "DB running");
-      final var consumer = new WaitingConsumer();
-      mcContainer.followOutput(consumer);
-      try {
-         consumer.waitUntil(
-                  frame -> frame.getUtf8String()
-                           .contains(EXPECTED_STARTED_MESSAGE),
-                  30, TimeUnit.SECONDS);
-      } catch (final TimeoutException e) {
-         throw new AssertionError(e);
-      }
+      awaitBeLogMessage(EXPECTED_STARTED_MESSAGE);
+      awaitBeLogMessage(EXPECTED_CONNECTION_MESSAGE);
    }
 }

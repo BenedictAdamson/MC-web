@@ -1,7 +1,8 @@
-# Helm resource file for the MC project,
-# declaring part of the MC application in a cluster.
-# © Copyright Benedict Adamson 2019-20.
-#
+# Dockerfile for the MC-database project,
+# to produce the MC database server in a container.
+
+# © Copyright Benedict Adamson 2018-20.
+# 
 # This file is part of MC.
 #
 # MC is free software: you can redistribute it and/or modify
@@ -15,16 +16,11 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with MC.  If not, see <https://www.gnu.org/licenses/>.
+# along with MC-des.  If not, see <https://www.gnu.org/licenses/>.
 #
-apiVersion: v2
-appVersion: "2.5.0-SNAPSHOT"
-description: The Mission Command game.
-name: mc
-version: 2.5.0-SNAPSHOT
-sources:
-  - https://github.com/BenedictAdamson/MC
-maintainers:
-  - name: Benedict Adamson
-    email: badamson@spamcop.net
-    url: https://github.com/BenedictAdamson
+
+FROM mongo:4.2
+ARG VERSION
+LABEL version="${VERSION}"
+LABEL description="The Mission Command game database server."
+LABEL maintainer="badamson@spamcop.net"

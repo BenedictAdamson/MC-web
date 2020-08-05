@@ -38,7 +38,7 @@ spec:
     spec:
       containers:
       - name: mc-db
-        image: mongo:4
+        image: benedictadamson/mc-database:{{ .Chart.AppVersion }}
         args:
         - --bind_ip
         - 0.0.0.0

@@ -1,4 +1,4 @@
-package uk.badamson.mc;
+package uk.badamson.mc.presentation;
 /*
  * © Copyright Benedict Adamson 2019-20.
  *
@@ -19,7 +19,9 @@ package uk.badamson.mc;
  */
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -32,42 +34,35 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * <p>
- * Basic system test for the MC back-end, testing it operating alone without any
- * needed servers.
+ * Basic system test for the MC front-end, testing it operating alone without
+ * any needed servers.
  * </p>
  * <p>
- * The MC back-end expects and needs a database server to be present, so this
- * tests that it provides useful diagnostic messages if the database is missing
- * or misbehaving. The test builds the Docker image using the real Dockerfile,
- * so this also tests that Dockerfile.
+ * The test builds the Docker image using the real Dockerfile, so this tests
+ * that Dockerfile.
  * </p>
  */
 @Testcontainers
 @Tag("IT")
-public class SolitaryIT {
+public class SolitaryFrontEndIT {
 
-   public static final String EXPECTED_STARTED_MESSAGE = "Started Application";
-   public static final String EXPECTED_ERROR_MESSAGE = "Connection refused";
+   public static final String EXPECTED_STARTED_MESSAGE = "AH00094: Command line";
 
    @Container
-   private final McBackEndContainer container = new McBackEndContainer();
+   private final McFrontEndContainer container = new McFrontEndContainer();
 
    @Test
-   public void start() {
+   public void start() throws TimeoutException {
       final var consumer = new WaitingConsumer();
       container.followOutput(consumer);
-      try {
-         consumer.waitUntil(frame -> {
-            final String text = frame.getUtf8String();
-            return text.contains(EXPECTED_STARTED_MESSAGE)
-                     || text.contains(EXPECTED_ERROR_MESSAGE);
-         }, 11000, TimeUnit.MILLISECONDS);
-      } catch (final TimeoutException e) {
-         throw new AssertionError(e);
-      }
+         consumer.waitUntil(
+                  frame -> frame.getUtf8String()
+                           .contains(EXPECTED_STARTED_MESSAGE),
+                  7000, TimeUnit.MILLISECONDS);
 
       final var logs = container.getLogs();
-      assertThat("Logged error message", logs,
-               containsString(EXPECTED_ERROR_MESSAGE));
+      assertAll("Log suitable messages",
+               () -> assertThat(logs, containsString(EXPECTED_STARTED_MESSAGE)),
+               () -> assertThat(logs, not(containsString("error"))));
    }
 }

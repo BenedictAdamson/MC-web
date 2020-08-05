@@ -7,8 +7,8 @@
 		<artifactId>MC</artifactId>
 		<version>2.5.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>MC-integration</artifactId>
-	<packaging>helm</packaging>
+	<artifactId>MC-database</artifactId>
+	<packaging>pom</packaging>
 	<build>
 		<resources>
 			<resource>
@@ -22,61 +22,7 @@
 				<filtering>true</filtering>
 			</testResource>
 		</testResources>
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>com.kiwigrid</groupId>
-										<artifactId>
-											helm-maven-plugin
-										</artifactId>
-										<versionRange>
-											[5.5,)
-										</versionRange>
-										<goals>
-											<goal>init</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 		<plugins>
-			<plugin>
-				<groupId>com.kiwigrid</groupId>
-				<artifactId>helm-maven-plugin</artifactId>
-				<extensions>true</extensions> <!-- Allow POM to have helm packaging -->
-				<configuration>
-					<chartDirectory>${project.basedir}/src/main/helm</chartDirectory>
-					<chartVersion>${project.version}</chartVersion>
-					<useLocalHelmBinary>true</useLocalHelmBinary>
-					<uploadRepoStable>
-						<name>stable-helm-repo</name>
-						<url>http://localhost:8082/api/charts</url>
-						<type>CHARTMUSEUM</type>
-					</uploadRepoStable>
-					<uploadRepoSnapshot>
-						<name>snapshot-helm-repo</name>
-						<url>http://localhost:8082/api/charts</url>
-						<type>CHARTMUSEUM</type>
-					</uploadRepoSnapshot>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>com.github.spotbugs</groupId>
 				<artifactId>spotbugs-maven-plugin</artifactId>
@@ -87,6 +33,32 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<effort>Max</effort>
+					<threshold>Low</threshold>
+					<xmlOutput>true</xmlOutput>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>dockerfile-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default</id>
+						<goals>
+							<goal>build</goal>
+							<goal>push</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<repository>index.docker.io/benedictadamson/mc-database</repository>
+					<tag>${project.version}</tag>
+					<useMavenSettingsForAuth>true</useMavenSettingsForAuth>
+					<buildArgs>
+						<VERSION>${project.version}</VERSION>
+					</buildArgs>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -163,8 +135,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<!-- For running tests that do not need external (Maven controlled) setup 
 					and tear-down steps. This project uses the plugin to run integration tests 
-					that use Testcontainers. These tests use Docker images of the components 
-					of MC, which the other modules should have build during the package phase. -->
+					that use Testcontainers. -->
 				<executions>
 					<execution>
 						<id>JUnit-integration-test</id>
@@ -196,23 +167,6 @@
 		</plugins>
 	</reporting>
 	<dependencies>
-		<dependency>
-			<groupId>uk.badamson.mc</groupId>
-			<artifactId>MC-back-end</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>uk.badamson.mc</groupId>
-			<artifactId>MC-database</artifactId>
-			<type>pom</type>
-			<version>${project.parent.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>uk.badamson.mc</groupId>
-			<artifactId>MC-front-end</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
-		<!-- Third-party dependencies: -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
