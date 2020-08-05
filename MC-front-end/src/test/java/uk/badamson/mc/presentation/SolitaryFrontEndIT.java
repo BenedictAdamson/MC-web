@@ -52,17 +52,13 @@ public class SolitaryFrontEndIT {
    private final McFrontEndContainer container = new McFrontEndContainer();
 
    @Test
-   public void start() {
+   public void start() throws TimeoutException {
       final var consumer = new WaitingConsumer();
       container.followOutput(consumer);
-      try {
          consumer.waitUntil(
                   frame -> frame.getUtf8String()
                            .contains(EXPECTED_STARTED_MESSAGE),
                   7000, TimeUnit.MILLISECONDS);
-      } catch (final TimeoutException e) {
-         // Fall through to the assertion check (which will fail)
-      }
 
       final var logs = container.getLogs();
       assertAll("Log suitable messages",
