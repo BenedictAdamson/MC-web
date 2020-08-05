@@ -45,8 +45,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * <p>
- * Basic system test for the MC database and MC backend containers operating together, testing it
- * operating as a pristine (fresh) installation.
+ * Basic system test for the MC database and MC backend containers operating
+ * together, testing it operating as a pristine (fresh) installation.
  * </p>
  */
 @TestMethodOrder(OrderAnnotation.class)
@@ -57,6 +57,8 @@ public class PristineDbAndBeImagesIT {
    public static final int MC_LISTENING_PORT = 8080;
 
    public static final String EXPECTED_STARTED_MESSAGE = "Started Application";
+
+   public static final String EXPECTED_CONNECTION_MESSAGE = "successfully connected to server";
 
    private final Network containersNetwork = Network.newNetwork();
 
@@ -72,6 +74,14 @@ public class PristineDbAndBeImagesIT {
 
    private void assertThatNoErrorMessagesLogged(final String logs) {
       assertThat(logs, not(containsString("ERROR")));
+   }
+
+   private void awaitBeLogMessage(final String message)
+            throws TimeoutException {
+      final var consumer = new WaitingConsumer();
+      beContainer.followOutput(consumer);
+      consumer.waitUntil(frame -> frame.getUtf8String().contains(message), 30,
+               TimeUnit.SECONDS);
    }
 
    private WebTestClient connectWebTestClient(final String path,
@@ -91,16 +101,16 @@ public class PristineDbAndBeImagesIT {
 
    @Test
    @Order(2)
-   public void getHealthCheck() {
-      waitUntilStarted();
+   public void getHealthCheck() throws TimeoutException {
+      waitUntilReady();
       getJson("/actuator/health", null, null).expectStatus().isOk();
       assertThatNoErrorMessagesLogged(beContainer.getLogs());
    }
 
    @Test
    @Order(2)
-   public void getHomePage() {
-      waitUntilStarted();
+   public void getHomePage() throws TimeoutException {
+      waitUntilReady();
       getJson("/", null, null).expectStatus().isOk();
       assertThatNoErrorMessagesLogged(beContainer.getLogs());
    }
@@ -113,8 +123,8 @@ public class PristineDbAndBeImagesIT {
 
    @Test
    @Order(2)
-   public void getPlayerDirectory() {
-      waitUntilStarted();
+   public void getPlayerDirectory() throws TimeoutException {
+      waitUntilReady();
       final var response = getJson("/api/player", null, null);
 
       assertThatNoErrorMessagesLogged(beContainer.getLogs());
@@ -123,29 +133,21 @@ public class PristineDbAndBeImagesIT {
 
    @Test
    @Order(1)
-   public void start() {
-      waitUntilStarted();
+   public void start() throws TimeoutException {
+      waitUntilReady();
 
       final var logs = beContainer.getLogs();
       assertAll("Log suitable messages",
                () -> assertThat(logs, containsString(EXPECTED_STARTED_MESSAGE)),
                () -> assertThat(logs,
-                        containsString("successfully connected to server")),
+                        containsString(EXPECTED_CONNECTION_MESSAGE)),
                () -> assertThatNoErrorMessagesLogged(logs),
                () -> assertThat(logs, not(containsString("Unable to start"))));
    }
 
-   private void waitUntilStarted() {
+   private void waitUntilReady() throws TimeoutException {
       assertTrue(dbContainer.isRunning(), "DB running");
-      final var consumer = new WaitingConsumer();
-      beContainer.followOutput(consumer);
-      try {
-         consumer.waitUntil(
-                  frame -> frame.getUtf8String()
-                           .contains(EXPECTED_STARTED_MESSAGE),
-                  30, TimeUnit.SECONDS);
-      } catch (final TimeoutException e) {
-         throw new AssertionError(e);
-      }
+      awaitBeLogMessage(EXPECTED_STARTED_MESSAGE);
+      awaitBeLogMessage(EXPECTED_CONNECTION_MESSAGE);
    }
 }
