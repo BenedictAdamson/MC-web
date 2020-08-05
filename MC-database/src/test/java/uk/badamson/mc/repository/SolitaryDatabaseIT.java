@@ -38,7 +38,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  */
 @Testcontainers
 @Tag("IT")
-public class SolitaryIT {
+public class SolitaryDatabaseIT {
 
    @Container
    private final McDatabaseContainer container = new McDatabaseContainer();

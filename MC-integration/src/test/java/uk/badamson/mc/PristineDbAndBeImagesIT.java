@@ -45,14 +45,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * <p>
- * Basic system test for the MC containers operating together, testing it
+ * Basic system test for the MC database and MC backend containers operating together, testing it
  * operating as a pristine (fresh) installation.
  * </p>
  */
 @TestMethodOrder(OrderAnnotation.class)
 @Testcontainers
 @Tag("IT")
-public class PristineIT {
+public class PristineDbAndBeImagesIT {
 
    public static final int MC_LISTENING_PORT = 8080;
 
@@ -65,7 +65,7 @@ public class PristineIT {
             .withNetwork(containersNetwork).withNetworkAliases("db");
 
    @Container
-   private final McBackEndContainer mcContainer = new McBackEndContainer()
+   private final McBackEndContainer beContainer = new McBackEndContainer()
             .withNetwork(containersNetwork).withNetworkAliases("mc")
             .withCommand("--spring.data.mongodb.host=db")
             .withExposedPorts(MC_LISTENING_PORT);
@@ -78,8 +78,8 @@ public class PristineIT {
             final String query, final String fragment) {
       final var scheme = "http";
       final String userInfo = null;
-      final String host = mcContainer.getContainerIpAddress();
-      final int port = mcContainer.getMappedPort(8080);
+      final String host = beContainer.getContainerIpAddress();
+      final int port = beContainer.getMappedPort(8080);
       final URI uri;
       try {
          uri = new URI(scheme, userInfo, host, port, path, query, fragment);
@@ -94,7 +94,7 @@ public class PristineIT {
    public void getHealthCheck() {
       waitUntilStarted();
       getJson("/actuator/health", null, null).expectStatus().isOk();
-      assertThatNoErrorMessagesLogged(mcContainer.getLogs());
+      assertThatNoErrorMessagesLogged(beContainer.getLogs());
    }
 
    @Test
@@ -102,7 +102,7 @@ public class PristineIT {
    public void getHomePage() {
       waitUntilStarted();
       getJson("/", null, null).expectStatus().isOk();
-      assertThatNoErrorMessagesLogged(mcContainer.getLogs());
+      assertThatNoErrorMessagesLogged(beContainer.getLogs());
    }
 
    private ResponseSpec getJson(final String path, final String query,
@@ -117,7 +117,7 @@ public class PristineIT {
       waitUntilStarted();
       final var response = getJson("/api/player", null, null);
 
-      assertThatNoErrorMessagesLogged(mcContainer.getLogs());
+      assertThatNoErrorMessagesLogged(beContainer.getLogs());
       response.expectStatus().isOk();
    }
 
@@ -126,7 +126,7 @@ public class PristineIT {
    public void start() {
       waitUntilStarted();
 
-      final var logs = mcContainer.getLogs();
+      final var logs = beContainer.getLogs();
       assertAll("Log suitable messages",
                () -> assertThat(logs, containsString(EXPECTED_STARTED_MESSAGE)),
                () -> assertThat(logs,
@@ -138,7 +138,7 @@ public class PristineIT {
    private void waitUntilStarted() {
       assertTrue(dbContainer.isRunning(), "DB running");
       final var consumer = new WaitingConsumer();
-      mcContainer.followOutput(consumer);
+      beContainer.followOutput(consumer);
       try {
          consumer.waitUntil(
                   frame -> frame.getUtf8String()
