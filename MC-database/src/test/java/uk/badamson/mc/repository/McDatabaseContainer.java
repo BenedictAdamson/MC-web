@@ -18,68 +18,28 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Properties;
-
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.images.builder.ImageFromDockerfile;
+import org.testcontainers.containers.MongoDBContainer;
 
 /**
  * <p>
  * A Testcontainers Docker container for the MC-database.
  * </p>
- * <p>
- * This class builds the Docker image for the container using the real
- * Dockerfile, so it also tests that Dockerfile.
- * </p>
  */
-final class McDatabaseContainer extends GenericContainer<McDatabaseContainer> {
+final class McDatabaseContainer extends MongoDBContainer {
 
-   public static final String VERSION = getVersion();
+   public static final String VERSION = Version.VERSION;
 
-   private static final Path DOCKERFILE = Paths.get("Dockerfile");
+   public static final String IMAGE = "index.docker.io/benedictadamson/mc-database:"
+            + VERSION;
 
-   private static final ImageFromDockerfile IMAGE = createImage(VERSION);
-
-   private static ImageFromDockerfile createImage(final String version) {
-      return new ImageFromDockerfile()
-               .withFileFromPath("Dockerfile", DOCKERFILE)
-               .withBuildArg("VERSION", version);
-   }
-
-   private static Properties getApplicationProperties() throws IOException {
-      final InputStream stream = Thread.currentThread().getContextClassLoader()
-               .getResourceAsStream("application.properties");
-      if (stream == null) {
-         throw new FileNotFoundException(
-                  "resource application.properties not found");
-      }
-      final Properties properties = new Properties();
-      properties.load(stream);
-      return properties;
-   }
-
-   private static String getVersion() {
-      String version;
-      try {
-         version = getApplicationProperties().getProperty("build.version");
-      } catch (final IOException e) {
-         throw new IllegalStateException(
-                  "unable to read application.properties resource", e);
-      }
-      if (version == null || version.isEmpty()) {
-         throw new IllegalStateException(
-                  "missing build.version property in application.properties resource");
-      }
-      return version;
-   }
+   static final String PASSWORD = "letmein";
 
    McDatabaseContainer() {
       super(IMAGE);
+      withNetworkAliases("db");
+      withEnv("MONGO_INITDB_ROOT_USERNAME", "admin");
+      withEnv("MONGO_INITDB_ROOT_PASSWORD", PASSWORD);
+      withCommand("--bind_ip", "0.0.0.0");
    }
 
 }
