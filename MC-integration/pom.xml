@@ -212,6 +212,12 @@
 			<artifactId>MC-front-end</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>uk.badamson.mc</groupId>
+			<artifactId>MC-model</artifactId>
+			<version>${project.parent.version}</version>
+			<scope>test</scope>
+		</dependency>
 		<!-- Third-party dependencies: -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
