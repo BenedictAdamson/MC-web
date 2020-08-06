@@ -203,8 +203,15 @@ public class PristineDbAndBeImagesIT {
                is(1L));
    }
 
+   private void waitUntilDbAcceptsConnections() {
+      try (final var client = dbContainer.createClient();) {
+         client.getDatabase(McDatabaseContainer.DB);
+      }
+   }
+
    private void waitUntilReady() throws TimeoutException {
       assertTrue(dbContainer.isRunning(), "DB running");
+      waitUntilDbAcceptsConnections();
       awaitBeLogMessage(EXPECTED_STARTED_MESSAGE);
       awaitBeLogMessage(EXPECTED_CONNECTION_MESSAGE);
    }
