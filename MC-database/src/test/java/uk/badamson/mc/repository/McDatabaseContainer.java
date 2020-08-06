@@ -18,7 +18,14 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.util.Arrays;
+
 import org.testcontainers.containers.GenericContainer;
+
+import com.mongodb.MongoClientSettings;
+import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 
 /**
  * <p>
@@ -32,14 +39,32 @@ final class McDatabaseContainer extends GenericContainer<McDatabaseContainer> {
    public static final String IMAGE = "index.docker.io/benedictadamson/mc-database:"
             + VERSION;
 
+   public static final int PORT = 27017;
+
+   public static final String HOST = "db";
+
+   public static final String DB = "mc";
+
    static final String PASSWORD = "letmein";
 
    McDatabaseContainer() {
       super(IMAGE);
-      withNetworkAliases("db");
+      withNetworkAliases(HOST);
       withEnv("MONGO_INITDB_ROOT_USERNAME", "admin");
       withEnv("MONGO_INITDB_ROOT_PASSWORD", PASSWORD);
       withCommand("--bind_ip", "0.0.0.0");
+      this.addExposedPort(PORT);
    }
 
+   MongoClient createClient() {
+      return MongoClients
+               .create(MongoClientSettings.builder()
+                        .applyToClusterSettings(builder -> builder
+                                 .hosts(Arrays.asList(getServerAddress())))
+                        .build());
+   }
+
+   ServerAddress getServerAddress() {
+      return new ServerAddress(getHost(), this.getMappedPort(PORT));
+   }
 }

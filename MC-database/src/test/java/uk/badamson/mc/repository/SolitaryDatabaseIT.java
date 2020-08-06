@@ -22,8 +22,11 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -36,6 +39,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * tests that Dockerfile.
  * </p>
  */
+@TestMethodOrder(OrderAnnotation.class)
 @Testcontainers
 @Tag("IT")
 public class SolitaryDatabaseIT {
@@ -43,12 +47,24 @@ public class SolitaryDatabaseIT {
    @Container
    private final McDatabaseContainer container = new McDatabaseContainer();
 
-   private void assertThatNoErrorMessagesLogged(final String logs) {
+   private void assertThatNoErrorMessages(final String logs) {
       assertThat(logs, not(containsString("ERROR")));
    }
 
    @Test
+   @Order(2)
+   public void connect() {
+      try (final var client = container.createClient();) {
+         client.getDatabase(McDatabaseContainer.DB);
+
+         final var logs = container.getLogs();
+         assertThatNoErrorMessages(logs);
+      }
+   }
+
+   @Test
+   @Order(1)
    public void start() {
-      assertThatNoErrorMessagesLogged(container.getLogs());
+      assertThatNoErrorMessages(container.getLogs());
    }
 }
