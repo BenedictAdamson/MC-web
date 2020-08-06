@@ -24,3 +24,4 @@ ARG VERSION
 LABEL version="${VERSION}"
 LABEL description="The Mission Command game database server."
 LABEL maintainer="badamson@spamcop.net"
+ENV MONGO_INITDB_DATABASE=mc
