@@ -31,9 +31,13 @@ final class McDatabaseContainer extends MongoDBContainer {
 
    public static final String IMAGE = "index.docker.io/benedictadamson/mc-database:"
             + VERSION;
+   
+   static final String PASSWORD = "letmein";
 
    McDatabaseContainer() {
       super(IMAGE);
+      withEnv("MONGO_INITDB_ROOT_USERNAME", "admin");
+      withEnv("MONGO_INITDB_ROOT_PASSWORD", PASSWORD);
    }
 
 }

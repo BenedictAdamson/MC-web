@@ -34,6 +34,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    McBackEndContainer() {
       super(IMAGE);
+      withEnv("SPRING_DATA_MONGODB_PASSWORD", McDatabaseContainer.PASSWORD);
    }
 
 }

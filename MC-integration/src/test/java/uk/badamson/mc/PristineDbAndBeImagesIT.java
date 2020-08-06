@@ -161,7 +161,12 @@ public class PristineDbAndBeImagesIT {
       waitUntilReady();
       getJson("/api/player", null, null);
 
-      assertThatNoErrorMessagesLogged(beContainer.getLogs());
+      {
+         final var logs = beContainer.getLogs();
+         assertThat(logs, not(containsString("requires authentication")));
+         assertThat(logs, not(containsString("Exception authenticating")));
+         assertThatNoErrorMessagesLogged(logs);
+      }
       responseIsOk();
       can_get_the_list_of_players();
       the_list_of_players_has_one_player();
