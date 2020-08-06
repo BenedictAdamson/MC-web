@@ -39,7 +39,7 @@ final class McDatabaseContainer extends GenericContainer<McDatabaseContainer> {
       withNetworkAliases("db");
       withEnv("MONGO_INITDB_ROOT_USERNAME", "admin");
       withEnv("MONGO_INITDB_ROOT_PASSWORD", PASSWORD);
-      withCommand("--replSet", "docker-rs", "--bind_ip", "0.0.0.0");
+      withCommand("--bind_ip", "0.0.0.0");
    }
 
 }
