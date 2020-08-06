@@ -38,7 +38,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.ListBodySpec;
-import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.WaitingConsumer;
 import org.testcontainers.junit.jupiter.Container;
@@ -64,7 +63,7 @@ public class PristineDbAndBeImagesIT {
    private final Network containersNetwork = Network.newNetwork();
 
    @Container
-   private final MongoDBContainer dbContainer = new McDatabaseContainer()
+   private final McDatabaseContainer dbContainer = new McDatabaseContainer()
             .withNetwork(containersNetwork).withNetworkAliases("db");
 
    @Container

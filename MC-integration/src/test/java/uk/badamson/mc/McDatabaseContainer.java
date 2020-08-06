@@ -18,14 +18,14 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.containers.GenericContainer;
 
 /**
  * <p>
  * A Testcontainers Docker container for the MC-database.
  * </p>
  */
-final class McDatabaseContainer extends MongoDBContainer {
+final class McDatabaseContainer extends GenericContainer<McDatabaseContainer> {
 
    public static final String VERSION = Version.VERSION;
 
