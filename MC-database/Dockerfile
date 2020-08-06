@@ -25,3 +25,5 @@ LABEL version="${VERSION}"
 LABEL description="The Mission Command game database server."
 LABEL maintainer="badamson@spamcop.net"
 ENV MONGO_INITDB_DATABASE=mc
+RUN mkdir /data/db/home-monogdb
+RUN ln -s  /data/db/home-monogdb /home/monogdb
