@@ -53,9 +53,9 @@ public final class McDatabaseContainer
    public McDatabaseContainer() {
       super(IMAGE);
       withNetworkAliases(HOST);
+      addExposedPort(PORT);
       withEnv("MONGO_INITDB_ROOT_PASSWORD", PASSWORD);
       withCommand("--bind_ip", "0.0.0.0");
-      addExposedPort(PORT);
    }
 
    public MongoClient createClient() {
@@ -67,6 +67,6 @@ public final class McDatabaseContainer
    }
 
    private ServerAddress getServerAddress() {
-      return new ServerAddress(getHost(), this.getMappedPort(PORT));
+      return new ServerAddress(getHost(), getMappedPort(PORT));
    }
 }
