@@ -50,8 +50,6 @@ spec:
           initialDelaySeconds: 11
           periodSeconds: 3
         env:
-        - name: MONGO_INITDB_ROOT_USERNAME
-          value: admin
         - name: MONGO_INITDB_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:

@@ -48,7 +48,6 @@ final class McDatabaseContainer extends GenericContainer<McDatabaseContainer> {
    McDatabaseContainer() {
       super(IMAGE);
       withNetworkAliases("db");
-      withEnv("MONGO_INITDB_ROOT_USERNAME", "admin");
       withEnv("MONGO_INITDB_ROOT_PASSWORD", PASSWORD);
       withCommand("--bind_ip", "0.0.0.0");
       addExposedPort(PORT);
