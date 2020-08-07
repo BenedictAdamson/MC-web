@@ -25,8 +25,6 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -35,7 +33,6 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.ListBodySpec;
 import org.testcontainers.containers.Network;
@@ -90,31 +87,16 @@ public class PristineDbAndBeImagesIT {
    }
 
    private void can_get_the_list_of_players() {
-      getJson("/api/player", null, null);
+      getJsonFromBe("/api/player");
       responseIsOk();
       responsePlayerList = response.expectBodyList(Player.class);
-   }
-
-   private WebTestClient connectWebTestClient(final String path,
-            final String query, final String fragment) {
-      final var scheme = "http";
-      final String userInfo = null;
-      final String host = beContainer.getContainerIpAddress();
-      final int port = beContainer.getMappedPort(8080);
-      final URI uri;
-      try {
-         uri = new URI(scheme, userInfo, host, port, path, query, fragment);
-      } catch (final URISyntaxException e) {
-         throw new IllegalArgumentException(e);
-      }
-      return WebTestClient.bindToServer().baseUrl(uri.toString()).build();
    }
 
    @Test
    @Order(2)
    public void getHealthCheck() throws TimeoutException {
       waitUntilReady();
-      getJson("/actuator/health", null, null);
+      getJsonFromBe("/actuator/health");
       responseIsOk();
       assertThatNoErrorMessagesLogged(beContainer.getLogs());
    }
@@ -123,15 +105,13 @@ public class PristineDbAndBeImagesIT {
    @Order(2)
    public void getHomePage() throws TimeoutException {
       waitUntilReady();
-      getJson("/", null, null);
+      getJsonFromBe("/");
       responseIsOk();
       assertThatNoErrorMessagesLogged(beContainer.getLogs());
    }
 
-   private void getJson(final String path, final String query,
-            final String fragment) {
-      response = connectWebTestClient(path, query, fragment).get()
-               .accept(MediaType.APPLICATION_JSON).exchange();
+   private void getJsonFromBe(final String path) {
+      response = beContainer.getJson(path);
    }
 
    /**
@@ -160,7 +140,7 @@ public class PristineDbAndBeImagesIT {
    @Order(3)
    public void getPlayerDirectory() throws TimeoutException {
       waitUntilReady();
-      getJson("/api/player", null, null);
+      getJsonFromBe("/api/player");
 
       responseIsOk();
       can_get_the_list_of_players();

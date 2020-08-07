@@ -18,6 +18,11 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.containers.GenericContainer;
 
 import uk.badamson.mc.repository.McDatabaseContainer;
@@ -28,6 +33,8 @@ import uk.badamson.mc.repository.McDatabaseContainer;
  * </p>
  */
 final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
+
+   private static final int PORT = 8080;
 
    public static final String VERSION = Version.VERSION;
 
@@ -40,4 +47,24 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       withCommand("--spring.data.mongodb.host=db");
    }
 
+   private WebTestClient connectWebTestClient(final String path) {
+      final var scheme = "http";
+      final String userInfo = null;
+      final String query = null;
+      final String fragment = null;
+      final String host = getContainerIpAddress();
+      final int port = getMappedPort(PORT);
+      final URI uri;
+      try {
+         uri = new URI(scheme, userInfo, host, port, path, query, fragment);
+      } catch (final URISyntaxException e) {
+         throw new IllegalArgumentException(e);
+      }
+      return WebTestClient.bindToServer().baseUrl(uri.toString()).build();
+   }
+
+   WebTestClient.ResponseSpec getJson(final String path) {
+      return connectWebTestClient(path).get().accept(MediaType.APPLICATION_JSON)
+               .exchange();
+   }
 }
