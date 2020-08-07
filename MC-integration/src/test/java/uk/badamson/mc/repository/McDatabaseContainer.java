@@ -44,13 +44,15 @@ public final class McDatabaseContainer
 
    public static final int PORT = 27017;
 
+   public static final String HOST = "db";
+
    public static final String DB = "mc";
 
    public static final String PASSWORD = "letmein";
 
    public McDatabaseContainer() {
       super(IMAGE);
-      withNetworkAliases("db");
+      withNetworkAliases(HOST);
       withEnv("MONGO_INITDB_ROOT_PASSWORD", PASSWORD);
       withCommand("--bind_ip", "0.0.0.0");
       addExposedPort(PORT);

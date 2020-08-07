@@ -34,7 +34,8 @@ import uk.badamson.mc.Version;
  * A Testcontainers Docker container for the MC-database.
  * </p>
  */
-final class McDatabaseContainer extends GenericContainer<McDatabaseContainer> {
+public final class McDatabaseContainer
+         extends GenericContainer<McDatabaseContainer> {
 
    public static final String VERSION = Version.VERSION;
 
@@ -47,9 +48,9 @@ final class McDatabaseContainer extends GenericContainer<McDatabaseContainer> {
 
    public static final String DB = "mc";
 
-   static final String PASSWORD = "letmein";
+   public static final String PASSWORD = "letmein";
 
-   McDatabaseContainer() {
+   public McDatabaseContainer() {
       super(IMAGE);
       withNetworkAliases(HOST);
       withEnv("MONGO_INITDB_ROOT_PASSWORD", PASSWORD);
@@ -57,7 +58,7 @@ final class McDatabaseContainer extends GenericContainer<McDatabaseContainer> {
       addExposedPort(PORT);
    }
 
-   MongoClient createClient() {
+   public MongoClient createClient() {
       return MongoClients
                .create(MongoClientSettings.builder()
                         .applyToClusterSettings(builder -> builder
@@ -65,7 +66,7 @@ final class McDatabaseContainer extends GenericContainer<McDatabaseContainer> {
                         .build());
    }
 
-   ServerAddress getServerAddress() {
+   private ServerAddress getServerAddress() {
       return new ServerAddress(getHost(), this.getMappedPort(PORT));
    }
 }
