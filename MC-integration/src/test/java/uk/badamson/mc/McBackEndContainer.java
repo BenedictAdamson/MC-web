@@ -20,6 +20,7 @@ package uk.badamson.mc;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.TimeoutException;
 
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -34,7 +35,9 @@ import uk.badamson.mc.repository.McDatabaseContainer;
  */
 final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
-   private static final int PORT = 8080;
+   public static final String HEALTHCHECK_PATH = "/actuator/health";
+
+   public static final int PORT = 8080;
 
    public static final String VERSION = Version.VERSION;
 
@@ -45,6 +48,29 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       super(IMAGE);
       withEnv("SPRING_DATA_MONGODB_PASSWORD", McDatabaseContainer.PASSWORD);
       withCommand("--spring.data.mongodb.host=db");
+   }
+
+   void assertHealthCheckOk() {
+      getJson(HEALTHCHECK_PATH).expectStatus().isOk();
+   }
+
+   void awaitHealthCheckOk() throws TimeoutException, InterruptedException {
+      int tries = 0;
+      int sleep = 50;
+      while (true) {
+         tries++;
+         try {
+            assertHealthCheckOk();
+            return;
+         } catch (final AssertionError e) {
+            if (20 <= tries) {
+               throw (TimeoutException) new TimeoutException().initCause(e);
+            } else {
+               Thread.sleep(sleep);
+               sleep = sleep < 500 ? sleep * 2 : sleep;
+            }
+         }
+      }
    }
 
    private WebTestClient connectWebTestClient(final String path) {

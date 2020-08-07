@@ -94,16 +94,7 @@ public class PristineDbAndBeImagesIT {
 
    @Test
    @Order(2)
-   public void getHealthCheck() throws TimeoutException {
-      waitUntilReady();
-      getJsonFromBe("/actuator/health");
-      responseIsOk();
-      assertThatNoErrorMessagesLogged(beContainer.getLogs());
-   }
-
-   @Test
-   @Order(2)
-   public void getHomePage() throws TimeoutException {
+   public void getHomePage() throws TimeoutException, InterruptedException {
       waitUntilReady();
       getJsonFromBe("/");
       responseIsOk();
@@ -137,15 +128,20 @@ public class PristineDbAndBeImagesIT {
     *            takes too long.
     */
    @Test
-   @Order(3)
-   public void getPlayerDirectory() throws TimeoutException {
+   @Order(2)
+   public void getPlayerDirectory()
+            throws TimeoutException, InterruptedException {
       waitUntilReady();
+
       getJsonFromBe("/api/player");
 
-      responseIsOk();
-      can_get_the_list_of_players();
-      the_list_of_players_has_one_player();
-      the_list_of_players_includes_the_administrator();
+      {
+         responseIsOk();
+         can_get_the_list_of_players();
+         the_list_of_players_has_one_player();
+         the_list_of_players_includes_the_administrator();
+      }
+      beContainer.assertHealthCheckOk();
       {
          final var logs = beContainer.getLogs();
          assertThat(logs, not(containsString("requires authentication")));
@@ -160,7 +156,7 @@ public class PristineDbAndBeImagesIT {
 
    @Test
    @Order(1)
-   public void start() throws TimeoutException {
+   public void start() throws TimeoutException, InterruptedException {
       waitUntilReady();
 
       final var logs = beContainer.getLogs();
@@ -170,6 +166,7 @@ public class PristineDbAndBeImagesIT {
                         containsString(EXPECTED_CONNECTION_MESSAGE)),
                () -> assertThatNoErrorMessagesLogged(logs),
                () -> assertThat(logs, not(containsString("Unable to start"))));
+      beContainer.assertHealthCheckOk();
    }
 
    private void the_list_of_players_has_one_player() {
@@ -191,10 +188,11 @@ public class PristineDbAndBeImagesIT {
       }
    }
 
-   private void waitUntilReady() throws TimeoutException {
+   private void waitUntilReady() throws TimeoutException, InterruptedException {
       assertTrue(dbContainer.isRunning(), "DB running");
       waitUntilDbAcceptsConnections();
       awaitBeLogMessage(EXPECTED_STARTED_MESSAGE);
       awaitBeLogMessage(EXPECTED_CONNECTION_MESSAGE);
+      beContainer.awaitHealthCheckOk();
    }
 }
