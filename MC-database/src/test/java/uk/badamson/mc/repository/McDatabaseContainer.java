@@ -27,6 +27,8 @@ import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 
+import uk.badamson.mc.Version;
+
 /**
  * <p>
  * A Testcontainers Docker container for the MC-database.
