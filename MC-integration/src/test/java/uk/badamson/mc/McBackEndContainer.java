@@ -20,6 +20,8 @@ package uk.badamson.mc;
 
 import org.testcontainers.containers.GenericContainer;
 
+import uk.badamson.mc.repository.McDatabaseContainer;
+
 /**
  * <p>
  * A Testcontainers Docker container for the MC-back-end.

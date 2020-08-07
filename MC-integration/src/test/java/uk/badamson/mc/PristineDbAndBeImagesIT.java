@@ -43,6 +43,8 @@ import org.testcontainers.containers.output.WaitingConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import uk.badamson.mc.repository.McDatabaseContainer;
+
 /**
  * <p>
  * Basic system test for the MC database and MC backend containers operating
