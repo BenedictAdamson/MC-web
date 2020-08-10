@@ -18,9 +18,13 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.time.Duration;
 import java.util.Arrays;
 
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
+import org.testcontainers.containers.wait.strategy.WaitStrategy;
 
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
@@ -37,7 +41,6 @@ import uk.badamson.mc.Version;
  */
 public final class McDatabaseContainer
          extends GenericContainer<McDatabaseContainer> {
-
    public static final String VERSION = Version.VERSION;
 
    public static final String IMAGE = "index.docker.io/benedictadamson/mc-database:"
@@ -70,12 +73,23 @@ public final class McDatabaseContainer
    public static final MongoCredential BAD_CREDENTIALS = MongoCredential
             .createCredential("BAD", AUTHENTICATION_DB, "BAD".toCharArray());
 
+   private static final Duration STARTUP_TIME = Duration.ofMillis(100);
+
+   private static final WaitStrategy WAIT_STRATEGY = new WaitAllStrategy()
+            .withStrategy(Wait.forLogMessage(".*MongoDB starting.*", 1))
+            .withStrategy(Wait.forListeningPort())
+            .withStrategy(Wait.forLogMessage(".*init process complete.*", 1))
+            .withStrategy(
+                     Wait.forLogMessage(".*[Ww]aiting for connection.*", 1));
+
    public McDatabaseContainer() {
       super(IMAGE);
       addExposedPort(PORT);
       withEnv("MONGO_INITDB_ROOT_PASSWORD", ROOT_PASSWORD);
       withCommand("--bind_ip", "0.0.0.0");
       withNetworkAliases(HOST);
+      withMinimumRunningDuration(STARTUP_TIME);
+      waitingFor(WAIT_STRATEGY);
    }
 
    public MongoClient createClient(final MongoCredential credentials) {
