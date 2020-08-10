@@ -89,6 +89,34 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<!--Work around Failsafe/Surefire not yet using Test Engine discovery 
+					functionality of JUnit 5 -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>Cucumber-integration-test</id>
+						<phase>integration-test</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<target>
+						<java classname="org.junit.platform.console.ConsoleLauncher"
+							fork="true" failonerror="true" newenvironment="true"
+							maxmemory="512m" classpathref="maven.test.classpath">
+							<arg value="--include-engine" />
+							<arg value="cucumber" />
+							<arg value="--scan-classpath" />
+							<arg value="${project.build.testOutputDirectory}" />
+							<arg value="--reports-dir=target/failsafe-reports" /> <!-- expected location if had used failsafe plugin -->
+						</java>
+					</target>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<executions>
@@ -218,6 +246,12 @@
 			<version>${project.parent.version}</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>uk.badamson.mc</groupId>
+			<artifactId>MC-spec</artifactId>
+			<version>${project.parent.version}</version>
+			<scope>test</scope>
+		</dependency>
 		<!-- Third-party dependencies: -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
@@ -265,6 +299,16 @@
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-java</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-junit-platform-engine</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
