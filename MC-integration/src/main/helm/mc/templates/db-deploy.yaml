@@ -54,7 +54,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: {{ .Release.Name }}-db-password-secret
-              key: db-password
+              key: root-password
         volumeMounts:
         - mountPath: /data/db
           name: mc-data-db
