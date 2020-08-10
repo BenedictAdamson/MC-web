@@ -11,9 +11,9 @@ Use of the `mc-database` image is similar to use of the `mongo` image. In partic
 * Set the environment variable `MONGO_INITDB_ROOT_PASSWORD` to initialise a superuser in the `admin` authentication database, and to subsequently have the server start with authentication enabled.
 * The data is stored in the directory `/data/db`, which should be a mounted volume.
 
-However, the image sets the following environment variables used by the `monog` base image, so you will not be able to override these.
+However, the image sets the following environment variables used by the `mongo` base image, so you will not be able to override these.
 * `MONGO_INITDB_DATABASE=mc`, to create a specific database for use with the rest of MC
-* `MONGO_INITDB_ROOT_USERNAME=admin`, to specifc the user name of the database administrator.
+* `MONGO_INITDB_ROOT_USERNAME=admin`, to specify the user name of the database administrator.
 
 The image does some additional initialisation for a new container:
 * It creates a database named `mc`.
