@@ -46,7 +46,8 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    McBackEndContainer() {
       super(IMAGE);
-      withEnv("SPRING_DATA_MONGODB_PASSWORD", McDatabaseContainer.PASSWORD);
+      withEnv("SPRING_DATA_MONGODB_PASSWORD",
+               new String(McDatabaseContainer.USER_CREDENTIALS.getPassword()));
       withCommand("--spring.data.mongodb.host=" + McDatabaseContainer.HOST);
    }
 

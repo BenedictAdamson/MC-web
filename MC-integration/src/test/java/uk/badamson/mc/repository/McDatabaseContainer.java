@@ -18,11 +18,16 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.time.Duration;
 import java.util.Arrays;
 
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
+import org.testcontainers.containers.wait.strategy.WaitStrategy;
 
 import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -46,24 +51,56 @@ public final class McDatabaseContainer
 
    public static final String HOST = "db";
 
+   public static final String AUTHENTICATION_DB = "admin";
+
    public static final String DB = "mc";
 
-   public static final String PASSWORD = "letmein";
+   private static final String NORMAL_USER = "mc";
+
+   private static final String ROOT_USER = "admin";
+
+   private static final String ROOT_PASSWORD = "letmein";
+
+   private static final String USER_PASSWORD = "password123";
+
+   public static final MongoCredential USER_CREDENTIALS = MongoCredential
+            .createCredential(NORMAL_USER, AUTHENTICATION_DB,
+                     USER_PASSWORD.toCharArray());
+
+   public static final MongoCredential ROOT_CREDENTIALS = MongoCredential
+            .createCredential(ROOT_USER, AUTHENTICATION_DB,
+                     ROOT_PASSWORD.toCharArray());
+
+   public static final MongoCredential BAD_CREDENTIALS = MongoCredential
+            .createCredential("BAD", AUTHENTICATION_DB, "BAD".toCharArray());
+
+   private static final Duration STARTUP_TIME = Duration.ofMillis(100);
+
+   private static final WaitStrategy WAIT_STRATEGY = new WaitAllStrategy()
+            .withStrategy(Wait.forLogMessage(".*MongoDB starting.*", 1))
+            .withStrategy(Wait.forListeningPort())
+            .withStrategy(Wait.forLogMessage(
+                     ".*[Ii]nitiali[sz]ation of mc db complete.*", 1))
+            .withStrategy(Wait.forLogMessage(".*init process complete.*", 1))
+            .withStrategy(
+                     Wait.forLogMessage(".*[Ww]aiting for connection.*", 1));
 
    public McDatabaseContainer() {
       super(IMAGE);
-      withNetworkAliases(HOST);
       addExposedPort(PORT);
-      withEnv("MONGO_INITDB_ROOT_PASSWORD", PASSWORD);
+      withEnv("MONGO_INITDB_ROOT_PASSWORD", ROOT_PASSWORD);
+      withEnv("MC_INIT_PASSWORD", USER_PASSWORD);
       withCommand("--bind_ip", "0.0.0.0");
+      withNetworkAliases(HOST);
+      withMinimumRunningDuration(STARTUP_TIME);
+      waitingFor(WAIT_STRATEGY);
    }
 
-   public MongoClient createClient() {
-      return MongoClients
-               .create(MongoClientSettings.builder()
-                        .applyToClusterSettings(builder -> builder
-                                 .hosts(Arrays.asList(getServerAddress())))
-                        .build());
+   public MongoClient createClient(final MongoCredential credentials) {
+      return MongoClients.create(MongoClientSettings.builder()
+               .applyToClusterSettings(builder -> builder
+                        .hosts(Arrays.asList(getServerAddress())))
+               .credential(credentials).build());
    }
 
    private ServerAddress getServerAddress() {

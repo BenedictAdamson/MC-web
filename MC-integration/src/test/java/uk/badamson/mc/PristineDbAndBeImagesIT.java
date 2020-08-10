@@ -183,7 +183,8 @@ public class PristineDbAndBeImagesIT {
    }
 
    private void waitUntilDbAcceptsConnections() {
-      try (final var client = dbContainer.createClient();) {
+      try (final var client = dbContainer
+               .createClient(McDatabaseContainer.ROOT_CREDENTIALS);) {
          client.getDatabase(McDatabaseContainer.DB);
       }
    }
