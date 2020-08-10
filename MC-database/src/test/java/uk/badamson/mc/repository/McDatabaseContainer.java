@@ -78,6 +78,8 @@ public final class McDatabaseContainer
    private static final WaitStrategy WAIT_STRATEGY = new WaitAllStrategy()
             .withStrategy(Wait.forLogMessage(".*MongoDB starting.*", 1))
             .withStrategy(Wait.forListeningPort())
+            .withStrategy(Wait.forLogMessage(
+                     ".*[Ii]nitiali[sz]ation of mc db complete.*", 1))
             .withStrategy(Wait.forLogMessage(".*init process complete.*", 1))
             .withStrategy(
                      Wait.forLogMessage(".*[Ww]aiting for connection.*", 1));
