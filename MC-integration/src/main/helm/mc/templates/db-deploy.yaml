@@ -55,6 +55,11 @@ spec:
             secretKeyRef:
               name: {{ .Release.Name }}-db-password-secret
               key: root-password
+        - name: MC_INIT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-db-password-secret
+              key: user-password
         volumeMounts:
         - mountPath: /data/db
           name: mc-data-db
