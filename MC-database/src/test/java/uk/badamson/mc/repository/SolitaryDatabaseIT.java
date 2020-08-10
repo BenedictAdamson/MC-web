@@ -59,14 +59,15 @@ public class SolitaryDatabaseIT {
       @Test
       @Order(2)
       public void root() {
-         test(McDatabaseContainer.ROOT_CREDENTIALS);
+         test(McDatabaseContainer.ROOT_CREDENTIALS, ALL_DBS);
       }
 
-      private void test(final MongoCredential credentials) {
+      private void test(final MongoCredential credentials,
+               final HashSet<String> expectedDbs) {
          try (final var client = container.createClient(credentials);) {
             final var databaseNames = Sets
                      .newHashSet(client.listDatabaseNames());
-            assertEquals(EXPECTED_DBS, databaseNames, "databaseName");
+            assertEquals(expectedDbs, databaseNames, "databaseNames");
          } // try
 
          final var logs = container.getLogs();
@@ -76,12 +77,13 @@ public class SolitaryDatabaseIT {
       @Test
       @Order(2)
       public void user() {
-         test(McDatabaseContainer.USER_CREDENTIALS);
+         test(McDatabaseContainer.USER_CREDENTIALS,
+                  Sets.newHashSet(McDatabaseContainer.DB));
       }
 
    }// class
 
-   private static final HashSet<String> EXPECTED_DBS = Sets.newHashSet(
+   private static final HashSet<String> ALL_DBS = Sets.newHashSet(
             McDatabaseContainer.DB, McDatabaseContainer.AUTHENTICATION_DB,
             "config", "local");
 
