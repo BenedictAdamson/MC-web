@@ -56,7 +56,11 @@ public final class McDatabaseContainer
    public static final String PASSWORD = "letmein";
 
    public static final MongoCredential CREDENTIALS = MongoCredential
-            .createCredential(USER_NAME, DB, PASSWORD.toCharArray());
+            .createCredential(USER_NAME, AUTHENTICATION_DB,
+                     PASSWORD.toCharArray());
+
+   public static final MongoCredential BAD_CREDENTIALS = MongoCredential
+            .createCredential("BAD", AUTHENTICATION_DB, "BAD".toCharArray());
 
    public McDatabaseContainer() {
       super(IMAGE);

@@ -21,7 +21,9 @@ package uk.badamson.mc.repository;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
@@ -29,6 +31,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.shaded.com.google.common.collect.Sets;
+
+import com.mongodb.MongoSecurityException;
 
 /**
  * <p>
@@ -53,14 +58,32 @@ public class SolitaryDatabaseIT {
 
    @Test
    @Order(2)
-   public void connect() {
+   public void read() {
       try (final var client = container
                .createClient(McDatabaseContainer.CREDENTIALS);) {
-         client.getDatabase(McDatabaseContainer.DB);
+         final var databaseNames = Sets.newHashSet(client.listDatabaseNames());
+         assertEquals(
+                  Sets.newHashSet(McDatabaseContainer.DB,
+                           McDatabaseContainer.AUTHENTICATION_DB),
+                  databaseNames, "databaseName");
+      } // try
 
-         final var logs = container.getLogs();
-         assertThatNoErrorMessages(logs);
-      }
+      final var logs = container.getLogs();
+      assertThatNoErrorMessages(logs);
+   }
+
+   @Test
+   @Order(2)
+   public void badCredentials() {
+      try (final var client = container
+               .createClient(McDatabaseContainer.BAD_CREDENTIALS);) {
+         /*
+          * Read something, so the DBMS checks the credentials. Must construct
+          * the HashSet, because the Mongo Iterable does lazy (on-demand) reads.
+          */
+         Assertions.assertThrows(MongoSecurityException.class,
+                  () -> Sets.newHashSet(client.listDatabaseNames()));
+      } // try
    }
 
    @Test
