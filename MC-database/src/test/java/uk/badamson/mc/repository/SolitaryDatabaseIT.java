@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.com.google.common.collect.Sets;
 
+import com.mongodb.MongoCredential;
 import com.mongodb.MongoSecurityException;
 
 /**
@@ -49,27 +51,42 @@ import com.mongodb.MongoSecurityException;
 @Tag("IT")
 public class SolitaryDatabaseIT {
 
+   @Nested
+   public class Read {
+
+      @Test
+      @Order(2)
+      public void root() {
+         test(McDatabaseContainer.ROOT_CREDENTIALS);
+      }
+
+      private void test(final MongoCredential credentials) {
+         try (final var client = container.createClient(credentials);) {
+            final var databaseNames = Sets
+                     .newHashSet(client.listDatabaseNames());
+            assertEquals(
+                     Sets.newHashSet(McDatabaseContainer.DB,
+                              McDatabaseContainer.AUTHENTICATION_DB),
+                     databaseNames, "databaseName");
+         } // try
+
+         final var logs = container.getLogs();
+         assertThatNoErrorMessages(logs);
+      }
+
+      @Test
+      @Order(2)
+      public void user() {
+         test(McDatabaseContainer.USER_CREDENTIALS);
+      }
+
+   }// class
+
    @Container
    private final McDatabaseContainer container = new McDatabaseContainer();
 
    private void assertThatNoErrorMessages(final String logs) {
       assertThat(logs, not(containsString("ERROR")));
-   }
-
-   @Test
-   @Order(2)
-   public void read() {
-      try (final var client = container
-               .createClient(McDatabaseContainer.CREDENTIALS);) {
-         final var databaseNames = Sets.newHashSet(client.listDatabaseNames());
-         assertEquals(
-                  Sets.newHashSet(McDatabaseContainer.DB,
-                           McDatabaseContainer.AUTHENTICATION_DB),
-                  databaseNames, "databaseName");
-      } // try
-
-      final var logs = container.getLogs();
-      assertThatNoErrorMessages(logs);
    }
 
    @Test

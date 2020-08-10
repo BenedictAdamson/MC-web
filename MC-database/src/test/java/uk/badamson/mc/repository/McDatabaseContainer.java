@@ -51,13 +51,21 @@ public final class McDatabaseContainer
 
    public static final String DB = "mc";
 
-   public static final String USER_NAME = "mc";
+   private static final String NORMAL_USER = "mc";
 
-   public static final String PASSWORD = "letmein";
+   private static final String ROOT_USER = "admin";
 
-   public static final MongoCredential CREDENTIALS = MongoCredential
-            .createCredential(USER_NAME, AUTHENTICATION_DB,
-                     PASSWORD.toCharArray());
+   private static final String ROOT_PASSWORD = "letmein";
+
+   private static final String USER_PASSWORD = "password123";
+
+   public static final MongoCredential USER_CREDENTIALS = MongoCredential
+            .createCredential(NORMAL_USER, AUTHENTICATION_DB,
+                     USER_PASSWORD.toCharArray());
+
+   public static final MongoCredential ROOT_CREDENTIALS = MongoCredential
+            .createCredential(ROOT_USER, AUTHENTICATION_DB,
+                     ROOT_PASSWORD.toCharArray());
 
    public static final MongoCredential BAD_CREDENTIALS = MongoCredential
             .createCredential("BAD", AUTHENTICATION_DB, "BAD".toCharArray());
@@ -65,7 +73,7 @@ public final class McDatabaseContainer
    public McDatabaseContainer() {
       super(IMAGE);
       withNetworkAliases(HOST);
-      withEnv("MONGO_INITDB_ROOT_PASSWORD", PASSWORD);
+      withEnv("MONGO_INITDB_ROOT_PASSWORD", ROOT_PASSWORD);
       withCommand("--bind_ip", "0.0.0.0");
       addExposedPort(PORT);
    }
