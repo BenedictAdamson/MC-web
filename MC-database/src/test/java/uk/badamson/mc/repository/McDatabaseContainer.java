@@ -72,10 +72,10 @@ public final class McDatabaseContainer
 
    public McDatabaseContainer() {
       super(IMAGE);
-      withNetworkAliases(HOST);
+      addExposedPort(PORT);
       withEnv("MONGO_INITDB_ROOT_PASSWORD", ROOT_PASSWORD);
       withCommand("--bind_ip", "0.0.0.0");
-      addExposedPort(PORT);
+      withNetworkAliases(HOST);
    }
 
    public MongoClient createClient(final MongoCredential credentials) {
