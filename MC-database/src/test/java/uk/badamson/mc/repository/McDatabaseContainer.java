@@ -88,6 +88,7 @@ public final class McDatabaseContainer
       super(IMAGE);
       addExposedPort(PORT);
       withEnv("MONGO_INITDB_ROOT_PASSWORD", ROOT_PASSWORD);
+      withEnv("MC_INIT_PASSWORD", USER_PASSWORD);
       withCommand("--bind_ip", "0.0.0.0");
       withNetworkAliases(HOST);
       withMinimumRunningDuration(STARTUP_TIME);

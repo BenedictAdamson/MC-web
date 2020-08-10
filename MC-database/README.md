@@ -14,3 +14,7 @@ Use of the `mc-database` image is similar to use of the `mongo` image. In partic
 However, the image sets the following environment variables used by the `monog` base image, so you will not be able to override these.
 * `MONGO_INITDB_DATABASE=mc`, to create a specific database for use with the rest of MC
 * `MONGO_INITDB_ROOT_USERNAME=admin`, to specifc the user name of the database administrator.
+
+The image does some additional initialisation for a new container:
+* It creates a database named `mc`.
+* It creates a user named `mc`, recorded in the `admin` authentication database, using the environment variable `MC_INIT_PASSWORD` as the password for the user. The user has the `readWrite` role for the `mc` database, and no other roles.
