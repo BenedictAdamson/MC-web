@@ -50,13 +50,16 @@ spec:
           initialDelaySeconds: 11
           periodSeconds: 3
         env:
-        - name: MONGO_INITDB_ROOT_USERNAME
-          value: admin
         - name: MONGO_INITDB_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ .Release.Name }}-db-password-secret
-              key: db-password
+              key: root-password
+        - name: MC_INIT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-db-password-secret
+              key: user-password
         volumeMounts:
         - mountPath: /data/db
           name: mc-data-db

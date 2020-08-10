@@ -21,11 +21,10 @@ package uk.badamson.mc;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -34,14 +33,14 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
-import org.testcontainers.containers.MongoDBContainer;
+import org.springframework.test.web.reactive.server.WebTestClient.ListBodySpec;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.output.WaitingConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import uk.badamson.mc.repository.McDatabaseContainer;
 
 /**
  * <p>
@@ -63,7 +62,7 @@ public class PristineDbAndBeImagesIT {
    private final Network containersNetwork = Network.newNetwork();
 
    @Container
-   private final MongoDBContainer dbContainer = new McDatabaseContainer()
+   private final McDatabaseContainer dbContainer = new McDatabaseContainer()
             .withNetwork(containersNetwork).withNetworkAliases("db");
 
    @Container
@@ -71,6 +70,9 @@ public class PristineDbAndBeImagesIT {
             .withNetwork(containersNetwork).withNetworkAliases("mc")
             .withCommand("--spring.data.mongodb.host=db")
             .withExposedPorts(MC_LISTENING_PORT);
+
+   private WebTestClient.ResponseSpec response;
+   private ListBodySpec<Player> responsePlayerList;
 
    private void assertThatNoErrorMessagesLogged(final String logs) {
       assertThat(logs, not(containsString("ERROR")));
@@ -84,56 +86,77 @@ public class PristineDbAndBeImagesIT {
                TimeUnit.SECONDS);
    }
 
-   private WebTestClient connectWebTestClient(final String path,
-            final String query, final String fragment) {
-      final var scheme = "http";
-      final String userInfo = null;
-      final String host = beContainer.getContainerIpAddress();
-      final int port = beContainer.getMappedPort(8080);
-      final URI uri;
-      try {
-         uri = new URI(scheme, userInfo, host, port, path, query, fragment);
-      } catch (final URISyntaxException e) {
-         throw new IllegalArgumentException(e);
+   private void can_get_the_list_of_players() {
+      getJsonFromBe("/api/player");
+      responseIsOk();
+      responsePlayerList = response.expectBodyList(Player.class);
+   }
+
+   @Test
+   @Order(2)
+   public void getHomePage() throws TimeoutException, InterruptedException {
+      waitUntilReady();
+      getJsonFromBe("/");
+      responseIsOk();
+      assertThatNoErrorMessagesLogged(beContainer.getLogs());
+   }
+
+   private void getJsonFromBe(final String path) {
+      response = beContainer.getJson(path);
+   }
+
+   /**
+    * <h1>Scenario: Get players of fresh instance</h1>
+    * <ol>
+    * <li>Given a fresh instance of MC
+    * <li>And not logged in
+    * <li>And not presenting a CSRF token
+    * <li>When getting the players (The path of the players resource is
+    * {@code /api/player})
+    * <li>Then MC serves the resource
+    * <li>And there is only one player, the administrator, with the default name
+    * <ol>
+    * <li>And the response message is a list of players
+    * <li>And the list of players has one player
+    * <li>And the list of players includes the administrator
+    * <li>And the list of players includes a player named "Administrator"
+    * </ol>
+    * </ol>
+    *
+    * @throws TimeoutException
+    *            If the system takes too long to become ready, or the response
+    *            takes too long.
+    */
+   @Test
+   @Order(2)
+   public void getPlayerDirectory()
+            throws TimeoutException, InterruptedException {
+      waitUntilReady();
+
+      getJsonFromBe("/api/player");
+
+      {
+         responseIsOk();
+         can_get_the_list_of_players();
+         the_list_of_players_has_one_player();
+         the_list_of_players_includes_the_administrator();
       }
-      return WebTestClient.bindToServer().baseUrl(uri.toString()).build();
+      beContainer.assertHealthCheckOk();
+      {
+         final var logs = beContainer.getLogs();
+         assertThat(logs, not(containsString("requires authentication")));
+         assertThat(logs, not(containsString("Exception authenticating")));
+         assertThatNoErrorMessagesLogged(logs);
+      }
    }
 
-   @Test
-   @Order(2)
-   public void getHealthCheck() throws TimeoutException {
-      waitUntilReady();
-      getJson("/actuator/health", null, null).expectStatus().isOk();
-      assertThatNoErrorMessagesLogged(beContainer.getLogs());
-   }
-
-   @Test
-   @Order(2)
-   public void getHomePage() throws TimeoutException {
-      waitUntilReady();
-      getJson("/", null, null).expectStatus().isOk();
-      assertThatNoErrorMessagesLogged(beContainer.getLogs());
-   }
-
-   private ResponseSpec getJson(final String path, final String query,
-            final String fragment) {
-      return connectWebTestClient(path, query, fragment).get()
-               .accept(MediaType.APPLICATION_JSON).exchange();
-   }
-
-   @Test
-   @Order(2)
-   public void getPlayerDirectory() throws TimeoutException {
-      waitUntilReady();
-      final var response = getJson("/api/player", null, null);
-
-      assertThatNoErrorMessagesLogged(beContainer.getLogs());
+   private void responseIsOk() {
       response.expectStatus().isOk();
    }
 
    @Test
    @Order(1)
-   public void start() throws TimeoutException {
+   public void start() throws TimeoutException, InterruptedException {
       waitUntilReady();
 
       final var logs = beContainer.getLogs();
@@ -143,11 +166,34 @@ public class PristineDbAndBeImagesIT {
                         containsString(EXPECTED_CONNECTION_MESSAGE)),
                () -> assertThatNoErrorMessagesLogged(logs),
                () -> assertThat(logs, not(containsString("Unable to start"))));
+      beContainer.assertHealthCheckOk();
    }
 
-   private void waitUntilReady() throws TimeoutException {
+   private void the_list_of_players_has_one_player() {
+      responsePlayerList.hasSize(1);
+   }
+
+   private void the_list_of_players_includes_the_administrator() {
+      responsePlayerList.value(
+               players -> players.stream()
+                        .filter(player -> Player.ADMINISTRATOR_USERNAME
+                                 .equals(player.getUsername()))
+                        .count(),
+               is(1L));
+   }
+
+   private void waitUntilDbAcceptsConnections() {
+      try (final var client = dbContainer
+               .createClient(McDatabaseContainer.ROOT_CREDENTIALS);) {
+         client.getDatabase(McDatabaseContainer.DB);
+      }
+   }
+
+   private void waitUntilReady() throws TimeoutException, InterruptedException {
       assertTrue(dbContainer.isRunning(), "DB running");
+      waitUntilDbAcceptsConnections();
       awaitBeLogMessage(EXPECTED_STARTED_MESSAGE);
       awaitBeLogMessage(EXPECTED_CONNECTION_MESSAGE);
+      beContainer.awaitHealthCheckOk();
    }
 }

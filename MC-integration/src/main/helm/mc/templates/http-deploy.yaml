@@ -58,13 +58,12 @@ spec:
         - containerPort: 8080
         args:
         - --spring.data.mongodb.host={{ .Release.Name }}-db-svc
-        - --spring.data.mongodb.username=admin
         env:
         - name: SPRING_DATA_MONGODB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ .Release.Name }}-db-password-secret
-              key: db-password
+              key: user-password
         readinessProbe:
           httpGet:
             path: /actuator/health/readiness
