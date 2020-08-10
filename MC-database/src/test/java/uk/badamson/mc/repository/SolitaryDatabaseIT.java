@@ -23,6 +23,8 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.HashSet;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Nested;
@@ -64,10 +66,7 @@ public class SolitaryDatabaseIT {
          try (final var client = container.createClient(credentials);) {
             final var databaseNames = Sets
                      .newHashSet(client.listDatabaseNames());
-            assertEquals(
-                     Sets.newHashSet(McDatabaseContainer.DB,
-                              McDatabaseContainer.AUTHENTICATION_DB),
-                     databaseNames, "databaseName");
+            assertEquals(EXPECTED_DBS, databaseNames, "databaseName");
          } // try
 
          final var logs = container.getLogs();
@@ -81,6 +80,10 @@ public class SolitaryDatabaseIT {
       }
 
    }// class
+
+   private static final HashSet<String> EXPECTED_DBS = Sets.newHashSet(
+            McDatabaseContainer.DB, McDatabaseContainer.AUTHENTICATION_DB,
+            "config", "local");
 
    @Container
    private final McDatabaseContainer container = new McDatabaseContainer();
