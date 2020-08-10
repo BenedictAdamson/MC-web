@@ -1,0 +1,18 @@
+# MC-front-end
+
+© Copyright Benedict Adamson 2018-20.
+
+The front end and front end HTTPD server of the Mission Command game.
+
+MC provides a web interface: you play it using a web browser, using a URL that indicates the installation (server) of MC that you wish to play. An installation of MC includes
+* A *front end*, which runs in the browser.
+* A *front end HTTPD server*, which communicates with the browser. It provides your browser with the code for the front end. It forwards requests from the browser (or front end) that require complicated processing to the *back end*.
+
+## Public Repositories
+
+The MC front end HTTPD server is available as a
+[Docker](https://www.docker.com/)
+image from the repository
+[https://hub.docker.com/r/benedictadamson/mc-front-end-srv](https://hub.docker.com/r/benedictadamson/mc-front-end-srv)
+
+ 
