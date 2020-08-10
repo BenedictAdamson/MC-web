@@ -58,7 +58,6 @@ spec:
         - containerPort: 8080
         args:
         - --spring.data.mongodb.host={{ .Release.Name }}-db-svc
-        - --spring.data.mongodb.username=admin
         env:
         - name: SPRING_DATA_MONGODB_PASSWORD
           valueFrom:
