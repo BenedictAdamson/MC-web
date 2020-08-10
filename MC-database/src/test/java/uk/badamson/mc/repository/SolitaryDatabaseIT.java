@@ -54,7 +54,8 @@ public class SolitaryDatabaseIT {
    @Test
    @Order(2)
    public void connect() {
-      try (final var client = container.createClient();) {
+      try (final var client = container
+               .createClient(McDatabaseContainer.CREDENTIALS);) {
          client.getDatabase(McDatabaseContainer.DB);
 
          final var logs = container.getLogs();

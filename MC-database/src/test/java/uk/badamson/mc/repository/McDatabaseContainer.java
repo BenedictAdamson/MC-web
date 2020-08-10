@@ -23,6 +23,7 @@ import java.util.Arrays;
 import org.testcontainers.containers.GenericContainer;
 
 import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
@@ -46,9 +47,16 @@ public final class McDatabaseContainer
 
    public static final String HOST = "db";
 
+   public static final String AUTHENTICATION_DB = "admin";
+
    public static final String DB = "mc";
 
+   public static final String USER_NAME = "mc";
+
    public static final String PASSWORD = "letmein";
+
+   public static final MongoCredential CREDENTIALS = MongoCredential
+            .createCredential(USER_NAME, DB, PASSWORD.toCharArray());
 
    public McDatabaseContainer() {
       super(IMAGE);
@@ -58,12 +66,11 @@ public final class McDatabaseContainer
       addExposedPort(PORT);
    }
 
-   public MongoClient createClient() {
-      return MongoClients
-               .create(MongoClientSettings.builder()
-                        .applyToClusterSettings(builder -> builder
-                                 .hosts(Arrays.asList(getServerAddress())))
-                        .build());
+   public MongoClient createClient(final MongoCredential credentials) {
+      return MongoClients.create(MongoClientSettings.builder()
+               .applyToClusterSettings(builder -> builder
+                        .hosts(Arrays.asList(getServerAddress())))
+               .credential(credentials).build());
    }
 
    private ServerAddress getServerAddress() {
