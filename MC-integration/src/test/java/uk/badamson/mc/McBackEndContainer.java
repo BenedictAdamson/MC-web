@@ -20,11 +20,13 @@ package uk.badamson.mc;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.output.WaitingConsumer;
 
 import uk.badamson.mc.repository.McDatabaseContainer;
 
@@ -43,6 +45,10 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    public static final String IMAGE = "index.docker.io/benedictadamson/mc-back-end:"
             + VERSION;
+
+   public static final String STARTED_MESSAGE = "Started Application";
+
+   public static final String CONNECTION_MESSAGE = "successfully connected to server";
 
    McBackEndContainer() {
       super(IMAGE);
@@ -74,6 +80,13 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       }
    }
 
+   void awaitLogMessage(final String message) throws TimeoutException {
+      final var consumer = new WaitingConsumer();
+      followOutput(consumer);
+      consumer.waitUntil(frame -> frame.getUtf8String().contains(message), 30,
+               TimeUnit.SECONDS);
+   }
+
    private WebTestClient connectWebTestClient(final String path) {
       final var scheme = "http";
       final String userInfo = null;
@@ -93,5 +106,11 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
    WebTestClient.ResponseSpec getJson(final String path) {
       return connectWebTestClient(path).get().accept(MediaType.APPLICATION_JSON)
                .exchange();
+   }
+
+   void waitUntilReady() throws TimeoutException, InterruptedException {
+      awaitLogMessage(STARTED_MESSAGE);
+      awaitLogMessage(CONNECTION_MESSAGE);
+      awaitHealthCheckOk();
    }
 }
