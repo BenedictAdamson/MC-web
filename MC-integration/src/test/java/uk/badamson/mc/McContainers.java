@@ -18,8 +18,12 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.net.URI;
 import java.util.concurrent.TimeoutException;
 
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.testcontainers.containers.BrowserWebDriverContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.lifecycle.Startable;
 
@@ -34,17 +38,26 @@ import uk.badamson.mc.repository.McDatabaseContainer;
  */
 public class McContainers implements Startable, AutoCloseable {
 
+   private static final URI BASE_URI = URI
+            .create("http://" + McReverseProxyContainer.HOST);
+
+   public static String getUri(final String path) {
+      return BASE_URI.resolve(path).toASCIIString();
+   }
+
    private final Network network = Network.newNetwork();
 
    private final McDatabaseContainer db = new McDatabaseContainer()
             .withNetwork(network);
 
    private final McBackEndContainer be = new McBackEndContainer()
-            .withNetwork(network)
-            .withCommand("--spring.data.mongodb.host=db");
-   
+            .withNetwork(network).withCommand("--spring.data.mongodb.host=db");
+
    private final McReverseProxyContainer in = new McReverseProxyContainer()
             .withNetwork(network);
+
+   private final BrowserWebDriverContainer<?> browser = new BrowserWebDriverContainer<>()
+            .withCapabilities(new FirefoxOptions()).withNetwork(network);
 
    @Override
    public void close() {
@@ -52,10 +65,15 @@ public class McContainers implements Startable, AutoCloseable {
        * Close the resources top-down, to reduce the number of transient
        * connection errors.
        */
+      browser.close();
       in.close();
       be.close();
       db.close();
       network.close();
+   }
+
+   public RemoteWebDriver getWebDriver() {
+      return browser.getWebDriver();
    }
 
    @Override
@@ -71,6 +89,7 @@ public class McContainers implements Startable, AutoCloseable {
          be.waitUntilReady();
          be.awaitHealthCheckOk();
          in.start();
+         browser.start();
       } catch (TimeoutException | InterruptedException e) {
          throw new RuntimeException("Unable to start all mc containers", e);
       }
@@ -82,6 +101,7 @@ public class McContainers implements Startable, AutoCloseable {
        * Stop the resources top-down, to reduce the number of transient
        * connection errors.
        */
+      browser.stop();
       in.stop();
       be.stop();
       db.stop();
