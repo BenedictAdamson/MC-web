@@ -19,6 +19,7 @@ package uk.badamson.mc;
  */
 
 import java.net.URI;
+import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -26,6 +27,8 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.containers.BrowserWebDriverContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.lifecycle.Startable;
+import org.testcontainers.lifecycle.TestDescription;
+import org.testcontainers.lifecycle.TestLifecycleAware;
 
 import uk.badamson.mc.presentation.McReverseProxyContainer;
 import uk.badamson.mc.repository.McDatabaseContainer;
@@ -36,7 +39,8 @@ import uk.badamson.mc.repository.McDatabaseContainer;
  * MC software.
  * </p>
  */
-public class McContainers implements Startable, AutoCloseable {
+public class McContainers
+         implements Startable, AutoCloseable, TestLifecycleAware {
 
    private static final URI BASE_URI = URI
             .create("http://" + McReverseProxyContainer.HOST);
@@ -58,6 +62,17 @@ public class McContainers implements Startable, AutoCloseable {
 
    private final BrowserWebDriverContainer<?> browser = new BrowserWebDriverContainer<>()
             .withCapabilities(new FirefoxOptions()).withNetwork(network);
+
+   @Override
+   public void afterTest(final TestDescription description,
+            final Optional<Throwable> throwable) {
+      browser.afterTest(description, throwable);
+   }
+
+   @Override
+   public void beforeTest(final TestDescription description) {
+      browser.beforeTest(description);
+   }
 
    @Override
    public void close() {
@@ -106,4 +121,5 @@ public class McContainers implements Startable, AutoCloseable {
       be.stop();
       db.stop();
    }
+
 }
