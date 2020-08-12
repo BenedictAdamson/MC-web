@@ -23,6 +23,7 @@ import java.util.concurrent.TimeoutException;
 import org.testcontainers.containers.Network;
 import org.testcontainers.lifecycle.Startable;
 
+import uk.badamson.mc.presentation.McReverseProxyContainer;
 import uk.badamson.mc.repository.McDatabaseContainer;
 
 /**
@@ -36,11 +37,14 @@ public class McContainers implements Startable, AutoCloseable {
    private final Network network = Network.newNetwork();
 
    private final McDatabaseContainer db = new McDatabaseContainer()
-            .withNetwork(network).withNetworkAliases("db");
+            .withNetwork(network);
 
    private final McBackEndContainer be = new McBackEndContainer()
-            .withNetwork(network).withNetworkAliases("be")
+            .withNetwork(network)
             .withCommand("--spring.data.mongodb.host=db");
+   
+   private final McReverseProxyContainer in = new McReverseProxyContainer()
+            .withNetwork(network);
 
    @Override
    public void close() {
@@ -48,6 +52,7 @@ public class McContainers implements Startable, AutoCloseable {
        * Close the resources top-down, to reduce the number of transient
        * connection errors.
        */
+      in.close();
       be.close();
       db.close();
       network.close();
@@ -65,6 +70,7 @@ public class McContainers implements Startable, AutoCloseable {
          be.start();
          be.waitUntilReady();
          be.awaitHealthCheckOk();
+         in.start();
       } catch (TimeoutException | InterruptedException e) {
          throw new RuntimeException("Unable to start all mc containers", e);
       }
@@ -76,6 +82,7 @@ public class McContainers implements Startable, AutoCloseable {
        * Stop the resources top-down, to reduce the number of transient
        * connection errors.
        */
+      in.stop();
       be.stop();
       db.stop();
    }

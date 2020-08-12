@@ -41,6 +41,8 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    public static final int PORT = 8080;
 
+   public static final String HOST = "be";
+
    public static final String VERSION = Version.VERSION;
 
    public static final String IMAGE = "index.docker.io/benedictadamson/mc-back-end:"
@@ -54,6 +56,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       super(IMAGE);
       withEnv("SPRING_DATA_MONGODB_PASSWORD",
                new String(McDatabaseContainer.USER_CREDENTIALS.getPassword()));
+      withNetworkAliases(HOST);
       withCommand("--spring.data.mongodb.host=" + McDatabaseContainer.HOST);
    }
 
