@@ -26,6 +26,6 @@ import io.cucumber.junit.platform.engine.Cucumber;
  * </p>
  */
 @Cucumber
-public class RunCucumberTest {
+public class RunCucumberIT {
 
 }
