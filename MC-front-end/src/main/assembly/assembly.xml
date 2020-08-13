@@ -8,7 +8,7 @@
 	<fileSets>
 		<fileSet>
 			<outputDirectory></outputDirectory><!-- root -->
-			<directory>src/main/web/mc-front-end/dist/mc-front-end</directory>
+			<directory>target/ng-dist/mc-front-end</directory>
 			<includes>
 				<!-- all -->
 			</includes>

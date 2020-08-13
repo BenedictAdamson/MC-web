@@ -31,4 +31,4 @@ EXPOSE 80
 RUN rm -r /usr/share/nginx/html/*
 
 COPY src/main/resources/etc/nginx/conf.d/*.conf /etc/nginx/conf.d/
-COPY src/main/web/mc-front-end/dist/mc-front-end/ /usr/share/nginx/html
+COPY target/ng-dist/mc-front-end/ /usr/share/nginx/html
