@@ -143,6 +143,27 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/docker</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/main/docker</directory>
+									<filtering>false</filtering>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 			</plugin>
 			<plugin>
@@ -161,6 +182,8 @@
 					<repository>index.docker.io/benedictadamson/mc-front-end-srv</repository>
 					<tag>${project.version}</tag>
 					<useMavenSettingsForAuth>true</useMavenSettingsForAuth>
+					<contextDirectory>${project.build.directory}</contextDirectory>
+					<dockerfile>${project.build.directory}/docker/Dockerfile</dockerfile>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -192,7 +215,7 @@
 			<scope>test</scope>
 		</dependency>
 		<!-- Do not depend on junit-platform-runner. It is for JUnit 4 tests; if 
-			it is in the classpath, the Surefire plugin will think we want to run onlt 
+			it is in the classpath, the Surefire plugin will think we want to run only 
 			JUnit 4 tests, and will therefore ignore all the JUnit 5 tests. -->
 		<dependency>
 			<groupId>org.opentest4j</groupId>
