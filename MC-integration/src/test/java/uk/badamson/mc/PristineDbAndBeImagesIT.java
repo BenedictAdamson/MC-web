@@ -44,6 +44,11 @@ import uk.badamson.mc.repository.McDatabaseContainer;
  * Basic system test for the MC database and MC backend containers operating
  * together, testing it operating as a pristine (fresh) installation.
  * </p>
+ * <p>
+ * These tests demonstrate that it is possible to configure the back-end to
+ * communicate correctly with the database. They do not really demonstrate
+ * specific correct functionality.
+ * </p>
  */
 @TestMethodOrder(OrderAnnotation.class)
 @Testcontainers
@@ -73,15 +78,6 @@ public class PristineDbAndBeImagesIT {
       getJsonFromBe("/api/player");
       responseIsOk();
       responsePlayerList = response.expectBodyList(Player.class);
-   }
-
-   @Test
-   @Order(2)
-   public void getHomePage() throws TimeoutException, InterruptedException {
-      waitUntilReady();
-      getJsonFromBe("/");
-      responseIsOk();
-      assertThatNoErrorMessagesLogged(beContainer.getLogs());
    }
 
    private void getJsonFromBe(final String path) {
