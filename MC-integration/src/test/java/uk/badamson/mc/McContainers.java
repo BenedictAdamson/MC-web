@@ -30,6 +30,7 @@ import org.testcontainers.lifecycle.Startable;
 import org.testcontainers.lifecycle.TestDescription;
 import org.testcontainers.lifecycle.TestLifecycleAware;
 
+import uk.badamson.mc.presentation.McFrontEndContainer;
 import uk.badamson.mc.presentation.McReverseProxyContainer;
 import uk.badamson.mc.repository.McDatabaseContainer;
 
@@ -57,6 +58,9 @@ public class McContainers
    private final McBackEndContainer be = new McBackEndContainer()
             .withNetwork(network).withCommand("--spring.data.mongodb.host=db");
 
+   private final McFrontEndContainer fe = new McFrontEndContainer()
+            .withNetwork(network);
+
    private final McReverseProxyContainer in = new McReverseProxyContainer()
             .withNetwork(network);
 
@@ -82,6 +86,7 @@ public class McContainers
        */
       browser.close();
       in.close();
+      fe.close();
       be.close();
       db.close();
       network.close();
@@ -103,6 +108,7 @@ public class McContainers
          be.start();
          be.waitUntilReady();
          be.awaitHealthCheckOk();
+         fe.start();
          in.start();
          browser.start();
       } catch (TimeoutException | InterruptedException e) {
@@ -118,6 +124,7 @@ public class McContainers
        */
       browser.stop();
       in.stop();
+      fe.stop();
       be.stop();
       db.stop();
    }
