@@ -135,6 +135,14 @@
 				<!-- This project uses the plugin to run integration tests that use Testcontainers. 
 					These tests use Docker images of the components of MC, which the other modules 
 					should have build during the package phase. -->
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
