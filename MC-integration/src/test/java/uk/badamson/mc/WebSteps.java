@@ -76,6 +76,7 @@ public class WebSteps {
    public void afterScenario(final Scenario scenario) {
       tellContainersTestOutcome(scenario);
       containers.stop();
+      close();
    }
 
    @Before
@@ -87,6 +88,13 @@ public class WebSteps {
    @Then("can get the list of players")
    public void can_get_the_list_of_players() {
       // TODO
+   }
+
+   private void close() {
+      if (webDriver != null) {
+         webDriver.quit();
+      }
+      containers.close();
    }
 
    /**
