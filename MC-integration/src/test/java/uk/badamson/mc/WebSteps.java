@@ -21,6 +21,8 @@ package uk.badamson.mc;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.lifecycle.TestDescription;
 
 import io.cucumber.java.After;
@@ -53,10 +55,10 @@ public class WebSteps {
    }
 
    private final McContainers containers = new McContainers();
-   private String dnsName;
-   private Boolean csrfTokenSet;
 
-   private Boolean userSet;
+   private RemoteWebDriver webDriver;
+
+   private String url;
 
    @Given("a fresh instance of MC")
    public void a_fresh_instance_of_MC() {
@@ -79,11 +81,21 @@ public class WebSteps {
    @Before
    public void beforeScenario() {
       containers.start();
+      webDriver = containers.getWebDriver();
    }
 
    @Then("can get the list of players")
    public void can_get_the_list_of_players() {
       // TODO
+   }
+
+   /**
+    * @throws WebDriverException
+    *            If the resource given by {@link #url} does not exist.
+    */
+   private void get() throws WebDriverException {
+      Objects.requireNonNull(url, "url");
+      webDriver.get(url);
    }
 
    @When("getting the players")
@@ -106,8 +118,6 @@ public class WebSteps {
 
    @Given("logged in as {string}")
    public void logged_in_as(final String name) {
-      requireUnspecifiedUser();
-      userSet = Boolean.TRUE;
       // TODO
    }
 
@@ -143,7 +153,7 @@ public class WebSteps {
 
    @Then("MC serves the web page")
    public void mc_serves_the_web_page() {
-      // TODO
+      get();
    }
 
    @When("modifying the unknown resource with a {string} at {string}")
@@ -154,33 +164,17 @@ public class WebSteps {
 
    @Given("not logged in")
    public void not_logged_in() {
-      requireUnspecifiedUser();
-      userSet = Boolean.FALSE;
+      // Do nothing: it is the default
    }
 
    @Given("not presenting a CSRF token")
    public void not_presenting_a_CSRF_token() {
-      requireUnspecifiedCsrfToken();
-      csrfTokenSet = Boolean.FALSE;
+      // Do nothing: not used for E2E tests.
    }
 
    @Given("presenting a valid CSRF token")
    public void presenting_a_valid_CSRF_token() {
-      requireUnspecifiedCsrfToken();
-      csrfTokenSet = Boolean.TRUE;
-      // TODO
-   }
-
-   private void requireUnspecifiedCsrfToken() {
-      if (csrfTokenSet != null) {
-         throw new IllegalStateException("Contradictory CSRF settings");
-      }
-   }
-
-   private void requireUnspecifiedUser() {
-      if (userSet != null) {
-         throw new IllegalStateException("Contradictory user settings");
-      }
+      // Do nothing: not used for E2E tests.
    }
 
    private void tellContainersTestOutcome(final Scenario scenario) {
@@ -209,7 +203,10 @@ public class WebSteps {
 
    @Given("the DNS name, example.com, of an MC server")
    public void the_DNS_name_of_an_MC_server() {
-      dnsName = "example.com";
+      /*
+       * Do nothing; the test set up hard-codes the DNS name as
+       * McContainers.INGRESS_HOST
+       */
    }
 
    @Then("the list of players has one player")
@@ -234,7 +231,7 @@ public class WebSteps {
 
    @When("the potential player gives the obvious URL http://example.com/ to a web browser")
    public void the_potential_player_gives_the_obvious_URL_to_a_web_browser() {
-      // TODO
+      url = McContainers.getUri("/");
    }
 
    @Then("the response message is a list of players")
@@ -244,8 +241,6 @@ public class WebSteps {
 
    @Given("user authenticated as Administrator")
    public void user_authenticated_as_Administrator() {
-      requireUnspecifiedUser();
-      userSet = Boolean.TRUE;
       // TODO
    }
 

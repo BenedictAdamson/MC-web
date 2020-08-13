@@ -46,6 +46,8 @@ public class McContainers
    private static final URI BASE_URI = URI
             .create("http://" + McReverseProxyContainer.HOST);
 
+   public static final String INGRESS_HOST = BASE_URI.getAuthority();
+
    public static String getUri(final String path) {
       return BASE_URI.resolve(path).toASCIIString();
    }
