@@ -19,7 +19,13 @@ package uk.badamson.mc;
  */
 
 import java.util.Objects;
+import java.util.Optional;
 
+import org.testcontainers.lifecycle.TestDescription;
+
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.Scenario;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -30,8 +36,26 @@ import io.cucumber.java.en.When;
  */
 public class WebSteps {
 
+   private static TestDescription createTestDescription(
+            final Scenario scenario) {
+      return new TestDescription() {
+
+         @Override
+         public String getFilesystemFriendlyName() {
+            return scenario.getName();
+         }
+
+         @Override
+         public String getTestId() {
+            return scenario.getId();
+         }
+      };
+   }
+
+   private final McContainers containers = new McContainers();
    private String dnsName;
    private Boolean csrfTokenSet;
+
    private Boolean userSet;
 
    @Given("a fresh instance of MC")
@@ -44,6 +68,17 @@ public class WebSteps {
       Objects.requireNonNull(name, "name");
       Objects.requireNonNull(password, "password");
       // TODO
+   }
+
+   @After
+   public void afterScenario(final Scenario scenario) {
+      tellContainersTestOutcome(scenario);
+      containers.stop();
+   }
+
+   @Before
+   public void beforeScenario() {
+      containers.start();
    }
 
    @Then("can get the list of players")
@@ -146,6 +181,22 @@ public class WebSteps {
       if (userSet != null) {
          throw new IllegalStateException("Contradictory user settings");
       }
+   }
+
+   private void tellContainersTestOutcome(final Scenario scenario) {
+      final var testDescription = createTestDescription(scenario);
+      /*
+       * Unfortunately, Cucumber does not provide us with the exception that
+       * caused a test failure.
+       */
+      final Throwable throwable;
+      if (scenario.isFailed()) {
+         throwable = new AssertionError(
+                  "Scenario " + scenario.getId() + " failed");
+      } else {
+         throwable = null;
+      }
+      containers.afterTest(testDescription, Optional.ofNullable(throwable));
    }
 
    @Given("that player {string} exists with  password {string}")
