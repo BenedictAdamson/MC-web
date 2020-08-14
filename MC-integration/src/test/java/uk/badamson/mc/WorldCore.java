@@ -39,33 +39,29 @@ import io.cucumber.java.Scenario;
  * part) of the <i>world</i> used for a BDD test scenario.
  * </p>
  * <p>
- * Construction of an instance of this class creates, but does not start, a
- * Docker container for each of the MC servers, plus some DOcker containers for
- * accessing MC using a web browser.
+ * Instances of this class encapsulate a Docker container for each of the MC
+ * servers, plus some Docker containers for accessing MC using a web browser.
  * </p>
  */
-public final class CucumberWorldCore implements AutoCloseable {
+public final class WorldCore implements AutoCloseable {
 
    private enum State {
 
       CREATED {
 
          @Override
-         void beginScenario(final CucumberWorldCore world,
-                  final Scenario scenario) {
+         void beginScenario(final WorldCore world, final Scenario scenario) {
             world.doBeginScenario(scenario);
          }
 
          @Override
-         void endScenario(final CucumberWorldCore world,
-                  final Scenario scenario) {
+         void endScenario(final WorldCore world, final Scenario scenario) {
             throw new IllegalStateException(toString());
          }
       },
       BEGUN {
          @Override
-         void beginScenario(final CucumberWorldCore world,
-                  final Scenario scenario) {
+         void beginScenario(final WorldCore world, final Scenario scenario) {
             /*
              * Do nothing, so may be called in quick succession from multiple
              * upper layers during the start up of a scenario
@@ -73,21 +69,18 @@ public final class CucumberWorldCore implements AutoCloseable {
          }
 
          @Override
-         void endScenario(final CucumberWorldCore world,
-                  final Scenario scenario) {
+         void endScenario(final WorldCore world, final Scenario scenario) {
             world.doEndScenario(scenario);
          }
       },
       ENDED {
          @Override
-         void beginScenario(final CucumberWorldCore world,
-                  final Scenario scenario) {
+         void beginScenario(final WorldCore world, final Scenario scenario) {
             throw new IllegalStateException(toString());
          }
 
          @Override
-         void endScenario(final CucumberWorldCore world,
-                  final Scenario scenario) {
+         void endScenario(final WorldCore world, final Scenario scenario) {
             /*
              * Do nothing, so may be called in quick succession from multiple
              * upper layers during the shut down of a scenario
@@ -96,19 +89,17 @@ public final class CucumberWorldCore implements AutoCloseable {
       },
       CLOSED {
          @Override
-         void beginScenario(final CucumberWorldCore world,
-                  final Scenario scenario) {
+         void beginScenario(final WorldCore world, final Scenario scenario) {
             throw new IllegalStateException(toString());
          }
 
          @Override
-         void close(final CucumberWorldCore world) {
+         void close(final WorldCore world) {
             // Do nothing (already closed): idempotent
          }
 
          @Override
-         void endScenario(final CucumberWorldCore world,
-                  final Scenario scenario) {
+         void endScenario(final WorldCore world, final Scenario scenario) {
             /*
              * Do nothing, so close and endScenario may be called in quick
              * succession from multiple upper layers during the shut down of a
@@ -117,16 +108,16 @@ public final class CucumberWorldCore implements AutoCloseable {
          }
       };
 
-      abstract void beginScenario(CucumberWorldCore world, Scenario scenario);
+      abstract void beginScenario(WorldCore world, Scenario scenario);
 
-      void close(final CucumberWorldCore world) {
+      void close(final WorldCore world) {
          world.doClose();
       }
 
-      abstract void endScenario(CucumberWorldCore world, Scenario scenario);
+      abstract void endScenario(WorldCore world, Scenario scenario);
    }// enum
 
-   private static WeakHashMap<String, CucumberWorldCore> instances = new WeakHashMap<>();
+   private static WeakHashMap<String, WorldCore> instances = new WeakHashMap<>();
 
    private static TestDescription createTestDescription(
             final Scenario scenario) {
@@ -146,8 +137,8 @@ public final class CucumberWorldCore implements AutoCloseable {
 
    /**
     * <p>
-    * Create or acquire an instance of the {@link CucumberWorldCore} for use
-    * while running a given Cucumber scenario.
+    * Create or acquire an instance of the {@link WorldCore} for use while
+    * running a given Cucumber scenario.
     * </p>
     * <p>
     * All the step definitions should, directly or indirectly, use an instance
@@ -161,14 +152,14 @@ public final class CucumberWorldCore implements AutoCloseable {
     * @throws NullPointerException
     *            If {@code scenario} is null
     */
-   public static CucumberWorldCore getInstance(final Scenario scenario) {
+   public static WorldCore getInstance(final Scenario scenario) {
       Objects.requireNonNull(scenario, "scenario");
       final var key = scenario.getId();
-      CucumberWorldCore instance;
+      WorldCore instance;
       synchronized (instances) {
          instance = instances.get(key);
          if (instance == null) {
-            instance = new CucumberWorldCore();
+            instance = new WorldCore();
             instances.put(key, instance);
          }
       }
@@ -183,7 +174,7 @@ public final class CucumberWorldCore implements AutoCloseable {
 
    private State state = State.CREATED;
 
-   private CucumberWorldCore() {
+   private WorldCore() {
       // Constructor is provate to firce use of getInstance.
    }
 
