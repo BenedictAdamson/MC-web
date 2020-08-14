@@ -33,7 +33,7 @@ import io.cucumber.java.en.When;
  */
 public class WebSteps implements AutoCloseable {
 
-   private final CucumberSutInterface sut = new CucumberSutInterface();
+   private final CucumberWorldCore sut = new CucumberWorldCore();
 
    @When("adding a player named {string} with  password {string}")
    public void adding_a_player_named(final String name, final String password) {

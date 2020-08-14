@@ -34,12 +34,16 @@ import io.cucumber.java.Scenario;
  * Encapsulate access to an instance of MC, for Cucumber (BDD) testing.
  * </p>
  * <p>
+ * Instances of this class are intended to be used as the lowest-level (core
+ * part) of the <i>world</i> used for a BDD test scenario.
+ * </p>
+ * <p>
  * Construction of an instance of this class creates, but does not start, a
  * Docker container for each of the MC servers, plus some DOcker containers for
  * accessing MC using a web browser.
  * </p>
  */
-public final class CucumberSutInterface implements AutoCloseable {
+public final class CucumberWorldCore implements AutoCloseable {
 
    private static TestDescription createTestDescription(
             final Scenario scenario) {
