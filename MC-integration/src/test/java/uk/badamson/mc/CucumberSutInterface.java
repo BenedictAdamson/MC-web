@@ -71,9 +71,15 @@ public final class CucumberSutInterface implements AutoCloseable {
     * Starts the Docker containers for the SUT. This should be called
     * {@link Before} each scenario.
     * </p>
+    *
+    * @param scenario
+    *           The scenario that is beginning.
+    * @throws NullPointerException
+    *            If {@code scenario} is null;
     */
-   public void beginScenario() {
+   public void beginScenario(final Scenario scenario) {
       containers.start();
+      containers.beforeTest(createTestDescription(scenario));
       webDriver = containers.getWebDriver();
    }
 
@@ -121,8 +127,8 @@ public final class CucumberSutInterface implements AutoCloseable {
     *
     * @throws IllegalStateException
     *            <ul>
-    *            <li>If the scenario has not {@linkplain #beginScenario()
-    *            begun}.</li>
+    *            <li>If the scenario has not
+    *            {@linkplain #beginScenario(Scenario) begun}.</li>
     *            <li>If the scenario has {@linkplain #endScenario(Scenario)
     *            ended}.</li>
     *            <li>If the this has been {@linkplain #close() closed}.</li>

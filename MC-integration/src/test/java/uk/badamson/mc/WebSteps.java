@@ -48,8 +48,8 @@ public class WebSteps implements AutoCloseable {
    }
 
    @Before
-   public void beforeScenario() {
-      sut.beginScenario();
+   public void beforeScenario(final Scenario scenario) {
+      sut.beginScenario(scenario);
    }
 
    @Then("can get the list of players")
@@ -110,14 +110,14 @@ public class WebSteps implements AutoCloseable {
       // TODO
    }
 
-   @Then("MC serves the resource")
-   public void mc_serves_the_players_resource() {
-      // TODO
-   }
-
    @Then("MC serves the home page")
    public void mc_serves_the_home_page() {
       sut.get();
+   }
+
+   @Then("MC serves the resource")
+   public void mc_serves_the_players_resource() {
+      // TODO
    }
 
    @When("modifying the unknown resource with a {string} at {string}")
