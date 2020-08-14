@@ -35,11 +35,6 @@ public class WebSteps implements AutoCloseable {
 
    private final CucumberSutInterface sut = new CucumberSutInterface();
 
-   @Given("a fresh instance of MC")
-   public void a_fresh_instance_of_MC() {
-      // Do nothing
-   }
-
    @When("adding a player named {string} with  password {string}")
    public void adding_a_player_named(final String name, final String password) {
       Objects.requireNonNull(name, "name");
@@ -131,19 +126,9 @@ public class WebSteps implements AutoCloseable {
       // TODO
    }
 
-   @Given("not logged in")
-   public void not_logged_in() {
-      // Do nothing: it is the default
-   }
-
-   @Given("not presenting a CSRF token")
-   public void not_presenting_a_CSRF_token() {
-      // Do nothing: not used for E2E tests.
-   }
-
    @Given("presenting a valid CSRF token")
    public void presenting_a_valid_CSRF_token() {
-      // Do nothing: not used for E2E tests.
+      // Do nothing: the fron-end code should be doing this implicitly.
    }
 
    @Given("that player {string} exists with  password {string}")
