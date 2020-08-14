@@ -115,8 +115,8 @@ public class WebSteps implements AutoCloseable {
       // TODO
    }
 
-   @Then("MC serves the web page")
-   public void mc_serves_the_web_page() {
+   @Then("MC serves the home page")
+   public void mc_serves_the_home_page() {
       sut.get();
    }
 
