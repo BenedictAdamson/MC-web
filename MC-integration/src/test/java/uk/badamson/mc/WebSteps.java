@@ -113,11 +113,6 @@ public class WebSteps implements AutoCloseable {
       // TODO
    }
 
-   @Then("MC serves the home page")
-   public void mc_serves_the_home_page() {
-      worldCore.get();
-   }
-
    @Then("MC serves the resource")
    public void mc_serves_the_players_resource() {
       // TODO
@@ -131,7 +126,7 @@ public class WebSteps implements AutoCloseable {
 
    @Given("presenting a valid CSRF token")
    public void presenting_a_valid_CSRF_token() {
-      // Do nothing: the fron-end code should be doing this implicitly.
+      // Do nothing: the front-end code should be doing this implicitly.
    }
 
    @Given("that player {string} exists with  password {string}")
@@ -140,14 +135,6 @@ public class WebSteps implements AutoCloseable {
       Objects.requireNonNull(player, "player");
       Objects.requireNonNull(password, "password");
       // TODO
-   }
-
-   @Given("the DNS name, example.com, of an MC server")
-   public void the_DNS_name_of_an_MC_server() {
-      /*
-       * Do nothing; the test set up hard-codes the DNS name as
-       * McContainers.INGRESS_HOST
-       */
    }
 
    @Then("the list of players has one player")
@@ -168,11 +155,6 @@ public class WebSteps implements AutoCloseable {
    @When("the potential player gives the DNS name to a web browser")
    public void the_potential_player_gives_the_DNS_name_to_a_web_browser() {
       // TODO
-   }
-
-   @When("the potential player gives the obvious URL http://example.com/ to a web browser")
-   public void the_potential_player_gives_the_obvious_URL_to_a_web_browser() {
-      worldCore.setPath("/");
    }
 
    @Then("the response message is a list of players")
