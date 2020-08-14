@@ -33,7 +33,7 @@ import io.cucumber.java.en.When;
  */
 public class WebSteps implements AutoCloseable {
 
-   private final CucumberWorldCore sut = new CucumberWorldCore();
+   private CucumberWorldCore worldCore;
 
    @When("adding a player named {string} with  password {string}")
    public void adding_a_player_named(final String name, final String password) {
@@ -44,12 +44,13 @@ public class WebSteps implements AutoCloseable {
 
    @After
    public void afterScenario(final Scenario scenario) {
-      sut.endScenario(scenario);
+      worldCore.endScenario(scenario);
    }
 
    @Before
    public void beforeScenario(final Scenario scenario) {
-      sut.beginScenario(scenario);
+      worldCore = CucumberWorldCore.getInstance(scenario);
+      worldCore.beginScenario(scenario);
    }
 
    @Then("can get the list of players")
@@ -59,7 +60,9 @@ public class WebSteps implements AutoCloseable {
 
    @Override
    public void close() {
-      sut.close();
+      if (worldCore != null) {
+         worldCore.close();
+      }
    }
 
    @When("getting the players")
@@ -112,7 +115,7 @@ public class WebSteps implements AutoCloseable {
 
    @Then("MC serves the home page")
    public void mc_serves_the_home_page() {
-      sut.get();
+      worldCore.get();
    }
 
    @Then("MC serves the resource")
@@ -169,7 +172,7 @@ public class WebSteps implements AutoCloseable {
 
    @When("the potential player gives the obvious URL http://example.com/ to a web browser")
    public void the_potential_player_gives_the_obvious_URL_to_a_web_browser() {
-      sut.setPath("/");
+      worldCore.setPath("/");
    }
 
    @Then("the response message is a list of players")
