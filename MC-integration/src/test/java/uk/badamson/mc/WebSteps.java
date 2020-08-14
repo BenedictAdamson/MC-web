@@ -19,11 +19,6 @@ package uk.badamson.mc;
  */
 
 import java.util.Objects;
-import java.util.Optional;
-
-import org.openqa.selenium.WebDriverException;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.testcontainers.lifecycle.TestDescription;
 
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -36,29 +31,9 @@ import io.cucumber.java.en.When;
  * <p>
  * Definitions of BDD steps for the Cucumber-JVM BDD testing tool.
  */
-public class WebSteps {
+public class WebSteps implements AutoCloseable {
 
-   private static TestDescription createTestDescription(
-            final Scenario scenario) {
-      return new TestDescription() {
-
-         @Override
-         public String getFilesystemFriendlyName() {
-            return scenario.getName();
-         }
-
-         @Override
-         public String getTestId() {
-            return scenario.getId();
-         }
-      };
-   }
-
-   private final McContainers containers = new McContainers();
-
-   private RemoteWebDriver webDriver;
-
-   private String url;
+   private final CucumberSutInterface sut = new CucumberSutInterface();
 
    @Given("a fresh instance of MC")
    public void a_fresh_instance_of_MC() {
@@ -74,15 +49,12 @@ public class WebSteps {
 
    @After
    public void afterScenario(final Scenario scenario) {
-      tellContainersTestOutcome(scenario);
-      containers.stop();
-      close();
+      sut.endScenario(scenario);
    }
 
    @Before
    public void beforeScenario() {
-      containers.start();
-      webDriver = containers.getWebDriver();
+      sut.beginScenario();
    }
 
    @Then("can get the list of players")
@@ -90,20 +62,9 @@ public class WebSteps {
       // TODO
    }
 
-   private void close() {
-      if (webDriver != null) {
-         webDriver.quit();
-      }
-      containers.close();
-   }
-
-   /**
-    * @throws WebDriverException
-    *            If the resource given by {@link #url} does not exist.
-    */
-   private void get() throws WebDriverException {
-      Objects.requireNonNull(url, "url");
-      webDriver.get(url);
+   @Override
+   public void close() {
+      sut.close();
    }
 
    @When("getting the players")
@@ -161,7 +122,7 @@ public class WebSteps {
 
    @Then("MC serves the web page")
    public void mc_serves_the_web_page() {
-      get();
+      sut.get();
    }
 
    @When("modifying the unknown resource with a {string} at {string}")
@@ -183,22 +144,6 @@ public class WebSteps {
    @Given("presenting a valid CSRF token")
    public void presenting_a_valid_CSRF_token() {
       // Do nothing: not used for E2E tests.
-   }
-
-   private void tellContainersTestOutcome(final Scenario scenario) {
-      final var testDescription = createTestDescription(scenario);
-      /*
-       * Unfortunately, Cucumber does not provide us with the exception that
-       * caused a test failure.
-       */
-      final Throwable throwable;
-      if (scenario.isFailed()) {
-         throwable = new AssertionError(
-                  "Scenario " + scenario.getId() + " failed");
-      } else {
-         throwable = null;
-      }
-      containers.afterTest(testDescription, Optional.ofNullable(throwable));
    }
 
    @Given("that player {string} exists with  password {string}")
@@ -239,7 +184,7 @@ public class WebSteps {
 
    @When("the potential player gives the obvious URL http://example.com/ to a web browser")
    public void the_potential_player_gives_the_obvious_URL_to_a_web_browser() {
-      url = McContainers.getUri("/");
+      sut.setPath("/");
    }
 
    @Then("the response message is a list of players")
