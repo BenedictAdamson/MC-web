@@ -33,7 +33,7 @@ import io.cucumber.java.en.When;
  */
 public class WebSteps implements AutoCloseable {
 
-   private WorldCore worldCore;
+   private CucumberWorldCore worldCore;
 
    @When("adding a player named {string} with  password {string}")
    public void adding_a_player_named(final String name, final String password) {
@@ -49,7 +49,7 @@ public class WebSteps implements AutoCloseable {
 
    @Before
    public void beforeScenario(final Scenario scenario) {
-      worldCore = WorldCore.getInstance(scenario);
+      worldCore = CucumberWorldCore.getInstance(scenario);
       worldCore.beginScenario(scenario);
    }
 
