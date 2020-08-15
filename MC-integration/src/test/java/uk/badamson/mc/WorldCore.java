@@ -43,7 +43,7 @@ import io.cucumber.java.Scenario;
  * accessing MC using a web browser.
  * </p>
  */
-public final class CucumberWorldCore implements AutoCloseable {
+public final class WorldCore implements AutoCloseable {
 
    private static TestDescription createTestDescription(
             final Scenario scenario) {
