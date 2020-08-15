@@ -20,7 +20,6 @@ package uk.badamson.mc;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.WeakHashMap;
 
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -126,8 +125,6 @@ public final class CucumberWorldCore implements AutoCloseable {
       abstract void endScenario(CucumberWorldCore world, Scenario scenario);
    }// enum
 
-   private static WeakHashMap<String, CucumberWorldCore> instances = new WeakHashMap<>();
-
    private static TestDescription createTestDescription(
             final Scenario scenario) {
       return new TestDescription() {
@@ -144,37 +141,6 @@ public final class CucumberWorldCore implements AutoCloseable {
       };
    }
 
-   /**
-    * <p>
-    * Create or acquire an instance of the {@link CucumberWorldCore} for use
-    * while running a given Cucumber scenario.
-    * </p>
-    * <p>
-    * All the step definitions should, directly or indirectly, use an instance
-    * created by this method. In practice, this means that step definition
-    * classes should have a {@link Before} method that delegates to this method
-    * and records the returned reference.
-    *
-    * @param scenario
-    *           The scenario for which an instance is wanted.
-    * @return The instance for the given scenario.
-    * @throws NullPointerException
-    *            If {@code scenario} is null
-    */
-   public static CucumberWorldCore getInstance(final Scenario scenario) {
-      Objects.requireNonNull(scenario, "scenario");
-      final var key = scenario.getId();
-      CucumberWorldCore instance;
-      synchronized (instances) {
-         instance = instances.get(key);
-         if (instance == null) {
-            instance = new CucumberWorldCore();
-            instances.put(key, instance);
-         }
-      }
-      return instance;
-   }
-
    private final McContainers containers = new McContainers();
 
    private RemoteWebDriver webDriver;
@@ -183,20 +149,13 @@ public final class CucumberWorldCore implements AutoCloseable {
 
    private State state = State.CREATED;
 
-   private CucumberWorldCore() {
-      // Constructor is provate to firce use of getInstance.
-   }
-
    /**
     * <p>
     * Prepare the SUT and this interface for execution of a Cucumber scenario.
     * </p>
     * <p>
     * Starts the Docker containers for the SUT. This should be called
-    * {@link Before} each scenario. It is safe for this method to be called
-    * multiple times at the beginning of a scenario. To ensure that this is
-    * called for each scenario, all step definition classes should have a
-    * {@link Before} method that delegates to this method.
+    * {@link Before} each scenario.
     * </p>
     *
     * @param scenario
@@ -255,10 +214,7 @@ public final class CucumberWorldCore implements AutoCloseable {
     * </p>
     * <p>
     * This method also {@linkplain #close() closes} this interface. This should
-    * be called {@link After} each scenario. It is safe for this method to be
-    * called multiple times at the end of a scenario. To ensure that this is
-    * called for each scenario, all step definition classes should have an
-    * {@link After} method that delegates to this method.
+    * be called {@link After} each scenario.
     * </p>
     *
     * @param scenario
