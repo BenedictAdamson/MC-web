@@ -45,86 +45,6 @@ import io.cucumber.java.Scenario;
  */
 public final class CucumberWorldCore implements AutoCloseable {
 
-   private enum State {
-
-      CREATED {
-
-         @Override
-         void beginScenario(final CucumberWorldCore world,
-                  final Scenario scenario) {
-            world.doBeginScenario(scenario);
-         }
-
-         @Override
-         void endScenario(final CucumberWorldCore world,
-                  final Scenario scenario) {
-            throw new IllegalStateException(toString());
-         }
-      },
-      BEGUN {
-         @Override
-         void beginScenario(final CucumberWorldCore world,
-                  final Scenario scenario) {
-            /*
-             * Do nothing, so may be called in quick succession from multiple
-             * upper layers during the start up of a scenario
-             */
-         }
-
-         @Override
-         void endScenario(final CucumberWorldCore world,
-                  final Scenario scenario) {
-            world.doEndScenario(scenario);
-         }
-      },
-      ENDED {
-         @Override
-         void beginScenario(final CucumberWorldCore world,
-                  final Scenario scenario) {
-            throw new IllegalStateException(toString());
-         }
-
-         @Override
-         void endScenario(final CucumberWorldCore world,
-                  final Scenario scenario) {
-            /*
-             * Do nothing, so may be called in quick succession from multiple
-             * upper layers during the shut down of a scenario
-             */
-         }
-      },
-      CLOSED {
-         @Override
-         void beginScenario(final CucumberWorldCore world,
-                  final Scenario scenario) {
-            throw new IllegalStateException(toString());
-         }
-
-         @Override
-         void close(final CucumberWorldCore world) {
-            // Do nothing (already closed): idempotent
-         }
-
-         @Override
-         void endScenario(final CucumberWorldCore world,
-                  final Scenario scenario) {
-            /*
-             * Do nothing, so close and endScenario may be called in quick
-             * succession from multiple upper layers during the shut down of a
-             * scenario
-             */
-         }
-      };
-
-      abstract void beginScenario(CucumberWorldCore world, Scenario scenario);
-
-      void close(final CucumberWorldCore world) {
-         world.doClose();
-      }
-
-      abstract void endScenario(CucumberWorldCore world, Scenario scenario);
-   }// enum
-
    private static TestDescription createTestDescription(
             final Scenario scenario) {
       return new TestDescription() {
@@ -147,8 +67,6 @@ public final class CucumberWorldCore implements AutoCloseable {
 
    private String url;
 
-   private State state = State.CREATED;
-
    /**
     * <p>
     * Prepare the SUT and this interface for execution of a Cucumber scenario.
@@ -164,7 +82,9 @@ public final class CucumberWorldCore implements AutoCloseable {
     *            If {@code scenario} is null;
     */
    public void beginScenario(final Scenario scenario) {
-      state.beginScenario(this, scenario);
+      containers.start();
+      containers.beforeTest(createTestDescription(scenario));
+      webDriver = containers.getWebDriver();
    }
 
    /**
@@ -174,20 +94,6 @@ public final class CucumberWorldCore implements AutoCloseable {
     */
    @Override
    public void close() {
-      state.close(this);
-   }
-
-   private void doBeginScenario(final Scenario scenario) {
-      if (state != State.CREATED) {
-         throw new IllegalStateException(state.toString());
-      }
-      containers.start();
-      containers.beforeTest(createTestDescription(scenario));
-      webDriver = containers.getWebDriver();
-      state = State.BEGUN;
-   }
-
-   private void doClose() {
       if (webDriver != null) {
          webDriver.quit();
          webDriver = null;
@@ -195,16 +101,6 @@ public final class CucumberWorldCore implements AutoCloseable {
       url = null;
       containers.stop();
       containers.close();
-      state = State.CLOSED;
-   }
-
-   private void doEndScenario(final Scenario scenario) {
-      if (state != State.BEGUN) {
-         throw new IllegalStateException(state.toString());
-      }
-      tellContainersTestOutcome(scenario);
-      state = State.ENDED;
-      close();
    }
 
    /**
@@ -223,7 +119,8 @@ public final class CucumberWorldCore implements AutoCloseable {
     *            If {@code scenario} is null;
     */
    public void endScenario(final Scenario scenario) {
-      doEndScenario(scenario);
+      tellContainersTestOutcome(scenario);
+      close();
    }
 
    /**
