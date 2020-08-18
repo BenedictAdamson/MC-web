@@ -18,27 +18,33 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+
+import uk.badamson.mc.Version;
 
 /**
  * <p>
- * End-points for the home-page
+ * A Testcontainers Docker container for the MC-front-end server.
  * </p>
  */
-@RestController
-public class HomeController {
+public final class McFrontEndContainer
+         extends GenericContainer<McFrontEndContainer> {
 
-   /**
-    * <p>
-    * Behaviour of the GET verb for the home page.
-    * </p>
-    *
-    * @return The response.
-    */
-   @GetMapping("/")
-   public String get() {
-      return "Hello";
+   public static final String VERSION = Version.VERSION;
+
+   public static final int PORT = 80;
+
+   public static final String HOST = "fe";
+
+   public static final String IMAGE = "index.docker.io/benedictadamson/mc-front-end-srv:"
+            + VERSION;
+
+   public McFrontEndContainer() {
+      super(IMAGE);
+      addExposedPort(PORT);
+      withNetworkAliases(HOST);
+      waitingFor(Wait.forListeningPort());
    }
 
 }

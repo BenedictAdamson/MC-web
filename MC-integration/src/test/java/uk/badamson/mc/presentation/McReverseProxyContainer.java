@@ -19,23 +19,35 @@ package uk.badamson.mc.presentation;
  */
 
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import uk.badamson.mc.Version;
 
 /**
  * <p>
- * A Testcontainers Docker container for the MC-front-end.
+ * A Testcontainers Docker providing an HTTP reverse proxy (ingress) for the MC
+ * HTTP servers.
  * </p>
  */
-final class McFrontEndContainer extends GenericContainer<McFrontEndContainer> {
+public final class McReverseProxyContainer
+         extends GenericContainer<McReverseProxyContainer> {
 
    public static final String VERSION = Version.VERSION;
-   public static final String IMAGE = "index.docker.io/benedictadamson/mc-front-end-srv:"
-            + VERSION;
 
-   McFrontEndContainer() {
+   public static final int PORT = 80;
+
+   public static final String HOST = "in";
+
+   private static final ImageFromDockerfile IMAGE = new ImageFromDockerfile()
+            .withFileFromClasspath("Dockerfile", "reverse-proxy.Dockerfile")
+            .withFileFromClasspath("rp.conf", "reverse-proxy.rp.conf");
+
+   public McReverseProxyContainer() {
       super(IMAGE);
-      withExposedPorts(80);
+      addExposedPort(PORT);
+      withNetworkAliases(HOST);
+      waitingFor(Wait.forListeningPort());
    }
 
 }

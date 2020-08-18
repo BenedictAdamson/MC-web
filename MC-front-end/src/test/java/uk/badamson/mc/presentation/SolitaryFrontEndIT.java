@@ -46,7 +46,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Tag("IT")
 public class SolitaryFrontEndIT {
 
-   public static final String EXPECTED_STARTED_MESSAGE = "AH00094: Command line";
+   public static final String EXPECTED_STARTED_MESSAGE = "ready for start up";
 
    @Container
    private final McFrontEndContainer container = new McFrontEndContainer();
@@ -55,10 +55,10 @@ public class SolitaryFrontEndIT {
    public void start() throws TimeoutException {
       final var consumer = new WaitingConsumer();
       container.followOutput(consumer);
-         consumer.waitUntil(
-                  frame -> frame.getUtf8String()
-                           .contains(EXPECTED_STARTED_MESSAGE),
-                  7000, TimeUnit.MILLISECONDS);
+      consumer.waitUntil(
+               frame -> frame.getUtf8String()
+                        .contains(EXPECTED_STARTED_MESSAGE),
+               7000, TimeUnit.MILLISECONDS);
 
       final var logs = container.getLogs();
       assertAll("Log suitable messages",

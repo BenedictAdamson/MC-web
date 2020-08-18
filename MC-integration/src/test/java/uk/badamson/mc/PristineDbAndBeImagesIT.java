@@ -23,9 +23,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -36,7 +34,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.ListBodySpec;
 import org.testcontainers.containers.Network;
-import org.testcontainers.containers.output.WaitingConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -47,17 +44,16 @@ import uk.badamson.mc.repository.McDatabaseContainer;
  * Basic system test for the MC database and MC backend containers operating
  * together, testing it operating as a pristine (fresh) installation.
  * </p>
+ * <p>
+ * These tests demonstrate that it is possible to configure the back-end to
+ * communicate correctly with the database. They do not really demonstrate
+ * specific correct functionality.
+ * </p>
  */
 @TestMethodOrder(OrderAnnotation.class)
 @Testcontainers
 @Tag("IT")
 public class PristineDbAndBeImagesIT {
-
-   public static final int MC_LISTENING_PORT = 8080;
-
-   public static final String EXPECTED_STARTED_MESSAGE = "Started Application";
-
-   public static final String EXPECTED_CONNECTION_MESSAGE = "successfully connected to server";
 
    private final Network containersNetwork = Network.newNetwork();
 
@@ -69,7 +65,7 @@ public class PristineDbAndBeImagesIT {
    private final McBackEndContainer beContainer = new McBackEndContainer()
             .withNetwork(containersNetwork).withNetworkAliases("mc")
             .withCommand("--spring.data.mongodb.host=db")
-            .withExposedPorts(MC_LISTENING_PORT);
+            .withExposedPorts(McBackEndContainer.PORT);
 
    private WebTestClient.ResponseSpec response;
    private ListBodySpec<Player> responsePlayerList;
@@ -78,27 +74,10 @@ public class PristineDbAndBeImagesIT {
       assertThat(logs, not(containsString("ERROR")));
    }
 
-   private void awaitBeLogMessage(final String message)
-            throws TimeoutException {
-      final var consumer = new WaitingConsumer();
-      beContainer.followOutput(consumer);
-      consumer.waitUntil(frame -> frame.getUtf8String().contains(message), 30,
-               TimeUnit.SECONDS);
-   }
-
    private void can_get_the_list_of_players() {
       getJsonFromBe("/api/player");
       responseIsOk();
       responsePlayerList = response.expectBodyList(Player.class);
-   }
-
-   @Test
-   @Order(2)
-   public void getHomePage() throws TimeoutException, InterruptedException {
-      waitUntilReady();
-      getJsonFromBe("/");
-      responseIsOk();
-      assertThatNoErrorMessagesLogged(beContainer.getLogs());
    }
 
    private void getJsonFromBe(final String path) {
@@ -161,9 +140,10 @@ public class PristineDbAndBeImagesIT {
 
       final var logs = beContainer.getLogs();
       assertAll("Log suitable messages",
-               () -> assertThat(logs, containsString(EXPECTED_STARTED_MESSAGE)),
                () -> assertThat(logs,
-                        containsString(EXPECTED_CONNECTION_MESSAGE)),
+                        containsString(McBackEndContainer.STARTED_MESSAGE)),
+               () -> assertThat(logs,
+                        containsString(McBackEndContainer.CONNECTION_MESSAGE)),
                () -> assertThatNoErrorMessagesLogged(logs),
                () -> assertThat(logs, not(containsString("Unable to start"))));
       beContainer.assertHealthCheckOk();
@@ -182,18 +162,8 @@ public class PristineDbAndBeImagesIT {
                is(1L));
    }
 
-   private void waitUntilDbAcceptsConnections() {
-      try (final var client = dbContainer
-               .createClient(McDatabaseContainer.ROOT_CREDENTIALS);) {
-         client.getDatabase(McDatabaseContainer.DB);
-      }
-   }
-
    private void waitUntilReady() throws TimeoutException, InterruptedException {
-      assertTrue(dbContainer.isRunning(), "DB running");
-      waitUntilDbAcceptsConnections();
-      awaitBeLogMessage(EXPECTED_STARTED_MESSAGE);
-      awaitBeLogMessage(EXPECTED_CONNECTION_MESSAGE);
-      beContainer.awaitHealthCheckOk();
+      dbContainer.waitUntilAcceptsConnections();
+      beContainer.waitUntilReady();
    }
 }

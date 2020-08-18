@@ -1,6 +1,6 @@
-package uk.badamson.mc.presentation;
+package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2018-20.
  *
  * This file is part of MC.
  *
@@ -18,24 +18,18 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.testcontainers.containers.GenericContainer;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.context.annotation.Import;
 
-import uk.badamson.mc.Version;
+import io.cucumber.spring.CucumberContextConfiguration;
 
 /**
  * <p>
- * A Testcontainers Docker container for the MC-front-end.
+ * The Spring Cucumber configuration for tests of the Mission Command game.
  * </p>
  */
-final class McFrontEndContainer extends GenericContainer<McFrontEndContainer> {
-
-   public static final String VERSION = Version.VERSION;
-   public static final String IMAGE = "index.docker.io/benedictadamson/mc-front-end-srv:"
-            + VERSION;
-
-   McFrontEndContainer() {
-      super(IMAGE);
-      withExposedPorts(80);
-   }
-
+@CucumberContextConfiguration
+@Import(value = { TestConfiguration.class, CucumberBeansConfiguration.class })
+@AutoConfigureWebTestClient
+public class CucumberTestConfiguration {
 }

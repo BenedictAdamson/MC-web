@@ -1,5 +1,8 @@
-# © Copyright Benedict Adamson 2019-20.
-#
+# Dockerfile for the MC-integration project,
+# to produce an HTTP reverse proxy in a container.
+
+# © Copyright Benedict Adamson 2020.
+# 
 # This file is part of MC.
 #
 # MC is free software: you can redistribute it and/or modify
@@ -10,17 +13,17 @@
 # MC is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
+# GNU General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with MC.  If not, see <https://www.gnu.org/licenses/>.
 #
-Feature: Home-page
-  It should be easy for players to access the home-page of an MC server.
 
-  Scenario: Potential player accesses an MC server using a simple URL with the root path
-    Given the DNS name, example.com, of an MC server
-    When the potential player gives the obvious URL http://example.com/ to a web browser
-    And not logged in
-    And not presenting a CSRF token
-    Then MC serves the web page
+FROM nginx:1
+
+EXPOSE 80
+
+RUN rm -r /usr/share/nginx/html/*
+
+COPY rp.conf /etc/nginx/conf.d/rp.conf
+CMD ["nginx", "-g", "daemon off;"]

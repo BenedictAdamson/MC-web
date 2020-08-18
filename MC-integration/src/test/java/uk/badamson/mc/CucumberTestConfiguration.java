@@ -19,18 +19,17 @@ package uk.badamson.mc;
  */
 
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.context.annotation.Import;
 
 import io.cucumber.spring.CucumberContextConfiguration;
 
 /**
  * <p>
- * The Spring Cucumber configuration for tests of the Mission Command game.
+ * The Spring Cucumber configuration for integration tests of the Mission
+ * Command game.
  * </p>
  */
 @CucumberContextConfiguration
-@Import(value = { ApplicationTest.class })
 @AutoConfigureWebTestClient
-public class CucumberApplicationTest {
+public class CucumberTestConfiguration {
 
 }
