@@ -30,6 +30,7 @@ import org.testcontainers.lifecycle.Startable;
 import org.testcontainers.lifecycle.TestDescription;
 import org.testcontainers.lifecycle.TestLifecycleAware;
 
+import uk.badamson.mc.auth.McAuthContainer;
 import uk.badamson.mc.presentation.McFrontEndContainer;
 import uk.badamson.mc.presentation.McReverseProxyContainer;
 import uk.badamson.mc.repository.McDatabaseContainer;
@@ -53,6 +54,9 @@ public class McContainers
    }
 
    private final Network network = Network.newNetwork();
+
+   private final McAuthContainer auth = new McAuthContainer()
+            .withNetwork(network);
 
    private final McDatabaseContainer db = new McDatabaseContainer()
             .withNetwork(network);
@@ -91,6 +95,7 @@ public class McContainers
       fe.close();
       be.close();
       db.close();
+      auth.close();
       network.close();
    }
 
@@ -105,6 +110,7 @@ public class McContainers
        * the number of transient connection errors.
        */
       try {
+         auth.start();
          db.start();
          db.waitUntilAcceptsConnections();
          be.start();
@@ -129,6 +135,7 @@ public class McContainers
       fe.stop();
       be.stop();
       db.stop();
+      auth.stop();
    }
 
 }
