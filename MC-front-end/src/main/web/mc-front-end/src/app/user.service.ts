@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-import { Player } from './player';
+import { User } from './user';
 
 const httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -12,25 +12,25 @@ const httpOptions = {
 @Injectable({
     providedIn: 'root'
 })
-export class PlayerService {
+export class UserService {
 
-    private playerUrl = '/api/player';  // URL to API
+    private userUrl = '/api/user';  // URL to API
 
     constructor(
         private http: HttpClient) { }
 
-    getPlayers(): Observable<Player[]> {
-        return this.http.get<Player[]>(this.playerUrl)
+    getUsers(): Observable<User[]> {
+        return this.http.get<User[]>(this.userUrl)
             .pipe(
-                catchError(this.handleError<Player[]>('getPlayers', []))
+                catchError(this.handleError<User[]>('getUsers', []))
             );
     }
 
-    getPlayer(username: string): Observable<Player> {
-        const url = `${this.playerUrl}/${username}`;
-        return this.http.get<Player>(url)
+    getUser(username: string): Observable<User> {
+        const url = `${this.userUrl}/${username}`;
+        return this.http.get<User>(url)
             .pipe(
-                catchError(this.handleError<Player>(`getPlayer id=${username}`))
+                catchError(this.handleError<User>(`getUser id=${username}`))
             );
     }
 

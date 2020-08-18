@@ -1,29 +1,29 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { PlayerService } from '../player.service';
-import { Player } from '../player';
+import { UserService } from '../user.service';
+import { User } from '../user';
 
 @Component({
-    selector: 'app-player',
-    templateUrl: './player.component.html',
-    styleUrls: ['./player.component.css']
+    selector: 'app-user',
+    templateUrl: './user.component.html',
+    styleUrls: ['./user.component.css']
 })
-export class PlayerComponent implements OnInit {
+export class UserComponent implements OnInit {
 
-    player: Player;
+    user: User;
 
     constructor(
         private route: ActivatedRoute,
-        private playerService: PlayerService) { }
+        private userService: UserService) { }
 
     ngOnInit() {
-        this.getPlayer();
+        this.getUser();
     }
 
 
-    getPlayer(): void {
+    getUser(): void {
         const username = this.route.snapshot.paramMap.get('username');
-        this.playerService.getPlayer(username)
-            .subscribe(player => this.player = player);
+        this.userService.getUser(username)
+            .subscribe(user => this.user = user);
     }
 }

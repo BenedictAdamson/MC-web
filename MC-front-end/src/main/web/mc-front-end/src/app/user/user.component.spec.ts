@@ -1,46 +1,46 @@
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { of } from 'rxjs';
 
-import { Player } from '../player';
-import { PlayerComponent } from './player.component';
-import { PlayerService } from '../player.service';
+import { User } from '../user';
+import { UserComponent } from './user.component';
+import { UserService } from '../user.service';
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-describe('PlayerComponent', () => {
-    let component: PlayerComponent;
-    let fixture: ComponentFixture<PlayerComponent>;
+describe('UserComponent', () => {
+    let component: UserComponent;
+    let fixture: ComponentFixture<UserComponent>;
 
     const PLAYER_A = { username: 'Administrator', password: null, authorities: ['ROLE_ADMIN'] };
     const PLAYER_B = { username: 'Benedict', password: null, authorities: [] };
 
-    const setUp = (testPlayer: Player) => {
-        const playerServiceStub = jasmine.createSpyObj('PlayerService', ['getPlayer']);
-        playerServiceStub.getPlayer.and.returnValue(of(testPlayer));
+    const setUp = (testUser: User) => {
+        const userServiceStub = jasmine.createSpyObj('UserService', ['getUser']);
+        userServiceStub.getUser.and.returnValue(of(testUser));
 
         TestBed.configureTestingModule({
-            declarations: [PlayerComponent],
+            declarations: [UserComponent],
             providers: [{
                 provide: ActivatedRoute,
                 useValue: {
-                    params: of({ username: testPlayer.username }),
+                    params: of({ username: testUser.username }),
                     snapshot: {
-                        paramMap: convertToParamMap({ username: testPlayer.username })
+                        paramMap: convertToParamMap({ username: testUser.username })
                     }
                 }
             },
-            { provide: PlayerService, useValue: playerServiceStub }]
+            { provide: UserService, useValue: userServiceStub }]
         });
 
-        fixture = TestBed.createComponent(PlayerComponent);
+        fixture = TestBed.createComponent(UserComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     };
-    const canCreate = (testPlayer: Player) => {
-        setUp(testPlayer);
+    const canCreate = (testUser: User) => {
+        setUp(testUser);
 
         expect(component).toBeTruthy();
-        expect(component.player).toBe(testPlayer);
+        expect(component.user).toBe(testUser);
     };
     it('can create [a]', () => {
         canCreate(PLAYER_A);

@@ -2,11 +2,11 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
-import { PlayerService } from './player.service';
-import { Player } from './player';
+import { UserService } from './user.service';
+import { User } from './user';
 
 
-describe('PlayerService', () => {
+describe('UserService', () => {
     let httpClient: HttpClient;
     let httpTestingController: HttpTestingController;
 
@@ -26,38 +26,38 @@ describe('PlayerService', () => {
     });
 
     it('should be created', () => {
-        const service: PlayerService = TestBed.get(PlayerService);
+        const service: UserService = TestBed.get(UserService);
         expect(service).toBeTruthy();
     });
 
-    it('can get players', () => {
-        const testPlayers: Player[] = [ADMINISTRATOR];
-        const service: PlayerService = TestBed.get(PlayerService);
+    it('can get users', () => {
+        const testUsers: User[] = [ADMINISTRATOR];
+        const service: UserService = TestBed.get(UserService);
 
-        service.getPlayers().subscribe(players => expect(players).toEqual(testPlayers));
+        service.getUsers().subscribe(users => expect(users).toEqual(testUsers));
 
-        const request = httpTestingController.expectOne('/api/player');
+        const request = httpTestingController.expectOne('/api/user');
         expect(request.request.method).toEqual('GET');
-        request.flush(testPlayers);
+        request.flush(testUsers);
         httpTestingController.verify();
     });
 
-    let canGetPlayer: CallableFunction;
-    canGetPlayer = (testPlayer: Player) => {
-        const username = testPlayer.username;
-        const service: PlayerService = TestBed.get(PlayerService);
+    let canGetUser: CallableFunction;
+    canGetUser = (testUser: User) => {
+        const username = testUser.username;
+        const service: UserService = TestBed.get(UserService);
 
-        service.getPlayer(username).subscribe(player => expect(player).toEqual(testPlayer));
+        service.getUser(username).subscribe(user => expect(user).toEqual(testUser));
 
-        const request = httpTestingController.expectOne(`/api/player/${username}`);
+        const request = httpTestingController.expectOne(`/api/user/${username}`);
         expect(request.request.method).toEqual('GET');
-        request.flush(testPlayer);
+        request.flush(testUser);
         httpTestingController.verify();
     };
     it('can get the administrator', () => {
-        canGetPlayer(ADMINISTRATOR);
+        canGetUser(ADMINISTRATOR);
     });
-    it('can get other player', () => {
-        canGetPlayer(PLAYER);
+    it('can get other user', () => {
+        canGetUser(PLAYER);
     });
 });

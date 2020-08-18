@@ -5,8 +5,8 @@ import { RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
-import { PlayerComponent } from './player/player.component';
-import { PlayersComponent } from './players/players.component';
+import { UserComponent } from './user/user.component';
+import { UsersComponent } from './users/users.component';
 import { HomeComponent } from './home/home.component';
 
 @NgModule({
@@ -18,8 +18,8 @@ import { HomeComponent } from './home/home.component';
     ],
     declarations: [
         AppComponent,
-        PlayersComponent,
-        PlayerComponent,
+        UsersComponent,
+        UserComponent,
         HomeComponent
     ],
     providers: [],

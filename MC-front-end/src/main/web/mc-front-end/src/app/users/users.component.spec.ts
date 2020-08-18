@@ -3,38 +3,38 @@ import { of } from 'rxjs';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { Player } from '../player';
-import { PlayersComponent } from './players.component';
-import { PlayerService } from '../player.service';
+import { User } from '../user';
+import { UsersComponent } from './users.component';
+import { UserService } from '../user.service';
 
-describe('PlayersComponent', () => {
-    let component: PlayersComponent;
-    let fixture: ComponentFixture<PlayersComponent>;
+describe('UsersComponent', () => {
+    let component: UsersComponent;
+    let fixture: ComponentFixture<UsersComponent>;
 
     const PLAYER_A = { username: 'Administrator', password: null, authorities: ['ROLE_ADMIN'] };
     const PLAYER_B = { username: 'Benedict', password: null, authorities: [] };
 
-    const setUp = (testPlayers: Player[]) => {
-        const playerServiceStub = jasmine.createSpyObj('PlayerService', ['getPlayers']);
-        playerServiceStub.getPlayers.and.returnValue(of(testPlayers));
+    const setUp = (testUsers: User[]) => {
+        const userServiceStub = jasmine.createSpyObj('UserService', ['getUsers']);
+        userServiceStub.getUsers.and.returnValue(of(testUsers));
 
         TestBed.configureTestingModule({
-            declarations: [PlayersComponent],
+            declarations: [UsersComponent],
             imports: [RouterTestingModule],
             providers: [
-                { provide: PlayerService, useValue: playerServiceStub }]
+                { provide: UserService, useValue: userServiceStub }]
         });
 
-        fixture = TestBed.createComponent(PlayersComponent);
+        fixture = TestBed.createComponent(UsersComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     };
 
-    const canCreate = (testPlayers: Player[]) => {
-        setUp(testPlayers);
+    const canCreate = (testUsers: User[]) => {
+        setUp(testUsers);
 
         expect(component).toBeTruthy();
-        expect(component.players).toBe(testPlayers);
+        expect(component.users).toBe(testUsers);
     };
 
     it('can create [1]', () => {
