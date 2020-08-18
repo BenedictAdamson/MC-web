@@ -11,7 +11,7 @@ describe('UserService', () => {
     let httpTestingController: HttpTestingController;
 
     const ADMINISTRATOR = { username: 'Administrator', password: null, authorities: ['ROLE_ADMIN'] };
-    const PLAYER = { username: 'Benedict', password: null, authorities: [] };
+    const USER = { username: 'Benedict', password: null, authorities: [] };
 
     beforeEach(() => {
         TestBed.configureTestingModule({
@@ -58,6 +58,6 @@ describe('UserService', () => {
         canGetUser(ADMINISTRATOR);
     });
     it('can get other user', () => {
-        canGetUser(PLAYER);
+        canGetUser(USER);
     });
 });

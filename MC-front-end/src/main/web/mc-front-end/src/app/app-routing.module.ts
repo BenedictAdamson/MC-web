@@ -1,13 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { HomeComponent } from './home/home.component';
-import { UserComponent } from './player/player.component';
-import { UsersComponent } from './players/players.component';
+import { UserComponent } from './user/user.component';
+import { UsersComponent } from './users/users.component';
 
 const routes: Routes = [
     { path: '', component: HomeComponent, pathMatch: 'full' },
-    { path: 'player', component: UsersComponent, pathMatch: 'full' },
-    { path: 'player/:username', component: UserComponent }
+    { path: 'user', component: UsersComponent, pathMatch: 'full' },
+    { path: 'user/:username', component: UserComponent }
 ];
 
 @NgModule({

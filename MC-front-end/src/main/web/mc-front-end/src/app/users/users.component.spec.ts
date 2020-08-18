@@ -11,8 +11,8 @@ describe('UsersComponent', () => {
     let component: UsersComponent;
     let fixture: ComponentFixture<UsersComponent>;
 
-    const PLAYER_A = { username: 'Administrator', password: null, authorities: ['ROLE_ADMIN'] };
-    const PLAYER_B = { username: 'Benedict', password: null, authorities: [] };
+    const USER_A = { username: 'Administrator', password: null, authorities: ['ROLE_ADMIN'] };
+    const USER_B = { username: 'Benedict', password: null, authorities: [] };
 
     const setUp = (testUsers: User[]) => {
         const userServiceStub = jasmine.createSpyObj('UserService', ['getUsers']);
@@ -38,10 +38,10 @@ describe('UsersComponent', () => {
     };
 
     it('can create [1]', () => {
-        canCreate([PLAYER_A]);
+        canCreate([USER_A]);
     });
 
     it('can create [2]', () => {
-        canCreate([PLAYER_A, PLAYER_B]);
+        canCreate([USER_A, USER_B]);
     });
 });

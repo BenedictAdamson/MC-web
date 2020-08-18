@@ -11,8 +11,8 @@ describe('UserComponent', () => {
     let component: UserComponent;
     let fixture: ComponentFixture<UserComponent>;
 
-    const PLAYER_A = { username: 'Administrator', password: null, authorities: ['ROLE_ADMIN'] };
-    const PLAYER_B = { username: 'Benedict', password: null, authorities: [] };
+    const USER_A = { username: 'Administrator', password: null, authorities: ['ROLE_ADMIN'] };
+    const USER_B = { username: 'Benedict', password: null, authorities: [] };
 
     const setUp = (testUser: User) => {
         const userServiceStub = jasmine.createSpyObj('UserService', ['getUser']);
@@ -43,9 +43,9 @@ describe('UserComponent', () => {
         expect(component.user).toBe(testUser);
     };
     it('can create [a]', () => {
-        canCreate(PLAYER_A);
+        canCreate(USER_A);
     });
     it('can create [b]', () => {
-        canCreate(PLAYER_B);
+        canCreate(USER_B);
     });
 });
