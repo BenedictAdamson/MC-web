@@ -22,18 +22,18 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import uk.badamson.mc.auth.McAuthContainer;
-
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.containers.Network;
 
 /**
  * <p>
@@ -44,18 +44,16 @@ import org.testcontainers.containers.Network;
 @TestMethodOrder(OrderAnnotation.class)
 @Testcontainers
 @Tag("IT")
-public class AuthServerWithAuthDbIT {
+public class AuthServerWithAuthDbIT implements AutoCloseable {
 
    private final Network containersNetwork = Network.newNetwork();
 
-   @Container
    private final MySQLContainer<?> dbContainer = new MySQLContainer<>()
             .withNetwork(containersNetwork).withNetworkAliases("auth-db")
             .withDatabaseName(McAuthContainer.DB_NAME)
             .withUsername(McAuthContainer.DB_USER)
             .withPassword(McAuthContainer.DB_PASSWORD);
 
-   @Container
    private final McAuthContainer authContainer = new McAuthContainer()
             .withNetwork(containersNetwork).withNetworkAliases("auth")
             .withEnv("DB_VENDOR", "mysql").withEnv("DB_ADDR", "auth-db")
@@ -65,9 +63,32 @@ public class AuthServerWithAuthDbIT {
       assertThat(logs, not(containsString("ERROR")));
    }
 
+   @Override
+   public void close() {
+      authContainer.close();
+      dbContainer.close();
+   }
+
+   @BeforeEach
+   public void setUp() {
+      dbContainer.start();
+      authContainer.start();
+   }
+
    @Test
    @Order(1)
    public void start() {
       assertThatNoErrorMessages(authContainer.getLogs());
+   }
+
+   private void stop() {
+      authContainer.stop();
+      dbContainer.stop();
+      close();
+   }
+
+   @AfterEach
+   public void tearDown() {
+      stop();
    }
 }
