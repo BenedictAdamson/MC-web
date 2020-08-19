@@ -40,7 +40,11 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
    public static final int PORT = 8080;
 
    public static final String HOST = "auth";
-   
+
+   public static final String DB_USER = "keycloak";
+   public static final String DB_NAME = "keycloak";
+   public static final String DB_PASSWORD = "password123";
+
    private static final String ADMIN_PASSWORD = "letmein";
 
    private static final Duration STARTUP_TIME = Duration.ofMillis(100);
@@ -51,6 +55,7 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
       super(IMAGE);
       addExposedPort(PORT);
       withEnv("KEYCLOAK_PASSWORD", ADMIN_PASSWORD);
+      withEnv("DB_PASSWORD", DB_PASSWORD);
       withNetworkAliases(HOST);
       withMinimumRunningDuration(STARTUP_TIME);
       waitingFor(WAIT_STRATEGY);
