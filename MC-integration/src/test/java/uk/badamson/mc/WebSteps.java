@@ -62,13 +62,13 @@ public class WebSteps implements AutoCloseable {
       sut.close();
    }
 
-   @When("getting the users")
-   public void getting_the_users() {
+   @When("getting the unknown resource at {string}")
+   public void getting_the_unknown_resource_at(final String path) {
       // TODO
    }
 
-   @When("getting the unknown resource at {string}")
-   public void getting_the_unknown_resource_at(final String path) {
+   @When("getting the users")
+   public void getting_the_users() {
       // TODO
    }
 

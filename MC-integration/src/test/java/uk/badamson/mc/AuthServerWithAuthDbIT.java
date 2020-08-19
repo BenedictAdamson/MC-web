@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -48,11 +47,8 @@ public class AuthServerWithAuthDbIT implements AutoCloseable {
 
    private final Network containersNetwork = Network.newNetwork();
 
-   private final MySQLContainer<?> dbContainer = new MySQLContainer<>()
-            .withNetwork(containersNetwork).withNetworkAliases("auth-db")
-            .withDatabaseName(McAuthContainer.DB_NAME)
-            .withUsername(McAuthContainer.DB_USER)
-            .withPassword(McAuthContainer.DB_PASSWORD);
+   private final AuthDbContainer dbContainer = new AuthDbContainer()
+            .withNetwork(containersNetwork);
 
    private final McAuthContainer authContainer = new McAuthContainer()
             .withNetwork(containersNetwork).withNetworkAliases("auth")
@@ -67,6 +63,7 @@ public class AuthServerWithAuthDbIT implements AutoCloseable {
    public void close() {
       authContainer.close();
       dbContainer.close();
+      containersNetwork.close();
    }
 
    @BeforeEach

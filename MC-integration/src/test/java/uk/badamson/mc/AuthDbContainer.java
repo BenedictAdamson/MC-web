@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2018-20.
+ * © Copyright Benedict Adamson 2020.
  *
  * This file is part of MC.
  *
@@ -18,15 +18,24 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import io.cucumber.spring.CucumberContextConfiguration;
+import org.testcontainers.containers.MySQLContainer;
+
+import uk.badamson.mc.auth.McAuthContainer;
 
 /**
  * <p>
- * The Spring Cucumber configuration for integration tests of the Mission
- * Command game.
+ * A Testcontainers Docker container holding a database server for use by the
+ * (MC-auth) authentication server.
  * </p>
  */
-@CucumberContextConfiguration
-public class CucumberTestConfiguration {
+public class AuthDbContainer extends MySQLContainer<AuthDbContainer> {
 
+   public static final String HOST = "auth-db";
+
+   public AuthDbContainer() {
+      withNetworkAliases(HOST);
+      withDatabaseName(McAuthContainer.DB_NAME);
+      withUsername(McAuthContainer.DB_USER);
+      withPassword(McAuthContainer.DB_PASSWORD);
+   }
 }
