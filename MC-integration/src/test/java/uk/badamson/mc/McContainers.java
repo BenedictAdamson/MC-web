@@ -59,7 +59,8 @@ public class McContainers
             .withNetwork(network);
 
    private final McAuthContainer auth = new McAuthContainer()
-            .withNetwork(network);
+            .withNetwork(network).withEnv("DB_VENDOR", "mysql")
+            .withEnv("DB_ADDR", AuthDbContainer.HOST);
 
    private final McDatabaseContainer db = new McDatabaseContainer()
             .withNetwork(network);
