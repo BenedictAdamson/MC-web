@@ -55,6 +55,9 @@ public class McContainers
 
    private final Network network = Network.newNetwork();
 
+   private final AuthDbContainer authDb = new AuthDbContainer()
+            .withNetwork(network);
+
    private final McAuthContainer auth = new McAuthContainer()
             .withNetwork(network);
 
@@ -96,6 +99,7 @@ public class McContainers
       be.close();
       db.close();
       auth.close();
+      authDb.close();
       network.close();
    }
 
@@ -110,6 +114,7 @@ public class McContainers
        * the number of transient connection errors.
        */
       try {
+         authDb.start();
          auth.start();
          db.start();
          db.waitUntilAcceptsConnections();
@@ -136,6 +141,7 @@ public class McContainers
       be.stop();
       db.stop();
       auth.stop();
+      authDb.stop();
    }
 
 }
