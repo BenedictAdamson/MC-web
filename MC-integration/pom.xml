@@ -218,6 +218,7 @@
 		<dependency>
 			<groupId>uk.badamson.mc</groupId>
 			<artifactId>MC-auth</artifactId>
+			<type>pom</type>
 			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
