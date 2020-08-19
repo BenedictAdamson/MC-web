@@ -22,7 +22,6 @@ import java.time.Duration;
 
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
 
 import uk.badamson.mc.Version;
@@ -41,15 +40,17 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
    public static final int PORT = 8080;
 
    public static final String HOST = "auth";
+   
+   private static final String ADMIN_PASSWORD = "letmein";
 
    private static final Duration STARTUP_TIME = Duration.ofMillis(100);
 
-   private static final WaitStrategy WAIT_STRATEGY = new WaitAllStrategy()
-            .withStrategy(Wait.forListeningPort());
+   private static final WaitStrategy WAIT_STRATEGY = Wait.forListeningPort();
 
    public McAuthContainer() {
       super(IMAGE);
       addExposedPort(PORT);
+      withEnv("KEYCLOAK_PASSWORD", ADMIN_PASSWORD);
       withNetworkAliases(HOST);
       withMinimumRunningDuration(STARTUP_TIME);
       waitingFor(WAIT_STRATEGY);
