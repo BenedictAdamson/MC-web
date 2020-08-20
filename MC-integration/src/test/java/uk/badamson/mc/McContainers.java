@@ -24,7 +24,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.net.URI;
 import java.util.Optional;
-import java.util.concurrent.TimeoutException;
 
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
