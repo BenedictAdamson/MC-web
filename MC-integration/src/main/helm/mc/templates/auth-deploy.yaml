@@ -51,11 +51,7 @@ spec:
         - name: KEYCLOAK_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-db-password-secret
-              key: user-password
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-db-password-secret
+              name: {{ .Release.Name }}-secrets
               key: user-password
         readinessProbe:
           httpGet:

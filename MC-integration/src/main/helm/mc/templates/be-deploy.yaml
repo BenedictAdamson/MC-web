@@ -47,7 +47,7 @@ spec:
         - name: SPRING_DATA_MONGODB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-db-password-secret
+              name: {{ .Release.Name }}-secrets
               key: user-password
         readinessProbe:
           httpGet:

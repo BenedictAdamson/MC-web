@@ -59,7 +59,7 @@ spec:
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-db-password-secret
+              name: {{ .Release.Name }}-secrets
               key: root-password
         volumeMounts:
         - mountPath: /var/lib/mysql
