@@ -18,7 +18,7 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.containers.MariaDBContainer;
 
 import uk.badamson.mc.auth.McAuthContainer;
 
@@ -28,7 +28,7 @@ import uk.badamson.mc.auth.McAuthContainer;
  * (MC-auth) authentication server.
  * </p>
  */
-public class AuthDbContainer extends MySQLContainer<AuthDbContainer> {
+public class AuthDbContainer extends MariaDBContainer<AuthDbContainer> {
 
    public static final String HOST = "auth-db";
 

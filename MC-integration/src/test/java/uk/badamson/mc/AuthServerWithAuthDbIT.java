@@ -51,7 +51,7 @@ public class AuthServerWithAuthDbIT implements AutoCloseable {
             .withNetwork(containersNetwork);
 
    private final McAuthContainer authContainer = new McAuthContainer()
-            .withNetwork(containersNetwork).withEnv("DB_VENDOR", "mysql")
+            .withNetwork(containersNetwork).withEnv("DB_VENDOR", "mariadb")
             .withEnv("DB_ADDR", AuthDbContainer.HOST);
 
    private void assertThatNoErrorMessages(final String logs) {
