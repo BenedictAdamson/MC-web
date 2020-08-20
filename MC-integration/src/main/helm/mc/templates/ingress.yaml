@@ -15,6 +15,10 @@ spec:
         backend:
           serviceName: {{ .Release.Name }}-be-svc
           servicePort: 8080
+      - path: /auth/
+        backend:
+          serviceName: {{ .Release.Name }}-auth-svc
+          servicePort: 8080
       - path: /
         backend:
           serviceName: service2
