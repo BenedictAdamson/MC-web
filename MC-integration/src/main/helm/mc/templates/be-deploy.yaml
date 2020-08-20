@@ -48,7 +48,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: {{ .Release.Name }}-secrets
-              key: user-password
+              key: db-user-password
         readinessProbe:
           httpGet:
             path: /actuator/health/readiness

@@ -54,13 +54,13 @@ spec:
         - name: MYSQL_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-db-password-secret
-              key: root-password
+              name: {{ .Release.Name }}-secrets
+              key: db-user-password
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ .Release.Name }}-secrets
-              key: root-password
+              key: db-root-password
         volumeMounts:
         - mountPath: /var/lib/mysql
           name: mc-auth-db
