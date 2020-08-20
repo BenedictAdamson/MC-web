@@ -20,9 +20,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-fe-deploy
+  name: {{ .Release.Name }}-be-deploy
   labels:
-    app.kubernetes.io/component: front-end
+    app.kubernetes.io/component: back-end
 {{ include "mc.labels" . | indent 4 }}
 spec:
   replicas: 1
@@ -37,14 +37,27 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
-        name: mc-front-end
-        image: benedictadamson/mc-front-end-srv:{{ .Chart.AppVersion }}
+        name: mc-back-end
+        image: benedictadamson/mc-back-end:{{ .Chart.AppVersion }}
         ports:
-        - containerPort: 80
-          name: http
+        - containerPort: 8080
+        args:
+        - --spring.data.mongodb.host={{ .Release.Name }}-db-svc
+        env:
+        - name: SPRING_DATA_MONGODB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-db-password-secret
+              key: user-password
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 13
+          periodSeconds: 5
         livenessProbe:
           httpGet:
-            path: /
-            port: 80
+            path: /actuator/health/liveness
+            port: 8080
           initialDelaySeconds: 20
-          periodSeconds: 13
+          periodSeconds: 59
