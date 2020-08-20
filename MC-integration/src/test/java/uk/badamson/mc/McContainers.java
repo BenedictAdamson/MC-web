@@ -18,6 +18,10 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
@@ -115,20 +119,14 @@ public class McContainers
        * Start the containers bottom-up, and wait until each is ready, to reduce
        * the number of transient connection errors.
        */
-      try {
-         authDb.start();
-         auth.start();
-         db.start();
-         db.waitUntilAcceptsConnections();
-         be.start();
-         be.waitUntilReady();
-         be.awaitHealthCheckOk();
-         fe.start();
-         in.start();
-         browser.start();
-      } catch (TimeoutException | InterruptedException e) {
-         throw new RuntimeException("Unable to start all mc containers", e);
-      }
+      authDb.start();
+      auth.start();
+      db.start();
+      db.waitUntilAcceptsConnections();
+      be.start();
+      fe.start();
+      in.start();
+      browser.start();
    }
 
    @Override
@@ -146,4 +144,17 @@ public class McContainers
       authDb.stop();
    }
 
+   private static void assertThatNoErrorMessagesLogged(final String logs) {
+      assertThat(logs, not(containsString("ERROR")));
+   }
+
+   public void assertThatNoErrorMessagesLogged() {
+      assertThatNoErrorMessagesLogged(authDb.getLogs());
+      assertThatNoErrorMessagesLogged(auth.getLogs());
+      assertThatNoErrorMessagesLogged(db.getLogs());
+      assertThatNoErrorMessagesLogged(be.getLogs());
+      assertThatNoErrorMessagesLogged(fe.getLogs());
+      assertThatNoErrorMessagesLogged(in.getLogs());
+      assertThatNoErrorMessagesLogged(browser.getLogs());
+   }
 }
