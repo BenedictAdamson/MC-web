@@ -20,9 +20,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-db-deploy
+  name: {{ .Release.Name }}-be-deploy
   labels:
-    app.kubernetes.io/component: database
+    app.kubernetes.io/component: back-end
 {{ include "mc.labels" . | indent 4 }}
 spec:
   replicas: 1
@@ -37,32 +37,27 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
-      - name: mc-db
-        image: benedictadamson/mc-database:{{ .Chart.AppVersion }}
-        args:
-        - --bind_ip
-        - 0.0.0.0
+        name: mc-back-end
+        image: benedictadamson/mc-back-end:{{ .Chart.AppVersion }}
         ports:
-        - containerPort: 27017
-        readinessProbe:
-          tcpSocket:
-            port: 27017
-          initialDelaySeconds: 11
-          periodSeconds: 3
+        - containerPort: 8080
+        args:
+        - --spring.data.mongodb.host={{ .Release.Name }}-db-svc
         env:
-        - name: MONGO_INITDB_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-secrets
-              key: db-root-password
-        - name: MC_INIT_PASSWORD
+        - name: SPRING_DATA_MONGODB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ .Release.Name }}-secrets
               key: db-user-password
-        volumeMounts:
-        - mountPath: /data/db
-          name: mc-data-db
-      volumes:
-      - name: mc-data-db
-        emptyDir: {}
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 13
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 20
+          periodSeconds: 59

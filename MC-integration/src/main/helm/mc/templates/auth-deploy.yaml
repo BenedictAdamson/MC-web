@@ -20,9 +20,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-db-deploy
+  name: {{ .Release.Name }}-auth-deploy
   labels:
-    app.kubernetes.io/component: database
+    app.kubernetes.io/component: server
 {{ include "mc.labels" . | indent 4 }}
 spec:
   replicas: 1
@@ -37,32 +37,34 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
-      - name: mc-db
-        image: benedictadamson/mc-database:{{ .Chart.AppVersion }}
-        args:
-        - --bind_ip
-        - 0.0.0.0
+        name: mc-auth
+        image: benedictadamson/mc-auth:{{ .Chart.AppVersion }}
         ports:
-        - containerPort: 27017
-        readinessProbe:
-          tcpSocket:
-            port: 27017
-          initialDelaySeconds: 11
-          periodSeconds: 3
+        - containerPort: 8080
         env:
-        - name: MONGO_INITDB_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-secrets
-              key: db-root-password
-        - name: MC_INIT_PASSWORD
+        - name: DB_VENDOR
+          value: mariadb
+        - name: DB_ADDR
+          value: {{ .Release.Name }}-auth-db-svc
+        - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ .Release.Name }}-secrets
               key: db-user-password
-        volumeMounts:
-        - mountPath: /data/db
-          name: mc-data-db
-      volumes:
-      - name: mc-data-db
-        emptyDir: {}
+        - name: KEYCLOAK_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-secrets
+              key: db-user-password
+        readinessProbe:
+          httpGet:
+            path: /auth
+            port: 8080
+          initialDelaySeconds: 13
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 20
+          periodSeconds: 59

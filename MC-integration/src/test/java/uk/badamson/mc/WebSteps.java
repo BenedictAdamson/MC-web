@@ -35,8 +35,8 @@ public class WebSteps implements AutoCloseable {
 
    private final WorldCore sut = new WorldCore();
 
-   @When("adding a player named {string} with  password {string}")
-   public void adding_a_player_named(final String name, final String password) {
+   @When("adding a user named {string} with  password {string}")
+   public void adding_a_user_named(final String name, final String password) {
       Objects.requireNonNull(name, "name");
       Objects.requireNonNull(password, "password");
       // TODO
@@ -52,8 +52,8 @@ public class WebSteps implements AutoCloseable {
       sut.beginScenario(scenario);
    }
 
-   @Then("can get the list of players")
-   public void can_get_the_list_of_players() {
+   @Then("can get the list of users")
+   public void can_get_the_list_of_users() {
       // TODO
    }
 
@@ -62,20 +62,20 @@ public class WebSteps implements AutoCloseable {
       sut.close();
    }
 
-   @When("getting the players")
-   public void getting_the_players() {
-      // TODO
-   }
-
    @When("getting the unknown resource at {string}")
    public void getting_the_unknown_resource_at(final String path) {
       // TODO
    }
 
+   @When("getting the users")
+   public void getting_the_users() {
+      // TODO
+   }
+
    @When("log in as {string} using password {string}")
-   public void log_in_as_using_password(final String player,
+   public void log_in_as_using_password(final String user,
             final String password) {
-      Objects.requireNonNull(player, "player");
+      Objects.requireNonNull(user, "user");
       Objects.requireNonNull(password, "password");
       // TODO
    }
@@ -116,7 +116,7 @@ public class WebSteps implements AutoCloseable {
    }
 
    @Then("MC serves the resource")
-   public void mc_serves_the_players_resource() {
+   public void mc_serves_the_users_resource() {
       // TODO
    }
 
@@ -131,10 +131,10 @@ public class WebSteps implements AutoCloseable {
       // Do nothing: the fron-end code should be doing this implicitly.
    }
 
-   @Given("that player {string} exists with  password {string}")
-   public void that_player_exists_with_password(final String player,
+   @Given("that user {string} exists with  password {string}")
+   public void that_user_exists_with_password(final String user,
             final String password) {
-      Objects.requireNonNull(player, "player");
+      Objects.requireNonNull(user, "user");
       Objects.requireNonNull(password, "password");
       // TODO
    }
@@ -147,33 +147,33 @@ public class WebSteps implements AutoCloseable {
        */
    }
 
-   @Then("the list of players has one player")
-   public void the_list_of_players_has_one_player() {
+   @Then("the list of users has one user")
+   public void the_list_of_users_has_one_user() {
       // TODO
    }
 
-   @Then("the list of players includes a player named {string}")
-   public void the_list_of_players_includes_a_player_named(final String name) {
+   @Then("the list of users includes a user named {string}")
+   public void the_list_of_users_includes_a_user_named(final String name) {
       // TODO
    }
 
-   @Then("the list of players includes the administrator")
-   public void the_list_of_players_includes_the_administrator() {
+   @Then("the list of users includes the administrator")
+   public void the_list_of_users_includes_the_administrator() {
       // TODO
    }
 
-   @When("the potential player gives the DNS name to a web browser")
-   public void the_potential_player_gives_the_DNS_name_to_a_web_browser() {
+   @When("the potential user gives the DNS name to a web browser")
+   public void the_potential_user_gives_the_DNS_name_to_a_web_browser() {
       // TODO
    }
 
-   @When("the potential player gives the obvious URL http://example.com/ to a web browser")
-   public void the_potential_player_gives_the_obvious_URL_to_a_web_browser() {
+   @When("the potential user gives the obvious URL http://example.com/ to a web browser")
+   public void the_potential_user_gives_the_obvious_URL_to_a_web_browser() {
       sut.setPath("/");
    }
 
-   @Then("the response message is a list of players")
-   public void the_response_message_is_a_list_of_players() {
+   @Then("the response message is a list of users")
+   public void the_response_message_is_a_list_of_users() {
       // TODO
    }
 

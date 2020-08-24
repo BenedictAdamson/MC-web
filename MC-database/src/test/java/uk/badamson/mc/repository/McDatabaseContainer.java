@@ -41,6 +41,7 @@ import uk.badamson.mc.Version;
  */
 public final class McDatabaseContainer
          extends GenericContainer<McDatabaseContainer> {
+
    public static final String VERSION = Version.VERSION;
 
    public static final String IMAGE = "index.docker.io/benedictadamson/mc-database:"
@@ -103,6 +104,12 @@ public final class McDatabaseContainer
    }
 
    private ServerAddress getServerAddress() {
-      return new ServerAddress(getHost(), this.getMappedPort(PORT));
+      return new ServerAddress(getHost(), getMappedPort(PORT));
+   }
+
+   public void waitUntilAcceptsConnections() {
+      try (final var client = createClient(ROOT_CREDENTIALS);) {
+         client.getDatabase(DB);
+      }
    }
 }
