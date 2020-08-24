@@ -32,8 +32,8 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import uk.badamson.mc.auth.AuthDbContainer;
 import uk.badamson.mc.auth.McAuthContainer;
+import uk.badamson.mc.repository.AuthDbContainer;
 
 /**
  * <p>

@@ -1,4 +1,4 @@
-package uk.badamson.mc.auth;
+package uk.badamson.mc.repository;
 /*
  * © Copyright Benedict Adamson 2020.
  *
@@ -19,6 +19,8 @@ package uk.badamson.mc.auth;
  */
 
 import org.testcontainers.containers.MariaDBContainer;
+
+import uk.badamson.mc.auth.McAuthContainer;
 
 /**
  * <p>
