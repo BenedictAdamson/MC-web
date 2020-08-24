@@ -228,6 +228,12 @@
 		</dependency>
 		<dependency>
 			<groupId>uk.badamson.mc</groupId>
+			<artifactId>MC-auth-db</artifactId>
+			<type>pom</type>
+			<version>${project.parent.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.badamson.mc</groupId>
 			<artifactId>MC-back-end</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
