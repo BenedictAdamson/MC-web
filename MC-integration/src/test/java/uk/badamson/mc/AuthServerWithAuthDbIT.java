@@ -67,25 +67,21 @@ public class AuthServerWithAuthDbIT implements AutoCloseable {
    }
 
    @BeforeEach
-   public void setUp() {
+   public void start() {
       dbContainer.start();
       authContainer.start();
    }
 
    @Test
    @Order(1)
-   public void start() {
+   public void startUp() {
       assertThatNoErrorMessages(authContainer.getLogs());
    }
 
-   private void stop() {
+   @AfterEach
+   public void stop() {
       authContainer.stop();
       dbContainer.stop();
       close();
-   }
-
-   @AfterEach
-   public void tearDown() {
-      stop();
    }
 }

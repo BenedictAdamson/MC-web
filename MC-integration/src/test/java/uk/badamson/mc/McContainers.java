@@ -53,6 +53,10 @@ public class McContainers
 
    public static final String INGRESS_HOST = BASE_URI.getAuthority();
 
+   private static void assertThatNoErrorMessagesLogged(final String logs) {
+      assertThat(logs, not(containsString("ERROR:")));
+   }
+
    public static String createUrlFromPath(final String path) {
       return BASE_URI.resolve(path).toASCIIString();
    }
@@ -85,6 +89,16 @@ public class McContainers
    public void afterTest(final TestDescription description,
             final Optional<Throwable> throwable) {
       browser.afterTest(description, throwable);
+   }
+
+   public void assertThatNoErrorMessagesLogged() {
+      assertThatNoErrorMessagesLogged(authDb.getLogs());
+      assertThatNoErrorMessagesLogged(auth.getLogs());
+      assertThatNoErrorMessagesLogged(db.getLogs());
+      assertThatNoErrorMessagesLogged(be.getLogs());
+      assertThatNoErrorMessagesLogged(fe.getLogs());
+      assertThatNoErrorMessagesLogged(in.getLogs());
+      assertThatNoErrorMessagesLogged(browser.getLogs());
    }
 
    @Override
@@ -141,19 +155,6 @@ public class McContainers
       db.stop();
       auth.stop();
       authDb.stop();
-   }
-
-   private static void assertThatNoErrorMessagesLogged(final String logs) {
-      assertThat(logs, not(containsString("ERROR:")));
-   }
-
-   public void assertThatNoErrorMessagesLogged() {
-      assertThatNoErrorMessagesLogged(authDb.getLogs());
-      assertThatNoErrorMessagesLogged(auth.getLogs());
-      assertThatNoErrorMessagesLogged(db.getLogs());
-      assertThatNoErrorMessagesLogged(be.getLogs());
-      assertThatNoErrorMessagesLogged(fe.getLogs());
-      assertThatNoErrorMessagesLogged(in.getLogs());
-      assertThatNoErrorMessagesLogged(browser.getLogs());
+      close();
    }
 }

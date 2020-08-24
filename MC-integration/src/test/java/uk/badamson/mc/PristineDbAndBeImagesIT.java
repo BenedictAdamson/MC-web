@@ -25,13 +25,14 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.concurrent.TimeoutException;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.testcontainers.containers.Network;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import uk.badamson.mc.repository.McDatabaseContainer;
@@ -50,15 +51,13 @@ import uk.badamson.mc.repository.McDatabaseContainer;
 @TestMethodOrder(OrderAnnotation.class)
 @Testcontainers
 @Tag("IT")
-public class PristineDbAndBeImagesIT {
+public class PristineDbAndBeImagesIT implements AutoCloseable {
 
    private final Network containersNetwork = Network.newNetwork();
 
-   @Container
    private final McDatabaseContainer dbContainer = new McDatabaseContainer()
             .withNetwork(containersNetwork).withNetworkAliases("db");
 
-   @Container
    private final McBackEndContainer beContainer = new McBackEndContainer()
             .withNetwork(containersNetwork).withNetworkAliases("mc")
             .withCommand("--spring.data.mongodb.host=db")
@@ -68,9 +67,26 @@ public class PristineDbAndBeImagesIT {
       assertThat(logs, not(containsString("ERROR")));
    }
 
+   @Override
+   public void close() {
+      beContainer.close();
+      dbContainer.close();
+      containersNetwork.close();
+   }
+
+   @BeforeEach
+   public void start() {
+      /*
+       * Start the containers bottom-up, and wait until each is ready, to reduce
+       * the number of transient connection errors.
+       */
+      dbContainer.start();
+      beContainer.start();
+   }
+
    @Test
    @Order(1)
-   public void start() throws TimeoutException, InterruptedException {
+   public void startUp() throws TimeoutException, InterruptedException {
       waitUntilReady();
 
       final var logs = beContainer.getLogs();
@@ -82,6 +98,17 @@ public class PristineDbAndBeImagesIT {
                () -> assertThatNoErrorMessagesLogged(logs),
                () -> assertThat(logs, not(containsString("Unable to start"))));
       beContainer.assertHealthCheckOk();
+   }
+
+   @AfterEach
+   public void stop() {
+      /*
+       * Stop the resources top-down, to reduce the number of transient
+       * connection errors.
+       */
+      beContainer.stop();
+      dbContainer.stop();
+      close();
    }
 
    private void waitUntilReady() throws TimeoutException, InterruptedException {
