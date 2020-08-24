@@ -87,6 +87,11 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<effort>Max</effort>
+					<threshold>Low</threshold>
+					<xmlOutput>true</xmlOutput>
+				</configuration>
 			</plugin>
 			<plugin>
 				<!--Work around Failsafe/Surefire not yet using Test Engine discovery 
