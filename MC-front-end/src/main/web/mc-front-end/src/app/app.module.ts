@@ -5,24 +5,29 @@ import { RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
+import { WINDOW_PROVIDERS } from './window-providers';
+import { KEYCLOAK_PROVIDERS } from './keycloak-init';
 import { UserComponent } from './user/user.component';
 import { UsersComponent } from './users/users.component';
 import { HomeComponent } from './home/home.component';
 
 @NgModule({
-    imports: [
-        BrowserModule,
-        AppRoutingModule,
-        HttpClientModule,
-        RouterModule
-    ],
-    declarations: [
-        AppComponent,
-        UsersComponent,
-        UserComponent,
-        HomeComponent
-    ],
-    providers: [],
-    bootstrap: [AppComponent]
+	imports: [
+		BrowserModule,
+		AppRoutingModule,
+		HttpClientModule,
+		RouterModule
+	],
+	declarations: [
+		AppComponent,
+		UsersComponent,
+		UserComponent,
+		HomeComponent
+	],
+	providers: [
+		WINDOW_PROVIDERS,
+		KEYCLOAK_PROVIDERS
+	],
+	bootstrap: [AppComponent]
 })
 export class AppModule { }
