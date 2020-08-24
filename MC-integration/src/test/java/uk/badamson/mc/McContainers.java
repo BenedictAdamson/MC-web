@@ -144,7 +144,7 @@ public class McContainers
    }
 
    private static void assertThatNoErrorMessagesLogged(final String logs) {
-      assertThat(logs, not(containsString("ERROR")));
+      assertThat(logs, not(containsString("ERROR:")));
    }
 
    public void assertThatNoErrorMessagesLogged() {
