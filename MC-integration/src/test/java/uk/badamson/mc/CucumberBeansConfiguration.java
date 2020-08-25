@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2018-20.
+ * © Copyright Benedict Adamson 2020.
  *
  * This file is part of MC.
  *
@@ -18,18 +18,9 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Configuration;
 
-import io.cucumber.spring.CucumberContextConfiguration;
-
-/**
- * <p>
- * The Spring Cucumber configuration for integration tests of the Mission
- * Command game.
- * </p>
- */
-@CucumberContextConfiguration
-@Import(value = { CucumberBeansConfiguration.class })
-public class CucumberTestConfiguration {
+@Configuration
+public class CucumberBeansConfiguration {
 
 }
