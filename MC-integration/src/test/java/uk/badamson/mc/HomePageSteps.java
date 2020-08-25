@@ -18,10 +18,7 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.util.Objects;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -29,30 +26,14 @@ import io.cucumber.java.en.When;
 
 /**
  * <p>
- * Definitions of BDD steps for the Cucumber-JVM BDD testing tool.
+ * Definitions of BDD steps for the Cucumber-JVM BDD testing tool for steps
+ * pertaining to the home-page.
+ * </p>
  */
-@DirtiesContext
-public class WebSteps {
+public class HomePageSteps {
 
    @Autowired
    private WorldCore worldCore;
-
-   @When("adding a user named {string} with  password {string}")
-   public void adding_a_user_named(final String name, final String password) {
-      Objects.requireNonNull(name, "name");
-      Objects.requireNonNull(password, "password");
-      // TODO
-   }
-
-   @Then("can get the list of users")
-   public void can_get_the_list_of_users() {
-      // TODO
-   }
-
-   @Then("MC forbids the request")
-   public void mc_forbids_the_request() {
-      // TODO
-   }
 
    @Then("MC serves the home page")
    public void mc_serves_the_home_page() {
