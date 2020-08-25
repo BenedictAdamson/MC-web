@@ -126,11 +126,6 @@ public class WebSteps implements AutoCloseable {
       // TODO
    }
 
-   @Given("presenting a valid CSRF token")
-   public void presenting_a_valid_CSRF_token() {
-      // Do nothing: the fron-end code should be doing this implicitly.
-   }
-
    @Given("that user {string} exists with  password {string}")
    public void that_user_exists_with_password(final String user,
             final String password) {
