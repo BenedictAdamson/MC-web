@@ -20,9 +20,9 @@ package uk.badamson.mc;
 
 import java.util.Objects;
 
-import io.cucumber.java.After;
-import io.cucumber.java.Before;
-import io.cucumber.java.Scenario;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -31,9 +31,11 @@ import io.cucumber.java.en.When;
  * <p>
  * Definitions of BDD steps for the Cucumber-JVM BDD testing tool.
  */
-public class WebSteps implements AutoCloseable {
+@DirtiesContext
+public class WebSteps {
 
-   private final WorldCore sut = new WorldCore();
+   @Autowired
+   private WorldCore worldCore;
 
    @When("adding a user named {string} with  password {string}")
    public void adding_a_user_named(final String name, final String password) {
@@ -42,56 +44,8 @@ public class WebSteps implements AutoCloseable {
       // TODO
    }
 
-   @After
-   public void afterScenario(final Scenario scenario) {
-      sut.endScenario(scenario);
-   }
-
-   @Before
-   public void beforeScenario(final Scenario scenario) {
-      sut.beginScenario(scenario);
-   }
-
    @Then("can get the list of users")
    public void can_get_the_list_of_users() {
-      // TODO
-   }
-
-   @Override
-   public void close() {
-      sut.close();
-   }
-
-   @When("getting the unknown resource at {string}")
-   public void getting_the_unknown_resource_at(final String path) {
-      // TODO
-   }
-
-   @When("getting the users")
-   public void getting_the_users() {
-      // TODO
-   }
-
-   @When("log in as {string} using password {string}")
-   public void log_in_as_using_password(final String user,
-            final String password) {
-      Objects.requireNonNull(user, "user");
-      Objects.requireNonNull(password, "password");
-      // TODO
-   }
-
-   @Given("logged in as {string}")
-   public void logged_in_as(final String name) {
-      // TODO
-   }
-
-   @Then("MC accepts the addition")
-   public void mc_accepts_the_addition() {
-      // TODO
-   }
-
-   @Then("MC accepts the login")
-   public void mc_accepts_the_login() {
       // TODO
    }
 
@@ -100,38 +54,9 @@ public class WebSteps implements AutoCloseable {
       // TODO
    }
 
-   @Then("MC replies with Forbidden")
-   public void mc_replies_with_forbidden() {
-      // TODO
-   }
-
-   @Then("MC replies with Not Found")
-   public void mc_replies_with_not_found() {
-      // TODO
-   }
-
    @Then("MC serves the home page")
    public void mc_serves_the_home_page() {
-      sut.get();
-   }
-
-   @Then("MC serves the resource")
-   public void mc_serves_the_users_resource() {
-      // TODO
-   }
-
-   @When("modifying the unknown resource with a {string} at {string}")
-   public void modifying_the_unknown_resource_with_a(final String verb,
-            final String path) {
-      // TODO
-   }
-
-   @Given("that user {string} exists with  password {string}")
-   public void that_user_exists_with_password(final String user,
-            final String password) {
-      Objects.requireNonNull(user, "user");
-      Objects.requireNonNull(password, "password");
-      // TODO
+      worldCore.get();
    }
 
    @Given("the DNS name, example.com, of an MC server")
@@ -142,39 +67,9 @@ public class WebSteps implements AutoCloseable {
        */
    }
 
-   @Then("the list of users has one user")
-   public void the_list_of_users_has_one_user() {
-      // TODO
-   }
-
-   @Then("the list of users includes a user named {string}")
-   public void the_list_of_users_includes_a_user_named(final String name) {
-      // TODO
-   }
-
-   @Then("the list of users includes the administrator")
-   public void the_list_of_users_includes_the_administrator() {
-      // TODO
-   }
-
-   @When("the potential user gives the DNS name to a web browser")
-   public void the_potential_user_gives_the_DNS_name_to_a_web_browser() {
-      // TODO
-   }
-
    @When("the potential user gives the obvious URL http://example.com/ to a web browser")
    public void the_potential_user_gives_the_obvious_URL_to_a_web_browser() {
-      sut.setPath("/");
-   }
-
-   @Then("the response message is a list of users")
-   public void the_response_message_is_a_list_of_users() {
-      // TODO
-   }
-
-   @Given("user authenticated as Administrator")
-   public void user_authenticated_as_Administrator() {
-      // TODO
+      worldCore.setPath("/");
    }
 
 }

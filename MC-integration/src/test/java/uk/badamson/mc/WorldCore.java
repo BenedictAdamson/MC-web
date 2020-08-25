@@ -28,6 +28,7 @@ import org.testcontainers.lifecycle.TestDescription;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
+import io.cucumber.spring.ScenarioScope;
 
 /**
  * <p>
@@ -43,6 +44,7 @@ import io.cucumber.java.Scenario;
  * accessing MC using a web browser.
  * </p>
  */
+@ScenarioScope
 public final class WorldCore implements AutoCloseable {
 
    private static Optional<Throwable> createOutcomeException(
@@ -97,6 +99,7 @@ public final class WorldCore implements AutoCloseable {
     * @throws NullPointerException
     *            If {@code scenario} is null;
     */
+   @Before
    public void beginScenario(final Scenario scenario) {
       containers.start();
       containers.beforeTest(createTestDescription(scenario));
@@ -134,6 +137,7 @@ public final class WorldCore implements AutoCloseable {
     * @throws NullPointerException
     *            If {@code scenario} is null;
     */
+   @After
    public void endScenario(final Scenario scenario) {
       tellContainersTestOutcome(scenario);
       close();
