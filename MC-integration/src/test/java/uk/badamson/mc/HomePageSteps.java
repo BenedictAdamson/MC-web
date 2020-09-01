@@ -37,7 +37,7 @@ public class HomePageSteps {
 
    @Then("MC serves the home page")
    public void mc_serves_the_home_page() {
-      worldCore.get();
+      worldCore.getUrlUsingBrowser();
    }
 
    @Given("the DNS name, example.com, of an MC server")
@@ -50,7 +50,7 @@ public class HomePageSteps {
 
    @When("the potential user gives the obvious URL http://example.com/ to a web browser")
    public void the_potential_user_gives_the_obvious_URL_to_a_web_browser() {
-      worldCore.setPath("/");
+      worldCore.setUrlPath("/");
    }
 
 }

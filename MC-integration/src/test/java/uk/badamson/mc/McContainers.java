@@ -48,17 +48,18 @@ import uk.badamson.mc.repository.McDatabaseContainer;
 public class McContainers
          implements Startable, AutoCloseable, TestLifecycleAware {
 
-   private static final URI BASE_URI = URI
+   private static final URI BASE_PRIVATE_NETWORK_URI = URI
             .create("http://" + McReverseProxyContainer.HOST);
 
-   public static final String INGRESS_HOST = BASE_URI.getAuthority();
+   public static final String INGRESS_HOST = BASE_PRIVATE_NETWORK_URI
+            .getAuthority();
 
    private static void assertThatNoErrorMessagesLogged(final String logs) {
       assertThat(logs, not(containsString("ERROR:")));
    }
 
-   public static String createUrlFromPath(final String path) {
-      return BASE_URI.resolve(path).toASCIIString();
+   public static URI createIngressPrivateNetworkUriFromPath(final String path) {
+      return BASE_PRIVATE_NETWORK_URI.resolve(path);
    }
 
    private final Network network = Network.newNetwork();
@@ -120,6 +121,12 @@ public class McContainers
       auth.close();
       authDb.close();
       network.close();
+   }
+
+   public URI createIngressUriFromPath(final String path) {
+      final var base = URI.create(
+               "http://" + in.getHost() + ":" + in.getFirstMappedPort());
+      return base.resolve(path);
    }
 
    public RemoteWebDriver getWebDriver() {

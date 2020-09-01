@@ -18,9 +18,14 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.ProtocolException;
+import java.net.URI;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.lifecycle.TestDescription;
@@ -83,7 +88,9 @@ public final class WorldCore implements AutoCloseable {
 
    private RemoteWebDriver webDriver;
 
-   private String url;
+   private URI privateNetworkUrl;
+
+   private URI localUrl;
 
    /**
     * <p>
@@ -117,7 +124,7 @@ public final class WorldCore implements AutoCloseable {
          webDriver.quit();
          webDriver = null;
       }
-      url = null;
+      privateNetworkUrl = null;
       containers.stop();
       containers.close();
    }
@@ -145,8 +152,46 @@ public final class WorldCore implements AutoCloseable {
 
    /**
     * <p>
+    * Perform an HTTP request of the front-end of the SUT, using the previously
+    * {@linkplain #setUrlPath(String) set URL}, and return the HTTP status code
+    * of the response.
+    * </p>
+    *
+    * @param method
+    *           the HTTP method of the request.
+    * @throws IllegalArgumentException
+    *            If {@code method} is not a valid HTTP method
+    * @throws IllegalStateException
+    *            <ul>
+    *            <li>If the scenario has not
+    *            {@linkplain #beginScenario(Scenario) begun}.</li>
+    *            <li>If the scenario has {@linkplain #endScenario(Scenario)
+    *            ended}.</li>
+    *            <li>If the this has been {@linkplain #close() closed}.</li>
+    *            <li>If no URL was previously {@linkplain #setUrlPath(String)
+    *            set}.</li>
+    *            </ul>
+    */
+   public int getHttpResponseCode(final String method) {
+      try {
+         Objects.requireNonNull(localUrl, "urlPath not set");
+         final HttpURLConnection connection = (HttpURLConnection) localUrl
+                  .toURL().openConnection();
+         connection.setRequestMethod(method);
+         connection.connect();
+         return connection.getResponseCode();
+      } catch (final ProtocolException e) {
+         throw new IllegalArgumentException("Illegal method " + method, e);
+      } catch (IOException | NullPointerException e) {
+         throw new IllegalStateException(e);
+      }
+   }
+
+   /**
+    * <p>
     * Perform an HTTP GET of the front-end of the SUT, using the previously
-    * {@linkplain #setPath(String) set URL}.
+    * {@linkplain #setUrlPath(String) set URL}, using {@link WebDriver} to give
+    * a similar experience to manually using a web browser.
     * </p>
     *
     * @throws IllegalStateException
@@ -156,20 +201,20 @@ public final class WorldCore implements AutoCloseable {
     *            <li>If the scenario has {@linkplain #endScenario(Scenario)
     *            ended}.</li>
     *            <li>If the this has been {@linkplain #close() closed}.</li>
-    *            <li>If no URL was previously {@linkplain #setPath(String)
+    *            <li>If no URL was previously {@linkplain #setUrlPath(String)
     *            set}.</li>
     *            </ul>
     * @throws WebDriverException
     *            If the resource given by the URL does not exist.
     */
-   public void get() throws WebDriverException {
+   public void getUrlUsingBrowser() throws WebDriverException {
       try {
          Objects.requireNonNull(webDriver, "webDriver");
-         Objects.requireNonNull(url, "url");
+         Objects.requireNonNull(privateNetworkUrl, "url");
       } catch (final NullPointerException e) {
          throw new IllegalStateException(e);
       }
-      webDriver.get(url);
+      webDriver.get(privateNetworkUrl.toASCIIString());
    }
 
    /**
@@ -185,8 +230,10 @@ public final class WorldCore implements AutoCloseable {
     * @throws IllegalArgumentException
     *            If {@code path} violates RFC 2396
     */
-   public void setPath(final String path) {
-      url = McContainers.createUrlFromPath(path);
+   public void setUrlPath(final String path) {
+      privateNetworkUrl = McContainers
+               .createIngressPrivateNetworkUriFromPath(path);
+      localUrl = containers.createIngressUriFromPath(path);
    }
 
    private void tellContainersTestOutcome(final Scenario scenario) {

@@ -18,6 +18,10 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.net.HttpURLConnection;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.en.Then;
@@ -34,25 +38,32 @@ public class UnknownResourceSteps {
    @Autowired
    private WorldCore worldCore;
 
+   private int httpResponseCode;
+
+   private void doHttpRequest(final String method, final String path) {
+      worldCore.setUrlPath(path);
+      httpResponseCode = worldCore.getHttpResponseCode(method);
+   }
+
    @When("getting the unknown resource at {string}")
    public void getting_the_unknown_resource_at(final String path) {
-      // TODO
+      doHttpRequest("GET", path);
    }
 
    @Then("MC replies with Forbidden")
    public void mc_replies_with_forbidden() {
-      // TODO
+      assertEquals(HttpURLConnection.HTTP_FORBIDDEN, httpResponseCode);
    }
 
    @Then("MC replies with Not Found")
    public void mc_replies_with_not_found() {
-      // TODO
+      assertEquals(HttpURLConnection.HTTP_NOT_FOUND, httpResponseCode);
    }
 
    @When("modifying the unknown resource with a {string} at {string}")
-   public void modifying_the_unknown_resource_with_a(final String verb,
+   public void modifying_the_unknown_resource_with_a(final String method,
             final String path) {
-      // TODO
+      doHttpRequest(method, path);
    }
 
 }
