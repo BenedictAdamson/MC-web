@@ -54,17 +54,17 @@ public class UnknownResourceSteps {
       doHttpRequest("GET", path);
    }
 
+   @Then("MC replies with Not Found")
+   public void mc_replies_with_not_found() {
+      assertEquals(HttpURLConnection.HTTP_NOT_FOUND, httpResponseCode);
+   }
+
    @Then("MC replies with Not Found or Forbidden or Method Not Allowed")
    public void mc_replies_with_not_found_or_forbidden_or_method_not_allowed() {
       final var expected = Set.<Integer>of(HttpURLConnection.HTTP_NOT_FOUND,
                HttpURLConnection.HTTP_FORBIDDEN,
                HttpURLConnection.HTTP_BAD_METHOD);
       assertThat(httpResponseCode, is(in(expected)));
-   }
-
-   @Then("MC replies with Not Found")
-   public void mc_replies_with_not_found() {
-      assertEquals(HttpURLConnection.HTTP_NOT_FOUND, httpResponseCode);
    }
 
    @When("modifying the unknown resource with a {string} at {string}")
