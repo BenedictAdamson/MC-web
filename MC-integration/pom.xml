@@ -115,6 +115,8 @@
 							<arg value="--include-engine" />
 							<arg value="cucumber" />
 							<arg value="--select-package=uk.badamson.mc" />
+							<arg value="--include-tag" />
+							<arg value="integration" />
 							<arg value="--reports-dir=target/failsafe-reports" /> <!-- expected location if had used failsafe plugin -->
 						</java>
 					</target>
