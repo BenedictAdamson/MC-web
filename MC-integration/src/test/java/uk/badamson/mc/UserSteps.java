@@ -45,6 +45,11 @@ public class UserSteps {
       // TODO
    }
 
+   @Then("MC does not present adding a user as an option")
+   public void does_not_present_adding_user_option() {
+      // TODO
+   }
+
    @When("getting the users")
    public void getting_users() {
       // TODO

@@ -18,9 +18,13 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.in;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.HttpURLConnection;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -50,9 +54,12 @@ public class UnknownResourceSteps {
       doHttpRequest("GET", path);
    }
 
-   @Then("MC replies with Forbidden")
-   public void mc_replies_with_forbidden() {
-      assertEquals(HttpURLConnection.HTTP_FORBIDDEN, httpResponseCode);
+   @Then("MC replies with Not Found or Forbidden or Method Not Allowed")
+   public void mc_replies_with_not_found_or_forbidden_or_method_not_allowed() {
+      final var expected = Set.<Integer>of(HttpURLConnection.HTTP_NOT_FOUND,
+               HttpURLConnection.HTTP_FORBIDDEN,
+               HttpURLConnection.HTTP_BAD_METHOD);
+      assertThat(httpResponseCode, is(in(expected)));
    }
 
    @Then("MC replies with Not Found")
