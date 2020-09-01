@@ -18,8 +18,11 @@ package uk.badamson.mc.auth;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Duration;
 
+import org.keycloak.admin.client.Keycloak;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
@@ -44,7 +47,10 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
    public static final String DB_USER = "keycloak";
    public static final String DB_NAME = "keycloak";
    public static final String DB_PASSWORD = "password123";
+   public static final String REALM = "MC";
+   public static final String CLIENT_ID = "mc-ui";
 
+   private static final String ADMIN_USER = "admin";
    private static final String ADMIN_PASSWORD = "letmein";
 
    private static final Duration STARTUP_TIME = Duration.ofMillis(100);
@@ -61,4 +67,17 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
       waitingFor(WAIT_STRATEGY);
    }
 
+   public Keycloak getKeycloakInstance() {
+      return Keycloak.getInstance(getUri().toASCIIString(), REALM, ADMIN_USER,
+               ADMIN_PASSWORD, CLIENT_ID);
+   }
+
+   private URI getUri() {
+      try {
+         return new URI("http", null, getHost(), getFirstMappedPort(), "", null,
+                  null);
+      } catch (final URISyntaxException e) {// never happens
+         throw new IllegalStateException(e);
+      }
+   }
 }

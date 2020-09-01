@@ -21,6 +21,9 @@ package uk.badamson.mc;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +32,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -64,6 +68,25 @@ public class AuthServerWithAuthDbIT implements AutoCloseable {
       authContainer.close();
       dbContainer.close();
       containersNetwork.close();
+   }
+
+   /**
+    * The <i>Get users of fresh instance</i> scenario requires that a fresh
+    * instance of MC has a list of users that has at least one user.
+    */
+   @Test
+   @Order(2)
+   public void listPristineUsers() {
+      try (var keycloak = authContainer.getKeycloakInstance()) {
+         final var realm = keycloak.realm(McAuthContainer.REALM);
+         final List<UserRepresentation> users;
+         try {
+            users = realm.users().list();
+         } catch (Exception e) {
+            throw new AssertionError("Unable to list users in realm", e);
+         }
+         assertThat(users, not(empty()));
+      }
    }
 
    @BeforeEach
