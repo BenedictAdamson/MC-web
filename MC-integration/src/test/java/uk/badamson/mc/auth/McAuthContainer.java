@@ -78,8 +78,8 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
 
    private URI getUri() {
       try {
-         return new URI("http", null, getHost(), getFirstMappedPort(), "", null,
-                  null);
+         return new URI("http", null, getHost(), getFirstMappedPort(), "/auth",
+                  null, null);
       } catch (final URISyntaxException e) {// never happens
          throw new IllegalStateException(e);
       }
