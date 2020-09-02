@@ -25,6 +25,7 @@ import java.time.Duration;
 import org.keycloak.admin.client.Keycloak;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
 
 import uk.badamson.mc.Version;
@@ -53,9 +54,12 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
    private static final String ADMIN_USER = "admin";
    private static final String ADMIN_PASSWORD = "letmein";
 
-   private static final Duration STARTUP_TIME = Duration.ofMillis(100);
+   private static final Duration STARTUP_TIME = Duration.ofSeconds(180);
 
-   private static final WaitStrategy WAIT_STRATEGY = Wait.forListeningPort();
+   private static final WaitStrategy WAIT_STRATEGY = new WaitAllStrategy()
+            .withStartupTimeout(STARTUP_TIME)
+            .withStrategy(Wait.forListeningPort()).withStrategy(
+                     Wait.forLogMessage(".*[Aa]dmin console listening.*", 1));
 
    public McAuthContainer() {
       super(IMAGE);
@@ -63,8 +67,8 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
       withEnv("KEYCLOAK_PASSWORD", ADMIN_PASSWORD);
       withEnv("DB_PASSWORD", DB_PASSWORD);
       withNetworkAliases(HOST);
-      withMinimumRunningDuration(STARTUP_TIME);
       waitingFor(WAIT_STRATEGY);
+      ;
    }
 
    public Keycloak getKeycloakInstance() {
