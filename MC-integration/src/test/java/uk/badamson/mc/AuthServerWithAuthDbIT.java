@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -76,14 +77,21 @@ public class AuthServerWithAuthDbIT implements AutoCloseable {
     */
    @Test
    @Order(2)
-   public void listPristineUsers() {
+   public void pristine() {
       try (var keycloak = authContainer.getKeycloakInstance()) {
+         final List<RealmRepresentation> realms;
+         try {
+            realms = keycloak.realms().findAll();
+         } catch (Exception e) {// provide better diagnostics
+            throw new AssertionError("Able to list realms", e);
+         }
+         assertThat(realms, not(empty()));
          final var realm = keycloak.realm(McAuthContainer.REALM);
          final List<UserRepresentation> users;
          try {
             users = realm.users().list();
-         } catch (Exception e) {
-            throw new AssertionError("Unable to list users in realm", e);
+         } catch (Exception e) {// provide better diagnostics
+            throw new AssertionError("Able to list users in realm", e);
          }
          assertThat(users, not(empty()));
       }
