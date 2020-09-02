@@ -48,11 +48,13 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
    public static final String DB_USER = "keycloak";
    public static final String DB_NAME = "keycloak";
    public static final String DB_PASSWORD = "password123";
-   public static final String REALM = "MC";
-   public static final String CLIENT_ID = "mc-ui";
+   public static final String MC_REALM = "MC";
+   public static final String MC_CLIENT_ID = "mc-ui";
 
    private static final String ADMIN_USER = "admin";
    private static final String ADMIN_PASSWORD = "letmein";
+   private static final String ADMIN_REALM = "master";
+   private static final String ADMIN_CLIENT_ID = null;
 
    private static final Duration STARTUP_TIME = Duration.ofSeconds(180);
 
@@ -68,12 +70,11 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
       withEnv("DB_PASSWORD", DB_PASSWORD);
       withNetworkAliases(HOST);
       waitingFor(WAIT_STRATEGY);
-      ;
    }
 
    public Keycloak getKeycloakInstance() {
-      return Keycloak.getInstance(getUri().toASCIIString(), REALM, ADMIN_USER,
-               ADMIN_PASSWORD, CLIENT_ID);
+      return Keycloak.getInstance(getUri().toASCIIString(), ADMIN_REALM, ADMIN_USER,
+               ADMIN_PASSWORD, ADMIN_CLIENT_ID);
    }
 
    private URI getUri() {

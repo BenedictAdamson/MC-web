@@ -77,7 +77,7 @@ public class AuthServerWithAuthDbIT implements AutoCloseable {
     */
    @Test
    @Order(2)
-   public void pristine() {
+   public void listUsers() {
       try (var keycloak = authContainer.getKeycloakInstance()) {
          final List<RealmRepresentation> realms;
          try {
@@ -86,7 +86,7 @@ public class AuthServerWithAuthDbIT implements AutoCloseable {
             throw new AssertionError("Able to list realms", e);
          }
          assertThat(realms, not(empty()));
-         final var realm = keycloak.realm(McAuthContainer.REALM);
+         final var realm = keycloak.realm(McAuthContainer.MC_REALM);
          final List<UserRepresentation> users;
          try {
             users = realm.users().list();
