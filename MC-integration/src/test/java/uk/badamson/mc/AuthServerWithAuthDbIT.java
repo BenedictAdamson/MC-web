@@ -82,7 +82,7 @@ public class AuthServerWithAuthDbIT implements AutoCloseable {
          final List<RealmRepresentation> realms;
          try {
             realms = keycloak.realms().findAll();
-         } catch (Exception e) {// provide better diagnostics
+         } catch (final Exception e) {// provide better diagnostics
             throw new AssertionError("Able to list realms", e);
          }
          assertThat(realms, not(empty()));
@@ -90,7 +90,7 @@ public class AuthServerWithAuthDbIT implements AutoCloseable {
          final List<UserRepresentation> users;
          try {
             users = realm.users().list();
-         } catch (Exception e) {// provide better diagnostics
+         } catch (final Exception e) {// provide better diagnostics
             throw new AssertionError("Able to list users in realm", e);
          }
          assertThat(users, not(empty()));
