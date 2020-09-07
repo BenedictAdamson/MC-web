@@ -19,7 +19,7 @@ package uk.badamson.mc;
  */
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.jupiter.api.AfterEach;
@@ -88,6 +88,23 @@ public class AuthSubSystemIT implements AutoCloseable {
    @Test
    @Order(1)
    public void startUp() {
+      assertThatNoErrorMessages(auth.getLogs());
+   }
+
+   /**
+    * The <i>List users</i> scenario requires that a user with the "player" role
+    * is permitted to list users.
+    */
+   @Test
+   @Order(2)
+   public void listUsersAsPlayer() {
+      final var user = "Jeff";
+      final var password = "letmein";
+      auth.addPlayer(user, password);
+      try (var keycloak = auth.getKeycloakInstance(user, password)) {
+         var users = keycloak.realm(McAuthContainer.MC_REALM).users().list();
+         assertThat(users, not(empty()));
+      }
       assertThatNoErrorMessages(auth.getLogs());
    }
 

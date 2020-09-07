@@ -18,6 +18,7 @@ package uk.badamson.mc.auth;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
@@ -36,6 +37,8 @@ import uk.badamson.mc.Version;
  * </p>
  */
 public final class McAuthContainer extends GenericContainer<McAuthContainer> {
+   private static final String KCADM = "/opt/jboss/keycloak/bin/kcadm.sh";
+
    public static final String VERSION = Version.VERSION;
 
    public static final String IMAGE = "index.docker.io/benedictadamson/mc-auth:"
@@ -48,10 +51,6 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
    public static final String MC_REALM = "MC";
    public static final String MC_CLIENT_ID = "mc-ui";
 
-   private static final String ADMIN_USER = "admin";
-   private static final String ADMIN_REALM = MC_REALM;
-   private static final String ADMIN_CLIENT_ID = "realm-management";
-
    private static final Duration STARTUP_TIME = Duration.ofSeconds(180);
 
    private static final WaitStrategy WAIT_STRATEGY = new WaitAllStrategy()
@@ -59,12 +58,9 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
             .withStrategy(Wait.forListeningPort()).withStrategy(
                      Wait.forLogMessage(".*[Aa]dmin console listening.*", 1));
 
-   private final String keycloakPassword;
-
    public McAuthContainer(String keycloakPassword, String dbVendor,
             String dbAddr, String dbPassword) {
       super(IMAGE);
-      this.keycloakPassword = keycloakPassword;
       addExposedPort(PORT);
       withEnv("KEYCLOAK_PASSWORD", keycloakPassword);
       withEnv("DB_VENDOR", dbVendor);
@@ -73,9 +69,22 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
       waitingFor(WAIT_STRATEGY);
    }
 
-   public Keycloak getKeycloakInstance() {
-      return Keycloak.getInstance(getUri().toASCIIString(), ADMIN_REALM,
-               ADMIN_USER, keycloakPassword, ADMIN_CLIENT_ID);
+   public void addPlayer(String user, String password) {
+      try {
+         execInContainer(KCADM, "create", "users", "-r", MC_REALM, "-s",
+                  "username=" + user, "-s", "enabled=true");
+         execInContainer(KCADM, "set-password", "-r", MC_REALM, "--username",
+                  user, "--new-password", password);
+         execInContainer(KCADM, "add-roles", "-r", MC_REALM, "--uusername",
+                  user, "--rolename", "player");
+      } catch (IOException | InterruptedException e) {
+         throw new RuntimeException("Failed to add player", e);
+      }
+   }
+
+   public Keycloak getKeycloakInstance(String user, String password) {
+      return Keycloak.getInstance(getUri().toASCIIString(), MC_REALM, user,
+               password, MC_CLIENT_ID);
    }
 
    private URI getUri() {
