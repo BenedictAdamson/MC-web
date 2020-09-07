@@ -50,7 +50,7 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
 
    private static final String ADMIN_USER = "admin";
    private static final String ADMIN_REALM = MC_REALM;
-   private static final String ADMIN_CLIENT_ID = MC_CLIENT_ID;
+   private static final String ADMIN_CLIENT_ID = "realm-management";
 
    private static final Duration STARTUP_TIME = Duration.ofSeconds(180);
 
@@ -58,10 +58,11 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
             .withStartupTimeout(STARTUP_TIME)
             .withStrategy(Wait.forListeningPort()).withStrategy(
                      Wait.forLogMessage(".*[Aa]dmin console listening.*", 1));
-   
+
    private final String keycloakPassword;
 
-   public McAuthContainer(String keycloakPassword, String dbVendor, String dbAddr, String dbPassword) {
+   public McAuthContainer(String keycloakPassword, String dbVendor,
+            String dbAddr, String dbPassword) {
       super(IMAGE);
       this.keycloakPassword = keycloakPassword;
       addExposedPort(PORT);
