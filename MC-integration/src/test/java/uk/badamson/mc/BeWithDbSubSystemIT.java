@@ -92,17 +92,22 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    @Test
    @Order(1)
    public void startUp() throws TimeoutException, InterruptedException {
-      waitUntilReady();
-
-      final var logs = be.getLogs();
-      assertAll("Log suitable messages",
-               () -> assertThat(logs,
-                        containsString(McBackEndContainer.STARTED_MESSAGE)),
-               () -> assertThat(logs,
-                        containsString(McBackEndContainer.CONNECTION_MESSAGE)),
-               () -> assertThatNoErrorMessagesLogged(logs),
-               () -> assertThat(logs, not(containsString("Unable to start"))));
-      be.assertHealthCheckOk();
+      try {
+         be.awaitLogMessage(McBackEndContainer.STARTED_MESSAGE);
+         be.awaitLogMessage(McBackEndContainer.CONNECTION_MESSAGE);
+      } finally {// Provide useful diagnostics even if timeout
+         final var logs = be.getLogs();
+         assertAll("Log suitable messages",
+                  () -> assertThat(logs,
+                           containsString(McBackEndContainer.STARTED_MESSAGE)),
+                  () -> assertThat(logs,
+                           containsString(
+                                    McBackEndContainer.CONNECTION_MESSAGE)),
+                  () -> assertThatNoErrorMessagesLogged(logs),
+                  () -> assertThat(logs,
+                           not(containsString("Unable to start"))));
+         be.assertHealthCheckOk();
+      }
    }
 
    @AfterEach
@@ -114,10 +119,5 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       be.stop();
       db.stop();
       close();
-   }
-
-   private void waitUntilReady() throws TimeoutException, InterruptedException {
-      db.waitUntilAcceptsConnections();
-      be.waitUntilReady();
    }
 }

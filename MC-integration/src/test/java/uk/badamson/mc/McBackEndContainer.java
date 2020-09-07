@@ -20,6 +20,7 @@ package uk.badamson.mc;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -27,6 +28,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.WaitingConsumer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
+import org.testcontainers.containers.wait.strategy.WaitStrategy;
 
 /**
  * <p>
@@ -46,13 +50,17 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    public static final String STARTED_MESSAGE = "Started Application";
 
+   private static final WaitStrategy WAIT_STRATEGY = new WaitAllStrategy()
+            .withStartupTimeout(Duration.ofSeconds(20))
+            .withStrategy(Wait.forLogMessage(".*" + STARTED_MESSAGE + ".*", 1));
+
    public static final String CONNECTION_MESSAGE = "successfully connected to server";
 
    McBackEndContainer(String mongoDbHost, String mongoDbPassword) {
       super(IMAGE);
-      withEnv("SPRING_DATA_MONGODB_PASSWORD",
-               mongoDbPassword);
-      withCommand("--spring.data.mongodb.host=" + mongoDbPassword);
+      waitingFor(WAIT_STRATEGY);
+      withEnv("SPRING_DATA_MONGODB_PASSWORD", mongoDbPassword);
+      withCommand("--spring.data.mongodb.host=" + mongoDbHost);
    }
 
    void assertHealthCheckOk() {
@@ -104,11 +112,5 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
    WebTestClient.ResponseSpec getJson(final String path) {
       return connectWebTestClient(path).get().accept(MediaType.APPLICATION_JSON)
                .exchange();
-   }
-
-   void waitUntilReady() throws TimeoutException, InterruptedException {
-      awaitLogMessage(STARTED_MESSAGE);
-      awaitLogMessage(CONNECTION_MESSAGE);
-      awaitHealthCheckOk();
    }
 }

@@ -101,10 +101,4 @@ public final class McDatabaseContainer
    private ServerAddress getServerAddress() {
       return new ServerAddress(getHost(), getMappedPort(PORT));
    }
-
-   public void waitUntilAcceptsConnections() {
-      try (final var client = createClient(rootCredentials);) {
-         client.getDatabase(DB);
-      }
-   }
 }

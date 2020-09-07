@@ -162,7 +162,6 @@ public class McContainers
       auth.start();
       authInit.start();
       db.start();
-      db.waitUntilAcceptsConnections();
       be.start();
       fe.start();
       in.start();

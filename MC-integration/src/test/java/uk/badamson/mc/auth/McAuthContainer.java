@@ -29,7 +29,6 @@ import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
 
 import uk.badamson.mc.Version;
-import uk.badamson.mc.repository.AuthDbContainer;
 
 /**
  * <p>
