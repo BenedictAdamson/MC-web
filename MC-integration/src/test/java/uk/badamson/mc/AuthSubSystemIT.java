@@ -19,8 +19,9 @@ package uk.badamson.mc;
  */
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.not;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,6 +79,25 @@ public class AuthSubSystemIT implements AutoCloseable {
       network.close();
    }
 
+   /**
+    * The <i>List users</i> scenario requires that a user with the "player" role
+    * is permitted to list users.
+    */
+   @Test
+   @Order(2)
+   public void listUsersAsPlayer() {
+      final var user = "jeff";
+      final var password = "letmein";
+      auth.addPlayer(user, password);
+      try (var keycloak = auth.getKeycloakInstance(user, password,
+               McAuthContainer.REALM_MANAGEMENT_CLIENT_ID)) {
+         final var users = keycloak.realm(McAuthContainer.MC_REALM).users()
+                  .list();
+         assertThat(users, not(empty()));
+      }
+      assertThatNoErrorMessages(auth.getLogs());
+   }
+
    @BeforeEach
    public void start() {
       authDb.start();
@@ -88,23 +108,6 @@ public class AuthSubSystemIT implements AutoCloseable {
    @Test
    @Order(1)
    public void startUp() {
-      assertThatNoErrorMessages(auth.getLogs());
-   }
-
-   /**
-    * The <i>List users</i> scenario requires that a user with the "player" role
-    * is permitted to list users.
-    */
-   @Test
-   @Order(2)
-   public void listUsersAsPlayer() {
-      final var user = "Jeff";
-      final var password = "letmein";
-      auth.addPlayer(user, password);
-      try (var keycloak = auth.getKeycloakInstance(user, password)) {
-         var users = keycloak.realm(McAuthContainer.MC_REALM).users().list();
-         assertThat(users, not(empty()));
-      }
       assertThatNoErrorMessages(auth.getLogs());
    }
 

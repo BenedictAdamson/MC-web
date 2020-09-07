@@ -22,13 +22,14 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
+import java.util.Arrays;
 
 import org.keycloak.admin.client.Keycloak;
+import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
-import org.testcontainers.containers.Container;
 
 import uk.badamson.mc.Version;
 
@@ -60,9 +61,20 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
             .withStrategy(Wait.forListeningPort()).withStrategy(
                      Wait.forLogMessage(".*[Aa]dmin console listening.*", 1));
 
-   public McAuthContainer(String keycloakPassword, String dbVendor,
-            String dbAddr, String dbPassword) {
+   private static void requireSuccess(final Container.ExecResult result)
+            throws IllegalStateException {
+      if (result.getExitCode() != 0) {
+         final String message = result.getStderr() + "\n" + result.getStdout();
+         throw new IllegalStateException(message);
+      }
+   }
+
+   private final String keycloakPassword;
+
+   public McAuthContainer(final String keycloakPassword, final String dbVendor,
+            final String dbAddr, final String dbPassword) {
       super(IMAGE);
+      this.keycloakPassword = keycloakPassword;
       addExposedPort(PORT);
       withEnv("KEYCLOAK_PASSWORD", keycloakPassword);
       withEnv("DB_VENDOR", dbVendor);
@@ -71,28 +83,29 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
       waitingFor(WAIT_STRATEGY);
    }
 
-   private void requireSuccess(Container.ExecResult result) {
-      if (result.getExitCode() != 0) {
-         final String message = result.getStderr() + "\n" + result.getStdout();
-         throw new IllegalStateException(message);
-      }
+   public void addPlayer(final String user, final String password) {
+      execute(KCADM, "config", "credentials", "--server",
+               "http://localhost:8080/auth", "--realm", "master", "--user",
+               "admin", "--password", keycloakPassword);
+      execute(KCADM, "create", "users", "-r", MC_REALM, "-s",
+               "username=" + user, "-s", "enabled=true");
+      execute(KCADM, "set-password", "-r", MC_REALM, "--username", user,
+               "--new-password", password);
+      execute(KCADM, "add-roles", "-r", MC_REALM, "--uusername", user,
+               "--rolename", "player");
    }
 
-   public void addPlayer(String user, String password) {
+   private void execute(final String... command) {
       try {
-         requireSuccess(execInContainer(KCADM, "create", "users", "-r",
-                  MC_REALM, "-s", "username=" + user, "-s", "enabled=true"));
-         requireSuccess(execInContainer(KCADM, "set-password", "-r", MC_REALM,
-                  "--username", user, "--new-password", password));
-         requireSuccess(execInContainer(KCADM, "add-roles", "-r", MC_REALM,
-                  "--uusername", user, "--rolename", "player"));
-      } catch (IOException | InterruptedException e) {
-         throw new RuntimeException("Failed to add player", e);
+         requireSuccess(execInContainer(command));
+      } catch (IOException | InterruptedException | IllegalStateException e) {
+         throw new RuntimeException(
+                  "Failed command " + Arrays.toString(command), e);
       }
    }
 
-   public Keycloak getKeycloakInstance(String user, String password,
-            String client) {
+   public Keycloak getKeycloakInstance(final String user, final String password,
+            final String client) {
       return Keycloak.getInstance(getUri().toASCIIString(), MC_REALM, user,
                password, client);
    }
