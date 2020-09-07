@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.keycloak.representations.idm.UserRepresentation;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -80,25 +79,6 @@ public class AuthSubSystemIT implements AutoCloseable {
       auth.close();
       authDb.close();
       network.close();
-   }
-
-   /**
-    * The <i>Get users of fresh instance</i> scenario requires that a fresh
-    * instance of MC has a list of users that has at least one user.
-    */
-   @Test
-   @Order(2)
-   public void listUsers() {
-      try (var keycloak = auth.getKeycloakInstance()) {
-         final var realm = keycloak.realm(McAuthContainer.MC_REALM);
-         final List<UserRepresentation> users;
-         try {
-            users = realm.users().list();
-         } catch (final Exception e) {// provide better diagnostics
-            throw new AssertionError("Able to list users in realm", e);
-         }
-         assertThat(users, not(empty()));
-      }
    }
 
    @BeforeEach
