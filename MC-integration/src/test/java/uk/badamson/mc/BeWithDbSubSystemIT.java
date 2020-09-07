@@ -51,21 +51,22 @@ import uk.badamson.mc.repository.McDatabaseContainer;
 @TestMethodOrder(OrderAnnotation.class)
 @Testcontainers
 @Tag("IT")
-public class PristineDbAndBeImagesIT implements AutoCloseable {
-   
+public class BeWithDbSubSystemIT implements AutoCloseable {
+
    private static final String BE_HOST = "be";
    private static final String DB_HOST = "db";
-   
+
    private static final String DB_ROOT_PASSWORD = "secret2";
    private static final String DB_USER_PASSWORD = "secret3";
 
    private final Network network = Network.newNetwork();
 
-   private final McDatabaseContainer db = new McDatabaseContainer(DB_ROOT_PASSWORD, DB_USER_PASSWORD)
-            .withNetwork(network).withNetworkAliases(DB_HOST);
+   private final McDatabaseContainer db = new McDatabaseContainer(
+            DB_ROOT_PASSWORD, DB_USER_PASSWORD).withNetwork(network)
+                     .withNetworkAliases(DB_HOST);
 
-   private final McBackEndContainer be = new McBackEndContainer(DB_HOST, DB_USER_PASSWORD)
-            .withNetwork(network).withNetworkAliases(BE_HOST);
+   private final McBackEndContainer be = new McBackEndContainer(DB_HOST,
+            DB_USER_PASSWORD).withNetwork(network).withNetworkAliases(BE_HOST);
 
    private void assertThatNoErrorMessagesLogged(final String logs) {
       assertThat(logs, not(containsString("ERROR")));

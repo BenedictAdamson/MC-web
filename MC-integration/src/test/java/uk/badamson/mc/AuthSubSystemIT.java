@@ -50,7 +50,7 @@ import uk.badamson.mc.repository.AuthDbContainer;
 @TestMethodOrder(OrderAnnotation.class)
 @Testcontainers
 @Tag("IT")
-public class AuthServerWithAuthDbIT implements AutoCloseable {
+public class AuthSubSystemIT implements AutoCloseable {
 
    private static final String AUTH_HOST = "auth";
    private static final String AUTH_DB_HOST = "auth-db";
