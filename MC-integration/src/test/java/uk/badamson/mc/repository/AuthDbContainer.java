@@ -30,23 +30,21 @@ import uk.badamson.mc.auth.McAuthContainer;
  * </p>
  */
 public class AuthDbContainer extends MariaDBContainer<AuthDbContainer> {
+   
+   public static final String KEYCLOAK_DB_VENDOR = "mariadb";
 
    public static final String VERSION = Version.VERSION;
 
    public static final String IMAGE = "index.docker.io/benedictadamson/mc-auth-db:"
             + VERSION;
 
-   public static final String HOST = "auth-db";
-
    private static final String DB_USER = McAuthContainer.DB_NAME;
    private static final String DB_NAME = McAuthContainer.DB_USER;
-   private static final String DB_PASSWORD = McAuthContainer.DB_PASSWORD;
 
-   public AuthDbContainer() {
+   public AuthDbContainer(String password) {
       super(IMAGE);
-      withNetworkAliases(HOST);
       withDatabaseName(DB_NAME);
       withUsername(DB_USER);
-      withPassword(DB_PASSWORD);
+      withPassword(password);
    }
 }

@@ -38,6 +38,7 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import uk.badamson.mc.auth.McAuthContainer;
+import uk.badamson.mc.auth.McAuthInitContainer;
 import uk.badamson.mc.repository.AuthDbContainer;
 
 /**
@@ -51,14 +52,24 @@ import uk.badamson.mc.repository.AuthDbContainer;
 @Tag("IT")
 public class AuthServerWithAuthDbIT implements AutoCloseable {
 
-   private final Network containersNetwork = Network.newNetwork();
+   private static final String AUTH_HOST = "auth";
+   private static final String AUTH_DB_HOST = "auth-db";
 
-   private final AuthDbContainer dbContainer = new AuthDbContainer()
-            .withNetwork(containersNetwork);
+   private static final String AUTH_DB_PASSWORD = "secret1";
+   private static final String KEYCLOAK_PASSWORD = "secret4";
 
-   private final McAuthContainer authContainer = new McAuthContainer()
-            .withNetwork(containersNetwork).withEnv("DB_VENDOR", "mariadb")
-            .withEnv("DB_ADDR", AuthDbContainer.HOST);
+   private final Network network = Network.newNetwork();
+
+   private final AuthDbContainer authDb = new AuthDbContainer(AUTH_DB_PASSWORD)
+            .withNetwork(network).withNetworkAliases(AUTH_DB_HOST);
+
+   private final McAuthContainer auth = new McAuthContainer(KEYCLOAK_PASSWORD,
+            AuthDbContainer.KEYCLOAK_DB_VENDOR, AUTH_DB_HOST, AUTH_DB_PASSWORD)
+                     .withNetwork(network).withNetworkAliases(AUTH_HOST);
+
+   private final McAuthInitContainer authInit = new McAuthInitContainer(
+            KEYCLOAK_PASSWORD, AUTH_HOST, McAuthContainer.PORT)
+                     .withNetwork(network);
 
    private void assertThatNoErrorMessages(final String logs) {
       assertThat(logs, not(containsString("ERROR")));
@@ -66,9 +77,10 @@ public class AuthServerWithAuthDbIT implements AutoCloseable {
 
    @Override
    public void close() {
-      authContainer.close();
-      dbContainer.close();
-      containersNetwork.close();
+      authInit.close();
+      auth.close();
+      authDb.close();
+      network.close();
    }
 
    /**
@@ -78,7 +90,7 @@ public class AuthServerWithAuthDbIT implements AutoCloseable {
    @Test
    @Order(2)
    public void listUsers() {
-      try (var keycloak = authContainer.getKeycloakInstance()) {
+      try (var keycloak = auth.getKeycloakInstance()) {
          final List<RealmRepresentation> realms;
          try {
             realms = keycloak.realms().findAll();
@@ -99,20 +111,22 @@ public class AuthServerWithAuthDbIT implements AutoCloseable {
 
    @BeforeEach
    public void start() {
-      dbContainer.start();
-      authContainer.start();
+      authDb.start();
+      auth.start();
+      authInit.start();
    }
 
    @Test
    @Order(1)
    public void startUp() {
-      assertThatNoErrorMessages(authContainer.getLogs());
+      assertThatNoErrorMessages(auth.getLogs());
    }
 
    @AfterEach
    public void stop() {
-      authContainer.stop();
-      dbContainer.stop();
+      authInit.stop();
+      auth.stop();
+      authDb.stop();
       close();
    }
 }

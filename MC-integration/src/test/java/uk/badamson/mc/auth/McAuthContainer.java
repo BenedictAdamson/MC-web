@@ -29,6 +29,7 @@ import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
 
 import uk.badamson.mc.Version;
+import uk.badamson.mc.repository.AuthDbContainer;
 
 /**
  * <p>
@@ -43,16 +44,12 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
 
    public static final int PORT = 8080;
 
-   public static final String HOST = "auth";
-
    public static final String DB_USER = "keycloak";
    public static final String DB_NAME = "keycloak";
-   public static final String DB_PASSWORD = "password123";
    public static final String MC_REALM = "MC";
    public static final String MC_CLIENT_ID = "mc-ui";
 
    private static final String ADMIN_USER = "admin";
-   private static final String ADMIN_PASSWORD = "letmein";
    private static final String ADMIN_REALM = MC_REALM;
    private static final String ADMIN_CLIENT_ID = MC_CLIENT_ID;
 
@@ -62,19 +59,23 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
             .withStartupTimeout(STARTUP_TIME)
             .withStrategy(Wait.forListeningPort()).withStrategy(
                      Wait.forLogMessage(".*[Aa]dmin console listening.*", 1));
+   
+   private final String keycloakPassword;
 
-   public McAuthContainer() {
+   public McAuthContainer(String keycloakPassword, String dbVendor, String dbAddr, String dbPassword) {
       super(IMAGE);
+      this.keycloakPassword = keycloakPassword;
       addExposedPort(PORT);
-      withEnv("KEYCLOAK_PASSWORD", ADMIN_PASSWORD);
-      withEnv("DB_PASSWORD", DB_PASSWORD);
-      withNetworkAliases(HOST);
+      withEnv("KEYCLOAK_PASSWORD", keycloakPassword);
+      withEnv("DB_VENDOR", dbVendor);
+      withEnv("DB_ADDR", dbAddr);
+      withEnv("DB_PASSWORD", dbPassword);
       waitingFor(WAIT_STRATEGY);
    }
 
    public Keycloak getKeycloakInstance() {
       return Keycloak.getInstance(getUri().toASCIIString(), ADMIN_REALM,
-               ADMIN_USER, ADMIN_PASSWORD, ADMIN_CLIENT_ID);
+               ADMIN_USER, keycloakPassword, ADMIN_CLIENT_ID);
    }
 
    private URI getUri() {

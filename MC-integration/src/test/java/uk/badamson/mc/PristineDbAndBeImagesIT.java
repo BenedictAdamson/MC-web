@@ -52,16 +52,20 @@ import uk.badamson.mc.repository.McDatabaseContainer;
 @Testcontainers
 @Tag("IT")
 public class PristineDbAndBeImagesIT implements AutoCloseable {
+   
+   private static final String BE_HOST = "be";
+   private static final String DB_HOST = "db";
+   
+   private static final String DB_ROOT_PASSWORD = "secret2";
+   private static final String DB_USER_PASSWORD = "secret3";
 
-   private final Network containersNetwork = Network.newNetwork();
+   private final Network network = Network.newNetwork();
 
-   private final McDatabaseContainer dbContainer = new McDatabaseContainer()
-            .withNetwork(containersNetwork).withNetworkAliases("db");
+   private final McDatabaseContainer db = new McDatabaseContainer(DB_ROOT_PASSWORD, DB_USER_PASSWORD)
+            .withNetwork(network).withNetworkAliases(DB_HOST);
 
-   private final McBackEndContainer beContainer = new McBackEndContainer()
-            .withNetwork(containersNetwork).withNetworkAliases("mc")
-            .withCommand("--spring.data.mongodb.host=db")
-            .withExposedPorts(McBackEndContainer.PORT);
+   private final McBackEndContainer be = new McBackEndContainer(DB_HOST, DB_USER_PASSWORD)
+            .withNetwork(network).withNetworkAliases(BE_HOST);
 
    private void assertThatNoErrorMessagesLogged(final String logs) {
       assertThat(logs, not(containsString("ERROR")));
@@ -69,9 +73,9 @@ public class PristineDbAndBeImagesIT implements AutoCloseable {
 
    @Override
    public void close() {
-      beContainer.close();
-      dbContainer.close();
-      containersNetwork.close();
+      be.close();
+      db.close();
+      network.close();
    }
 
    @BeforeEach
@@ -80,8 +84,8 @@ public class PristineDbAndBeImagesIT implements AutoCloseable {
        * Start the containers bottom-up, and wait until each is ready, to reduce
        * the number of transient connection errors.
        */
-      dbContainer.start();
-      beContainer.start();
+      db.start();
+      be.start();
    }
 
    @Test
@@ -89,7 +93,7 @@ public class PristineDbAndBeImagesIT implements AutoCloseable {
    public void startUp() throws TimeoutException, InterruptedException {
       waitUntilReady();
 
-      final var logs = beContainer.getLogs();
+      final var logs = be.getLogs();
       assertAll("Log suitable messages",
                () -> assertThat(logs,
                         containsString(McBackEndContainer.STARTED_MESSAGE)),
@@ -97,7 +101,7 @@ public class PristineDbAndBeImagesIT implements AutoCloseable {
                         containsString(McBackEndContainer.CONNECTION_MESSAGE)),
                () -> assertThatNoErrorMessagesLogged(logs),
                () -> assertThat(logs, not(containsString("Unable to start"))));
-      beContainer.assertHealthCheckOk();
+      be.assertHealthCheckOk();
    }
 
    @AfterEach
@@ -106,13 +110,13 @@ public class PristineDbAndBeImagesIT implements AutoCloseable {
        * Stop the resources top-down, to reduce the number of transient
        * connection errors.
        */
-      beContainer.stop();
-      dbContainer.stop();
+      be.stop();
+      db.stop();
       close();
    }
 
    private void waitUntilReady() throws TimeoutException, InterruptedException {
-      dbContainer.waitUntilAcceptsConnections();
-      beContainer.waitUntilReady();
+      db.waitUntilAcceptsConnections();
+      be.waitUntilReady();
    }
 }

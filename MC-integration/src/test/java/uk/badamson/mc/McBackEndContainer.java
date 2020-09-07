@@ -28,8 +28,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.WaitingConsumer;
 
-import uk.badamson.mc.repository.McDatabaseContainer;
-
 /**
  * <p>
  * A Testcontainers Docker container for the MC-back-end.
@@ -41,8 +39,6 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    public static final int PORT = 8080;
 
-   public static final String HOST = "be";
-
    public static final String VERSION = Version.VERSION;
 
    public static final String IMAGE = "index.docker.io/benedictadamson/mc-back-end:"
@@ -52,12 +48,11 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    public static final String CONNECTION_MESSAGE = "successfully connected to server";
 
-   McBackEndContainer() {
+   McBackEndContainer(String mongoDbHost, String mongoDbPassword) {
       super(IMAGE);
       withEnv("SPRING_DATA_MONGODB_PASSWORD",
-               new String(McDatabaseContainer.USER_CREDENTIALS.getPassword()));
-      withNetworkAliases(HOST);
-      withCommand("--spring.data.mongodb.host=" + McDatabaseContainer.HOST);
+               mongoDbPassword);
+      withCommand("--spring.data.mongodb.host=" + mongoDbPassword);
    }
 
    void assertHealthCheckOk() {
