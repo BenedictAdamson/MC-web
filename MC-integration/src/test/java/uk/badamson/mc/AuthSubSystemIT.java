@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -91,13 +90,6 @@ public class AuthSubSystemIT implements AutoCloseable {
    @Order(2)
    public void listUsers() {
       try (var keycloak = auth.getKeycloakInstance()) {
-         final List<RealmRepresentation> realms;
-         try {
-            realms = keycloak.realms().findAll();
-         } catch (final Exception e) {// provide better diagnostics
-            throw new AssertionError("Able to list realms", e);
-         }
-         assertThat(realms, not(empty()));
          final var realm = keycloak.realm(McAuthContainer.MC_REALM);
          final List<UserRepresentation> users;
          try {
