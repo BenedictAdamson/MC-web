@@ -108,10 +108,4 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
          throw new IllegalStateException(e);
       }
    }
-
-   @Override
-   public void start() {
-      super.start();
-      execute("/opt/jboss/keycloak/bin/mc-auth-init");
-   }
 }

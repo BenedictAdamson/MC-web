@@ -34,6 +34,7 @@ import org.testcontainers.lifecycle.TestDescription;
 import org.testcontainers.lifecycle.TestLifecycleAware;
 
 import uk.badamson.mc.auth.McAuthContainer;
+import uk.badamson.mc.auth.McAuthInitContainer;
 import uk.badamson.mc.presentation.McFrontEndContainer;
 import uk.badamson.mc.presentation.McReverseProxyContainer;
 import uk.badamson.mc.repository.AuthDbContainer;
@@ -83,6 +84,10 @@ public class McContainers
             AuthDbContainer.KEYCLOAK_DB_VENDOR, AUTH_DB_HOST, AUTH_DB_PASSWORD)
                      .withNetwork(network).withNetworkAliases(AUTH_HOST);
 
+   private final McAuthInitContainer authInit = new McAuthInitContainer(
+            KEYCLOAK_PASSWORD, AUTH_HOST, McAuthContainer.PORT)
+                     .withNetwork(network);
+
    private final McDatabaseContainer db = new McDatabaseContainer(
             DB_ROOT_PASSWORD, DB_USER_PASSWORD).withNetwork(network)
                      .withNetworkAliases(DB_HOST);
@@ -131,6 +136,7 @@ public class McContainers
       fe.close();
       be.close();
       db.close();
+      authInit.close();
       auth.close();
       authDb.close();
       network.close();
@@ -154,6 +160,7 @@ public class McContainers
        */
       authDb.start();
       auth.start();
+      authInit.start();
       db.start();
       be.start();
       fe.start();
@@ -172,6 +179,7 @@ public class McContainers
       fe.stop();
       be.stop();
       db.stop();
+      authInit.stop();
       auth.stop();
       authDb.stop();
       close();
