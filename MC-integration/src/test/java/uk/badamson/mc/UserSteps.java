@@ -69,13 +69,13 @@ public class UserSteps {
       // TODO
    }
 
-   @Given("logged in as {string}")
-   public void logged_in_as(final String user) {
+   @Given("logged in")
+   public void logged_in() {
       // TODO
    }
 
-   @When("log in as {string} using password {string}")
-   public void login_using_password(final String user, final String password) {
+   @When("log in using correct password")
+   public void login_using_correct_password() {
       // TODO
    }
 
@@ -99,19 +99,13 @@ public class UserSteps {
       // TODO
    }
 
-   @Given("user {string} does not have the {string} role")
-   public void user_does_not_have_role(final String user, final String role) {
+   @Given("user does not have the {string} role")
+   public void user_does_not_have_role(final String role) {
       // TODO
    }
 
-   @Given("that user {string} exists with  password {string}")
-   public void user_exists_with_password(final String user,
-            final String password) {
-      // TODO
-   }
-
-   @Given("user {string} has the {string} role")
-   public void user_has_role(final String user, final String role) {
+   @Given("user has the {string} role")
+   public void user_has_role(final String role) {
       // TODO
    }
 }
