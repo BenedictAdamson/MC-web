@@ -122,7 +122,6 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
    @Override
    public void start() {
       super.start();
-      execute("/opt/jboss/keycloak/bin/mc-auth-init", "localhost",
-               String.valueOf(PORT));
+      execute("/opt/jboss/keycloak/bin/mc-auth-init");
    }
 }
