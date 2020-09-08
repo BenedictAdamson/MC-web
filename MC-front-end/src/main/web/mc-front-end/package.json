@@ -50,6 +50,7 @@
     "node-sass": "^4.14.1",
     "nopt": "^5.0.0",
     "protractor": "~7.0.0",
+    "protractor-cucumber-framework": "^6.2.1",
     "sass-graph": "^3.0.5",
     "strip-indent": "^3.0.0",
     "strip-indent-cli": "^1.0.0",
