@@ -34,7 +34,6 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import uk.badamson.mc.auth.McAuthContainer;
-import uk.badamson.mc.auth.McAuthInitContainer;
 import uk.badamson.mc.repository.AuthDbContainer;
 
 /**
@@ -63,17 +62,12 @@ public class AuthSubSystemIT implements AutoCloseable {
             AuthDbContainer.KEYCLOAK_DB_VENDOR, AUTH_DB_HOST, AUTH_DB_PASSWORD)
                      .withNetwork(network).withNetworkAliases(AUTH_HOST);
 
-   private final McAuthInitContainer authInit = new McAuthInitContainer(
-            KEYCLOAK_PASSWORD, AUTH_HOST, McAuthContainer.PORT)
-                     .withNetwork(network);
-
    private void assertThatNoErrorMessages(final String logs) {
       assertThat(logs, not(containsString("ERROR")));
    }
 
    @Override
    public void close() {
-      authInit.close();
       auth.close();
       authDb.close();
       network.close();
@@ -102,7 +96,6 @@ public class AuthSubSystemIT implements AutoCloseable {
    public void start() {
       authDb.start();
       auth.start();
-      authInit.start();
    }
 
    @Test
@@ -113,7 +106,6 @@ public class AuthSubSystemIT implements AutoCloseable {
 
    @AfterEach
    public void stop() {
-      authInit.stop();
       auth.stop();
       authDb.stop();
       close();
