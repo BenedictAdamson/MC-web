@@ -33,7 +33,6 @@ import org.testcontainers.lifecycle.TestDescription;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
-import io.cucumber.spring.ScenarioScope;
 
 /**
  * <p>
@@ -49,7 +48,6 @@ import io.cucumber.spring.ScenarioScope;
  * accessing MC using a web browser.
  * </p>
  */
-@ScenarioScope
 public final class WorldCore implements AutoCloseable {
 
    private static Optional<Throwable> createOutcomeException(

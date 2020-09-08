@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import io.cucumber.spring.ScenarioScope;
 
 /**
  * <p>
@@ -30,6 +31,7 @@ import io.cucumber.java.en.When;
  * pertaining to users.
  * </p>
  */
+@ScenarioScope
 public class UserSteps {
 
    @Autowired
