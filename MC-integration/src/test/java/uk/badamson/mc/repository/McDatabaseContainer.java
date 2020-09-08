@@ -56,10 +56,6 @@ public final class McDatabaseContainer
    private static final String NORMAL_USER = "mc";
 
    private static final String ROOT_USER = "admin";
-   
-   public final MongoCredential userCredentials;
-
-   public final MongoCredential rootCredentials;
 
    public static final MongoCredential BAD_CREDENTIALS = MongoCredential
             .createCredential("BAD", AUTHENTICATION_DB, "BAD".toCharArray());
@@ -75,14 +71,17 @@ public final class McDatabaseContainer
             .withStrategy(
                      Wait.forLogMessage(".*[Ww]aiting for connection.*", 1));
 
-   public McDatabaseContainer(String rootPassword, String userPassword) {
+   public final MongoCredential userCredentials;
+
+   public final MongoCredential rootCredentials;
+
+   public McDatabaseContainer(final String rootPassword,
+            final String userPassword) {
       super(IMAGE);
- userCredentials = MongoCredential
-               .createCredential(NORMAL_USER, AUTHENTICATION_DB,
-                        userPassword.toCharArray());
- rootCredentials = MongoCredential
-          .createCredential(ROOT_USER, AUTHENTICATION_DB,
-                   rootPassword.toCharArray());
+      userCredentials = MongoCredential.createCredential(NORMAL_USER,
+               AUTHENTICATION_DB, userPassword.toCharArray());
+      rootCredentials = MongoCredential.createCredential(ROOT_USER,
+               AUTHENTICATION_DB, rootPassword.toCharArray());
       addExposedPort(PORT);
       withEnv("MONGO_INITDB_ROOT_PASSWORD", rootPassword);
       withEnv("MC_INIT_PASSWORD", userPassword);

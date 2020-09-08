@@ -41,7 +41,8 @@ public final class McAuthInitContainer
    private static final StartupCheckStrategy STARTUP_CHECK_STRATEGY = new OneShotStartupCheckStrategy()
             .withTimeout(Duration.ofSeconds(180));
 
-   public McAuthInitContainer(String keycloakPassword, String keycloakHost, int keycloakPort) {
+   public McAuthInitContainer(final String keycloakPassword,
+            final String keycloakHost, final int keycloakPort) {
       super(IMAGE);
       withStartupCheckStrategy(STARTUP_CHECK_STRATEGY);
       withEnv("KEYCLOAK_PASSWORD", keycloakPassword);

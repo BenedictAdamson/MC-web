@@ -52,7 +52,7 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
    public static final String MC_REALM = "MC";
    public static final String MC_CLIENT_ID = "mc-ui";
    public static final String REALM_MANAGEMENT_CLIENT_ID = "realm-management";
-   
+
    private static final String MC_ADD_PLAYER = "/opt/jboss/keycloak/bin/mc-add-player";
 
    private static final Duration STARTUP_TIME = Duration.ofSeconds(180);

@@ -42,6 +42,10 @@ public class UnknownResourceSteps {
    @Autowired
    private WorldCore worldCore;
 
+   @SuppressWarnings("unused")
+   @Autowired
+   private WorldCoreScenarioHook worldCoreScenarioHook;
+
    private int httpResponseCode;
 
    private void doHttpRequest(final String method, final String path) {

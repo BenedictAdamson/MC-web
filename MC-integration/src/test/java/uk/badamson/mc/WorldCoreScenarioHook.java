@@ -18,14 +18,34 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
 
-@Configuration
-public class CucumberBeansConfiguration {
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.Scenario;
 
-   @Bean
-   public WorldCore getWorldCore() {
-      return new WorldCore();
+/**
+ * <p>
+ * Enable automatic reporting of the beginning and ending of Cucumber scenarios
+ * to a {@link WorldCore} bean.
+ * </p>
+ */
+public final class WorldCoreScenarioHook {
+   private final WorldCore worldCore;
+
+   @Autowired
+   public WorldCoreScenarioHook(final WorldCore worldCore) {
+      this.worldCore = worldCore;
    }
+
+   @Before
+   public void beginScenario(final Scenario scenario) {
+      worldCore.beginScenario(scenario);
+   }
+
+   @After
+   public void endScenario(final Scenario scenario) {
+      worldCore.endScenario(scenario);
+   }
+
 }

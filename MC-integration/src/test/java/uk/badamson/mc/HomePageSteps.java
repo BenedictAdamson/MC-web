@@ -35,6 +35,10 @@ public class HomePageSteps {
    @Autowired
    private WorldCore worldCore;
 
+   @SuppressWarnings("unused")
+   @Autowired
+   private WorldCoreScenarioHook worldCoreScenarioHook;
+
    @Then("MC serves the home page")
    public void mc_serves_the_home_page() {
       worldCore.getUrlUsingBrowser();

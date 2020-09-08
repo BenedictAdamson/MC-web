@@ -25,6 +25,9 @@ import java.net.URI;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -47,6 +50,17 @@ import io.cucumber.java.Scenario;
  * Docker container for each of the MC servers, plus some Docker containers for
  * accessing MC using a web browser.
  * </p>
+ * <p>
+ * It is tempting to mark the {@link #beginScenario(Scenario)} method with a
+ * Cucumber {@link Before} annotation, and the {@link #endScenario(Scenario)}
+ * method with a Cucumber {@link After} annotation. However, then the
+ * Cucumber-Spring integration would give beans of this class
+ * {@code cucumber-glue} scope, and not reuse the bean for multiple tests. As
+ * this bean is <em>very</em> expensive to create, that would make testing far
+ * too expensive.
+ * </p>
+ *
+ * @see WorldCoreScenarioHook
  */
 public final class WorldCore implements AutoCloseable {
 
@@ -95,8 +109,7 @@ public final class WorldCore implements AutoCloseable {
     * Prepare the SUT and this interface for execution of a Cucumber scenario.
     * </p>
     * <p>
-    * Starts the Docker containers for the SUT. This should be called
-    * {@link Before} each scenario.
+    * This should be called {@link Before} each scenario.
     * </p>
     *
     * @param scenario
@@ -104,19 +117,24 @@ public final class WorldCore implements AutoCloseable {
     * @throws NullPointerException
     *            If {@code scenario} is null;
     */
-   @Before
    public void beginScenario(final Scenario scenario) {
-      containers.start();
+      try {
+         Objects.requireNonNull(webDriver, "webDriver");
+      } catch (final Exception e) {
+         throw new IllegalStateException("Not start()-ed", e);
+      }
       containers.beforeTest(createTestDescription(scenario));
-      webDriver = containers.getWebDriver();
    }
 
    /**
     * <p>
     * Stop and then dispose of the Docker containers used for the SUT.
     * </p>
+    *
+    * @see #open()
     */
    @Override
+   @PreDestroy
    public void close() {
       if (webDriver != null) {
          webDriver.quit();
@@ -133,8 +151,7 @@ public final class WorldCore implements AutoCloseable {
     * outcome of the scenario.
     * </p>
     * <p>
-    * This method also {@linkplain #close() closes} this interface. This should
-    * be called {@link After} each scenario.
+    * This should be called {@link After} each scenario.
     * </p>
     *
     * @param scenario
@@ -142,10 +159,8 @@ public final class WorldCore implements AutoCloseable {
     * @throws NullPointerException
     *            If {@code scenario} is null;
     */
-   @After
    public void endScenario(final Scenario scenario) {
       tellContainersTestOutcome(scenario);
-      close();
    }
 
    /**
@@ -213,6 +228,15 @@ public final class WorldCore implements AutoCloseable {
          throw new IllegalStateException(e);
       }
       webDriver.get(privateNetworkUrl.toASCIIString());
+   }
+
+   /**
+    * @see #close()
+    */
+   @PostConstruct
+   public void open() {
+      containers.start();
+      webDriver = containers.getWebDriver();
    }
 
    /**

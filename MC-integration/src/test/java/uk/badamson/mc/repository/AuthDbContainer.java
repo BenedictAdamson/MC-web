@@ -30,7 +30,7 @@ import uk.badamson.mc.auth.McAuthContainer;
  * </p>
  */
 public class AuthDbContainer extends MariaDBContainer<AuthDbContainer> {
-   
+
    public static final String KEYCLOAK_DB_VENDOR = "mariadb";
 
    public static final String VERSION = Version.VERSION;
@@ -41,7 +41,7 @@ public class AuthDbContainer extends MariaDBContainer<AuthDbContainer> {
    private static final String DB_USER = McAuthContainer.DB_NAME;
    private static final String DB_NAME = McAuthContainer.DB_USER;
 
-   public AuthDbContainer(String password) {
+   public AuthDbContainer(final String password) {
       super(IMAGE);
       withDatabaseName(DB_NAME);
       withUsername(DB_USER);

@@ -23,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.cucumber.spring.ScenarioScope;
 
 /**
  * <p>
@@ -31,11 +30,14 @@ import io.cucumber.spring.ScenarioScope;
  * pertaining to users.
  * </p>
  */
-@ScenarioScope
 public class UserSteps {
 
    @Autowired
    private WorldCore worldCore;
+
+   @SuppressWarnings("unused")
+   @Autowired
+   private WorldCoreScenarioHook worldCoreScenarioHook;
 
    @When("adding a user named {string} with  password {string}")
    public void adding_a_user(final String user, final String password) {

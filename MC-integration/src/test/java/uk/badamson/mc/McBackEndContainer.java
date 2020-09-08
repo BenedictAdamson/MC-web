@@ -56,7 +56,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    public static final String CONNECTION_MESSAGE = "successfully connected to server";
 
-   McBackEndContainer(String mongoDbHost, String mongoDbPassword) {
+   McBackEndContainer(final String mongoDbHost, final String mongoDbPassword) {
       super(IMAGE);
       waitingFor(WAIT_STRATEGY);
       withEnv("SPRING_DATA_MONGODB_PASSWORD", mongoDbPassword);
