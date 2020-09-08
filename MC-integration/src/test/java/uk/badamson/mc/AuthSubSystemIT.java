@@ -84,7 +84,7 @@ public class AuthSubSystemIT implements AutoCloseable {
       final var password = "letmein";
       auth.addPlayer(user, password);
       try (var keycloak = auth.getKeycloakInstance(user, password,
-               McAuthContainer.REALM_MANAGEMENT_CLIENT_ID)) {
+               McAuthContainer.MC_CLIENT_ID)) {
          final var users = keycloak.realm(McAuthContainer.MC_REALM).users()
                   .list();
          assertThat(users, not(empty()));
