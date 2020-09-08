@@ -39,7 +39,6 @@ import uk.badamson.mc.Version;
  * </p>
  */
 public final class McAuthContainer extends GenericContainer<McAuthContainer> {
-   private static final String KCADM = "/opt/jboss/keycloak/bin/kcadm.sh";
 
    public static final String VERSION = Version.VERSION;
 
@@ -53,6 +52,8 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
    public static final String MC_REALM = "MC";
    public static final String MC_CLIENT_ID = "mc-ui";
    public static final String REALM_MANAGEMENT_CLIENT_ID = "realm-management";
+   
+   private static final String MC_ADD_PLAYER = "/opt/jboss/keycloak/bin/mc-add-player";
 
    private static final Duration STARTUP_TIME = Duration.ofSeconds(180);
 
@@ -69,12 +70,9 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
       }
    }
 
-   private final String keycloakPassword;
-
    public McAuthContainer(final String keycloakPassword, final String dbVendor,
             final String dbAddr, final String dbPassword) {
       super(IMAGE);
-      this.keycloakPassword = keycloakPassword;
       addExposedPort(PORT);
       withEnv("KEYCLOAK_PASSWORD", keycloakPassword);
       withEnv("DB_VENDOR", dbVendor);
@@ -84,15 +82,7 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
    }
 
    public void addPlayer(final String user, final String password) {
-      execute(KCADM, "config", "credentials", "--server",
-               "http://localhost:8080/auth", "--realm", "master", "--user",
-               "admin", "--password", keycloakPassword);
-      execute(KCADM, "create", "users", "-r", MC_REALM, "-s",
-               "username=" + user, "-s", "enabled=true");
-      execute(KCADM, "set-password", "-r", MC_REALM, "--username", user,
-               "--new-password", password);
-      execute(KCADM, "add-roles", "-r", MC_REALM, "--uusername", user,
-               "--rolename", "player");
+      execute(MC_ADD_PLAYER, user, password);
    }
 
    private void execute(final String... command) {
