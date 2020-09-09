@@ -104,6 +104,10 @@ public class McContainers
    private final BrowserWebDriverContainer<?> browser = new BrowserWebDriverContainer<>()
             .withCapabilities(new FirefoxOptions()).withNetwork(network);
 
+   public void addPlayer(final String user, final String password) {
+      auth.addPlayer(user, password);
+   }
+
    @Override
    public void afterTest(final TestDescription description,
             final Optional<Throwable> throwable) {

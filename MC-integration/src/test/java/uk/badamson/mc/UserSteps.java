@@ -18,11 +18,18 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+
+import java.util.Objects;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import uk.badamson.mc.WorldCore.User;
 
 /**
  * <p>
@@ -39,6 +46,8 @@ public class UserSteps {
    @Autowired
    private WorldCoreScenarioHook worldCoreScenarioHook;
 
+   private User user;
+
    @When("adding a user named {string} with  password {string}")
    public void adding_a_user(final String user, final String password) {
       // TODO
@@ -52,6 +61,11 @@ public class UserSteps {
    @Then("MC does not present adding a user as an option")
    public void does_not_present_adding_user_option() {
       // TODO
+   }
+
+   private void getHomePage() {
+      worldCore.setUrlPath("/");
+      worldCore.getUrlUsingBrowser();
    }
 
    @When("getting the users")
@@ -74,14 +88,28 @@ public class UserSteps {
       // TODO
    }
 
+   private void login(final String name, final String password) {
+      getHomePage();
+      final var webDriver = worldCore.getWebDriver();
+      webDriver.findElementById("login").click();
+      webDriver.findElementByName("username").sendKeys(name);
+      webDriver.findElementByXPath("//input[@type='password']")
+               .sendKeys(password);
+      webDriver.findElementByXPath(
+               "//input[@type='submit'] or //button[@type='submit']").submit();
+   }
+
    @When("log in using correct password")
    public void login_using_correct_password() {
-      // TODO
+      Objects.requireNonNull(user, "user");
+      login(user.getName(), user.getPassword());
    }
 
    @Then("MC accepts the login")
    public void mc_accepts_login() {
-      // TODO
+      final var webDriver = worldCore.getWebDriver();
+      assertThat("No error messages",
+               webDriver.findElementsByClassName("error"), is(empty()));
    }
 
    @Then("MC accepts the addition")
@@ -106,6 +134,6 @@ public class UserSteps {
 
    @Given("user has the {string} role")
    public void user_has_role(final String role) {
-      // TODO
+      user = worldCore.getUserWithRole(role);
    }
 }

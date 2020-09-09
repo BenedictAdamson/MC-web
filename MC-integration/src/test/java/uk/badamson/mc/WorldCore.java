@@ -22,8 +22,11 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -36,6 +39,7 @@ import org.testcontainers.lifecycle.TestDescription;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
+import net.jcip.annotations.Immutable;
 
 /**
  * <p>
@@ -63,6 +67,34 @@ import io.cucumber.java.Scenario;
  * @see WorldCoreScenarioHook
  */
 public final class WorldCore implements AutoCloseable {
+
+   @Immutable
+   public static final class User {
+
+      private final String name;
+      private final String password;
+      private final Set<String> roles;
+
+      public User(final String name, final String password,
+               final Set<String> roles) {
+         this.name = name;
+         this.password = password;
+         this.roles = Set.copyOf(roles);
+      }
+
+      public String getName() {
+         return name;
+      }
+
+      public String getPassword() {
+         return password;
+      }
+
+      public Set<String> getRoles() {
+         return roles;
+      }
+
+   }// class
 
    private static Optional<Throwable> createOutcomeException(
             final Scenario scenario) {
@@ -98,11 +130,18 @@ public final class WorldCore implements AutoCloseable {
 
    private final McContainers containers = new McContainers();
 
+   private final Map<String, User> users = new HashMap<>();
+
    private RemoteWebDriver webDriver;
 
    private URI privateNetworkUrl;
 
    private URI localUrl;
+
+   private void addPlayer(final String name, final String password) {
+      containers.addPlayer(name, password);
+      users.put(name, new User(name, password, Set.of("player")));
+   }
 
    /**
     * <p>
@@ -143,6 +182,10 @@ public final class WorldCore implements AutoCloseable {
       privateNetworkUrl = null;
       containers.stop();
       containers.close();
+   }
+
+   private void createUsers() {
+      addPlayer("jeff", "password1");
    }
 
    /**
@@ -230,6 +273,16 @@ public final class WorldCore implements AutoCloseable {
       webDriver.get(privateNetworkUrl.toASCIIString());
    }
 
+   public User getUserWithRole(final String role) {
+      return users.values().stream()
+               .filter(user -> user.getRoles().contains(role)).findAny().get();
+   }
+
+   public RemoteWebDriver getWebDriver() {
+      Objects.requireNonNull(webDriver, "webDriver");
+      return webDriver;
+   }
+
    /**
     * @see #close()
     */
@@ -237,6 +290,7 @@ public final class WorldCore implements AutoCloseable {
    public void open() {
       containers.start();
       webDriver = containers.getWebDriver();
+      createUsers();
    }
 
    /**
