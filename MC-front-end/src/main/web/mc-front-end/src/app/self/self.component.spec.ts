@@ -38,19 +38,14 @@ describe('SelfComponent', () => {
 		expect(component).toBeDefined();
 	});
 
-	it('should not initially be logged in', () => {
-		expect(component.isLoggedIn()).toBeFalse();
-		expect(component.getUsername()).toBeUndefined();
+	it('should not initially be logged in', async () => {
+		expect(await component.isLoggedIn()).toBeFalse();
+		expect(component.getUsername()).toBeNull();
 	});
 
-	it('should have an identity after login', () => {
-		component.login().then(
-			() => {// fulfilled
-				expect(component.isLoggedIn()).toBeFalse();
-				expect(component.getUsername()).toBeUndefined();
-			},
-			(reason: any) => {// rejected
-				fail(reason);
-			});
+	it('should have an identity after login', async () => {
+		await component.login();
+		expect(await component.isLoggedIn()).toBeTrue();
+		expect(component.getUsername()).toBeDefined();
 	});
 });
