@@ -1,1 +1,6 @@
-<p>self works!</p>
+<div class="self" *ngIf="isLoggedIn() else selfLogin">
+	<p>Logged in as {{getUsername()}}</p>
+</div>
+<ng-template #selfLogin>
+<button id="login" (click)="login()">login</button>
+</ng-template>
