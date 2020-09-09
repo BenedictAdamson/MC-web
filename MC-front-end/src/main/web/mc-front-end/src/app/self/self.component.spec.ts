@@ -21,7 +21,6 @@ class MockKeycloakService {
 
 describe('SelfComponent', () => {
 	let component: SelfComponent;
-	let fixture: ComponentFixture<SelfComponent>;
 
 	beforeEach(async () => {
 		TestBed.configureTestingModule({
@@ -33,8 +32,6 @@ describe('SelfComponent', () => {
 		});
 		TestBed.inject(KeycloakService);
 		component = TestBed.inject(SelfComponent);
-		fixture = TestBed.createComponent(SelfComponent);
-		fixture.detectChanges();
 	});
 
 	it('should create', () => {
@@ -55,20 +52,5 @@ describe('SelfComponent', () => {
 			(reason: any) => {// rejected
 				fail(reason);
 			});
-	});
-
-	it('should initially provide a login button', () => {
-		const element: HTMLElement = fixture.nativeElement;
-		const button = element.querySelector('button');
-		expect(button).toBeDefined();
-		expect(button.textContent).toContain('login');
-	});
-
-	it('should display user-name after login', () => {
-		async () => component.login();
-		const element: HTMLElement = fixture.nativeElement;
-		const button = element.querySelector('button');
-		expect(button).toBeUndefined();
-		expect(element.textContent).toContain(component.getUsername());
 	});
 });
