@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
 
 @Component({
@@ -10,7 +9,6 @@ import { KeycloakService } from 'keycloak-angular';
 export class SelfComponent implements OnInit {
 
 	constructor(
-		private readonly router: Router,
 		private readonly keycloak: KeycloakService) { }
 
 	ngOnInit(): void {
@@ -22,7 +20,7 @@ export class SelfComponent implements OnInit {
 
 	async login() {
 		await this.keycloak.login({
-			redirectUri: window.location.origin + this.router.url
+			redirectUri: "/"
 		});
 	}
 }
