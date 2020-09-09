@@ -1,4 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
@@ -15,6 +16,7 @@ import { SelfComponent } from './self/self.component';
 @NgModule({
 	imports: [
 		BrowserModule,
+		CommonModule,
 		AppRoutingModule,
 		HttpClientModule,
 		RouterModule
