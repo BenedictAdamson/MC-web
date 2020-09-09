@@ -1,5 +1,3 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { KeycloakService } from 'keycloak-angular';
 
@@ -27,10 +25,6 @@ describe('SelfComponent', () => {
 
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
-			imports: [
-				BrowserModule, CommonModule
-			],
-			// provide the component-under-test and dependent service
 			providers: [
 				{ provide: KeycloakService, useClass: MockKeycloakService }
 			],
