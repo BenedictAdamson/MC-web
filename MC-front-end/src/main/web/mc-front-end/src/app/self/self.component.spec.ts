@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { KeycloakService } from 'keycloak-angular';
 
 import { SelfComponent } from './self.component';
@@ -20,18 +22,28 @@ class MockKeycloakService {
 }
 
 describe('SelfComponent', () => {
+	let fixture: ComponentFixture<SelfComponent>;
 	let component: SelfComponent;
 
-	beforeEach(async () => {
+	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
+			imports: [
+				BrowserModule, CommonModule
+			],
 			// provide the component-under-test and dependent service
 			providers: [
-				SelfComponent,
 				{ provide: KeycloakService, useClass: MockKeycloakService }
+			],
+			declarations: [
+				SelfComponent
 			]
-		});
+		}).compileComponents();
+	}));
+	beforeEach(() => {
 		TestBed.inject(KeycloakService);
-		component = TestBed.inject(SelfComponent);
+		fixture = TestBed.createComponent(SelfComponent);
+		component = fixture.componentInstance;
+		fixture.detectChanges();
 	});
 
 	it('should create', () => {
