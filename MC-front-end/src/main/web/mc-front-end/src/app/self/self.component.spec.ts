@@ -1,12 +1,15 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { KeycloakService } from 'keycloak-angular';
+import { KeycloakService, KeycloakEvent, KeycloakEventType } from 'keycloak-angular';
+import { Subject } from 'rxjs';
 
 import { SelfComponent } from './self.component';
 
 class MockKeycloakService {
 
-	private nextUsername: string = "jeff";
+	keycloakEvents$: Subject<KeycloakEvent> = new Subject;
+
 	private username: string = null;
+	private nextUsername: string = "jeff";
 
 	getUsername(): string { return this.username; }
 
@@ -16,6 +19,9 @@ class MockKeycloakService {
 		return new Promise((resolve, reject) => {
 			this.username = this.nextUsername;
 			this.nextUsername = null;
+			this.keycloakEvents$.next({
+				type: KeycloakEventType.OnAuthSuccess
+			});
 			resolve();
 		});
 	}
@@ -46,16 +52,17 @@ describe('SelfComponent', () => {
 	});
 
 	it('should not initially be logged in', async () => {
-		expect(await component.loggedIn.toPromise()).toBeFalse();
-		expect(component.getUsername()).toBeNull();
+		expect(component.loggedIn).toBeFalse();
+		expect(component.username).toBeNull();
 	});
 
 	it('should have an identity after login', async () => {
-		await component.login().toPromise();
-		fixture.detectChanges();
-		expect(await component.loggedIn.toPromise()).toBeTrue();
-		expect(component.getUsername()).not.toBeNull();
-	});
+		component.login().subscribe(() => {
+			component.handleLoggedIn();
+			fixture.detectChanges();
+			expect(component.loggedIn).toBe(true, 'logged in');
+			expect(component.username).not.toBe(null, 'has username');
+	})});
 
 	it('should initially provide a login button', () => {
 		fixture.detectChanges();
@@ -66,11 +73,10 @@ describe('SelfComponent', () => {
 	});
 
 	it('should display user-name after login', async () => {
-		await component.login().toPromise();
-		fixture.detectChanges();
-		const element: HTMLElement = fixture.nativeElement;
-		const button = element.querySelector('button');
-		expect(button).toBeNull();
-		expect(element.textContent).toContain(component.getUsername());
-	});
+		component.login().subscribe(() => {
+			component.handleLoggedIn();
+			fixture.detectChanges();
+			const element: HTMLElement = fixture.nativeElement;
+			expect(element.textContent).toContain(component.username);
+	})});
 });

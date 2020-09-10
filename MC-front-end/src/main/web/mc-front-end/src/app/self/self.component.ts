@@ -10,7 +10,9 @@ import { KeycloakService, KeycloakEvent, KeycloakEventType } from 'keycloak-angu
 export class SelfComponent implements OnInit {
 
 	constructor(
-		private readonly keycloak: KeycloakService) { }
+		private readonly keycloak: KeycloakService) {
+		this.handleLoggedOut();
+	}
 
 	async ngOnInit(): Promise<void> {
 		this.keycloak.keycloakEvents$.subscribe(event => this.handle(event));
@@ -23,13 +25,13 @@ export class SelfComponent implements OnInit {
 	}
 
 	handleLoggedOut(): void {// idempotent
-		this.username.next(null);
-		this.loggedIn.next(false);
+		this.username = null;
+		this.loggedIn = false;
 	}
 
 	handleLoggedIn(): void {// idempotent
-		this.username.next(this.keycloak.getUsername());
-		this.loggedIn.next(true);
+		this.username = this.keycloak.getUsername();
+		this.loggedIn = true;
 	}
 
 	private handle(event: KeycloakEvent): void {
@@ -46,9 +48,9 @@ export class SelfComponent implements OnInit {
 		}
 	}
 
-	username: Subject<string> = new Subject;
+	username: string;
 
-	loggedIn: Subject<boolean> = new Subject;
+	loggedIn: boolean;
 
 	/**
 	 * This indirectly makes use of an HTTP request, which is a cold Observable,
