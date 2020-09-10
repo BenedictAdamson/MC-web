@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable, from } from 'rxjs';
+import { Observable, defer, from } from 'rxjs';
 import { KeycloakService } from 'keycloak-angular';
 
 @Component({
@@ -17,11 +17,22 @@ export class SelfComponent implements OnInit {
 
 	getUsername(): string { return this.keycloak.getUsername(); }
 
-	loggedIn: Observable<boolean> = from(this.keycloak.isLoggedIn());
+	/**
+	 * This indirectly makes use of an HTTP request, which is a cold Observable,
+     * so this is a cold Observable too.
+     * That is, the expensive HTTP request will not be made until something subscribes to this Observable.
+	 */
+	loggedIn: Observable<boolean> = defer(() =>
+		from(this.keycloak.isLoggedIn()));
 
+	/**
+	 * This indirectly makes use of an HTTP request, which is a cold Observable,
+     * so this is a cold Observable too.
+     * That is, the expensive HTTP request will not be made until something subscribes to this Observable.
+	 */
 	login(): Observable<void> {
-		return from(this.keycloak.login({
+		return defer(() => from(this.keycloak.login({
 			redirectUri: "/"
-		}));
+		})));
 	}
 }
