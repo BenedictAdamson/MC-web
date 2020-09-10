@@ -18,8 +18,8 @@ export class SelfComponent implements OnInit {
 
 	isLoggedIn(): Promise<boolean> { return this.keycloak.isLoggedIn(); }
 
-	async login() {
-		await this.keycloak.login({
+	async login(): Promise<void> {
+		return this.keycloak.login({
 			redirectUri: "/"
 		});
 	}

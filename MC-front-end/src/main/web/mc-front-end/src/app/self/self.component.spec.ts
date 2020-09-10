@@ -10,11 +10,11 @@ class MockKeycloakService {
 
 	getUsername(): string { return this.username; }
 
-	isLoggedIn(): Promise<boolean> { return Promise.resolve(this.loggedIn); }
+	async isLoggedIn(): Promise<boolean> { return Promise.resolve(this.loggedIn); }
 
-	login(): Promise<void> {
-		this.username = "jeff";
+	async login(): Promise<void> {
 		this.loggedIn = true;
+		this.username = "jeff";
 		return Promise.resolve();
 	}
 }
@@ -51,7 +51,24 @@ describe('SelfComponent', () => {
 
 	it('should have an identity after login', async () => {
 		await component.login();
+		fixture.detectChanges();
 		expect(await component.isLoggedIn()).toBeTrue();
 		expect(component.getUsername()).toBeDefined();
+	});
+	
+	it('should initially provide a login button', () => {
+		const element: HTMLElement = fixture.nativeElement;
+		const button = element.querySelector('button');
+		expect(button).not.toBeNull();
+		expect(button.textContent).toContain('login');
+	});
+
+	it('should display user-name after login', async () => {
+		await component.login();
+		fixture.detectChanges();
+		const element: HTMLElement = fixture.nativeElement;
+		const button = element.querySelector('button');
+		expect(button).toBeNull();
+		expect(element.textContent).toContain(component.getUsername());
 	});
 });

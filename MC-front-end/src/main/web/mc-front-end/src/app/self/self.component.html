@@ -1,5 +1,5 @@
 <div class="self">
-	<p *ngIf="isLoggedIn(); else selfLogin">Logged in as
+	<p *ngIf="isLoggedIn() | async; else selfLogin">Logged in as
 		{{getUsername()}}</p>
 	<ng-template #selfLogin>
 	<button id="login" (click)="login()">login</button>
