@@ -16,7 +16,7 @@ export class SelfComponent implements OnInit {
 
 	getUsername(): string { return this.keycloak.getUsername(); }
 
-	isLoggedIn(): Promise<boolean> { return this.keycloak.isLoggedIn(); }
+	async isLoggedIn(): Promise<boolean> { return this.keycloak.isLoggedIn(); }
 
 	async login(): Promise<void> {
 		return this.keycloak.login({
