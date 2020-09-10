@@ -13,9 +13,11 @@ class MockKeycloakService {
 	async isLoggedIn(): Promise<boolean> { return Promise.resolve(this.username != null); }
 
 	async login(options: any): Promise<void> {
-		this.username = this.nextUsername;
-		this.nextUsername = null;
-		return Promise.resolve();
+		return new Promise((resolve, reject) => {
+			this.username = this.nextUsername;
+			this.nextUsername = null;
+			resolve();
+		});
 	}
 }
 
