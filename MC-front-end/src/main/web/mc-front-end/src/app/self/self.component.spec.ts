@@ -37,7 +37,6 @@ describe('SelfComponent', () => {
 		TestBed.inject(KeycloakService);
 		fixture = TestBed.createComponent(SelfComponent);
 		component = fixture.componentInstance;
-		fixture.detectChanges();
 	});
 
 	it('should create', () => {
@@ -57,6 +56,7 @@ describe('SelfComponent', () => {
 	});
 
 	it('should initially provide a login button', () => {
+		fixture.detectChanges();
 		const element: HTMLElement = fixture.nativeElement;
 		const button = element.querySelector('button');
 		expect(button).not.toBeNull();
