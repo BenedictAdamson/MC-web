@@ -5,16 +5,16 @@ import { SelfComponent } from './self.component';
 
 class MockKeycloakService {
 
-	private loggedIn: boolean = false;
+	private nextUsername: string = "jeff";
 	private username: string = null;
 
 	getUsername(): string { return this.username; }
 
-	async isLoggedIn(): Promise<boolean> { return Promise.resolve(this.loggedIn); }
+	async isLoggedIn(): Promise<boolean> { return Promise.resolve(this.username != null); }
 
-	async login(): Promise<void> {
-		this.loggedIn = true;
-		this.username = "jeff";
+	async login(options: any): Promise<void> {
+		this.username = this.nextUsername;
+		this.nextUsername = null;
 		return Promise.resolve();
 	}
 }
@@ -53,9 +53,9 @@ describe('SelfComponent', () => {
 		await component.login();
 		fixture.detectChanges();
 		expect(await component.isLoggedIn()).toBeTrue();
-		expect(component.getUsername()).toBeDefined();
+		expect(component.getUsername()).not.toBeNull();
 	});
-	
+
 	it('should initially provide a login button', () => {
 		const element: HTMLElement = fixture.nativeElement;
 		const button = element.querySelector('button');
