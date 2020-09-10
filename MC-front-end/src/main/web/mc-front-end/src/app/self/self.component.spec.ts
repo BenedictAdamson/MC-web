@@ -45,14 +45,14 @@ describe('SelfComponent', () => {
 	});
 
 	it('should not initially be logged in', async () => {
-		expect(await component.isLoggedIn()).toBeFalse();
+		expect(await component.loggedIn.toPromise()).toBeFalse();
 		expect(component.getUsername()).toBeNull();
 	});
 
 	it('should have an identity after login', async () => {
-		await component.login();
+		await component.login().toPromise();
 		fixture.detectChanges();
-		expect(await component.isLoggedIn()).toBeTrue();
+		expect(await component.loggedIn.toPromise()).toBeTrue();
 		expect(component.getUsername()).not.toBeNull();
 	});
 
@@ -64,7 +64,7 @@ describe('SelfComponent', () => {
 	});
 
 	it('should display user-name after login', async () => {
-		await component.login();
+		await component.login().toPromise();
 		fixture.detectChanges();
 		const element: HTMLElement = fixture.nativeElement;
 		const button = element.querySelector('button');

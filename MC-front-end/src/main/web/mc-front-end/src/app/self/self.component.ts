@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable, from } from 'rxjs';
 import { KeycloakService } from 'keycloak-angular';
 
 @Component({
@@ -16,11 +17,11 @@ export class SelfComponent implements OnInit {
 
 	getUsername(): string { return this.keycloak.getUsername(); }
 
-	async isLoggedIn(): Promise<boolean> { return this.keycloak.isLoggedIn(); }
+	loggedIn: Observable<boolean> = from(this.keycloak.isLoggedIn());
 
-	async login(): Promise<void> {
-		return this.keycloak.login({
+	login(): Observable<void> {
+		return from(this.keycloak.login({
 			redirectUri: "/"
-		});
+		}));
 	}
 }
