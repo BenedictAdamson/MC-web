@@ -43,4 +43,4 @@ spec:
             secretKeyRef:
               name: {{ .Release.Name }}-secrets
               key: db-user-password
-  restartPolicy:  OnFailure
+      restartPolicy:  OnFailure
