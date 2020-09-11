@@ -30,4 +30,4 @@ spec:
     app.kubernetes.io/instance: {{ .Release.Name }}
   ports:
   -  protocol: TCP
-     port: 27017
+     port: 3306
