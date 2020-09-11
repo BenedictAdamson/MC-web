@@ -24,11 +24,15 @@ metadata:
   labels:
     app.kubernetes.io/component: server
 {{ include "mc.labels" . | indent 4 }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": hook-succeeded
 spec:
   template:
     spec:
       containers:
-        name: mc-auth-init
+      - name: mc-auth-init
         image: benedictadamson/mc-auth-init:{{ .Chart.AppVersion }}
         args:
         - {{ .Release.Name }}-auth-svc
