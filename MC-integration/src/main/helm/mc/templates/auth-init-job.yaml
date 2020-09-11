@@ -36,7 +36,7 @@ spec:
         image: benedictadamson/mc-auth-init:{{ .Chart.AppVersion }}
         args:
         - {{ .Release.Name }}-auth-svc
-        - 8080
+        - "8080"
         env:
         - name: KEYCLOAK_PASSWORD
           valueFrom:
