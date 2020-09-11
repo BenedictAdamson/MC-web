@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with MC.  If not, see <https://www.gnu.org/licenses/>.
 #
-apiVersion: apps/v1
+apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ .Release.Name }}-auth-init-job
