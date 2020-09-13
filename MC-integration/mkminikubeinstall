@@ -1,0 +1,69 @@
+#!/bin/sh
+# mkminikubeinstall
+# Create a minikube instance with mc installed using Docker images in the local registry
+#
+# SYNOPSIS
+# mkminikubeinstall <version> <package>
+#
+# COMMAND LINE ARGUMENTS
+# <version>
+# The version of MC to install
+# <package>
+# The path-name or name of the Helm package to install.
+#
+# ENVIRONMENT
+# The minikube program must be in the program search PATH.
+# The helm program must be in the program search PATH.
+
+# Read environment
+TMPDIR="${TMPDIR:-/var/tmp}
+
+# Enable clean handlink of temporary files
+TMPDIR="$TMPDIR/mkminikubeinstall-$$"
+export TMPDIR
+rmTmpdir () {
+  rm -rf "$TMPDIR"
+}
+trap rmTmpdir EXIT
+
+# Parse command-line arguments
+VERSION="$1"
+PACKAGE="$2"
+
+VM="k8-mc-$VERSION"
+minikube start \
+  --profile="${VM}" \
+  --delete-on-failure=true
+
+# Upload the local Docker images
+# (minikube will only fetch from public registries or using loaded images,
+# never from our local registry)
+
+saveDockerImage () {
+   docker save --output "$TMPDIR/$1.tar" "benedictadamson/$1:$VERSION"
+}
+
+saveDockerImage mc-auth-db
+saveDockerImage mc-auth-init
+saveDockerImage mc-auth
+saveDockerImage mc-be
+saveDockerImage mc-db
+saveDockerImage mc-fe
+
+(
+  eval $(minikube docker-env)
+
+  loadDockerImage () {
+    docker load --input "$TMPDIR/$1.tar"
+  }
+  
+  loadDockerImage mc-auth-db
+  loadDockerImage mc-auth-init
+  loadDockerImage mc-auth
+  loadDockerImage mc-be
+  loadDockerImage mc-db
+  
+  eval $(minikube docker-env -u)
+}
+
+helm install -g --timeout 300s "${PACKAGE}"
