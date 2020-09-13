@@ -16,10 +16,11 @@
 # The helm program must be in the program search PATH.
 
 # Read environment
-TMPDIR="${TMPDIR:-/var/tmp}
+TMPDIR="${TMPDIR:-/var/tmp}"
 
-# Enable clean handlink of temporary files
+# Enable clean handling of temporary files
 TMPDIR="$TMPDIR/mkminikubeinstall-$$"
+mkdir "$TMPDIR"
 export TMPDIR
 rmTmpdir () {
   rm -rf "$TMPDIR"
@@ -40,30 +41,33 @@ minikube start \
 # never from our local registry)
 
 saveDockerImage () {
-   docker save --output "$TMPDIR/$1.tar" "benedictadamson/$1:$VERSION"
+  echo "saving Docker image for $1"
+  docker save --output "$TMPDIR/$1.tar" "benedictadamson/$1:$VERSION"
 }
 
 saveDockerImage mc-auth-db
 saveDockerImage mc-auth-init
 saveDockerImage mc-auth
-saveDockerImage mc-be
-saveDockerImage mc-db
-saveDockerImage mc-fe
+saveDockerImage mc-back-end
+saveDockerImage mc-database
+saveDockerImage mc-front-end-srv
 
 (
-  eval $(minikube docker-env)
+  eval $(minikube docker-env --profile="${VM}")
 
   loadDockerImage () {
+    echo "loading Docker image for $1"
     docker load --input "$TMPDIR/$1.tar"
   }
   
   loadDockerImage mc-auth-db
   loadDockerImage mc-auth-init
   loadDockerImage mc-auth
-  loadDockerImage mc-be
-  loadDockerImage mc-db
+  loadDockerImage mc-back-end
+  loadDockerImage mc-database
+  loadDockerImage mc-front-end-srv
   
-  eval $(minikube docker-env -u)
-}
+  eval $(minikube docker-env --profile="${VM}" -u)
+)
 
 helm install -g --timeout 300s "${PACKAGE}"
