@@ -48,7 +48,7 @@ spec:
         - name: DB_ADDR
           value: {{ .Release.Name }}-auth-db-svc
         - name: DB_PORT
-          value: 3306
+          value: "3306"
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
