@@ -38,8 +38,8 @@ public class AuthDbContainer extends MariaDBContainer<AuthDbContainer> {
    public static final String IMAGE = "index.docker.io/benedictadamson/mc-auth-db:"
             + VERSION;
 
-   private static final String DB_USER = McAuthContainer.DB_NAME;
-   private static final String DB_NAME = McAuthContainer.DB_USER;
+   private static final String DB_USER = McAuthContainer.DB_USER;
+   private static final String DB_NAME = McAuthContainer.DB_NAME;
 
    public AuthDbContainer(final String password) {
       super(IMAGE);
