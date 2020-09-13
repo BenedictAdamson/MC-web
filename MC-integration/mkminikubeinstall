@@ -70,4 +70,5 @@ saveDockerImage mc-front-end-srv
   eval $(minikube docker-env --profile="${VM}" -u)
 )
 
+echo "installing Helm package"
 helm install -g --timeout 300s "${PACKAGE}"
