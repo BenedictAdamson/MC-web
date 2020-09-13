@@ -45,8 +45,8 @@ spec:
         readinessProbe:
           tcpSocket:
             port: 3306
-          initialDelaySeconds: 11
-          periodSeconds: 3
+          initialDelaySeconds: 37
+          periodSeconds: 23
         env:
         - name: MYSQL_PASSWORD
           valueFrom:
