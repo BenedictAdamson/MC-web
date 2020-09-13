@@ -61,8 +61,8 @@ spec:
           httpGet:
             path: /auth
             port: 8080
-          initialDelaySeconds: 13
-          periodSeconds: 5
+          initialDelaySeconds: 37
+          periodSeconds: 31
         livenessProbe:
           httpGet:
             path: /
