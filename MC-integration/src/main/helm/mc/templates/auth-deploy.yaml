@@ -37,6 +37,13 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         provides: auth
     spec:
+      initContainers:
+      - name: await-auth-db
+        image: subfuzion/netcat:latest
+        args:
+        - "-dvz"
+        - {{ .Release.Name }}-auth-db-svc
+        - "3306"
       containers:
       - name: mc-auth
         image: benedictadamson/mc-auth:{{ .Chart.AppVersion }}
