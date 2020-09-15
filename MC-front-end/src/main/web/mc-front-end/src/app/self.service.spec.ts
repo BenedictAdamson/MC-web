@@ -1,5 +1,4 @@
-import { TestBed } from '@angular/core/testing';
-import { Observable, Subject, defer, of } from 'rxjs';
+import { Observable, Subject, defer } from 'rxjs';
 import { KeycloakEvent, KeycloakEventType, KeycloakService } from 'keycloak-angular';
 
 import { SelfService } from './self.service';
@@ -23,12 +22,16 @@ class MockKeycloakService extends KeycloakService {
 
 	async login(options: any): Promise<void> {
 		return new Promise((resolve, reject) => {
-			this.username = this.nextUsername;
-			this.nextUsername = null;
-			this.events$.next({
-				type: KeycloakEventType.OnAuthSuccess
-			});
-			resolve();
+			try {
+				this.username = this.nextUsername;
+				this.nextUsername = null;
+				this.events$.next({
+					type: KeycloakEventType.OnAuthSuccess
+				});
+				resolve();
+			} catch (e) {
+				reject(options + ' ' + e);
+			}
 		});
 	}
 };
