@@ -31,10 +31,14 @@ trap rmTmpdir EXIT
 VERSION="$1"
 PACKAGE="$2"
 
+# Start minikube
 VM="k8-mc-$VERSION"
 minikube start \
   --profile="${VM}" \
   --delete-on-failure=true
+minikube addons enable \
+  --profile="${VM}" \
+  ingress
 
 # Upload the local Docker images
 # (minikube will only fetch from public registries or using loaded images,
@@ -71,4 +75,4 @@ saveDockerImage mc-front-end-srv
 )
 
 echo "installing Helm package"
-helm install -g --timeout 300s "${PACKAGE}"
+helm install -g --timeout 600s "${PACKAGE}"
