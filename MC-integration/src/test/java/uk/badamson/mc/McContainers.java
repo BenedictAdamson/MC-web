@@ -67,8 +67,10 @@ public class McContainers
    public static final String INGRESS_HOST = BASE_PRIVATE_NETWORK_URI
             .getAuthority();
 
-   private static void assertThatNoErrorMessagesLogged(final String logs) {
-      assertThat(logs, not(containsString("ERROR:")));
+   private static void assertThatNoErrorMessagesLogged(final String container,
+            final String logs) {
+      assertThat(container + " logs no errors", logs,
+               not(containsString("ERROR:")));
    }
 
    public static URI createIngressPrivateNetworkUriFromPath(final String path) {
@@ -115,13 +117,13 @@ public class McContainers
    }
 
    public void assertThatNoErrorMessagesLogged() {
-      assertThatNoErrorMessagesLogged(authDb.getLogs());
-      assertThatNoErrorMessagesLogged(auth.getLogs());
-      assertThatNoErrorMessagesLogged(db.getLogs());
-      assertThatNoErrorMessagesLogged(be.getLogs());
-      assertThatNoErrorMessagesLogged(fe.getLogs());
-      assertThatNoErrorMessagesLogged(in.getLogs());
-      assertThatNoErrorMessagesLogged(browser.getLogs());
+      assertThatNoErrorMessagesLogged("auth-db", authDb.getLogs());
+      assertThatNoErrorMessagesLogged("auth", auth.getLogs());
+      assertThatNoErrorMessagesLogged("db", db.getLogs());
+      assertThatNoErrorMessagesLogged("be", be.getLogs());
+      assertThatNoErrorMessagesLogged("fe", fe.getLogs());
+      assertThatNoErrorMessagesLogged("in", in.getLogs());
+      assertThatNoErrorMessagesLogged("browser", browser.getLogs());
    }
 
    @Override
