@@ -1,4 +1,4 @@
-import { Observable, Subject, defer } from 'rxjs';
+import { Observable, Subject, defer, of } from 'rxjs';
 import { KeycloakEvent, KeycloakEventType, KeycloakService } from 'keycloak-angular';
 
 import { SelfService } from './self.service';
@@ -8,8 +8,8 @@ class MockKeycloakService extends KeycloakService {
 
 	get keycloakEvents$(): Subject<KeycloakEvent> { return this.events$; };
 
+	nextUsername: string = "jeff";
 	private username: string = null;
-	private nextUsername: string = "jeff";
 	private events$: Subject<KeycloakEvent> = new Subject;
 
 	init(): Promise<boolean> {
@@ -46,13 +46,35 @@ describe('SelfService', () => {
 	let service: SelfService;
 
 	beforeEach(() => {
-		keycloakFactory = defer(async () => <KeycloakService>(new MockKeycloakService));
+		keycloakFactory = of(new MockKeycloakService);
 		service = new SelfService(keycloakFactory);
 	});
 
-	it('should be created with iniitail state', () => {
+	it('should be created with initial state', () => {
 		expect(service).toBeTruthy();
 		assertInvariants(service);
 		expect(service.isLoggedIn()).toBe(false, 'not loggedIn');
+	});
+
+	it('can get keycloak', async () => {
+		var keycloak: KeycloakService = await service.getKeycloak$().toPromise();
+
+		assertInvariants(service);
+		expect(keycloak).not.toBeNull();
+	});
+
+	it('can get keycloak again', async () => {
+		var keycloak1: KeycloakService = await service.getKeycloak$().toPromise();
+		var keycloak2: KeycloakService = await service.getKeycloak$().toPromise();
+
+		assertInvariants(service);
+		expect(keycloak2).toBe(keycloak1);
+	});
+
+	it('should set username after successful login', async () => {
+		await service.login$().toPromise();
+
+		assertInvariants(service);
+		expect(service.isLoggedIn()).toBe(true, 'loggedIn');
 	});
 });
