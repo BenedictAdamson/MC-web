@@ -39,11 +39,6 @@ public class HomePageSteps {
    @Autowired
    private WorldCoreScenarioHook worldCoreScenarioHook;
 
-   @Then("MC serves the home page")
-   public void mc_serves_the_home_page() {
-      worldCore.getUrlUsingBrowser();
-   }
-
    @Given("the DNS name, example.com, of an MC server")
    public void the_DNS_name_of_an_MC_server() {
       /*
@@ -55,6 +50,12 @@ public class HomePageSteps {
    @When("the potential user gives the obvious URL http://example.com/ to a web browser")
    public void the_potential_user_gives_the_obvious_URL_to_a_web_browser() {
       worldCore.setUrlPath("/");
+      worldCore.getUrlUsingBrowser();
+   }
+
+   @Then("MC serves the home page")
+   public void mc_serves_the_resource() {
+      // TODO
    }
 
 }

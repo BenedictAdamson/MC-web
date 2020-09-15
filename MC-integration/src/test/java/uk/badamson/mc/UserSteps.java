@@ -117,11 +117,6 @@ public class UserSteps {
 
    }
 
-   @Then("MC serves the resource")
-   public void mc_serves_the_resource() {
-      // TODO
-   }
-
    @Then("the response is a list of users")
    public void response_is_list_of_users() {
       // TODO
