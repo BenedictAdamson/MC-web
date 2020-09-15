@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { Observable, defer } from 'rxjs';
+import { KeycloakService } from 'keycloak-angular';
 
 @Injectable({
 	providedIn: 'root'
@@ -10,7 +12,11 @@ export class SelfService {
      * Initial state:
      * not ##isLoggedIn()
      */
-	constructor() { }
+	constructor(
+		private keycloakFactory: Observable<KeycloakService>
+	) { }
+
+	private keycloak: KeycloakService;
 
     /**
      * @returns
@@ -27,5 +33,15 @@ export class SelfService {
      */
 	isLoggedIn(): boolean {
 		return this.getUsername() != null;
+	}
+
+
+	/**
+	 * This indirectly makes use of an HTTP request, which is a cold Observable,
+     * so this is a cold Observable too.
+     * That is, the expensive HTTP request will not be made until something subscribes to this Observable.
+	 */
+	login(): Observable<void> {
+		return defer(() => { });
 	}
 }
