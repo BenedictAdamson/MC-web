@@ -31,4 +31,4 @@ spec:
     provides: auth-db
   ports:
   -  protocol: TCP
-     port: 3306
+     port: 5432

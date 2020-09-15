@@ -44,7 +44,7 @@ spec:
         - containerPort: 3306
         readinessProbe:
           tcpSocket:
-            port: 3306
+            port: 5432
           initialDelaySeconds: 37
           periodSeconds: 23
         env:
