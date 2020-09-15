@@ -24,7 +24,7 @@ export class SelfService {
      * null if the user name is unknown,
      * which includes the case that the user is not logged in.
      */
-	getUsername(): string {
+	get username(): string {
 		return null;
 	};
 
@@ -32,8 +32,8 @@ export class SelfService {
      * @description
      * #isLoggedIn() iff #getUsername() is non null.
      */
-	isLoggedIn(): boolean {
-		return this.getUsername() != null;
+	get loggedIn(): boolean {
+		return this.username != null;
 	}
 
 
@@ -51,7 +51,7 @@ export class SelfService {
 		);
 	}
 
-	getKeycloak$(): Observable<KeycloakService> {
+	get keycloak$(): Observable<KeycloakService> {
 		return new Observable<KeycloakService>((s) => {
 			if (this.keycloak != null) {
 				// Provide the cached value
@@ -85,7 +85,7 @@ export class SelfService {
 	 * Iff the login is sucessful, the #getUsername() will be non null.
 	 */
 	login$(): Observable<void> {
-		return this.getKeycloak$().pipe(
+		return this.keycloak$.pipe(
 			SelfService.loginOperator$
 		);
 	}
