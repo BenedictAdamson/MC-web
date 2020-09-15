@@ -18,6 +18,9 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.en.Given;
@@ -32,12 +35,31 @@ import io.cucumber.java.en.When;
  */
 public class HomePageSteps {
 
+   public static final String GAME_NAME = "Mission Command";
+
    @Autowired
    private WorldCore worldCore;
 
    @SuppressWarnings("unused")
    @Autowired
    private WorldCoreScenarioHook worldCoreScenarioHook;
+
+   @Then("the home page header includes the name of the game")
+   public void home_page_header_includes_name_of_game() {
+      assertThat(worldCore.getWebDriver().findElementByTagName("h1").getText(),
+               containsString(GAME_NAME));
+   }
+
+   @Then("the home page title includes the name of the game")
+   public void home_page_title_includes_name_of_game() {
+      assertThat(worldCore.getWebDriver().getTitle(),
+               containsString(GAME_NAME));
+   }
+
+   @Then("MC serves the home page")
+   public void mc_serves_the_home_page() {
+      // Do nothing;
+   }
 
    @Given("the DNS name, example.com, of an MC server")
    public void the_DNS_name_of_an_MC_server() {
@@ -52,10 +74,4 @@ public class HomePageSteps {
       worldCore.setUrlPath("/");
       worldCore.getUrlUsingBrowser();
    }
-
-   @Then("MC serves the home page")
-   public void mc_serves_the_resource() {
-      // TODO
-   }
-
 }
