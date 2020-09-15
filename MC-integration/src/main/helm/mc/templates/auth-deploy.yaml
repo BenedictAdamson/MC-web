@@ -42,6 +42,8 @@ spec:
         image: subfuzion/netcat:latest
         args:
         - "-dvz"
+        - "-w"
+        - "10"
         - {{ .Release.Name }}-auth-db-svc
         - "5432"
       containers:
