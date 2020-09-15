@@ -43,7 +43,7 @@ spec:
         args:
         - "-dvz"
         - {{ .Release.Name }}-auth-db-svc
-        - "3306"
+        - "5432"
       containers:
       - name: mc-auth
         image: benedictadamson/mc-auth:{{ .Chart.AppVersion }}
