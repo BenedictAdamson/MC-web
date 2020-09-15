@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
       - name: auth-db
-        image: mariadb:10
+        image: postgres:9.6
         ports:
         - containerPort: 3306
         readinessProbe:
@@ -48,22 +48,17 @@ spec:
           initialDelaySeconds: 37
           periodSeconds: 23
         env:
-        - name: MYSQL_DATABASE
+        - name: POSTGRES_DB
           value: keycloak
-        - name: MYSQL_USER
+        - name: POSTGRES_USER
           value: keycloak
-        - name: MYSQL_PASSWORD
+        - name: POSTGRES_USER
           valueFrom:
             secretKeyRef:
               name: {{ .Release.Name }}-secrets
               key: db-user-password
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-secrets
-              key: db-root-password
         volumeMounts:
-        - mountPath: /var/lib/mysql
+        - mountPath: /var/lib/postgresql/data
           name: mc-auth-db
       volumes:
       - name: mc-auth-db

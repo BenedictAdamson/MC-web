@@ -18,7 +18,7 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.testcontainers.containers.MariaDBContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
 
 import uk.badamson.mc.auth.McAuthContainer;
 
@@ -28,17 +28,14 @@ import uk.badamson.mc.auth.McAuthContainer;
  * (MC-auth) authentication server.
  * </p>
  */
-public class AuthDbContainer extends MariaDBContainer<AuthDbContainer> {
+public class AuthDbContainer extends PostgreSQLContainer<AuthDbContainer> {
 
-   public static final String KEYCLOAK_DB_VENDOR = "mariadb";
-
-   public static final String IMAGE = "mariadb:10";
+   public static final String KEYCLOAK_DB_VENDOR = "postgres";
 
    private static final String DB_USER = McAuthContainer.DB_USER;
    private static final String DB_NAME = McAuthContainer.DB_NAME;
 
    public AuthDbContainer(final String password) {
-      super(IMAGE);
       withDatabaseName(DB_NAME);
       withUsername(DB_USER);
       withPassword(password);

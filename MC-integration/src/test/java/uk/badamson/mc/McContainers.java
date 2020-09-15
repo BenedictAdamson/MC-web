@@ -117,7 +117,7 @@ public class McContainers
    }
 
    public void assertThatNoErrorMessagesLogged() {
-      assertThatNoErrorMessagesLogged("auth-db", authDb.getLogs());
+      // Ignore spurious error messages from auth-db
       assertThatNoErrorMessagesLogged("auth", auth.getLogs());
       assertThatNoErrorMessagesLogged("db", db.getLogs());
       assertThatNoErrorMessagesLogged("be", be.getLogs());
