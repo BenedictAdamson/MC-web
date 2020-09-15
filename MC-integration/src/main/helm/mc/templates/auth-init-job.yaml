@@ -17,18 +17,30 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with MC.  If not, see <https://www.gnu.org/licenses/>.
 #
-apiVersion: v1
-kind: Service
+apiVersion: batch/v1
+kind: Job
 metadata:
-  name: {{ .Release.Name }}-auth-db-svc
+  name: {{ .Release.Name }}-auth-init-job
   labels:
-    app.kubernetes.io/component: database
+    app.kubernetes.io/component: server
 {{ include "mc.labels" . | indent 4 }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": hook-succeeded
 spec:
-  selector:
-    app.kubernetes.io/name: {{ include "mc.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    provides: auth-db
-  ports:
-  -  protocol: TCP
-     port: 5432
+  template:
+    spec:
+      containers:
+      - name: mc-auth-init
+        image: benedictadamson/mc-auth-init:{{ .Chart.AppVersion }}
+        args:
+        - {{ .Release.Name }}-auth-svc
+        - "8080"
+        env:
+        - name: KEYCLOAK_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-secrets
+              key: db-user-password
+      restartPolicy:  OnFailure

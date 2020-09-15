@@ -35,15 +35,12 @@ public final class McFrontEndContainer
 
    public static final int PORT = 80;
 
-   public static final String HOST = "fe";
-
    public static final String IMAGE = "index.docker.io/benedictadamson/mc-front-end-srv:"
             + VERSION;
 
    public McFrontEndContainer() {
       super(IMAGE);
       addExposedPort(PORT);
-      withNetworkAliases(HOST);
       waitingFor(Wait.forListeningPort());
    }
 

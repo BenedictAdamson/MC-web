@@ -34,6 +34,7 @@ import org.testcontainers.lifecycle.TestDescription;
 import org.testcontainers.lifecycle.TestLifecycleAware;
 
 import uk.badamson.mc.auth.McAuthContainer;
+import uk.badamson.mc.auth.McAuthInitContainer;
 import uk.badamson.mc.presentation.McFrontEndContainer;
 import uk.badamson.mc.presentation.McReverseProxyContainer;
 import uk.badamson.mc.repository.AuthDbContainer;
@@ -48,42 +49,66 @@ import uk.badamson.mc.repository.McDatabaseContainer;
 public class McContainers
          implements Startable, AutoCloseable, TestLifecycleAware {
 
-   private static final URI BASE_URI = URI
-            .create("http://" + McReverseProxyContainer.HOST);
+   private static final String AUTH_HOST = "auth";
+   private static final String AUTH_DB_HOST = "auth-db";
+   private static final String BE_HOST = "be";
+   private static final String DB_HOST = "db";
+   private static final String FE_HOST = "fe";
+   private static final String REVERSE_PROXY_HOST = "in";
 
-   public static final String INGRESS_HOST = BASE_URI.getAuthority();
+   private static final URI BASE_PRIVATE_NETWORK_URI = URI
+            .create("http://" + REVERSE_PROXY_HOST);
 
-   private static void assertThatNoErrorMessagesLogged(final String logs) {
-      assertThat(logs, not(containsString("ERROR:")));
+   private static final String AUTH_DB_PASSWORD = "secret1";
+   private static final String DB_ROOT_PASSWORD = "secret2";
+   private static final String DB_USER_PASSWORD = "secret3";
+   private static final String KEYCLOAK_PASSWORD = "secret4";
+
+   public static final String INGRESS_HOST = BASE_PRIVATE_NETWORK_URI
+            .getAuthority();
+
+   private static void assertThatNoErrorMessagesLogged(final String container,
+            final String logs) {
+      assertThat(container + " logs no errors", logs,
+               not(containsString("ERROR:")));
    }
 
-   public static String createUrlFromPath(final String path) {
-      return BASE_URI.resolve(path).toASCIIString();
+   public static URI createIngressPrivateNetworkUriFromPath(final String path) {
+      return BASE_PRIVATE_NETWORK_URI.resolve(path);
    }
 
    private final Network network = Network.newNetwork();
 
-   private final AuthDbContainer authDb = new AuthDbContainer()
-            .withNetwork(network);
+   private final AuthDbContainer authDb = new AuthDbContainer(AUTH_DB_PASSWORD)
+            .withNetwork(network).withNetworkAliases(AUTH_DB_HOST);
 
-   private final McAuthContainer auth = new McAuthContainer()
-            .withNetwork(network).withEnv("DB_VENDOR", "mysql")
-            .withEnv("DB_ADDR", AuthDbContainer.HOST);
+   private final McAuthContainer auth = new McAuthContainer(KEYCLOAK_PASSWORD,
+            AuthDbContainer.KEYCLOAK_DB_VENDOR, AUTH_DB_HOST, AUTH_DB_PASSWORD)
+                     .withNetwork(network).withNetworkAliases(AUTH_HOST);
 
-   private final McDatabaseContainer db = new McDatabaseContainer()
-            .withNetwork(network);
+   private final McAuthInitContainer authInit = new McAuthInitContainer(
+            KEYCLOAK_PASSWORD, AUTH_HOST, McAuthContainer.PORT)
+                     .withNetwork(network);
 
-   private final McBackEndContainer be = new McBackEndContainer()
-            .withNetwork(network).withCommand("--spring.data.mongodb.host=db");
+   private final McDatabaseContainer db = new McDatabaseContainer(
+            DB_ROOT_PASSWORD, DB_USER_PASSWORD).withNetwork(network)
+                     .withNetworkAliases(DB_HOST);
+
+   private final McBackEndContainer be = new McBackEndContainer(DB_HOST,
+            DB_USER_PASSWORD).withNetwork(network).withNetworkAliases(BE_HOST);
 
    private final McFrontEndContainer fe = new McFrontEndContainer()
-            .withNetwork(network);
+            .withNetwork(network).withNetworkAliases(FE_HOST);
 
    private final McReverseProxyContainer in = new McReverseProxyContainer()
-            .withNetwork(network);
+            .withNetwork(network).withNetworkAliases(REVERSE_PROXY_HOST);
 
    private final BrowserWebDriverContainer<?> browser = new BrowserWebDriverContainer<>()
             .withCapabilities(new FirefoxOptions()).withNetwork(network);
+
+   public void addPlayer(final String user, final String password) {
+      auth.addPlayer(user, password);
+   }
 
    @Override
    public void afterTest(final TestDescription description,
@@ -92,13 +117,13 @@ public class McContainers
    }
 
    public void assertThatNoErrorMessagesLogged() {
-      assertThatNoErrorMessagesLogged(authDb.getLogs());
-      assertThatNoErrorMessagesLogged(auth.getLogs());
-      assertThatNoErrorMessagesLogged(db.getLogs());
-      assertThatNoErrorMessagesLogged(be.getLogs());
-      assertThatNoErrorMessagesLogged(fe.getLogs());
-      assertThatNoErrorMessagesLogged(in.getLogs());
-      assertThatNoErrorMessagesLogged(browser.getLogs());
+      // Ignore spurious error messages from auth-db
+      assertThatNoErrorMessagesLogged("auth", auth.getLogs());
+      assertThatNoErrorMessagesLogged("db", db.getLogs());
+      assertThatNoErrorMessagesLogged("be", be.getLogs());
+      assertThatNoErrorMessagesLogged("fe", fe.getLogs());
+      assertThatNoErrorMessagesLogged("in", in.getLogs());
+      assertThatNoErrorMessagesLogged("browser", browser.getLogs());
    }
 
    @Override
@@ -117,9 +142,16 @@ public class McContainers
       fe.close();
       be.close();
       db.close();
+      authInit.close();
       auth.close();
       authDb.close();
       network.close();
+   }
+
+   public URI createIngressUriFromPath(final String path) {
+      final var base = URI.create(
+               "http://" + in.getHost() + ":" + in.getFirstMappedPort());
+      return base.resolve(path);
    }
 
    public RemoteWebDriver getWebDriver() {
@@ -134,8 +166,8 @@ public class McContainers
        */
       authDb.start();
       auth.start();
+      authInit.start();
       db.start();
-      db.waitUntilAcceptsConnections();
       be.start();
       fe.start();
       in.start();
@@ -153,6 +185,7 @@ public class McContainers
       fe.stop();
       be.stop();
       db.stop();
+      authInit.stop();
       auth.stop();
       authDb.stop();
       close();

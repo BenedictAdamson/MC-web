@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2020.
  *
  * This file is part of MC.
  *
@@ -18,27 +18,34 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.testcontainers.containers.GenericContainer;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.Scenario;
 
 /**
  * <p>
- * A Testcontainers Docker container for the MC-back-end.
- * </p>
- * <p>
- * This class builds the Docker image for the container using the real
- * Dockerfile, so it also tests that Dockerfile.
+ * Enable automatic reporting of the beginning and ending of Cucumber scenarios
+ * to a {@link WorldCore} bean.
  * </p>
  */
-final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
-   public static final int PORT = 8080;
+public final class WorldCoreScenarioHook {
+   private final WorldCore worldCore;
 
-   public static final String VERSION = Version.VERSION;
+   @Autowired
+   public WorldCoreScenarioHook(final WorldCore worldCore) {
+      this.worldCore = worldCore;
+   }
 
-   public static final String IMAGE = "index.docker.io/benedictadamson/mc-back-end:"
-            + VERSION;
+   @Before
+   public void beginScenario(final Scenario scenario) {
+      worldCore.beginScenario(scenario);
+   }
 
-   McBackEndContainer() {
-      super(IMAGE);
+   @After
+   public void endScenario(final Scenario scenario) {
+      worldCore.endScenario(scenario);
    }
 
 }

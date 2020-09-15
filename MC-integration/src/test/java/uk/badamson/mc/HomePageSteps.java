@@ -19,36 +19,42 @@ package uk.badamson.mc;
  */
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
 /**
  * <p>
- * Definitions of BDD steps for, for features about unknown pages (resources).
+ * Definitions of BDD steps for the Cucumber-JVM BDD testing tool for steps
+ * pertaining to the home-page.
  * </p>
  */
-@SpringBootTest(classes = TestConfiguration.class,
-         webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@DirtiesContext
-public class UnknownPageSteps {
+public class HomePageSteps {
 
    @Autowired
-   private BackEndWorldCore worldCore;
+   private WorldCore worldCore;
 
-   @When("getting the unknown resource at {string}")
-   public void getting_the_unknown_resource_at(final String path)
-            throws Exception {
-      worldCore.getJson(path);
+   @SuppressWarnings("unused")
+   @Autowired
+   private WorldCoreScenarioHook worldCoreScenarioHook;
+
+   @Then("MC serves the home page")
+   public void mc_serves_the_home_page() {
+      worldCore.getUrlUsingBrowser();
    }
 
-   @Then("MC replies with Not Found")
-   public void mc_replies_with_not_found() throws Exception {
-      worldCore.getResponse()
-               .andExpect(MockMvcResultMatchers.status().isNotFound());
+   @Given("the DNS name, example.com, of an MC server")
+   public void the_DNS_name_of_an_MC_server() {
+      /*
+       * Do nothing; the test set up hard-codes the DNS name as
+       * McContainers.INGRESS_HOST
+       */
+   }
+
+   @When("the potential user gives the obvious URL http://example.com/ to a web browser")
+   public void the_potential_user_gives_the_obvious_URL_to_a_web_browser() {
+      worldCore.setUrlPath("/");
    }
 
 }

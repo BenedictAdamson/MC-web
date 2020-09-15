@@ -35,17 +35,29 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "mc.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        provides: auth
     spec:
+      initContainers:
+      - name: await-auth-db
+        image: subfuzion/netcat:latest
+        args:
+        - "-dvz"
+        - "-w"
+        - "10"
+        - {{ .Release.Name }}-auth-db-svc
+        - "5432"
       containers:
-        name: mc-auth
+      - name: mc-auth
         image: benedictadamson/mc-auth:{{ .Chart.AppVersion }}
         ports:
         - containerPort: 8080
         env:
         - name: DB_VENDOR
-          value: mariadb
+          value: postgres
         - name: DB_ADDR
           value: {{ .Release.Name }}-auth-db-svc
+        - name: DB_PORT
+          value: "5432"
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -60,11 +72,18 @@ spec:
           httpGet:
             path: /auth
             port: 8080
-          initialDelaySeconds: 13
-          periodSeconds: 5
+          initialDelaySeconds: 29
+          periodSeconds: 31
         livenessProbe:
           httpGet:
             path: /
             port: 8080
-          initialDelaySeconds: 20
+          initialDelaySeconds: 119
           periodSeconds: 59
+        startupProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 60
+          failureThreshold: 15
+          periodSeconds: 20

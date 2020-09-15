@@ -35,30 +35,30 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "mc.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        provides: auth-db
     spec:
       containers:
       - name: auth-db
-        image: benedictadamson/mc-auth-db:{{ .Chart.AppVersion }}
+        image: postgres:9.6
         ports:
         - containerPort: 3306
         readinessProbe:
           tcpSocket:
-            port: 3306
-          initialDelaySeconds: 11
-          periodSeconds: 3
+            port: 5432
+          initialDelaySeconds: 37
+          periodSeconds: 23
         env:
-        - name: MYSQL_PASSWORD
+        - name: POSTGRES_DB
+          value: keycloak
+        - name: POSTGRES_USER
+          value: keycloak
+        - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ .Release.Name }}-secrets
               key: db-user-password
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Release.Name }}-secrets
-              key: db-root-password
         volumeMounts:
-        - mountPath: /var/lib/mysql
+        - mountPath: /var/lib/postgresql/data
           name: mc-auth-db
       volumes:
       - name: mc-auth-db

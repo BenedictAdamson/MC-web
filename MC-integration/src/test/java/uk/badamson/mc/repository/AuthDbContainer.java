@@ -18,9 +18,8 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.testcontainers.containers.MariaDBContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
 
-import uk.badamson.mc.Version;
 import uk.badamson.mc.auth.McAuthContainer;
 
 /**
@@ -29,24 +28,16 @@ import uk.badamson.mc.auth.McAuthContainer;
  * (MC-auth) authentication server.
  * </p>
  */
-public class AuthDbContainer extends MariaDBContainer<AuthDbContainer> {
+public class AuthDbContainer extends PostgreSQLContainer<AuthDbContainer> {
 
-   public static final String VERSION = Version.VERSION;
+   public static final String KEYCLOAK_DB_VENDOR = "postgres";
 
-   public static final String IMAGE = "index.docker.io/benedictadamson/mc-auth-db:"
-            + VERSION;
+   private static final String DB_USER = McAuthContainer.DB_USER;
+   private static final String DB_NAME = McAuthContainer.DB_NAME;
 
-   public static final String HOST = "auth-db";
-
-   private static final String DB_USER = McAuthContainer.DB_NAME;
-   private static final String DB_NAME = McAuthContainer.DB_USER;
-   private static final String DB_PASSWORD = McAuthContainer.DB_PASSWORD;
-
-   public AuthDbContainer() {
-      super(IMAGE);
-      withNetworkAliases(HOST);
+   public AuthDbContainer(final String password) {
       withDatabaseName(DB_NAME);
       withUsername(DB_USER);
-      withPassword(DB_PASSWORD);
+      withPassword(password);
    }
 }

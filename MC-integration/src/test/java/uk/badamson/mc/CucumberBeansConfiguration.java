@@ -1,6 +1,6 @@
-package uk.badamson.mc.presentation;
+package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2020.
  *
  * This file is part of MC.
  *
@@ -18,24 +18,14 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.testcontainers.containers.GenericContainer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-import uk.badamson.mc.Version;
+@Configuration
+public class CucumberBeansConfiguration {
 
-/**
- * <p>
- * A Testcontainers Docker container for the MC-front-end.
- * </p>
- */
-public final class McFrontEndContainer extends GenericContainer<McFrontEndContainer> {
-
-   public static final String VERSION = Version.VERSION;
-   public static final String IMAGE = "index.docker.io/benedictadamson/mc-front-end-srv:"
-            + VERSION;
-
-   public McFrontEndContainer() {
-      super(IMAGE);
-      withExposedPorts(80);
+   @Bean
+   public WorldCore getWorldCore() {
+      return new WorldCore();
    }
-
 }

@@ -35,9 +35,10 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "mc.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        provides: be
     spec:
       containers:
-        name: mc-back-end
+      - name: mc-back-end
         image: benedictadamson/mc-back-end:{{ .Chart.AppVersion }}
         ports:
         - containerPort: 8080

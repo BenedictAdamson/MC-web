@@ -17,7 +17,7 @@ import { KeycloakService } from 'keycloak-angular';
  */
 
 const keyCloakConfig = {
-	realm: "mc",
+	realm: "MC",
 	clientId: "mc-ui"
 };
 
