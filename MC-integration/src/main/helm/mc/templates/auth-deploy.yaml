@@ -53,7 +53,7 @@ spec:
         - containerPort: 8080
         env:
         - name: DB_VENDOR
-          value: mariadb
+          value: postgres
         - name: DB_ADDR
           value: {{ .Release.Name }}-auth-db-svc
         - name: DB_PORT
