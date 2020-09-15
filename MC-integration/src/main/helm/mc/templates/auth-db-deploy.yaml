@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
       - name: auth-db
-        image: benedictadamson/mc-auth-db:{{ .Chart.AppVersion }}
+        image: mariadb:10
         ports:
         - containerPort: 3306
         readinessProbe:
@@ -48,6 +48,10 @@ spec:
           initialDelaySeconds: 37
           periodSeconds: 23
         env:
+        - name: MYSQL_DATABASE
+          value: keycloak
+        - name: MYSQL_USER
+          value: keycloak
         - name: MYSQL_PASSWORD
           valueFrom:
             secretKeyRef:

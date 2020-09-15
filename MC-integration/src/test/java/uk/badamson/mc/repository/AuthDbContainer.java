@@ -20,7 +20,6 @@ package uk.badamson.mc.repository;
 
 import org.testcontainers.containers.MariaDBContainer;
 
-import uk.badamson.mc.Version;
 import uk.badamson.mc.auth.McAuthContainer;
 
 /**
@@ -33,10 +32,7 @@ public class AuthDbContainer extends MariaDBContainer<AuthDbContainer> {
 
    public static final String KEYCLOAK_DB_VENDOR = "mariadb";
 
-   public static final String VERSION = Version.VERSION;
-
-   public static final String IMAGE = "index.docker.io/benedictadamson/mc-auth-db:"
-            + VERSION;
+   public static final String IMAGE = "mariadb:10";
 
    private static final String DB_USER = McAuthContainer.DB_USER;
    private static final String DB_NAME = McAuthContainer.DB_NAME;
