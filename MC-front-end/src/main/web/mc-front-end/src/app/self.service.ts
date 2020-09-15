@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, defer, of, from } from 'rxjs';
-import { map, mergeMap, tap } from 'rxjs/operators';
+import { map, mergeMap, tap, filter } from 'rxjs/operators';
 import { KeycloakService } from 'keycloak-angular';
 
 @Injectable({
@@ -36,6 +36,21 @@ export class SelfService {
 		return this.getUsername() != null;
 	}
 
+
+	private acquireOperator$(k$: Observable<KeycloakService>): Observable<KeycloakService> {
+		return k$.pipe(
+			filter((k: KeycloakService) => k != null),
+			mergeMap((k: KeycloakService) =>
+				from(k.init()).pipe(
+					map((ok: boolean) => [k, ok]),
+					filter((p: [KeycloakService, boolean]) => p[1]),
+					map((p: [KeycloakService, boolean]) => p[0])
+				)
+			),
+			tap((k: KeycloakService) => this.keycloak = k)
+		);
+	}
+
 	getKeycloak$(): Observable<KeycloakService> {
 		return new Observable<KeycloakService>((s) => {
 			if (this.keycloak != null) {
@@ -45,7 +60,7 @@ export class SelfService {
 			} else {
 				// Provide a new constructed value, caching that value
 				this.keycloakFactory.pipe(
-					tap(k => this.keycloak = k)
+					k => this.acquireOperator$(k)
 				).subscribe(s);
 			}
 
