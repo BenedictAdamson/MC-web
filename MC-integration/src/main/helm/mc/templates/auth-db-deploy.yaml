@@ -52,7 +52,7 @@ spec:
           value: keycloak
         - name: POSTGRES_USER
           value: keycloak
-        - name: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ .Release.Name }}-secrets
