@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable, Subject, defer, from } from 'rxjs';
-import { KeycloakEvent, KeycloakEventType } from 'keycloak-angular';
+import { Observable } from 'rxjs';
 
 import { SelfService } from '../self.service';
 
