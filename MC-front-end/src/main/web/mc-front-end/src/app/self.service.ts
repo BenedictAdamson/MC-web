@@ -105,7 +105,7 @@ export class SelfService {
 	 *
 	 * Iff the login is sucessful, the #getUsername() will be non null.
 	 */
-	login$(): Observable<void> {
+	login(): Observable<void> {
 		return this.createdKeycloak$.pipe(
 			mergeMap((k: KeycloakService) => k ? from(k.login()) : of(null))
 		);

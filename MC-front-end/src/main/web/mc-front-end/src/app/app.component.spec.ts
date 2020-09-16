@@ -5,13 +5,19 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { AppComponent } from './app.component';
 import { SelfComponent } from './self/self.component';
+import { SelfService } from './self.service';
 
-class MockKeycloakService {
+class MockKeycloakService extends KeycloakService {
 
-	keycloakEvents$: Subject<KeycloakEvent> = new Subject;
+	get keycloakEvents$(): Subject<KeycloakEvent> { return this.events$; };
 
+	nextUsername: string = "jeff";
 	private username: string = null;
-	private nextUsername: string = "jeff";
+	private events$: Subject<KeycloakEvent> = new Subject;
+
+	init(): Promise<boolean> {
+		return Promise.resolve(true);
+	}
 
 	getUsername(): string { return this.username; }
 
@@ -19,21 +25,28 @@ class MockKeycloakService {
 
 	async login(options: any): Promise<void> {
 		return new Promise((resolve, reject) => {
-			this.username = this.nextUsername;
-			this.nextUsername = null;
-			this.keycloakEvents$.next({
-				type: KeycloakEventType.OnAuthSuccess
-			});
-			resolve();
+			try {
+				this.username = this.nextUsername;
+				this.nextUsername = null;
+				this.events$.next({
+					type: KeycloakEventType.OnAuthSuccess
+				});
+				resolve(null);
+			} catch (e) {
+				reject(options + ' ' + e);
+			}
 		});
 	}
-}
+};
 
 describe('AppComponent', () => {
+	let keycloakFactory = function() { return new MockKeycloakService };
+
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
 			providers: [
-				{ provide: KeycloakService, useClass: MockKeycloakService }
+				{ provide: KeycloakService, useClass: MockKeycloakService },
+				{ provide: SelfService, useValue: new SelfService(keycloakFactory) }
 			],
 			declarations: [
 				AppComponent, SelfComponent

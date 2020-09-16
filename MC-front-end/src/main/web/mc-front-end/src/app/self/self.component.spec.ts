@@ -3,13 +3,19 @@ import { KeycloakService, KeycloakEvent, KeycloakEventType } from 'keycloak-angu
 import { Subject } from 'rxjs';
 
 import { SelfComponent } from './self.component';
+import { SelfService } from '../self.service';
 
-class MockKeycloakService {
+class MockKeycloakService extends KeycloakService {
 
-	keycloakEvents$: Subject<KeycloakEvent> = new Subject;
+	get keycloakEvents$(): Subject<KeycloakEvent> { return this.events$; };
 
+	nextUsername: string = "jeff";
 	private username: string = null;
-	private nextUsername: string = "jeff";
+	private events$: Subject<KeycloakEvent> = new Subject;
+
+	init(): Promise<boolean> {
+		return Promise.resolve(true);
+	}
 
 	getUsername(): string { return this.username; }
 
@@ -17,24 +23,50 @@ class MockKeycloakService {
 
 	async login(options: any): Promise<void> {
 		return new Promise((resolve, reject) => {
-			this.username = this.nextUsername;
-			this.nextUsername = null;
-			this.keycloakEvents$.next({
-				type: KeycloakEventType.OnAuthSuccess
-			});
-			resolve();
+			try {
+				this.username = this.nextUsername;
+				this.nextUsername = null;
+				this.events$.next({
+					type: KeycloakEventType.OnAuthSuccess
+				});
+				resolve(null);
+			} catch (e) {
+				reject(options + ' ' + e);
+			}
 		});
 	}
-}
+};
 
 describe('SelfComponent', () => {
+	let keycloakFactory = function() { return new MockKeycloakService };
 	let fixture: ComponentFixture<SelfComponent>;
 	let component: SelfComponent;
+
+	let getLoggedIn = function(component: SelfComponent): boolean {
+		var loggedIn: boolean = null;
+		component.loggedIn$.subscribe({
+			next: (l) => loggedIn = l,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return loggedIn;
+	};
+
+	let getUsername = function(component: SelfComponent): string {
+		var username: string = null;
+		component.username$.subscribe({
+			next: (u) => username = u,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return username;
+	};
 
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
 			providers: [
-				{ provide: KeycloakService, useClass: MockKeycloakService }
+				{ provide: KeycloakService, useClass: MockKeycloakService },
+				{ provide: SelfService, useValue: new SelfService(keycloakFactory) }
 			],
 			declarations: [
 				SelfComponent
@@ -51,18 +83,23 @@ describe('SelfComponent', () => {
 		expect(component).toBeDefined();
 	});
 
-	it('should not initially be logged in', async () => {
-		expect(component.loggedIn).toBeFalse();
-		expect(component.username).toBeNull();
+	it('should not initially be logged in', () => {
+		expect(getLoggedIn(component)).toBe(false, 'not loggedIn');
+		expect(getUsername(component)).toBeNull();
 	});
 
-	it('should have an identity after login', async () => {
-		component.login().subscribe(() => {
-			component.handleLoggedIn();
-			fixture.detectChanges();
-			expect(component.loggedIn).toBe(true, 'logged in');
-			expect(component.username).not.toBe(null, 'has username');
-	})});
+	it('should have an identity after login', () => {
+		component.login().subscribe({
+			next: () => {
+				var loggedIn: boolean = getLoggedIn(component);
+				var username: string = getUsername(component);
+				expect(username).not.toBe(null, 'username not null');
+				expect(loggedIn).toBe(true, 'loggedIn');
+			},
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+	});
 
 	it('should initially provide a login button', () => {
 		fixture.detectChanges();
@@ -73,10 +110,15 @@ describe('SelfComponent', () => {
 	});
 
 	it('should display user-name after login', async () => {
-		component.login().subscribe(() => {
-			component.handleLoggedIn();
-			fixture.detectChanges();
-			const element: HTMLElement = fixture.nativeElement;
-			expect(element.textContent).toContain(component.username);
-	})});
+		component.login().subscribe({
+			next: () => {
+				fixture.detectChanges();
+				var username: string = getUsername(component);
+				const element: HTMLElement = fixture.nativeElement;
+				expect(element.textContent).toContain(username);
+			},
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+	});
 });

@@ -101,7 +101,7 @@ describe('SelfService', () => {
 	});
 
 	it('should have username after successful login', () => {
-		service.login$().subscribe({
+		service.login().subscribe({
 			next: () => {
 				assertInvariants(service);
 				var loggedIn: boolean = getLoggedIn(service);

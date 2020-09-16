@@ -1,6 +1,6 @@
 <div class="self">
-	<p *ngIf="loggedIn; else selfLogin">Logged in as
-		{{username}}</p>
+	<p *ngIf="loggedIn$ | async; else selfLogin">Logged in as
+		{{username$ | async}}</p>
 	<ng-template #selfLogin>
 	<button id="login" (click)="login()">login</button>
 	</ng-template>
