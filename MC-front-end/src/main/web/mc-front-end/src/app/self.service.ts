@@ -55,12 +55,12 @@ export class SelfService {
 
 	get keycloak$(): Observable<KeycloakService> {
 		return new Observable<KeycloakService>((s) => {
+			// Provide the cached value (may be null)
+			s.next(this.keycloak);
 			if (this.keycloak != null) {
-				// Provide the cached value
-				s.next(this.keycloak);
 				s.complete();
 			} else {
-				// Provide a new constructed value, caching that value
+				// Eventaully provide a newly constructed value, caching that value
 				this.keycloakFactory.pipe(
 					k => this.acquireOperator$(k)
 				).subscribe(s);
@@ -74,6 +74,7 @@ export class SelfService {
 
 	private static loginOperator$(k$: Observable<KeycloakService>): Observable<void> {
 		return k$.pipe(
+			filter((k: KeycloakService) => k != null),
 			mergeMap((k: KeycloakService) => from(k.login()))
 		);
 	}
