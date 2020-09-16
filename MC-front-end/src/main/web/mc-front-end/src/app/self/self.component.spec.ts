@@ -88,16 +88,19 @@ describe('SelfComponent', () => {
 		expect(getUsername(component)).toBeNull();
 	});
 
-	it('should have an identity after login', () => {
+	it('should have an identity after login', (done) => {
+		var nCalls: number = 0;
 		component.login().subscribe({
 			next: () => {
 				var loggedIn: boolean = getLoggedIn(component);
 				var username: string = getUsername(component);
 				expect(username).not.toBe(null, 'username not null');
 				expect(loggedIn).toBe(true, 'loggedIn');
+				++nCalls;
+				done();
 			},
-			error: (err) => fail(err),
-			complete: () => { }
+			error: (err) => done.fail(err),
+			complete: () => (!nCalls) ? done.fail('no values') : {}
 		});
 	});
 
@@ -109,16 +112,19 @@ describe('SelfComponent', () => {
 		expect(button.textContent).toContain('login');
 	});
 
-	it('should display user-name after login', async () => {
+	it('should display user-name after login', (done) => {
+		var nCalls: number = 0;
 		component.login().subscribe({
 			next: () => {
 				fixture.detectChanges();
 				var username: string = getUsername(component);
 				const element: HTMLElement = fixture.nativeElement;
 				expect(element.textContent).toContain(username);
+				++nCalls;
+				done();
 			},
-			error: (err) => fail(err),
-			complete: () => { }
+			error: (err) => done.fail(err),
+			complete: () => (!nCalls) ? done.fail('no values') : {}
 		});
 	});
 });

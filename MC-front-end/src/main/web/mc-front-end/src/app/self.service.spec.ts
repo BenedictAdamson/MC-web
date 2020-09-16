@@ -100,7 +100,8 @@ describe('SelfService', () => {
 		expect(keycloak2).toBe(keycloak1);
 	});
 
-	it('should have username after successful login', () => {
+	it('should have username after successful login', (done) => {
+		var nCalls: number = 0;
 		service.login().subscribe({
 			next: () => {
 				assertInvariants(service);
@@ -108,9 +109,10 @@ describe('SelfService', () => {
 				var username: string = getUsername(service);
 				expect(username).not.toBe(null, 'username not null');
 				expect(loggedIn).toBe(true, 'loggedIn');
+				done();
 			},
-			error: (err) => fail(err),
-			complete: () => { }
+			error: (err) => done.fail(err),
+			complete: () => (!nCalls) ? done.fail('no values') : {}
 		});
 	});
 });
