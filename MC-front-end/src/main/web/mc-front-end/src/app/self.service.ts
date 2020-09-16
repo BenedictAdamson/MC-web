@@ -20,20 +20,22 @@ export class SelfService {
 	private keycloak: KeycloakService;
 
     /**
-     * @returns
-     * null if the user name is unknown,
+     * @description
+     * Provides null if the user name is unknown,
      * which includes the case that the user is not logged in.
      */
-	get username(): string {
-		return null;
+	get username$(): Observable<string> {
+		return of(null);
 	};
 
     /**
      * @description
-     * #isLoggedIn() iff #getUsername() is non null.
+     * Provides true  iff #username$ provides non null.
      */
-	get loggedIn(): boolean {
-		return this.username != null;
+	get loggedIn$(): Observable<boolean> {
+		return this.username$.pipe(
+			map(n => n != null)
+		);
 	}
 
 

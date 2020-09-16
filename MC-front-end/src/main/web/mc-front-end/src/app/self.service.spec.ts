@@ -38,8 +38,10 @@ class MockKeycloakService extends KeycloakService {
 
 describe('SelfService', () => {
 
-	let assertInvariants: CallableFunction = (s: SelfService) => {
-		expect(s.loggedIn).toBe(s.username != null, 'isLoggedIn() iff getUsername() is non null.');
+	let assertInvariants: CallableFunction = async (s: SelfService) => {
+		var loggedIn: boolean = await s.loggedIn$.toPromise();
+		var username: string = await s.username$.toPromise();
+		expect(loggedIn).toBe(username != null, 'loggedIn iff username is non null.');
 	};
 
 	let keycloakFactory: Observable<KeycloakService>;
@@ -50,10 +52,11 @@ describe('SelfService', () => {
 		service = new SelfService(keycloakFactory);
 	});
 
-	it('should be created with initial state', () => {
+	it('should be created with initial state', async () => {
 		expect(service).toBeTruthy();
 		assertInvariants(service);
-		expect(service.loggedIn).toBe(false, 'not loggedIn');
+		var loggedIn: boolean = await service.loggedIn$.toPromise();
+		expect(loggedIn).toBe(false, 'not loggedIn');
 	});
 
 	it('can get keycloak', async () => {
@@ -75,6 +78,9 @@ describe('SelfService', () => {
 		await service.login$().toPromise();
 
 		assertInvariants(service);
-		expect(service.loggedIn).toBe(true, 'loggedIn');
+		var loggedIn: boolean = await service.loggedIn$.toPromise();
+		var username: string = await service.username$.toPromise();
+		expect(username).not.toBe(null, 'username not null');
+		expect(loggedIn).toBe(true, 'loggedIn');
 	});
 });
