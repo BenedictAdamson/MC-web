@@ -28,7 +28,7 @@ class MockKeycloakService extends KeycloakService {
 				this.events$.next({
 					type: KeycloakEventType.OnAuthSuccess
 				});
-				resolve();
+				resolve(null);
 			} catch (e) {
 				reject(options + ' ' + e);
 			}
@@ -38,9 +38,39 @@ class MockKeycloakService extends KeycloakService {
 
 describe('SelfService', () => {
 
-	let assertInvariants: CallableFunction = async (s: SelfService) => {
-		var loggedIn: boolean = await s.loggedIn$.toPromise();
-		var username: string = await s.username$.toPromise();
+	let getLoggedIn = function(service: SelfService): boolean {
+		var loggedIn: boolean = null;
+		service.loggedIn$.subscribe({
+			next: (l) => loggedIn = l,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return loggedIn;
+	};
+
+	let getKeycloak = function(service: SelfService): KeycloakService {
+		var keycloak: KeycloakService = null;
+		service.keycloak$.subscribe({
+			next: (k) => keycloak = k,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return keycloak;
+	};
+
+	let getUsername = function(service: SelfService): string {
+		var username: string = null;
+		service.username$.subscribe({
+			next: (u) => username = u,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return username;
+	};
+
+	let assertInvariants: CallableFunction = (s: SelfService) => {
+		var loggedIn: boolean = getLoggedIn(s);
+		var username: string = getUsername(s);
 		expect(loggedIn).toBe(username != null, 'loggedIn iff username is non null.');
 	};
 
@@ -51,35 +81,36 @@ describe('SelfService', () => {
 		service = new SelfService(keycloakFactory);
 	});
 
-	it('should be created with initial state', async () => {
+	it('should be created with initial state', () => {
 		expect(service).toBeTruthy();
 		assertInvariants(service);
-		var loggedIn: boolean = await service.loggedIn$.toPromise();
-		expect(loggedIn).toBe(false, 'not loggedIn');
+		expect(getLoggedIn(service)).toBe(false, 'not loggedIn');
 	});
 
 	it('can get keycloak', async () => {
-		var keycloak: KeycloakService = await service.keycloak$.toPromise();
-
+		expect(getKeycloak(service)).toBeNull();
 		assertInvariants(service);
-		expect(keycloak).not.toBeNull();
 	});
 
-	it('can get keycloak again', async () => {
-		var keycloak1: KeycloakService = await service.keycloak$.toPromise();
-		var keycloak2: KeycloakService = await service.keycloak$.toPromise();
+	it('can get keycloak again', () => {
+		var keycloak1: KeycloakService = getKeycloak(service);
+		var keycloak2: KeycloakService = getKeycloak(service);
 
 		assertInvariants(service);
 		expect(keycloak2).toBe(keycloak1);
 	});
 
-	it('should set username after successful login', async () => {
-		await service.login$().toPromise();
-
-		assertInvariants(service);
-		var loggedIn: boolean = await service.loggedIn$.toPromise();
-		var username: string = await service.username$.toPromise();
-		expect(username).not.toBe(null, 'username not null');
-		expect(loggedIn).toBe(true, 'loggedIn');
+	it('should have username after successful login', () => {
+		service.login$().subscribe({
+			next: () => {
+				assertInvariants(service);
+				var loggedIn: boolean = getLoggedIn(service);
+				var username: string = getUsername(service);
+				expect(username).not.toBe(null, 'username not null');
+				expect(loggedIn).toBe(true, 'loggedIn');
+			},
+			error: (err) => fail(err),
+			complete: () => { }
+		});
 	});
 });

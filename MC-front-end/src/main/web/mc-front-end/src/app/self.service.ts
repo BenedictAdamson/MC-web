@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, defer, of, from, concat } from 'rxjs';
+import { Observable, ReplaySubject, defer, of, from, concat } from 'rxjs';
 import { map, mergeMap, tap, filter } from 'rxjs/operators';
 import { KeycloakService, KeycloakEvent } from 'keycloak-angular';
 
@@ -23,11 +23,11 @@ export class SelfService {
 	constructor(keycloakFactory?: () => KeycloakService) {
 		keycloakFactory = keycloakFactory ? keycloakFactory : SelfService.keycloakFactory;
 		this.keycloakFactory = keycloakFactory;
+		this.keycloak$.next(null);
 	}
 
 
 	private keycloakFactory: () => KeycloakService;
-	private keycloak: KeycloakService;
 
     /**
      * @description
@@ -50,35 +50,54 @@ export class SelfService {
 		);
 	}
 
+    /**
+     * Subscribing to this Observable does not trigger creation of a KeycloakService.
+     * It provides a null value if the KeycloakService has not (yet) been created.
+     */
+	readonly keycloak$: ReplaySubject<KeycloakService> = new ReplaySubject(1);
 
-	private acquireOperator$(k$: Observable<KeycloakService>): Observable<KeycloakService> {
-		return k$.pipe(
-			filter((k: KeycloakService) => k != null),
-			mergeMap((k: KeycloakService) =>
-				from(k.init()).pipe(
-					map((ok: boolean) => [k, ok]),
-					filter((p: [KeycloakService, boolean]) => p[1]),
-					map((p: [KeycloakService, boolean]) => p[0])
-				)
-			),
-			tap((k: KeycloakService) => this.keycloak = k)
-		);
-	}
+	private hasKeycloak: boolean = false;
 
-	get keycloak$(): Observable<KeycloakService> {
-		if (this.keycloak) {
-			return of(this.keycloak);
+	private createKeycloak(): Observable<void> {
+		if (this.hasKeycloak) {
+			return of(null);
 		} else {
-			// Use the factory, and also cache its result for future use
-			return of(this.keycloakFactory()).pipe(k$ => this.acquireOperator$(k$));
+			return of(this.keycloakFactory()).pipe(
+				mergeMap((k: KeycloakService) =>
+					(k ? from(k.init()) : of(false)).pipe(
+						map((ok: boolean) => ok ? k : null)// convert init failure to null
+					)
+				),
+				tap((k: KeycloakService) => {// cache the created value
+					this.hasKeycloak = (k != null);
+					this.keycloak$.next(k)
+				}),
+				map(() => null)
+			);
 		}
 	}
 
-	private static loginOperator$(k$: Observable<KeycloakService>): Observable<void> {
-		return k$.pipe(
-			filter((k: KeycloakService) => k != null),
-			mergeMap((k: KeycloakService) => from(k.login()))
-		);
+    /**
+     * Subscribing to this Observable triggers creation and iniitailisation of a KeycloakService,
+     * if there is no value already.
+     * It provides a null value if creatino fails.
+     */
+	private get createdKeycloak$(): Observable<KeycloakService> {
+		if (this.hasKeycloak) {
+			return this.keycloak$;
+		} else {
+			return defer(() => of(this.keycloakFactory()).pipe(
+				mergeMap((k: KeycloakService) =>
+					(k ? from(k.init()) : of(false)).pipe(
+						map((ok: boolean) => ok ? k : null)// convert init failure to null
+					)
+				),
+				tap((k: KeycloakService) => {// cache the created value
+					this.hasKeycloak = (k != null);
+					this.keycloak$.next(k)
+				})
+			));
+		}
 	}
 
 	/**
@@ -90,8 +109,8 @@ export class SelfService {
 	 * Iff the login is sucessful, the #getUsername() will be non null.
 	 */
 	login$(): Observable<void> {
-		return this.keycloak$.pipe(
-			SelfService.loginOperator$
+		return this.createdKeycloak$.pipe(
+			mergeMap((k: KeycloakService) => k ? from(k.login()) : of(null))
 		);
 	}
 }
