@@ -25,7 +25,9 @@ export class SelfService {
      * which includes the case that the user is not logged in.
      */
 	get username$(): Observable<string> {
-		return of(null);
+		return this.keycloak$.pipe(
+			map((k: KeycloakService) => k ? k.getUsername() : null)
+		);
 	};
 
     /**
