@@ -100,19 +100,27 @@ describe('SelfService', () => {
 		expect(keycloak2).toBe(keycloak1);
 	});
 
+	let assertLoggedIn = function() {
+		assertInvariants(service);
+		var loggedIn: boolean = getLoggedIn(service);
+		var username: string = getUsername(service);
+		expect(username).not.toBe(null, 'username not null');
+		expect(loggedIn).toBe(true, 'loggedIn');
+	}
+
 	it('should have username after successful login', (done) => {
 		var nCalls: number = 0;
 		service.login().subscribe({
 			next: () => {
-				assertInvariants(service);
-				var loggedIn: boolean = getLoggedIn(service);
-				var username: string = getUsername(service);
-				expect(username).not.toBe(null, 'username not null');
-				expect(loggedIn).toBe(true, 'loggedIn');
+				assertLoggedIn();
+				++nCalls;
 				done();
 			},
 			error: (err) => done.fail(err),
-			complete: () => (!nCalls) ? done.fail('no values') : {}
+			complete: () => {
+				assertLoggedIn();
+				nCalls ? {} : done();
+			}
 		});
 	});
 });

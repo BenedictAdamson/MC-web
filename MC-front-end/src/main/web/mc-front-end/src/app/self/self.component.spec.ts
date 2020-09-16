@@ -112,19 +112,26 @@ describe('SelfComponent', () => {
 		expect(button.textContent).toContain('login');
 	});
 
+	let checkElement = function() {
+		var username: string = getUsername(component);
+		const element: HTMLElement = fixture.nativeElement;
+		expect(element.textContent).toContain(username);
+	}
+
 	it('should display user-name after login', (done) => {
 		var nCalls: number = 0;
 		component.login().subscribe({
 			next: () => {
 				fixture.detectChanges();
-				var username: string = getUsername(component);
-				const element: HTMLElement = fixture.nativeElement;
-				expect(element.textContent).toContain(username);
+				checkElement();
 				++nCalls;
 				done();
 			},
 			error: (err) => done.fail(err),
-			complete: () => (!nCalls) ? done.fail('no values') : {}
+			complete: () => {
+				checkElement();
+				nCalls ? {} : done();
+			}
 		});
 	});
 });
