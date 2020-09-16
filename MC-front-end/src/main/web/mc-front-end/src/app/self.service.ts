@@ -12,11 +12,18 @@ export class SelfService {
      * @description
      * Initial state:
      * not ##isLoggedIn()
+     *
+     * @param keycloakFactory
+     * A function returning giving a newly constructed KeycloakService object.
+     * Intended for use in unit tests, which might want to inject a mock KeycloakService.
+     * If absent (the usual case, or if null), the constructor uses a factory that provides a real KeycloakService.
      */
-	constructor(
-		private keycloakFactory: Observable<KeycloakService>
-	) { }
+	constructor(keycloakFactory: () => KeycloakService) {
+		this.keycloakFactory$ = defer(() => of(keycloakFactory()));
+	}
 
+
+	private keycloakFactory$: Observable<KeycloakService>
 	private keycloak: KeycloakService;
 
     /**
@@ -63,7 +70,7 @@ export class SelfService {
 				s.complete();
 			} else {
 				// Eventaully provide a newly constructed value, caching that value
-				this.keycloakFactory.pipe(
+				this.keycloakFactory$.pipe(
 					k => this.acquireOperator$(k)
 				).subscribe(s);
 			}

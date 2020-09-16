@@ -44,11 +44,10 @@ describe('SelfService', () => {
 		expect(loggedIn).toBe(username != null, 'loggedIn iff username is non null.');
 	};
 
-	let keycloakFactory: Observable<KeycloakService>;
+	let keycloakFactory = function() { return new MockKeycloakService };
 	let service: SelfService;
 
 	beforeEach(() => {
-		keycloakFactory = of(new MockKeycloakService);
 		service = new SelfService(keycloakFactory);
 	});
 
