@@ -8,8 +8,6 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { WINDOW_PROVIDERS } from './window-providers';
 import { KEYCLOAK_PROVIDERS } from './keycloak-init';
-import { UserComponent } from './user/user.component';
-import { UsersComponent } from './users/users.component';
 import { HomeComponent } from './home/home.component';
 import { SelfComponent } from './self/self.component';
 
@@ -23,8 +21,6 @@ import { SelfComponent } from './self/self.component';
 	],
 	declarations: [
 		AppComponent,
-		UsersComponent,
-		UserComponent,
 		HomeComponent,
 		SelfComponent
 	],
