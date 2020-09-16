@@ -1,3 +1,4 @@
+import { Injectable } from '@angular/core';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { KeycloakService, KeycloakEvent, KeycloakEventType } from 'keycloak-angular';
 import { Subject } from 'rxjs';
@@ -5,6 +6,7 @@ import { Subject } from 'rxjs';
 import { SelfComponent } from './self.component';
 import { SelfService } from '../self.service';
 
+@Injectable()
 class MockKeycloakService extends KeycloakService {
 
 	get keycloakEvents$(): Subject<KeycloakEvent> { return this.events$; };
