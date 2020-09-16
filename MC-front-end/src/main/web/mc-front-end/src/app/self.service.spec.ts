@@ -1,4 +1,4 @@
-import { Observable, Subject, defer, of } from 'rxjs';
+import { Subject } from 'rxjs';
 import { KeycloakEvent, KeycloakEventType, KeycloakService } from 'keycloak-angular';
 
 import { SelfService } from './self.service';

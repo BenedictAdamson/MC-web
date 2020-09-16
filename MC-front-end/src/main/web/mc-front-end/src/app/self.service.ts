@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable, ReplaySubject, defer, of, from, concat } from 'rxjs';
-import { map, mergeMap, tap, filter } from 'rxjs/operators';
-import { KeycloakService, KeycloakEvent } from 'keycloak-angular';
+import { Observable, ReplaySubject, defer, of, from } from 'rxjs';
+import { map, mergeMap, tap } from 'rxjs/operators';
+import { KeycloakService } from 'keycloak-angular';
 
 @Injectable({
 	providedIn: 'root'
@@ -57,25 +57,6 @@ export class SelfService {
 	readonly keycloak$: ReplaySubject<KeycloakService> = new ReplaySubject(1);
 
 	private hasKeycloak: boolean = false;
-
-	private createKeycloak(): Observable<void> {
-		if (this.hasKeycloak) {
-			return of(null);
-		} else {
-			return of(this.keycloakFactory()).pipe(
-				mergeMap((k: KeycloakService) =>
-					(k ? from(k.init()) : of(false)).pipe(
-						map((ok: boolean) => ok ? k : null)// convert init failure to null
-					)
-				),
-				tap((k: KeycloakService) => {// cache the created value
-					this.hasKeycloak = (k != null);
-					this.keycloak$.next(k)
-				}),
-				map(() => null)
-			);
-		}
-	}
 
     /**
      * Subscribing to this Observable triggers creation and iniitailisation of a KeycloakService,
