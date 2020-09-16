@@ -8,17 +8,20 @@ import { KeycloakService } from 'keycloak-angular';
 })
 export class SelfService {
 
+	private static keycloakFactory(): KeycloakService { return new KeycloakService };
+
     /**
      * @description
      * Initial state:
      * not ##isLoggedIn()
      *
      * @param keycloakFactory
-     * A function returning giving a newly constructed KeycloakService object.
+     * A function returning a newly constructed KeycloakService object.
      * Intended for use in unit tests, which might want to inject a mock KeycloakService.
      * If absent (the usual case, or if null), the constructor uses a factory that provides a real KeycloakService.
      */
-	constructor(keycloakFactory: () => KeycloakService) {
+	constructor(keycloakFactory?: () => KeycloakService) {
+		keycloakFactory = keycloakFactory ? keycloakFactory : SelfService.keycloakFactory;
 		this.keycloakFactory$ = defer(() => of(keycloakFactory()));
 	}
 
