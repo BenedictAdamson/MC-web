@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable, defer, of, from } from 'rxjs';
+import { Observable, defer, of, from, concat } from 'rxjs';
 import { map, mergeMap, tap, filter } from 'rxjs/operators';
-import { KeycloakService } from 'keycloak-angular';
+import { KeycloakService, KeycloakEvent } from 'keycloak-angular';
 
 @Injectable({
 	providedIn: 'root'
@@ -22,11 +22,11 @@ export class SelfService {
      */
 	constructor(keycloakFactory?: () => KeycloakService) {
 		keycloakFactory = keycloakFactory ? keycloakFactory : SelfService.keycloakFactory;
-		this.keycloakFactory$ = defer(() => of(keycloakFactory()));
+		this.keycloakFactory = keycloakFactory;
 	}
 
 
-	private keycloakFactory$: Observable<KeycloakService>
+	private keycloakFactory: () => KeycloakService;
 	private keycloak: KeycloakService;
 
     /**
@@ -66,22 +66,12 @@ export class SelfService {
 	}
 
 	get keycloak$(): Observable<KeycloakService> {
-		return new Observable<KeycloakService>((s) => {
-			// Provide the cached value (may be null)
-			s.next(this.keycloak);
-			if (this.keycloak != null) {
-				s.complete();
-			} else {
-				// Eventaully provide a newly constructed value, caching that value
-				this.keycloakFactory$.pipe(
-					k => this.acquireOperator$(k)
-				).subscribe(s);
-			}
-
-			return {
-				unsubscribe() { }
-			}
-		});
+		if (this.keycloak) {
+			return of(this.keycloak);
+		} else {
+			// Use the factory, and also cache its result for future use
+			return of(this.keycloakFactory()).pipe(k$ => this.acquireOperator$(k$));
+		}
 	}
 
 	private static loginOperator$(k$: Observable<KeycloakService>): Observable<void> {
