@@ -43,4 +43,8 @@ spec:
             secretKeyRef:
               name: {{ .Release.Name }}-secrets
               key: db-user-password
+        resources:
+          requests:
+            cpu: "0.1"
+            memory: "128M"
       restartPolicy:  OnFailure

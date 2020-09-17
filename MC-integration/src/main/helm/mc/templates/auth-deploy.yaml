@@ -68,6 +68,10 @@ spec:
             secretKeyRef:
               name: {{ .Release.Name }}-secrets
               key: db-user-password
+        resources:
+          requests:
+            cpu: "0.2"
+            memory: "128M"
         readinessProbe:
           httpGet:
             path: /auth
