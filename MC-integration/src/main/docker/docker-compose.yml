@@ -6,7 +6,9 @@ services:
     expose:
       - "5432"
     networks:
-      - mc
+      mc:
+        aliases:
+        - auth-db
     environment:
       POSTGRES_DB: "keycloak"
       POSTGRES_USER: "keycloak"
@@ -20,7 +22,9 @@ services:
     expose:
       - "8080"
     networks:
-      - mc
+      mc:
+        aliases:
+        - auth
     depends_on:
       - auth-db
     environment:
@@ -32,7 +36,9 @@ services:
   auth-init:
     image: index.docker.io/benedictadamson/mc-auth-init:${VERSION}
     networks:
-      - mc
+      mc:
+        aliases:
+        - auth-init
     depends_on:
       - auth
     environment:
@@ -45,7 +51,9 @@ services:
     expose:
       - "27017"
     networks:
-      - mc
+      mc:
+        aliases:
+        - db
     environment:
       MONGO_INITDB_ROOT_PASSWORD: "$PASSWORD_DB_ROOT"
       MC_INIT_PASSWORD: "$PASSWORD_DB_USER"
@@ -56,7 +64,9 @@ services:
     expose:
       - "8080"
     networks:
-      - mc
+      mc:
+        aliases:
+        - be
     depends_on:
       - db
     environment:
@@ -68,7 +78,9 @@ services:
     expose:
       - "80"
     networks:
-      - mc
+      mc:
+        aliases:
+        - fe
         
   in:
     build: $TMPDIR/in-build-ctx
@@ -77,7 +89,9 @@ services:
     expose:
       - "80"
     networks:
-      - mc
+      mc:
+        aliases:
+        - in
     depends_on:
       - auth
       - be
