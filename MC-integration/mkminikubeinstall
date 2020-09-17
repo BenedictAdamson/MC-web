@@ -49,7 +49,6 @@ saveDockerImage () {
   docker save --output "$TMPDIR/$1.tar" "benedictadamson/$1:$VERSION"
 }
 
-saveDockerImage mc-auth-db
 saveDockerImage mc-auth-init
 saveDockerImage mc-auth
 saveDockerImage mc-back-end
@@ -64,7 +63,6 @@ saveDockerImage mc-front-end-srv
     docker load --input "$TMPDIR/$1.tar"
   }
   
-  loadDockerImage mc-auth-db
   loadDockerImage mc-auth-init
   loadDockerImage mc-auth
   loadDockerImage mc-back-end
