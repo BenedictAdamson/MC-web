@@ -7,6 +7,7 @@ import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { WINDOW_PROVIDERS } from './window-providers';
+import { KEYCLOAK_PROVIDERS } from './keycloak-init';
 import { HomeComponent } from './home/home.component';
 import { SelfComponent } from './self/self.component';
 
@@ -24,7 +25,8 @@ import { SelfComponent } from './self/self.component';
 		SelfComponent
 	],
 	providers: [
-		WINDOW_PROVIDERS
+		WINDOW_PROVIDERS,
+		KEYCLOAK_PROVIDERS
 	],
 	bootstrap: [AppComponent]
 })
