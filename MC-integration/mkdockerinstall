@@ -1,0 +1,44 @@
+ #!/bin/sh
+# mkdockerinstall
+# Create Docker containers of  mc installed using Docker images in the local registry
+#
+# SYNOPSIS
+# mkdockerinstall <version>
+#
+# COMMAND LINE ARGUMENTS
+# <version>
+# The version of MC to install
+#
+# ENVIRONMENT
+# The docker-compose program must be in the program search PATH.
+
+# Read environment
+TMPDIR="${TMPDIR:-/var/tmp}"
+
+# Enable clean handling of temporary files
+TMPDIR="$TMPDIR/mkdockerinstall-$$"
+mkdir "$TMPDIR"
+export TMPDIR
+rmTmpdir () {
+  rm -rf "$TMPDIR"
+}
+trap rmTmpdir EXIT
+
+# Parse command-line arguments
+VERSION="$1"
+
+PASSWORD_DB_ROOT="password1"
+PASSWORD_DB_USER="password2"
+
+mkdir "$TMPDIR/in-build-ctx"
+cp src/test/resources/reverse-proxy.Dockerfile "$TMPDIR"/in-build-ctx/Dockerfile
+cp src/test/resources/reverse-proxy.rp.conf "$TMPDIR"/in-build-ctx/rp.conf
+
+export VERSION
+export PASSWORD_DB_ROOT    
+export PASSWORD_DB_USER
+docker-compose \
+   --file src/main/docker/docker-compose.yml \
+   --project-name "mx-$VERSION" \
+   up
+ 
