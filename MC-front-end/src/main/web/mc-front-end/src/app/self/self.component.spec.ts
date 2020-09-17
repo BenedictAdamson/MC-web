@@ -40,7 +40,6 @@ class MockKeycloakService extends KeycloakService {
 };
 
 describe('SelfComponent', () => {
-	let keycloakFactory = function() { return new MockKeycloakService };
 	let fixture: ComponentFixture<SelfComponent>;
 	let component: SelfComponent;
 
@@ -68,7 +67,7 @@ describe('SelfComponent', () => {
 		TestBed.configureTestingModule({
 			providers: [
 				{ provide: KeycloakService, useClass: MockKeycloakService },
-				{ provide: SelfService, useValue: new SelfService(keycloakFactory) }
+				{ provide: SelfService, useClass: SelfService }
 			],
 			declarations: [
 				SelfComponent

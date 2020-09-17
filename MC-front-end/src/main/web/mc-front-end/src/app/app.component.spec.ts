@@ -43,13 +43,12 @@ class MockKeycloakService extends KeycloakService {
 };
 
 describe('AppComponent', () => {
-	let keycloakFactory = function() { return new MockKeycloakService };
 
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
 			providers: [
 				{ provide: KeycloakService, useClass: MockKeycloakService },
-				{ provide: SelfService, useValue: new SelfService(keycloakFactory) }
+				{ provide: SelfService, useClass: SelfService }
 			],
 			declarations: [
 				AppComponent, SelfComponent

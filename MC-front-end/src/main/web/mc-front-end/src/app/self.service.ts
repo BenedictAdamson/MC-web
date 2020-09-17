@@ -4,28 +4,19 @@ import { map, mergeMap, tap } from 'rxjs/operators';
 import { KeycloakService } from 'keycloak-angular';
 
 /**
+ * @description
  * Provide information about the currently logged in user,
- * and an interface for logging in.
+ * and an interface for logging in.,
+ * as a facade in front of the actual authentication implementation used.
+ *
+ * Also provides information as Observables, even if the authentication implementation does not do so. 
  */
 @Injectable({
 	providedIn: 'root'
 })
 export class SelfService {
 
-	private static keycloakFactory(): KeycloakService { return new KeycloakService };
-
-	private keycloakFactory: () => KeycloakService;
-
-	private hasKeycloak: boolean = false;
-
-    /**
-     * @description
-     * The Keycloak service that this service uses for authentication.
-     *
-     * Subscribing to this Observable does not trigger creation of a KeycloakService.
-     * It provides a null value if the KeycloakService has not (yet) been created.
-     */
-	readonly keycloak$: ReplaySubject<KeycloakService> = new ReplaySubject(1);
+	private usernameRS$: ReplaySubject<string> = new ReplaySubject(1);
 
     /**
      * @description
@@ -33,16 +24,16 @@ export class SelfService {
      * not ##isLoggedIn()
      *
      * Instancing this class does not trigger a login request or any network traffic.
-     *
-     * @param keycloakFactory
-     * A function returning a newly constructed KeycloakService object.
-     * Intended for use in unit tests, which might want to inject a mock KeycloakService.
-     * If absent (the usual case, or if null), the constructor uses a factory that provides a real KeycloakService.
      */
-	constructor(keycloakFactory?: () => KeycloakService) {
-		keycloakFactory = keycloakFactory ? keycloakFactory : SelfService.keycloakFactory;
-		this.keycloakFactory = keycloakFactory;
-		this.keycloak$.next(null);
+	constructor(private keycloak: KeycloakService) {
+		this.updateState();
+		this.keycloak.keycloakEvents$.subscribe({
+			next: () => this.updateState()
+		});
+	}
+
+	private updateState(): void {
+		this.usernameRS$.next(this.keycloak.getUsername());
 	}
 
     /**
@@ -52,11 +43,12 @@ export class SelfService {
      * Provides null if the user name is unknown,
      * which includes the case that the user is not logged in.
      * Subscribing to this Observable does not trigger a login request.
+     *
+     * This Observable will publish new values when the currently logged in user changes.
+     * That is, this is a hot observable.
      */
 	get username$(): Observable<string> {
-		return this.keycloak$.pipe(
-			map((k: KeycloakService) => k ? k.getUsername() : null)
-		);
+		return this.usernameRS$;
 	};
 
     /**
@@ -71,28 +63,6 @@ export class SelfService {
 		);
 	}
 
-    /**
-     * Subscribing to this Observable triggers creation and iniitailisation of a KeycloakService,
-     * if there is no value already.
-     * It provides a null value if creation fails.
-     */
-	private get createdKeycloak$(): Observable<KeycloakService> {
-		if (this.hasKeycloak) {
-			return this.keycloak$;
-		} else {
-			return defer(() => of(this.keycloakFactory()).pipe(
-				mergeMap((k: KeycloakService) =>
-					(k ? from(k.init()) : of(false)).pipe(
-						map((ok: boolean) => ok ? k : null)// convert init failure to null
-					)
-				),
-				tap((k: KeycloakService) => {// cache the created value
-					this.hasKeycloak = (k != null);
-					this.keycloak$.next(k)
-				})
-			));
-		}
-	}
 
 	/**
 	 * @description
@@ -106,8 +76,6 @@ export class SelfService {
 	 * Iff the login is sucessful, the #getUsername() will be non null.
 	 */
 	login(): Observable<void> {
-		return this.createdKeycloak$.pipe(
-			mergeMap((k: KeycloakService) => k ? from(k.login()) : of(null))
-		);
+		return from(this.keycloak.login());
 	}
 }

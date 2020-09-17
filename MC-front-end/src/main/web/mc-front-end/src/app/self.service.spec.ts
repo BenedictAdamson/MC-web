@@ -49,16 +49,6 @@ describe('SelfService', () => {
 		return loggedIn;
 	};
 
-	let getKeycloak = function(service: SelfService): KeycloakService {
-		var keycloak: KeycloakService = null;
-		service.keycloak$.subscribe({
-			next: (k) => keycloak = k,
-			error: (err) => fail(err),
-			complete: () => { }
-		});
-		return keycloak;
-	};
-
 	let getUsername = function(service: SelfService): string {
 		var username: string = null;
 		service.username$.subscribe({
@@ -75,30 +65,18 @@ describe('SelfService', () => {
 		expect(loggedIn).toBe(username != null, 'loggedIn iff username is non null.');
 	};
 
-	let keycloakFactory = function() { return new MockKeycloakService };
+	let keycloak: KeycloakService;;
 	let service: SelfService;
 
 	beforeEach(() => {
-		service = new SelfService(keycloakFactory);
+		keycloak = new MockKeycloakService;
+		service = new SelfService(keycloak);
 	});
 
 	it('should be created with initial state', () => {
 		expect(service).toBeTruthy();
 		assertInvariants(service);
 		expect(getLoggedIn(service)).toBe(false, 'not loggedIn');
-	});
-
-	it('can get keycloak', async () => {
-		expect(getKeycloak(service)).toBeNull();
-		assertInvariants(service);
-	});
-
-	it('can get keycloak again', () => {
-		var keycloak1: KeycloakService = getKeycloak(service);
-		var keycloak2: KeycloakService = getKeycloak(service);
-
-		assertInvariants(service);
-		expect(keycloak2).toBe(keycloak1);
 	});
 
 	let assertLoggedIn = function() {
