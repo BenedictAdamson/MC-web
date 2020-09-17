@@ -47,7 +47,7 @@ services:
     networks:
       - mc
     environment:
-      MONGO_INITPASSWORD_DB_ROOT: "$PASSWORD_DB_ROOT"
+      MONGO_INITDB_ROOT_PASSWORD: "$PASSWORD_DB_ROOT"
       MC_INIT_PASSWORD: "$PASSWORD_DB_USER"
     command: ["--bind_ip", "0.0.0.0"]
         
