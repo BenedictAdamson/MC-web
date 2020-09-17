@@ -1,9 +1,9 @@
  #!/bin/sh
-# mkdockerinstall
+# mc-docker-compose
 # Create Docker or manipulate containers of  mc installed using Docker images in the local registry
 #
 # SYNOPSIS
-# mkdockerinstall <version> <command>
+# mc-docker-compose <version> <command>
 #
 # COMMAND LINE ARGUMENTS
 # <version>
@@ -18,7 +18,7 @@
 TMPDIR="${TMPDIR:-/var/tmp}"
 
 # Enable clean handling of temporary files
-TMPDIR="$TMPDIR/mkdockerinstall-$$"
+TMPDIR="$TMPDIR/mc-docker-compose-$$"
 mkdir "$TMPDIR"
 export TMPDIR
 rmTmpdir () {
