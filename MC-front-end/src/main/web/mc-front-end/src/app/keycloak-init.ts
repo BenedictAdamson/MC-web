@@ -43,7 +43,7 @@ function initializeKeycloakService(keycloak: KeycloakService, window: Window): (
 					},
 					bearerExcludedUrls: []
 				});
-				resolve();
+				resolve(keycloak);
 			} catch (error) {
 				reject(error);
 			}
