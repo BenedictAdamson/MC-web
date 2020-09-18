@@ -35,7 +35,8 @@ PACKAGE="$2"
 VM="k8-mc-$VERSION"
 minikube start \
   --profile="${VM}" \
-  --delete-on-failure=true
+  --delete-on-failure=true \
+  --memory=4g
 minikube addons enable \
   --profile="${VM}" \
   ingress
