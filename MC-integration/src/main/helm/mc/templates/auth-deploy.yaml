@@ -39,11 +39,10 @@ spec:
     spec:
       initContainers:
       - name: await-auth-db
-        image: subfuzion/netcat:latest
+        image: benedictadamson/awaitport:{{ .Chart.AppVersion }}
         args:
-        - "-dvz"
-        - "-w"
-        - "10"
+        - "20"
+        - "7"
         - {{ .Release.Name }}-auth-db-svc
         - "5432"
       containers:
