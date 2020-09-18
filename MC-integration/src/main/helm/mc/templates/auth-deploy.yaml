@@ -41,9 +41,11 @@ spec:
       - name: await-auth-db
         image: subfuzion/netcat:latest
         args:
-        - "sh"
-        - "-c"
-        - "while !netcat -dvz {{ .Release.Name }}-auth-db-svc 5432; do sleep 13; done"
+        - "-dvz"
+        - "-w"
+        - "10"
+        - {{ .Release.Name }}-auth-db-svc
+        - "5432"
       containers:
       - name: mc-auth
         image: benedictadamson/mc-auth:{{ .Chart.AppVersion }}

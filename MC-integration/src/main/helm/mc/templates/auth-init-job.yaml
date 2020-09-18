@@ -35,9 +35,11 @@ spec:
       - name: await-auth
         image: subfuzion/netcat:latest
         args:
-        - "sh"
-        - "-c"
-        - "while !netcat -dvz {{ .Release.Name }}-auth-svc 8080; do sleep 31; done"
+        - "-dvz"
+        - "-w"
+        - "13"
+        - {{ .Release.Name }}-auth-svc
+        - "8080"
       containers:
       - name: mc-auth-init
         image: benedictadamson/mc-auth-init:{{ .Chart.AppVersion }}
@@ -57,4 +59,4 @@ spec:
           limits:
             cpu: "0.2"
             memory: "256M"
-      restartPolicy:  Never
+      restartPolicy:  OnFailure
