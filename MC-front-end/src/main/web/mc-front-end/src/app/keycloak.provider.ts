@@ -53,7 +53,7 @@ function initializeKeycloakService(keycloak: KeycloakService, window: Window): (
 
 
 
-export const KEYCLOAK_PROVIDER: FactoryProvider = {
+export const KEYCLOAK_INITIALIZER: FactoryProvider = {
 	provide: APP_INITIALIZER,
 	useFactory: () => initializeKeycloakService,
 	/**
