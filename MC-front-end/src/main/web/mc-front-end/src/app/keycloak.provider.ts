@@ -61,5 +61,5 @@ export const KEYCLOAK_PROVIDER: FactoryProvider = {
 	* used as arguments to the `useFactory` function.
 	*/
 	deps: [KeycloakService, Window],
-	multi: true
+	multi: false
 };
