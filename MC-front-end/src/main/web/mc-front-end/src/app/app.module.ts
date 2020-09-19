@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { KeycloakAngularModule, KeycloakService } from 'keycloak-angular';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
@@ -17,7 +18,8 @@ import { SelfComponent } from './self/self.component';
 		CommonModule,
 		AppRoutingModule,
 		HttpClientModule,
-		RouterModule
+		RouterModule,
+		KeycloakAngularModule
 	],
 	declarations: [
 		AppComponent,
