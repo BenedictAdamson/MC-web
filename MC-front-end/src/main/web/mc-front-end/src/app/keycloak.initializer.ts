@@ -1,5 +1,5 @@
 import { APP_INITIALIZER, FactoryProvider } from '@angular/core';
-import { KeycloakService } from 'keycloak-angular';
+import { KeycloakService, KeycloakOptions } from 'keycloak-angular';
 import { WINDOW } from './window.provider';
 
 /**
@@ -22,28 +22,30 @@ const keyCloakConfig = {
 	clientId: "mc-ui"
 };
 
-
+function createKeycloakOptions(location: Location): KeycloakOptions {
+	var baseUrl = location.protocol + '://' + location.hostname;
+	if (location.port) {
+		baseUrl += ':' + location.port;
+	}
+	var keyCloakUrl = baseUrl + '/auth';
+	return {
+		config: {
+			url: keyCloakUrl,
+			realm: keyCloakConfig.realm,
+			clientId: keyCloakConfig.clientId
+		},
+		loadUserProfileAtStartUp: false,
+		initOptions: {},
+		bearerExcludedUrls: []
+	};
+}
 
 function initializeKeycloakService(keycloak: KeycloakService, window: Window): () => Promise<any> {
 	return (): Promise<any> => {
 		return new Promise(async (resolve, reject) => {
 			try {
-				var location = window.location;
-				var baseUrl = location.protocol + '://' + location.hostname;
-				if (location.port) {
-					baseUrl += ':' + location.port;
-				}
-				var keyCloakUrl = baseUrl + '/auth';
-				var ok: boolean = await keycloak.init({
-					config: {
-						url: keyCloakUrl,
-						realm: keyCloakConfig.realm,
-						clientId: keyCloakConfig.clientId
-					},
-					loadUserProfileAtStartUp: false,
-					initOptions: {},
-					bearerExcludedUrls: []
-				});
+				var options: KeycloakOptions = createKeycloakOptions(window.location);
+				var ok: boolean = await keycloak.init(options);
 				if (ok) {
 					resolve(keycloak);
 				} else {
