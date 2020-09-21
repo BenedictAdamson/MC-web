@@ -29,7 +29,10 @@ function initializeKeycloakService(keycloak: KeycloakService, window: Window): (
 		return new Promise(async (resolve, reject) => {
 			try {
 				var location = window.location;
-				var baseUrl = location.protocol + '://' + location.hostname + ':' + location.port;
+				var baseUrl = location.protocol + '://' + location.hostname;
+				if (location.port) {
+					baseUrl += ':' + location.port;
+				}
 				var keyCloakUrl = baseUrl + '/auth';
 				await keycloak.init({
 					config: {
