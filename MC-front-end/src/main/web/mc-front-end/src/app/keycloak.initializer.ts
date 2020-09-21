@@ -55,7 +55,7 @@ function initializeKeycloakService(keycloak: KeycloakService, window: Window): (
 
 export const KEYCLOAK_INITIALIZER: FactoryProvider = {
 	provide: APP_INITIALIZER,
-	useFactory: () => initializeKeycloakService,
+	useFactory: initializeKeycloakService,
 	/**
 	* A list of `token`s to be resolved by the injector. The list of values is then
 	* used as arguments to the `useFactory` function.
