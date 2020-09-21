@@ -34,7 +34,7 @@ function initializeKeycloakService(keycloak: KeycloakService, window: Window): (
 					baseUrl += ':' + location.port;
 				}
 				var keyCloakUrl = baseUrl + '/auth';
-				await keycloak.init({
+				var ok: boolean = await keycloak.init({
 					config: {
 						url: keyCloakUrl,
 						realm: keyCloakConfig.realm,
@@ -47,7 +47,11 @@ function initializeKeycloakService(keycloak: KeycloakService, window: Window): (
 					},
 					bearerExcludedUrls: []
 				});
-				resolve(keycloak);
+				if (ok) {
+					resolve(keycloak);
+				} else {
+					reject(keycloak);
+				}
 			} catch (error) {
 				reject(error);
 			}
