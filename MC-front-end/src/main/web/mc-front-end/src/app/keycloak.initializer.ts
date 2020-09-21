@@ -41,10 +41,7 @@ function initializeKeycloakService(keycloak: KeycloakService, window: Window): (
 						clientId: keyCloakConfig.clientId
 					},
 					loadUserProfileAtStartUp: false,
-					initOptions: {
-						onLoad: 'login-required',
-						checkLoginIframe: true
-					},
+					initOptions: {},
 					bearerExcludedUrls: []
 				});
 				if (ok) {
