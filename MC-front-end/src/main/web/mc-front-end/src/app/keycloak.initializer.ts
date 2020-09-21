@@ -1,5 +1,6 @@
 import { APP_INITIALIZER, FactoryProvider } from '@angular/core';
 import { KeycloakService } from 'keycloak-angular';
+import { WINDOW } from './window.provider';
 
 /**
  * @description
@@ -60,6 +61,6 @@ export const KEYCLOAK_INITIALIZER: FactoryProvider = {
 	* A list of `token`s to be resolved by the injector. The list of values is then
 	* used as arguments to the `useFactory` function.
 	*/
-	deps: [KeycloakService, Window],
+	deps: [KeycloakService, WINDOW],
 	multi: true
 };
