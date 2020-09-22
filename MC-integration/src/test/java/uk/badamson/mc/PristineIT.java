@@ -18,12 +18,13 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
@@ -40,10 +41,29 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @TestMethodOrder(OrderAnnotation.class)
 @Testcontainers
 @Tag("IT")
-public class PristineIT {
+public class PristineIT implements AutoCloseable {
 
-   @Container
-   private final McContainers containers = new McContainers();
+   /**
+    * All the tests are read-only, so we do not need to recreate the containers
+    * for each test. This is a big win, because creating all the containers is
+    * very expensive.
+    */
+   private static final McContainers containers = new McContainers();
+
+   @BeforeAll
+   public static void open() {
+      containers.start();
+   }
+
+   @AfterAll
+   public static void stop() {
+      containers.stop();
+   }
+
+   @Override
+   public void close() {
+      stop();
+   }
 
    @Test
    @Order(1)
