@@ -71,13 +71,17 @@ public final class McAuthContainer extends GenericContainer<McAuthContainer> {
    }
 
    public McAuthContainer(final String keycloakPassword, final String dbVendor,
-            final String dbAddr, final String dbPassword) {
+            final String dbAddr, final String dbPassword,
+            final boolean proxyAddressForwarding) {
       super(IMAGE);
       addExposedPort(PORT);
       withEnv("KEYCLOAK_PASSWORD", keycloakPassword);
       withEnv("DB_VENDOR", dbVendor);
       withEnv("DB_ADDR", dbAddr);
       withEnv("DB_PASSWORD", dbPassword);
+      if (proxyAddressForwarding) {
+         withEnv("PROXY_ADDRESS_FORWARDING", "true");
+      }
       waitingFor(WAIT_STRATEGY);
    }
 
