@@ -18,6 +18,13 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.ProtocolException;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
@@ -60,9 +67,53 @@ public class PristineIT implements AutoCloseable {
       containers.stop();
    }
 
+   private void assertGetHttpStatus(final String path,
+            final int expectedStatus) {
+      assertThat("HTTP status", getHttpResponseCode("GET", ""),
+               is(expectedStatus));
+   }
+
    @Override
    public void close() {
       stop();
+   }
+
+   @Test
+   @Order(2)
+   public void getAuthRootPage() {
+      assertGetHttpStatus("/auth", HttpURLConnection.HTTP_SEE_OTHER);
+   }
+
+   @Test
+   @Order(3)
+   public void getAuthWellKnownName() {
+      assertGetHttpStatus(
+               "/auth/realms/master/.well-known/openid-configuration",
+               HttpURLConnection.HTTP_OK);
+      /*
+       * Should show a JSON document listing a number of endpoints for Keycloak.
+       */
+   }
+
+   @Test
+   @Order(2)
+   public void getHomePage() {
+      assertGetHttpStatus("", HttpURLConnection.HTTP_OK);
+   }
+
+   private int getHttpResponseCode(final String method, final String path) {
+      try {
+         final var localUrl = containers.createIngressUriFromPath(path);
+         final HttpURLConnection connection = (HttpURLConnection) localUrl
+                  .toURL().openConnection();
+         connection.setRequestMethod(method);
+         connection.connect();
+         return connection.getResponseCode();
+      } catch (final ProtocolException e) {
+         throw new IllegalArgumentException("Illegal method " + method, e);
+      } catch (IOException | NullPointerException e) {
+         throw new IllegalStateException(e);
+      }
    }
 
    @Test
