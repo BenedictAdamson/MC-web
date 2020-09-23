@@ -33,10 +33,8 @@ import org.testcontainers.lifecycle.Startable;
 import org.testcontainers.lifecycle.TestDescription;
 import org.testcontainers.lifecycle.TestLifecycleAware;
 
-import uk.badamson.mc.auth.McAuthContainer;
 import uk.badamson.mc.presentation.McFrontEndContainer;
 import uk.badamson.mc.presentation.McReverseProxyContainer;
-import uk.badamson.mc.repository.AuthDbContainer;
 import uk.badamson.mc.repository.McDatabaseContainer;
 
 /**
@@ -63,13 +61,6 @@ public class McContainers
 
    private final Network network = Network.newNetwork();
 
-   private final AuthDbContainer authDb = new AuthDbContainer()
-            .withNetwork(network);
-
-   private final McAuthContainer auth = new McAuthContainer()
-            .withNetwork(network).withEnv("DB_VENDOR", "mysql")
-            .withEnv("DB_ADDR", AuthDbContainer.HOST);
-
    private final McDatabaseContainer db = new McDatabaseContainer()
             .withNetwork(network);
 
@@ -92,8 +83,6 @@ public class McContainers
    }
 
    public void assertThatNoErrorMessagesLogged() {
-      assertThatNoErrorMessagesLogged(authDb.getLogs());
-      assertThatNoErrorMessagesLogged(auth.getLogs());
       assertThatNoErrorMessagesLogged(db.getLogs());
       assertThatNoErrorMessagesLogged(be.getLogs());
       assertThatNoErrorMessagesLogged(fe.getLogs());
@@ -117,8 +106,6 @@ public class McContainers
       fe.close();
       be.close();
       db.close();
-      auth.close();
-      authDb.close();
       network.close();
    }
 
@@ -132,8 +119,6 @@ public class McContainers
        * Start the containers bottom-up, and wait until each is ready, to reduce
        * the number of transient connection errors.
        */
-      authDb.start();
-      auth.start();
       db.start();
       db.waitUntilAcceptsConnections();
       be.start();
@@ -153,8 +138,6 @@ public class McContainers
       fe.stop();
       be.stop();
       db.stop();
-      auth.stop();
-      authDb.stop();
       close();
    }
 }

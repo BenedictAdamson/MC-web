@@ -222,18 +222,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>uk.badamson.mc</groupId>
-			<artifactId>MC-auth</artifactId>
-			<type>pom</type>
-			<version>${project.parent.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>uk.badamson.mc</groupId>
-			<artifactId>MC-auth-db</artifactId>
-			<type>pom</type>
-			<version>${project.parent.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>uk.badamson.mc</groupId>
 			<artifactId>MC-back-end</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
@@ -296,11 +284,6 @@
 			it is in the classpath, the Surefire plugin will think we want to run onlt 
 			JUnit 4 tests, and will therefore ignore all the JUnit 5 tests. -->
 		<dependency>
-			<groupId>org.mariadb.jdbc</groupId>
-			<artifactId>mariadb-java-client</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.opentest4j</groupId>
 			<artifactId>opentest4j</artifactId>
 			<scope>test</scope>
@@ -339,11 +322,6 @@
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>junit-jupiter</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.testcontainers</groupId>
-			<artifactId>mariadb</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
