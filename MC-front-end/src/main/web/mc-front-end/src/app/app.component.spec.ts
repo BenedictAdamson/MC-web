@@ -1,17 +1,26 @@
-import { KeycloakService, KeycloakEvent, KeycloakEventType } from 'keycloak-angular';
-import { Subject } from 'rxjs';
+import { Injectable } from '@angular/core';
 import { TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { KeycloakService, KeycloakEvent, KeycloakEventType } from 'keycloak-angular';
+import { Subject } from 'rxjs';
+
 import { AppComponent } from './app.component';
 import { SelfComponent } from './self/self.component';
+import { SelfService } from './self.service';
 
-class MockKeycloakService {
+@Injectable()
+class MockKeycloakService extends KeycloakService {
 
-	keycloakEvents$: Subject<KeycloakEvent> = new Subject;
+	get keycloakEvents$(): Subject<KeycloakEvent> { return this.events$; };
 
+	nextUsername: string = "jeff";
 	private username: string = null;
-	private nextUsername: string = "jeff";
+	private events$: Subject<KeycloakEvent> = new Subject;
+
+	init(): Promise<boolean> {
+		return Promise.resolve(true);
+	}
 
 	getUsername(): string { return this.username; }
 
@@ -19,21 +28,27 @@ class MockKeycloakService {
 
 	async login(options: any): Promise<void> {
 		return new Promise((resolve, reject) => {
-			this.username = this.nextUsername;
-			this.nextUsername = null;
-			this.keycloakEvents$.next({
-				type: KeycloakEventType.OnAuthSuccess
-			});
-			resolve();
+			try {
+				this.username = this.nextUsername;
+				this.nextUsername = null;
+				this.events$.next({
+					type: KeycloakEventType.OnAuthSuccess
+				});
+				resolve(null);
+			} catch (e) {
+				reject(options + ' ' + e);
+			}
 		});
 	}
-}
+};
 
 describe('AppComponent', () => {
+
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
 			providers: [
-				{ provide: KeycloakService, useClass: MockKeycloakService }
+				{ provide: KeycloakService, useClass: MockKeycloakService },
+				{ provide: SelfService, useClass: SelfService }
 			],
 			declarations: [
 				AppComponent, SelfComponent

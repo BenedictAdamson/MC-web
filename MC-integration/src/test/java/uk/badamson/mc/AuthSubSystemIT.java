@@ -48,6 +48,7 @@ import uk.badamson.mc.repository.AuthDbContainer;
 @Tag("IT")
 public class AuthSubSystemIT implements AutoCloseable {
 
+   private static final boolean PROXY_ADDRESS_FORWARDING = false;
    private static final String AUTH_HOST = "auth";
    private static final String AUTH_DB_HOST = "auth-db";
 
@@ -60,8 +61,9 @@ public class AuthSubSystemIT implements AutoCloseable {
             .withNetwork(network).withNetworkAliases(AUTH_DB_HOST);
 
    private final McAuthContainer auth = new McAuthContainer(KEYCLOAK_PASSWORD,
-            AuthDbContainer.KEYCLOAK_DB_VENDOR, AUTH_DB_HOST, AUTH_DB_PASSWORD)
-                     .withNetwork(network).withNetworkAliases(AUTH_HOST);
+            AuthDbContainer.KEYCLOAK_DB_VENDOR, AUTH_DB_HOST, AUTH_DB_PASSWORD,
+            PROXY_ADDRESS_FORWARDING).withNetwork(network)
+                     .withNetworkAliases(AUTH_HOST);
 
    private final McAuthInitContainer authInit = new McAuthInitContainer(
             KEYCLOAK_PASSWORD, AUTH_HOST, McAuthContainer.PORT)

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable, Subject, defer, from } from 'rxjs';
-import { KeycloakService, KeycloakEvent, KeycloakEventType } from 'keycloak-angular';
+import { Observable } from 'rxjs';
+
+import { SelfService } from '../self.service';
 
 @Component({
 	selector: 'app-self',
@@ -10,47 +11,16 @@ import { KeycloakService, KeycloakEvent, KeycloakEventType } from 'keycloak-angu
 export class SelfComponent implements OnInit {
 
 	constructor(
-		private readonly keycloak: KeycloakService) {
-		this.handleLoggedOut();
+		private readonly service: SelfService) {
 	}
 
-	async ngOnInit(): Promise<void> {
-		this.keycloak.keycloakEvents$.subscribe(event => this.handle(event));
-		if (await this.keycloak.isLoggedIn()) {
-			this.handleLoggedIn();
-		} else {
-			this.handleLoggedOut();
-		}
-		/* As the handlers are idempotent, double handling because of subscription and the isLoggedIn() call is OK */
+	ngOnInit(): void {
+		// Do nothing
 	}
 
-	handleLoggedOut(): void {// idempotent
-		this.username = null;
-		this.loggedIn = false;
-	}
+	username$: Observable<string> = this.service.username$;
 
-	handleLoggedIn(): void {// idempotent
-		this.username = this.keycloak.getUsername();
-		this.loggedIn = true;
-	}
-
-	private handle(event: KeycloakEvent): void {
-		switch (event.type) {
-			case KeycloakEventType.OnAuthError:
-			case KeycloakEventType.OnAuthLogout:
-			case KeycloakEventType.OnAuthRefreshError:
-				this.handleLoggedOut(); break;
-			case KeycloakEventType.OnAuthRefreshSuccess:
-			case KeycloakEventType.OnAuthSuccess:
-				this.handleLoggedIn(); break;
-			default:
-			// ignore
-		}
-	}
-
-	username: string;
-
-	loggedIn: boolean;
+	loggedIn$: Observable<boolean> = this.service.loggedIn$;
 
 	/**
 	 * This indirectly makes use of an HTTP request, which is a cold Observable,
@@ -58,8 +28,6 @@ export class SelfComponent implements OnInit {
      * That is, the expensive HTTP request will not be made until something subscribes to this Observable.
 	 */
 	login(): Observable<void> {
-		return defer(() => from(this.keycloak.login({
-			redirectUri: "/"
-		})));
+		return this.service.login();
 	}
 }

@@ -1,0 +1,102 @@
+version: "2.2"
+services:
+
+  auth-db:
+    image: postgres:9.6.12
+    expose:
+      - "5432"
+    networks:
+      mc:
+        aliases:
+        - auth-db
+    environment:
+      POSTGRES_DB: "keycloak"
+      POSTGRES_USER: "keycloak"
+      POSTGRES_PASSWORD: "$PASSWORD_DB_USER"
+    command: ["postgres", "-c", "fsync=off"]
+        
+  auth:
+    image: index.docker.io/benedictadamson/mc-auth:${VERSION}
+    ports:
+      - "8089:8080"
+    expose:
+      - "8080"
+    networks:
+      mc:
+        aliases:
+        - auth
+    depends_on:
+      - auth-db
+    environment:
+      KEYCLOAK_PASSWORD: "$PASSWORD_DB_USER"
+      DB_VENDOR: "postgres"
+      DB_ADDR: "auth-db"
+      DB_PASSWORD: "$PASSWORD_DB_USER"
+        
+  auth-init:
+    image: index.docker.io/benedictadamson/mc-auth-init:${VERSION}
+    networks:
+      mc:
+        aliases:
+        - auth-init
+    depends_on:
+      - auth
+    environment:
+      KEYCLOAK_PASSWORD: "$PASSWORD_DB_USER"
+    command: ["auth", "8080"]
+    restart: "no"
+        
+  db:
+    image: index.docker.io/benedictadamson/mc-database:${VERSION}
+    expose:
+      - "27017"
+    networks:
+      mc:
+        aliases:
+        - db
+    environment:
+      MONGO_INITDB_ROOT_PASSWORD: "$PASSWORD_DB_ROOT"
+      MC_INIT_PASSWORD: "$PASSWORD_DB_USER"
+    command: ["--bind_ip", "0.0.0.0"]
+        
+  be:
+    image: index.docker.io/benedictadamson/mc-back-end:${VERSION}
+    expose:
+      - "8080"
+    networks:
+      mc:
+        aliases:
+        - be
+    depends_on:
+      - db
+    environment:
+      SPRING_DATA_MONGODB_PASSWORD: "$PASSWORD_DB_USER"
+    command: ["--spring.data.mongodb.host=db"]
+        
+  fe:
+    image: index.docker.io/benedictadamson/mc-front-end-srv:${VERSION}
+    expose:
+      - "80"
+    networks:
+      mc:
+        aliases:
+        - fe
+        
+  in:
+    build: $TMPDIR/in-build-ctx
+    ports:
+      - "8088:80"
+    expose:
+      - "80"
+    networks:
+      mc:
+        aliases:
+        - in
+    depends_on:
+      - auth
+      - be
+      - fe
+
+networks:
+  mc:
+

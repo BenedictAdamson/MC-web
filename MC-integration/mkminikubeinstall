@@ -35,7 +35,8 @@ PACKAGE="$2"
 VM="k8-mc-$VERSION"
 minikube start \
   --profile="${VM}" \
-  --delete-on-failure=true
+  --delete-on-failure=true \
+  --memory=4g
 minikube addons enable \
   --profile="${VM}" \
   ingress
@@ -49,7 +50,7 @@ saveDockerImage () {
   docker save --output "$TMPDIR/$1.tar" "benedictadamson/$1:$VERSION"
 }
 
-saveDockerImage mc-auth-db
+saveDockerImage awaitport
 saveDockerImage mc-auth-init
 saveDockerImage mc-auth
 saveDockerImage mc-back-end
@@ -64,7 +65,7 @@ saveDockerImage mc-front-end-srv
     docker load --input "$TMPDIR/$1.tar"
   }
   
-  loadDockerImage mc-auth-db
+  loadDockerImage awaitport
   loadDockerImage mc-auth-init
   loadDockerImage mc-auth
   loadDockerImage mc-back-end

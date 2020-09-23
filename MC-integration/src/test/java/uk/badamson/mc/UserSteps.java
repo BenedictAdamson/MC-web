@@ -114,11 +114,11 @@ public class UserSteps {
 
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() {
-
+      // TODO
    }
 
-   @Then("MC serves the resource")
-   public void mc_serves_the_resource() {
+   @Then("MC serves the users page")
+   public void mc_serves_users_page() {
       // TODO
    }
 

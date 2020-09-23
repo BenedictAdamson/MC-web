@@ -49,6 +49,7 @@ import uk.badamson.mc.repository.McDatabaseContainer;
 public class McContainers
          implements Startable, AutoCloseable, TestLifecycleAware {
 
+   private static final boolean AUTH_PROXY_ADDRESS_FORWARDING = true;
    private static final String AUTH_HOST = "auth";
    private static final String AUTH_DB_HOST = "auth-db";
    private static final String BE_HOST = "be";
@@ -83,8 +84,9 @@ public class McContainers
             .withNetwork(network).withNetworkAliases(AUTH_DB_HOST);
 
    private final McAuthContainer auth = new McAuthContainer(KEYCLOAK_PASSWORD,
-            AuthDbContainer.KEYCLOAK_DB_VENDOR, AUTH_DB_HOST, AUTH_DB_PASSWORD)
-                     .withNetwork(network).withNetworkAliases(AUTH_HOST);
+            AuthDbContainer.KEYCLOAK_DB_VENDOR, AUTH_DB_HOST, AUTH_DB_PASSWORD,
+            AUTH_PROXY_ADDRESS_FORWARDING).withNetwork(network)
+                     .withNetworkAliases(AUTH_HOST);
 
    private final McAuthInitContainer authInit = new McAuthInitContainer(
             KEYCLOAK_PASSWORD, AUTH_HOST, McAuthContainer.PORT)
