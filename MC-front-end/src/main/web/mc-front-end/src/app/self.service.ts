@@ -68,6 +68,10 @@ export class SelfService {
 	 * Iff the login is sucessful, the #getUsername() will be non null.
 	 */
 	login(): Observable<void> {
-		return from(of(null));//FIXME
-	}
+		return defer(() => from(new Promise<void>((resolve, reject) => {
+			// FIXME
+			this.usernameRS$.next('jeff');
+			resolve(null);
+		})));
+}
 }
