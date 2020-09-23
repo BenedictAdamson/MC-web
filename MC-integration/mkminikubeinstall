@@ -51,8 +51,6 @@ saveDockerImage () {
 }
 
 saveDockerImage awaitport
-saveDockerImage mc-auth-init
-saveDockerImage mc-auth
 saveDockerImage mc-back-end
 saveDockerImage mc-database
 saveDockerImage mc-front-end-srv
@@ -66,8 +64,6 @@ saveDockerImage mc-front-end-srv
   }
   
   loadDockerImage awaitport
-  loadDockerImage mc-auth-init
-  loadDockerImage mc-auth
   loadDockerImage mc-back-end
   loadDockerImage mc-database
   loadDockerImage mc-front-end-srv

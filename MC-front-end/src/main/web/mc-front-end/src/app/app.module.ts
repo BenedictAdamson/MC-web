@@ -23,7 +23,8 @@ import { SelfComponent } from './self/self.component';
 	declarations: [
 		AppComponent,
 		HomeComponent,
-		SelfComponent
+		UsersComponent,
+		UserComponent
 	],
 	providers: [
 		WINDOW_PROVIDER

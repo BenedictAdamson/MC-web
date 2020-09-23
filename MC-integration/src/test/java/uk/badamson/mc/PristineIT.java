@@ -80,23 +80,6 @@ public class PristineIT implements AutoCloseable {
 
    @Test
    @Order(2)
-   public void getAuthRootPage() {
-      assertGetHttpStatus("/auth", HttpURLConnection.HTTP_SEE_OTHER);
-   }
-
-   @Test
-   @Order(3)
-   public void getAuthWellKnownName() {
-      assertGetHttpStatus(
-               "/auth/realms/master/.well-known/openid-configuration",
-               HttpURLConnection.HTTP_OK);
-      /*
-       * Should show a JSON document listing a number of endpoints for Keycloak.
-       */
-   }
-
-   @Test
-   @Order(2)
    public void getHomePage() {
       assertGetHttpStatus("", HttpURLConnection.HTTP_OK);
    }
