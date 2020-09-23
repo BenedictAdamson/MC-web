@@ -14,10 +14,12 @@ spec:
       - path: /api/
         pathType: Prefix
         backend:
-          serviceName: {{ .Release.Name }}-be-svc
-          servicePort: 8080
+          service:
+            name: {{ .Release.Name }}-be-svc
+            port: 8080
       - path: /
         pathType: Prefix
         backend:
-          serviceName: {{ .Release.Name }}-fe-svc
-          servicePort: 80
+          service:
+            name: {{ .Release.Name }}-fe-svc
+            port: 80
