@@ -6,9 +6,9 @@ import { RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
-import { WINDOW_PROVIDERS } from './window-providers';
 import { UserComponent } from './user/user.component';
 import { UsersComponent } from './users/users.component';
+import { WINDOW_PROVIDER } from './window.provider';
 import { HomeComponent } from './home/home.component';
 import { SelfComponent } from './self/self.component';
 
@@ -22,13 +22,11 @@ import { SelfComponent } from './self/self.component';
 	],
 	declarations: [
 		AppComponent,
-		UsersComponent,
-		UserComponent,
 		HomeComponent,
 		SelfComponent
 	],
 	providers: [
-		WINDOW_PROVIDERS
+		WINDOW_PROVIDER
 	],
 	bootstrap: [AppComponent]
 })

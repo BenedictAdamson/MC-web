@@ -1,11 +1,15 @@
-import { Subject } from 'rxjs';
+import { Injectable } from '@angular/core';
 import { TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { Subject } from 'rxjs';
+
 import { AppComponent } from './app.component';
 import { SelfComponent } from './self/self.component';
+import { SelfService } from './self.service';
 
 describe('AppComponent', () => {
+
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
 			providers: [

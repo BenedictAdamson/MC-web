@@ -21,7 +21,8 @@ const routes: Routes = [
 	},
 	{
 		path: 'user/:username',
-		component: UserComponent
+		component: UserComponent,
+		pathMatch: 'full'
 	}
 ];
 

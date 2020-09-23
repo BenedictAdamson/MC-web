@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable, Subject, defer, from, of } from 'rxjs';
+import { Observable } from 'rxjs';
+
+import { SelfService } from '../self.service';
 
 @Component({
 	selector: 'app-self',
@@ -8,15 +10,17 @@ import { Observable, Subject, defer, from, of } from 'rxjs';
 })
 export class SelfComponent implements OnInit {
 
-	constructor() {
+	constructor(
+		private readonly service: SelfService) {
 	}
 
-	async ngOnInit(): Promise<void> {
+	ngOnInit(): void {
+		// Do nothing
 	}
 
-	username: string;
+	username$: Observable<string> = this.service.username$;
 
-	loggedIn: boolean;
+	loggedIn$: Observable<boolean> = this.service.loggedIn$;
 
 	/**
 	 * This indirectly makes use of an HTTP request, which is a cold Observable,
@@ -24,11 +28,6 @@ export class SelfComponent implements OnInit {
      * That is, the expensive HTTP request will not be made until something subscribes to this Observable.
 	 */
 	login(): Observable<void> {
-		// FIXME
-		return defer(() => {
-			this.username = "jeff";
-			this.loggedIn = true;
-			return of(null)
-		});
+		return this.service.login();
 	}
 }
