@@ -18,9 +18,12 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import java.net.URI;
 import java.util.Optional;
-import java.util.concurrent.TimeoutException;
 
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -30,8 +33,10 @@ import org.testcontainers.lifecycle.Startable;
 import org.testcontainers.lifecycle.TestDescription;
 import org.testcontainers.lifecycle.TestLifecycleAware;
 
+import uk.badamson.mc.auth.McAuthContainer;
 import uk.badamson.mc.presentation.McFrontEndContainer;
 import uk.badamson.mc.presentation.McReverseProxyContainer;
+import uk.badamson.mc.repository.AuthDbContainer;
 import uk.badamson.mc.repository.McDatabaseContainer;
 
 /**
@@ -48,11 +53,22 @@ public class McContainers
 
    public static final String INGRESS_HOST = BASE_URI.getAuthority();
 
+   private static void assertThatNoErrorMessagesLogged(final String logs) {
+      assertThat(logs, not(containsString("ERROR:")));
+   }
+
    public static String createUrlFromPath(final String path) {
       return BASE_URI.resolve(path).toASCIIString();
    }
 
    private final Network network = Network.newNetwork();
+
+   private final AuthDbContainer authDb = new AuthDbContainer()
+            .withNetwork(network);
+
+   private final McAuthContainer auth = new McAuthContainer()
+            .withNetwork(network).withEnv("DB_VENDOR", "mysql")
+            .withEnv("DB_ADDR", AuthDbContainer.HOST);
 
    private final McDatabaseContainer db = new McDatabaseContainer()
             .withNetwork(network);
@@ -75,6 +91,16 @@ public class McContainers
       browser.afterTest(description, throwable);
    }
 
+   public void assertThatNoErrorMessagesLogged() {
+      assertThatNoErrorMessagesLogged(authDb.getLogs());
+      assertThatNoErrorMessagesLogged(auth.getLogs());
+      assertThatNoErrorMessagesLogged(db.getLogs());
+      assertThatNoErrorMessagesLogged(be.getLogs());
+      assertThatNoErrorMessagesLogged(fe.getLogs());
+      assertThatNoErrorMessagesLogged(in.getLogs());
+      assertThatNoErrorMessagesLogged(browser.getLogs());
+   }
+
    @Override
    public void beforeTest(final TestDescription description) {
       browser.beforeTest(description);
@@ -91,6 +117,8 @@ public class McContainers
       fe.close();
       be.close();
       db.close();
+      auth.close();
+      authDb.close();
       network.close();
    }
 
@@ -104,18 +132,14 @@ public class McContainers
        * Start the containers bottom-up, and wait until each is ready, to reduce
        * the number of transient connection errors.
        */
-      try {
-         db.start();
-         db.waitUntilAcceptsConnections();
-         be.start();
-         be.waitUntilReady();
-         be.awaitHealthCheckOk();
-         fe.start();
-         in.start();
-         browser.start();
-      } catch (TimeoutException | InterruptedException e) {
-         throw new RuntimeException("Unable to start all mc containers", e);
-      }
+      authDb.start();
+      auth.start();
+      db.start();
+      db.waitUntilAcceptsConnections();
+      be.start();
+      fe.start();
+      in.start();
+      browser.start();
    }
 
    @Override
@@ -129,6 +153,8 @@ public class McContainers
       fe.stop();
       be.stop();
       db.stop();
+      auth.stop();
+      authDb.stop();
+      close();
    }
-
 }

@@ -18,11 +18,16 @@
 # along with MC.  If not, see <https://www.gnu.org/licenses/>.
 #
 apiVersion: v1
-kind: ConfigMap
+kind: Service
 metadata:
-  name: {{ .Release.Name }}-http-cm
+  name: {{ .Release.Name }}-fe-svc
   labels:
     app.kubernetes.io/component: front-end
 {{ include "mc.labels" . | indent 4 }}
-data:
-  httpd-local.conf: ''
+spec:
+  selector:
+    app.kubernetes.io/name: {{ include "mc.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+  - protocol: TCP
+    port: 80

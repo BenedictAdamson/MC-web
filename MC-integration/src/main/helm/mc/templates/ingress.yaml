@@ -8,6 +8,18 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
-  backend:
-    serviceName: {{ .Release.Name }}-http-svc
-    servicePort: 80
+  rules:
+  - http:
+      paths:
+      - path: /api/
+        backend:
+          serviceName: {{ .Release.Name }}-be-svc
+          servicePort: 8080
+      - path: /auth/
+        backend:
+          serviceName: {{ .Release.Name }}-auth-svc
+          servicePort: 8080
+      - path: /
+        backend:
+          serviceName: service2
+          servicePort: 80

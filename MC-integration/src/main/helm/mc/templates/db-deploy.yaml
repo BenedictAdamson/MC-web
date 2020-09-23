@@ -53,13 +53,13 @@ spec:
         - name: MONGO_INITDB_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-db-password-secret
-              key: root-password
+              name: {{ .Release.Name }}-secrets
+              key: db-root-password
         - name: MC_INIT_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-db-password-secret
-              key: user-password
+              name: {{ .Release.Name }}-secrets
+              key: db-user-password
         volumeMounts:
         - mountPath: /data/db
           name: mc-data-db

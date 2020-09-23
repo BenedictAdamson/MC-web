@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>uk.badamson.mc</groupId>
 		<artifactId>MC</artifactId>
-		<version>2.5.2</version>
+		<version>3.0.0</version>
 	</parent>
 	<artifactId>MC-integration</artifactId>
 	<packaging>helm</packaging>
@@ -87,6 +87,11 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<effort>Max</effort>
+					<threshold>Low</threshold>
+					<xmlOutput>true</xmlOutput>
+				</configuration>
 			</plugin>
 			<plugin>
 				<!--Work around Failsafe/Surefire not yet using Test Engine discovery 
@@ -217,6 +222,18 @@
 	<dependencies>
 		<dependency>
 			<groupId>uk.badamson.mc</groupId>
+			<artifactId>MC-auth</artifactId>
+			<type>pom</type>
+			<version>${project.parent.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.badamson.mc</groupId>
+			<artifactId>MC-auth-db</artifactId>
+			<type>pom</type>
+			<version>${project.parent.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>uk.badamson.mc</groupId>
 			<artifactId>MC-back-end</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
@@ -250,6 +267,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>io.projectreactor.netty</groupId>
+			<artifactId>reactor-netty</artifactId>
+			<scope>test</scope>
+			<!-- Because use Spring WebTestClient -->
+		</dependency>
+		<dependency>
 			<groupId>com.github.spotbugs</groupId>
 			<artifactId>spotbugs-annotations</artifactId>
 		</dependency>
@@ -272,6 +295,11 @@
 		<!-- Do not depend on junit-platform-runner. It is for JUnit 4 tests; if 
 			it is in the classpath, the Surefire plugin will think we want to run onlt 
 			JUnit 4 tests, and will therefore ignore all the JUnit 5 tests. -->
+		<dependency>
+			<groupId>org.mariadb.jdbc</groupId>
+			<artifactId>mariadb-java-client</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.opentest4j</groupId>
 			<artifactId>opentest4j</artifactId>
@@ -299,8 +327,9 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
+			<artifactId>spring-webflux</artifactId>
 			<scope>test</scope>
+			<!-- Because use Spring WebTestClient -->
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -310,6 +339,11 @@
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>mariadb</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

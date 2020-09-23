@@ -39,11 +39,27 @@ import io.cucumber.java.Scenario;
  * </p>
  * <p>
  * Construction of an instance of this class creates, but does not start, a
- * Docker container for each of the MC servers, plus some DOcker containers for
+ * Docker container for each of the MC servers, plus some Docker containers for
  * accessing MC using a web browser.
  * </p>
  */
 public final class WorldCore implements AutoCloseable {
+
+   private static Optional<Throwable> createOutcomeException(
+            final Scenario scenario) {
+      /*
+       * Unfortunately, Cucumber does not provide us with the exception that
+       * caused a test failure.
+       */
+      final Throwable throwable;
+      if (scenario.isFailed()) {
+         throwable = new AssertionError(
+                  "Scenario " + scenario.getId() + " failed");
+      } else {
+         throwable = null;
+      }
+      return Optional.ofNullable(throwable);
+   }
 
    private static TestDescription createTestDescription(
             final Scenario scenario) {
@@ -125,7 +141,7 @@ public final class WorldCore implements AutoCloseable {
 
    /**
     * <p>
-    * Perform an HTTP GET of the fron-end of the SUT, using the previously
+    * Perform an HTTP GET of the front-end of the SUT, using the previously
     * {@linkplain #setPath(String) set URL}.
     * </p>
     *
@@ -171,18 +187,8 @@ public final class WorldCore implements AutoCloseable {
 
    private void tellContainersTestOutcome(final Scenario scenario) {
       final var testDescription = createTestDescription(scenario);
-      /*
-       * Unfortunately, Cucumber does not provide us with the exception that
-       * caused a test failure.
-       */
-      final Throwable throwable;
-      if (scenario.isFailed()) {
-         throwable = new AssertionError(
-                  "Scenario " + scenario.getId() + " failed");
-      } else {
-         throwable = null;
-      }
-      containers.afterTest(testDescription, Optional.ofNullable(throwable));
+      final var exception = createOutcomeException(scenario);
+      containers.afterTest(testDescription, exception);
    }
 
 }// class

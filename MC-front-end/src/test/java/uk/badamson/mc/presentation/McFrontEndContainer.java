@@ -27,13 +27,13 @@ import uk.badamson.mc.Version;
  * A Testcontainers Docker container for the MC-front-end.
  * </p>
  */
-final class McFrontEndContainer extends GenericContainer<McFrontEndContainer> {
+public final class McFrontEndContainer extends GenericContainer<McFrontEndContainer> {
 
    public static final String VERSION = Version.VERSION;
    public static final String IMAGE = "index.docker.io/benedictadamson/mc-front-end-srv:"
             + VERSION;
 
-   McFrontEndContainer() {
+   public McFrontEndContainer() {
       super(IMAGE);
       withExposedPorts(80);
    }

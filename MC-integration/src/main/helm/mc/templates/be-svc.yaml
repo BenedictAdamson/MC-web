@@ -18,13 +18,16 @@
 # along with MC.  If not, see <https://www.gnu.org/licenses/>.
 #
 apiVersion: v1
-kind: Secret
+kind: Service
 metadata:
-  name: {{ .Release.Name }}-db-password-secret
+  name: {{ .Release.Name }}-be-svc
   labels:
-    app.kubernetes.io/component: database
+    app.kubernetes.io/component: back-end
 {{ include "mc.labels" . | indent 4 }}
-type: Opaque
-stringData:
-  root-password: FIXME
-  user-password: FIXME2
+spec:
+  selector:
+    app.kubernetes.io/name: {{ include "mc.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+  - protocol: TCP
+    port: 8080

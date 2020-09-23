@@ -20,9 +20,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-http-deploy
+  name: {{ .Release.Name }}-be-deploy
   labels:
-    app.kubernetes.io/component: front-end
+    app.kubernetes.io/component: back-end
 {{ include "mc.labels" . | indent 4 }}
 spec:
   replicas: 1
@@ -37,22 +37,7 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
-      - name: mc-front-end
-        image: benedictadamson/mc-front-end-srv:{{ .Chart.AppVersion }}
-        ports:
-        - containerPort: 80
-          name: http
-        volumeMounts:
-        - mountPath: /config
-          name: mc-http-config
-          readOnly: true
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 80
-          initialDelaySeconds: 20
-          periodSeconds: 13
-      - name: mc-back-end
+        name: mc-back-end
         image: benedictadamson/mc-back-end:{{ .Chart.AppVersion }}
         ports:
         - containerPort: 8080
@@ -62,8 +47,8 @@ spec:
         - name: SPRING_DATA_MONGODB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-db-password-secret
-              key: user-password
+              name: {{ .Release.Name }}-secrets
+              key: db-user-password
         readinessProbe:
           httpGet:
             path: /actuator/health/readiness
@@ -76,7 +61,3 @@ spec:
             port: 8080
           initialDelaySeconds: 20
           periodSeconds: 59
-      volumes:
-      - name: mc-http-config
-        configMap:
-          name: {{ .Release.Name }}-http-cm
