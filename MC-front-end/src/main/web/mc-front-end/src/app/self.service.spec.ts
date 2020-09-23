@@ -1,41 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
-import { KeycloakEvent, KeycloakEventType, KeycloakService } from 'keycloak-angular';
 
 import { SelfService } from './self.service';
-
-@Injectable()
-class MockKeycloakService extends KeycloakService {
-
-	get keycloakEvents$(): Subject<KeycloakEvent> { return this.events$; };
-
-	nextUsername: string = "jeff";
-	private username: string = null;
-	private events$: Subject<KeycloakEvent> = new Subject;
-
-	init(): Promise<boolean> {
-		return Promise.resolve(true);
-	}
-
-	getUsername(): string { return this.username; }
-
-	async isLoggedIn(): Promise<boolean> { return Promise.resolve(this.username != null); }
-
-	async login(options: any): Promise<void> {
-		return new Promise((resolve, reject) => {
-			try {
-				this.username = this.nextUsername;
-				this.nextUsername = null;
-				this.events$.next({
-					type: KeycloakEventType.OnAuthSuccess
-				});
-				resolve(null);
-			} catch (e) {
-				reject(options + ' ' + e);
-			}
-		});
-	}
-};
 
 describe('SelfService', () => {
 
@@ -65,12 +31,10 @@ describe('SelfService', () => {
 		expect(loggedIn).toBe(username != null, 'loggedIn iff username is non null.');
 	};
 
-	let keycloak: KeycloakService;;
 	let service: SelfService;
 
 	beforeEach(() => {
-		keycloak = new MockKeycloakService;
-		service = new SelfService(keycloak);
+		service = new SelfService();
 	});
 
 	it('should be created with initial state', () => {
