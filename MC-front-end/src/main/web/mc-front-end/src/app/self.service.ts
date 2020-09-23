@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, ReplaySubject, defer, of, from } from 'rxjs';
 import { map, mergeMap, tap } from 'rxjs/operators';
-import { KeycloakService } from 'keycloak-angular';
 
 /**
  * @description
@@ -25,15 +24,8 @@ export class SelfService {
      *
      * Instancing this class does not trigger a login request or any network traffic.
      */
-	constructor(private keycloak: KeycloakService) {
-		this.updateState();
-		this.keycloak.keycloakEvents$.subscribe({
-			next: () => this.updateState()
-		});
-	}
-
-	private updateState(): void {
-		this.usernameRS$.next(this.keycloak.getUsername());
+	constructor() {
+		this.usernameRS$.next(null);
 	}
 
     /**
@@ -76,6 +68,6 @@ export class SelfService {
 	 * Iff the login is sucessful, the #getUsername() will be non null.
 	 */
 	login(): Observable<void> {
-		return from(this.keycloak.login());
+		return from(of(null));//FIXME
 	}
 }
