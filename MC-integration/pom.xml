@@ -115,6 +115,8 @@
 							<arg value="--include-engine" />
 							<arg value="cucumber" />
 							<arg value="--select-package=uk.badamson.mc" />
+							<arg value="--include-tag" />
+							<arg value="integration" />
 							<arg value="--reports-dir=target/failsafe-reports" /> <!-- expected location if had used failsafe plugin -->
 						</java>
 					</target>
@@ -280,6 +282,11 @@
 			<artifactId>junit-platform-console</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.keycloak</groupId>
+			<artifactId>keycloak-admin-client</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<!-- Do not depend on junit-platform-runner. It is for JUnit 4 tests; if 
 			it is in the classpath, the Surefire plugin will think we want to run onlt 
 			JUnit 4 tests, and will therefore ignore all the JUnit 5 tests. -->
@@ -309,6 +316,11 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-support</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webflux</artifactId>
 			<scope>test</scope>
@@ -332,6 +344,11 @@
 		<dependency>
 			<groupId>io.cucumber</groupId>
 			<artifactId>cucumber-java</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

@@ -21,5 +21,5 @@ spec:
           servicePort: 8080
       - path: /
         backend:
-          serviceName: service2
+          serviceName: {{ .Release.Name }}-fe-svc
           servicePort: 80

@@ -35,9 +35,10 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "mc.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        provides: fe
     spec:
       containers:
-        name: mc-front-end
+      - name: mc-front-end
         image: benedictadamson/mc-front-end-srv:{{ .Chart.AppVersion }}
         ports:
         - containerPort: 80
@@ -47,4 +48,4 @@ spec:
             path: /
             port: 80
           initialDelaySeconds: 20
-          periodSeconds: 13
+          periodSeconds: 29

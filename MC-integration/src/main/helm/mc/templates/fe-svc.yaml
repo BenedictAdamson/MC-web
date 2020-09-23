@@ -28,6 +28,7 @@ spec:
   selector:
     app.kubernetes.io/name: {{ include "mc.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+    provides: fe
   ports:
   - protocol: TCP
     port: 80
