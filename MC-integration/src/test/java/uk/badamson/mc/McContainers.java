@@ -28,6 +28,7 @@ import java.util.Optional;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.containers.BrowserWebDriverContainer;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.lifecycle.Startable;
 import org.testcontainers.lifecycle.TestDescription;
@@ -48,7 +49,7 @@ public class McContainers
 
    private static final String BE_HOST = "be";
    private static final String DB_HOST = "db";
-   private static final String FE_HOST = "fe";
+   public static final String FE_HOST = "fe";
    private static final String REVERSE_PROXY_HOST = "in";
 
    private static final URI BASE_PRIVATE_NETWORK_URI = URI
@@ -68,6 +69,13 @@ public class McContainers
 
    public static URI createIngressPrivateNetworkUriFromPath(final String path) {
       return BASE_PRIVATE_NETWORK_URI.resolve(path);
+   }
+
+   public static URI createUriFromPath(final GenericContainer<?> container,
+            final String path) {
+      final var base = URI.create("http://" + container.getHost() + ":"
+               + container.getFirstMappedPort());
+      return base.resolve(path);
    }
 
    private final Network network = Network.newNetwork();
@@ -125,10 +133,12 @@ public class McContainers
       network.close();
    }
 
+   public URI createFrontEndUriFromPath(final String path) {
+      return createUriFromPath(fe, path);
+   }
+
    public URI createIngressUriFromPath(final String path) {
-      final var base = URI.create(
-               "http://" + in.getHost() + ":" + in.getFirstMappedPort());
-      return base.resolve(path);
+      return createUriFromPath(in, path);
    }
 
    public RemoteWebDriver getWebDriver() {
