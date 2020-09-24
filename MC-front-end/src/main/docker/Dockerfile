@@ -1,4 +1,4 @@
-# Dockerfile for the MC-front-end project,
+# Dockerfile for the MC project,
 # to produce the MC front-end server in a container.
 
 # © Copyright Benedict Adamson 2018-20.

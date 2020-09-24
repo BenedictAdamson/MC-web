@@ -24,6 +24,6 @@ FROM nginx:1
 EXPOSE 80
 
 RUN rm -r /usr/share/nginx/html/*
-
+RUN rm /etc/nginx/conf.d/default.conf
 COPY rp.conf /etc/nginx/conf.d/rp.conf
 CMD ["nginx", "-g", "daemon off;"]

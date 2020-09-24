@@ -1,34 +1,42 @@
-import { TestBed, async } from '@angular/core/testing';
+import { Injectable } from '@angular/core';
+import { TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { Subject } from 'rxjs';
+
 import { AppComponent } from './app.component';
+import { SelfComponent } from './self/self.component';
+import { SelfService } from './self.service';
 
 describe('AppComponent', () => {
-    beforeEach(async(() => {
-        TestBed.configureTestingModule({
-            declarations: [
-                AppComponent
-            ],
-            imports: [RouterTestingModule]
-        }).compileComponents();
-    }));
 
-    it('should create the app', () => {
-        const fixture = TestBed.createComponent(AppComponent);
-        const app = fixture.debugElement.componentInstance;
-        expect(app).toBeTruthy();
-    });
+	beforeEach(waitForAsync(() => {
+		TestBed.configureTestingModule({
+			providers: [
+			],
+			declarations: [
+				AppComponent, SelfComponent
+			],
+			imports: [RouterTestingModule]
+		}).compileComponents();
+	}));
 
-    it(`should have as title 'Mission Command'`, () => {
-        const fixture = TestBed.createComponent(AppComponent);
-        const app = fixture.debugElement.componentInstance;
-        expect(app.title).toEqual('Mission Command');
-    });
+	it('should create the app', () => {
+		const fixture = TestBed.createComponent(AppComponent);
+		const app = fixture.debugElement.componentInstance;
+		expect(app).toBeTruthy();
+	});
 
-    it('should render title in a h1 tag', () => {
-        const fixture = TestBed.createComponent(AppComponent);
-        fixture.detectChanges();
-        const compiled = fixture.debugElement.nativeElement;
-        expect(compiled.querySelector('h1').textContent).toContain('Mission Command');
-    });
+	it(`should have as title 'Mission Command'`, () => {
+		const fixture = TestBed.createComponent(AppComponent);
+		const app = fixture.debugElement.componentInstance;
+		expect(app.title).toEqual('Mission Command');
+	});
+
+	it('should render title in a h1 tag', () => {
+		const fixture = TestBed.createComponent(AppComponent);
+		fixture.detectChanges();
+		const compiled = fixture.debugElement.nativeElement;
+		expect(compiled.querySelector('h1').textContent).toContain('Mission Command');
+	});
 });

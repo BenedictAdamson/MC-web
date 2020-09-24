@@ -1,0 +1,27 @@
+#!/bin/sh
+# awaitport - wait until a TCP port accepts connections
+#
+# SYNOPSIS
+# awaitport <delay> <interval> <host> <port>
+#
+# COMMAND LINE ARGUMENTS
+# <delay>
+# how long, in seconds, to wait before first polling the port
+# <interval>
+# the interval, in seconds, between polls of the port
+# <host>
+# the host where the port is located
+# <port>
+# the port number of the port
+
+# Parse command-line
+ME="$0"
+DELAY="$1"
+INTERVAL="$2"
+HOST="$3"
+PORT="$4"
+
+sleep "$DELAY"
+while ! nc -dvz "$HOST" "$PORT"; do
+   sleep "$INTERVAL"
+done
