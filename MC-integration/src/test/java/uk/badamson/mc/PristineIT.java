@@ -34,6 +34,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import uk.badamson.mc.McContainers.HttpServer;
+
 /**
  * <p>
  * Basic system test for the MC components operating together, testing it
@@ -67,9 +69,10 @@ public class PristineIT implements AutoCloseable {
       containers.stop();
    }
 
-   private void assertGetHttpStatus(final String path,
+   private void assertGetHttpStatus(HttpServer server, final String path,
             final int expectedStatus) {
-      assertThat("HTTP status", getHttpResponseCode("GET", ""),
+      assertThat("HTTP status",
+               getHttpResponseCode(HttpServer.INGRESS, "GET", ""),
                is(expectedStatus));
    }
 
@@ -80,13 +83,20 @@ public class PristineIT implements AutoCloseable {
 
    @Test
    @Order(2)
-   public void getHomePage() {
-      assertGetHttpStatus("", HttpURLConnection.HTTP_OK);
+   public void getHomePageFromFrontEnd() {
+      assertGetHttpStatus(HttpServer.FRONT_END, "", HttpURLConnection.HTTP_OK);
    }
 
-   private int getHttpResponseCode(final String method, final String path) {
+   @Test
+   @Order(2)
+   public void getHomePageThroughIngress() {
+      assertGetHttpStatus(HttpServer.INGRESS, "", HttpURLConnection.HTTP_OK);
+   }
+
+   private int getHttpResponseCode(HttpServer server, final String method,
+            final String path) {
       try {
-         final var localUrl = containers.createIngressUriFromPath(path);
+         final var localUrl = containers.createUriFromPath(server, path);
          final HttpURLConnection connection = (HttpURLConnection) localUrl
                   .toURL().openConnection();
          connection.setRequestMethod(method);

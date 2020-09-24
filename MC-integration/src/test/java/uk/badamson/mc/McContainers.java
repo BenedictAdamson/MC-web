@@ -47,9 +47,13 @@ import uk.badamson.mc.repository.McDatabaseContainer;
 public class McContainers
          implements Startable, AutoCloseable, TestLifecycleAware {
 
+   public static enum HttpServer {
+      BACK_END, FRONT_END, INGRESS
+   }// enum
+
    private static final String BE_HOST = "be";
    private static final String DB_HOST = "db";
-   public static final String FE_HOST = "fe";
+   private static final String FE_HOST = "fe";
    private static final String REVERSE_PROXY_HOST = "in";
 
    private static final URI BASE_PRIVATE_NETWORK_URI = URI
@@ -57,9 +61,6 @@ public class McContainers
 
    private static final String DB_ROOT_PASSWORD = "secret2";
    private static final String DB_USER_PASSWORD = "secret3";
-
-   public static final String INGRESS_HOST = BASE_PRIVATE_NETWORK_URI
-            .getAuthority();
 
    private static void assertThatNoErrorMessagesLogged(final String container,
             final String logs) {
@@ -71,8 +72,19 @@ public class McContainers
       return BASE_PRIVATE_NETWORK_URI.resolve(path);
    }
 
-   public static URI createUriFromPath(final GenericContainer<?> container,
-            final String path) {
+   public URI createUriFromPath(final HttpServer server, final String path) {
+      GenericContainer<?> container = null;
+      switch (server) {
+      case BACK_END:
+         container = be;
+         break;
+      case FRONT_END:
+         container = fe;
+         break;
+      case INGRESS:
+         container = in;
+         break;
+      }
       final var base = URI.create("http://" + container.getHost() + ":"
                + container.getFirstMappedPort());
       return base.resolve(path);
@@ -131,14 +143,6 @@ public class McContainers
       be.close();
       db.close();
       network.close();
-   }
-
-   public URI createFrontEndUriFromPath(final String path) {
-      return createUriFromPath(fe, path);
-   }
-
-   public URI createIngressUriFromPath(final String path) {
-      return createUriFromPath(in, path);
    }
 
    public RemoteWebDriver getWebDriver() {
