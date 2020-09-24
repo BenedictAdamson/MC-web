@@ -40,6 +40,7 @@ import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
 import net.jcip.annotations.Immutable;
+import uk.badamson.mc.McContainers.HttpServer;
 
 /**
  * <p>
@@ -309,7 +310,7 @@ public final class WorldCore implements AutoCloseable {
    public void setUrlPath(final String path) {
       privateNetworkUrl = McContainers
                .createIngressPrivateNetworkUriFromPath(path);
-      localUrl = containers.createIngressUriFromPath(path);
+      localUrl = containers.createUriFromPath(HttpServer.INGRESS, path);
    }
 
    private void tellContainersTestOutcome(final Scenario scenario) {
