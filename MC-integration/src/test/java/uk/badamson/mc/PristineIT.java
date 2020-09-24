@@ -71,8 +71,7 @@ public class PristineIT implements AutoCloseable {
 
    private void assertGetHttpStatus(HttpServer server, final String path,
             final int expectedStatus) {
-      assertThat("HTTP status",
-               getHttpResponseCode(HttpServer.INGRESS, "GET", ""),
+      assertThat("HTTP status", getHttpResponseCode(server, "GET", ""),
                is(expectedStatus));
    }
 
