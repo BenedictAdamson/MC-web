@@ -6,6 +6,7 @@ import { RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
+import { LoginComponent } from './login/login.component';
 import { UserComponent } from './user/user.component';
 import { UsersComponent } from './users/users.component';
 import { WINDOW_PROVIDER } from './window.provider';
@@ -23,6 +24,7 @@ import { SelfComponent } from './self/self.component';
 	declarations: [
 		AppComponent,
 		HomeComponent,
+		LoginComponent,
 		SelfComponent,
 		UsersComponent,
 		UserComponent
