@@ -60,17 +60,24 @@ public class UserSteps {
 
    @Then("MC does not present adding a user as an option")
    public void does_not_present_adding_user_option() {
-      // TODO
+      getUrlUsingBrowser("/user");
+      final var webDriver = worldCore.getWebDriver();
+      assertThat("No add-user link", webDriver.findElementsById("add-user"),
+               empty());
    }
 
    private void getHomePage() {
-      worldCore.setUrlPath("/");
-      worldCore.getUrlUsingBrowser();
+      getUrlUsingBrowser("/");
    }
 
    @When("getting the users")
    public void getting_users() {
       // TODO
+   }
+
+   private void getUrlUsingBrowser(final String path) {
+      worldCore.setUrlPath(path);
+      worldCore.getUrlUsingBrowser();
    }
 
    @Then("the list of users includes a user named {string}")
@@ -85,7 +92,12 @@ public class UserSteps {
 
    @Given("logged in")
    public void logged_in() {
-      // TODO
+      login();
+   }
+
+   private void login() {
+      Objects.requireNonNull(user, "user");
+      login(user.getName(), user.getPassword());
    }
 
    private void login(final String name, final String password) {
@@ -100,8 +112,7 @@ public class UserSteps {
 
    @When("log in using correct password")
    public void login_using_correct_password() {
-      Objects.requireNonNull(user, "user");
-      login(user.getName(), user.getPassword());
+      login();
    }
 
    @Then("MC accepts the login")
@@ -128,7 +139,7 @@ public class UserSteps {
 
    @Given("user does not have the {string} role")
    public void user_does_not_have_role(final String role) {
-      // TODO
+      user = worldCore.getUserWithoutRole(role);
    }
 
    @Given("user has the {string} role")
