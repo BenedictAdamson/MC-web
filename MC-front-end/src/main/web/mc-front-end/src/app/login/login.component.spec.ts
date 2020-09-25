@@ -35,4 +35,10 @@ describe('LoginComponent', () => {
 		expect(field).not.toBeNull('has <input name="password">');
 		expect(field.getAttribute('type')).toBe('password', '<input name="password"> is type="password"');
 	});
+
+	it('should have a submit button', () => {
+		const element: HTMLElement = fixture.nativeElement;
+		const field = element.querySelector('button[type="submit"]');
+		expect(field).not.toBeNull('has <button type="submit">');
+	});
 });
