@@ -2,6 +2,6 @@
 	<p *ngIf="loggedIn$ | async; else selfLogin">Logged in as
 		{{username$ | async}}</p>
 	<ng-template #selfLogin>
-	<button id="login" (click)="login()">login</button>
+	<a id="login" routerLink="/login">login</a>
 	</ng-template>
 </div>

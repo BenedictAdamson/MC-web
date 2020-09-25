@@ -139,9 +139,10 @@ public final class WorldCore implements AutoCloseable {
 
    private URI localUrl;
 
-   private void addPlayer(final String name, final String password) {
-      containers.addPlayer(name, password);
-      users.put(name, new User(name, password, Set.of("player")));
+   private void addUser(final String name, final String password,
+            final Set<String> roles) {
+      containers.addUser(name, password);
+      users.put(name, new User(name, password, roles));
    }
 
    /**
@@ -186,7 +187,8 @@ public final class WorldCore implements AutoCloseable {
    }
 
    private void createUsers() {
-      addPlayer("jeff", "password1");
+      addUser("jeff", "password1", Set.of("player"));
+      addUser("alan", "password2", Set.of("player", "manage-users"));
    }
 
    /**
