@@ -69,7 +69,7 @@ public class PristineIT implements AutoCloseable {
       containers.stop();
    }
 
-   private void assertGetHttpStatus(HttpServer server, final String path,
+   private void assertGetHttpStatus(final HttpServer server, final String path,
             final int expectedStatus) {
       assertThat("HTTP status", getHttpResponseCode(server, "GET", ""),
                is(expectedStatus));
@@ -92,7 +92,7 @@ public class PristineIT implements AutoCloseable {
       assertGetHttpStatus(HttpServer.INGRESS, "", HttpURLConnection.HTTP_OK);
    }
 
-   private int getHttpResponseCode(HttpServer server, final String method,
+   private int getHttpResponseCode(final HttpServer server, final String method,
             final String path) {
       try {
          final var localUrl = containers.createUriFromPath(server, path);
