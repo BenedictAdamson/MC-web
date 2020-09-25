@@ -28,4 +28,11 @@ describe('LoginComponent', () => {
 		const field = element.querySelector('input[name="username"]');
 		expect(field).not.toBeNull();
 	});
+
+	it('should have a password field', () => {
+		const element: HTMLElement = fixture.nativeElement;
+		const field = element.querySelector('input[name="password"]');
+		expect(field).not.toBeNull('has <input name="password">');
+		expect(field.getAttribute('type')).toBe('password', '<input name="password"> is type="password"');
+	});
 });
