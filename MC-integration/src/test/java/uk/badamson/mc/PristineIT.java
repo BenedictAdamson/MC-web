@@ -109,6 +109,13 @@ public class PristineIT implements AutoCloseable {
    }
 
    @Test
+   @Order(3)
+   public void getUsersPageFromFrontEnd() {
+      assertGetHttpStatus(HttpServer.FRONT_END, "/user",
+               HttpURLConnection.HTTP_OK);
+   }
+
+   @Test
    @Order(1)
    public void start() {
       containers.assertThatNoErrorMessagesLogged();
