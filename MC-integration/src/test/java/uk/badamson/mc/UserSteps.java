@@ -138,7 +138,7 @@ public class UserSteps {
    @Then("MC serves the users page")
    public void mc_serves_users_page() {
       final var webDriver = worldCore.getWebDriver();
-      element = webDriver.findElementByTagName("h1");
+      element = webDriver.findElementByTagName("h2");
       assertThat("Has a header saying \"Users\"", element.getText(),
                containsString("Users"));
    }
