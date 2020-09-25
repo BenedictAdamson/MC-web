@@ -12,8 +12,8 @@ import { UsersComponent } from './users/users.component';
  */
 const routes: Routes = [
 	{
-		path: '',
-		component: HomeComponent,
+		path: 'user/:username',
+		component: UserComponent,
 		pathMatch: 'full'
 	},
 	{
@@ -27,8 +27,8 @@ const routes: Routes = [
 		pathMatch: 'full'
 	},
 	{
-		path: 'user/:username',
-		component: UserComponent,
+		path: '',
+		component: HomeComponent,
 		pathMatch: 'full'
 	}
 ];
