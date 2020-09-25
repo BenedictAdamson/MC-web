@@ -19,11 +19,15 @@ package uk.badamson.mc;
  */
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 
 import java.util.Objects;
 
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.en.Given;
@@ -47,6 +51,8 @@ public class UserSteps {
    private WorldCoreScenarioHook worldCoreScenarioHook;
 
    private User user;
+
+   private WebElement element;
 
    @When("adding a user named {string} with  password {string}")
    public void adding_a_user(final String user, final String password) {
@@ -72,7 +78,7 @@ public class UserSteps {
 
    @When("getting the users")
    public void getting_users() {
-      // TODO
+      getUrlUsingBrowser("/user");
    }
 
    private void getUrlUsingBrowser(final String path) {
@@ -87,7 +93,9 @@ public class UserSteps {
 
    @Then("the list of users has at least one user")
    public void list_of_users_not_empty() {
-      // TODO
+      Objects.requireNonNull(element);
+      assertThat("list entries", element.findElements(By.tagName("li")),
+               not(empty()));
    }
 
    @Given("logged in")
@@ -129,12 +137,16 @@ public class UserSteps {
 
    @Then("MC serves the users page")
    public void mc_serves_users_page() {
-      // TODO
+      final var webDriver = worldCore.getWebDriver();
+      element = webDriver.findElementByTagName("h1");
+      assertThat("Has a header saying \"Users\"", element.getText(),
+               containsString("Users"));
    }
 
    @Then("the response is a list of users")
    public void response_is_list_of_users() {
-      // TODO
+      final var webDriver = worldCore.getWebDriver();
+      element = webDriver.findElementByTagName("ol");
    }
 
    @Given("user does not have the {string} role")
