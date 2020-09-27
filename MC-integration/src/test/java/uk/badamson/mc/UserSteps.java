@@ -146,7 +146,7 @@ public class UserSteps {
    @Then("the response is a list of users")
    public void response_is_list_of_users() {
       final var webDriver = worldCore.getWebDriver();
-      element = webDriver.findElementByTagName("ol");
+      element = webDriver.findElementByTagName("ul");
    }
 
    @Given("user does not have the {string} role")
