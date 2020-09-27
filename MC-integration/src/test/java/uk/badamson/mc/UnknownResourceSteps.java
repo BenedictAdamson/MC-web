@@ -21,7 +21,6 @@ package uk.badamson.mc;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.HttpURLConnection;
 import java.util.Set;
@@ -51,16 +50,6 @@ public class UnknownResourceSteps {
    private void doHttpRequest(final String method, final String path) {
       worldCore.setUrlPath(path);
       httpResponseCode = worldCore.getHttpResponseCode(method);
-   }
-
-   @When("getting the unknown resource at {string}")
-   public void getting_the_unknown_resource_at(final String path) {
-      doHttpRequest("GET", path);
-   }
-
-   @Then("MC replies with Not Found")
-   public void mc_replies_with_not_found() {
-      assertEquals(HttpURLConnection.HTTP_NOT_FOUND, httpResponseCode);
    }
 
    @Then("MC replies with Not Found or Forbidden or Method Not Allowed")
