@@ -18,6 +18,8 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static java.util.stream.Collectors.toUnmodifiableSet;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
@@ -140,9 +142,11 @@ public final class WorldCore implements AutoCloseable {
    private URI localUrl;
 
    private void addUser(final String name, final String password,
-            final Set<String> roles) {
+            final Set<Authority> roles) {
       containers.addUser(name, password);
-      users.put(name, new User(name, password, roles));
+      final Set<String> roleNames = Authority.ALL.stream().map(r -> r.name())
+               .collect(toUnmodifiableSet());
+      users.put(name, new User(name, password, roleNames));
    }
 
    /**
@@ -187,8 +191,8 @@ public final class WorldCore implements AutoCloseable {
    }
 
    private void createUsers() {
-      addUser("jeff", "password1", Set.of("player"));
-      addUser("alan", "password2", Set.of("player", "manage-users"));
+      addUser("jeff", "password1", Set.of(Authority.ROLE_PLAYER));
+      addUser("alan", "password2", Authority.ALL);
    }
 
    /**
