@@ -144,7 +144,7 @@ public final class WorldCore implements AutoCloseable {
    private void addUser(final String name, final String password,
             final Set<Authority> roles) {
       containers.addUser(name, password);
-      final Set<String> roleNames = Authority.ALL.stream().map(r -> r.name())
+      final Set<String> roleNames = roles.stream().map(r -> r.name())
                .collect(toUnmodifiableSet());
       users.put(name, new User(name, password, roleNames));
    }
