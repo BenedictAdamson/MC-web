@@ -21,16 +21,20 @@ package uk.badamson.mc;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.WaitingConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * <p>
@@ -112,5 +116,22 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
    WebTestClient.ResponseSpec getJson(final String path) {
       return connectWebTestClient(path).get().accept(MediaType.APPLICATION_JSON)
                .exchange();
+   }
+
+
+   private static String encodeAsJson(final Object obj) {
+      try {
+         final ObjectMapper mapper = new ObjectMapper();
+         return mapper.writeValueAsString(obj);
+      } catch (final Exception e) {
+         throw new IllegalArgumentException("can not encode Object as JSON", e);
+      }
+   }
+
+
+   public ResponseSpec addUser(final User user) {
+      Objects.requireNonNull(user, "user");
+      final var request = connectWebTestClient("/api/user").post().contentType(MediaType.APPLICATION_JSON).bodyValue(encodeAsJson(user));
+      return request.exchange();
    }
 }

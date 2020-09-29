@@ -32,6 +32,8 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.springframework.test.web.client.ResponseActions;
+import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -119,5 +121,16 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       be.stop();
       db.stop();
       close();
+   }
+
+   @Test
+   @Order(2)
+   public void addUser() {
+      final var user = new User("jeff", "password", Authority.ALL, true, true,
+               true, true);
+      
+      final ResponseSpec response = be.addUser(user);
+      
+      response.expectStatus().isCreated();
    }
 }
