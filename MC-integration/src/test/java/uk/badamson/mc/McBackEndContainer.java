@@ -69,9 +69,13 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       }
    }
 
+   private final String administratorPassword;
+
    McBackEndContainer(final String mongoDbHost, final String mongoDbPassword,
             final String administratorPassword) {
       super(IMAGE);
+      this.administratorPassword = Objects.requireNonNull(administratorPassword,
+               "administratorPassword");
       waitingFor(WAIT_STRATEGY);
       withEnv("SPRING_DATA_MONGODB_PASSWORD", mongoDbPassword);
       withEnv("ADMINISTRATOR_PASSWORD", administratorPassword);
@@ -82,6 +86,8 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       Objects.requireNonNull(user, "user");
       final var request = connectWebTestClient("/api/user").post()
                .contentType(MediaType.APPLICATION_JSON)
+               .headers(headers -> headers.setBasicAuth(
+                        User.ADMINISTRATOR_USERNAME, administratorPassword))
                .bodyValue(encodeAsJson(user));
       return request.exchange();
    }
