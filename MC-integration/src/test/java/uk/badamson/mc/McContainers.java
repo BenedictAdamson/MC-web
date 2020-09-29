@@ -96,7 +96,7 @@ public class McContainers
       try {
          final var response = be.addUser(user);
          response.expectStatus().is2xxSuccessful();
-      } catch (Exception e) {
+      } catch (final Exception e) {
          throw new RuntimeException("Failed to add user", e);
       }
    }
