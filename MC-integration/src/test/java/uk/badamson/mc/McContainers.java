@@ -61,6 +61,7 @@ public class McContainers
 
    private static final String DB_ROOT_PASSWORD = "secret2";
    private static final String DB_USER_PASSWORD = "secret3";
+   private static final String ADMINISTARTOR_PASSWORD = "secret4";
 
    private static void assertThatNoErrorMessagesLogged(final String container,
             final String logs) {
@@ -79,7 +80,8 @@ public class McContainers
                      .withNetworkAliases(DB_HOST);
 
    private final McBackEndContainer be = new McBackEndContainer(DB_HOST,
-            DB_USER_PASSWORD).withNetwork(network).withNetworkAliases(BE_HOST);
+            DB_USER_PASSWORD, ADMINISTARTOR_PASSWORD).withNetwork(network)
+                     .withNetworkAliases(BE_HOST);
 
    private final McFrontEndContainer fe = new McFrontEndContainer()
             .withNetwork(network).withNetworkAliases(FE_HOST);

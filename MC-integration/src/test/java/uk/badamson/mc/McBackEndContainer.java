@@ -60,11 +60,30 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    public static final String CONNECTION_MESSAGE = "successfully connected to server";
 
-   McBackEndContainer(final String mongoDbHost, final String mongoDbPassword) {
+   private static String encodeAsJson(final Object obj) {
+      try {
+         final ObjectMapper mapper = new ObjectMapper();
+         return mapper.writeValueAsString(obj);
+      } catch (final Exception e) {
+         throw new IllegalArgumentException("can not encode Object as JSON", e);
+      }
+   }
+
+   McBackEndContainer(final String mongoDbHost, final String mongoDbPassword,
+            final String administratorPassword) {
       super(IMAGE);
       waitingFor(WAIT_STRATEGY);
       withEnv("SPRING_DATA_MONGODB_PASSWORD", mongoDbPassword);
+      withEnv("ADMINISTRATOR_PASSWORD", administratorPassword);
       withCommand("--spring.data.mongodb.host=" + mongoDbHost);
+   }
+
+   public ResponseSpec addUser(final User user) {
+      Objects.requireNonNull(user, "user");
+      final var request = connectWebTestClient("/api/user").post()
+               .contentType(MediaType.APPLICATION_JSON)
+               .bodyValue(encodeAsJson(user));
+      return request.exchange();
    }
 
    void assertHealthCheckOk() {
@@ -116,22 +135,5 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
    WebTestClient.ResponseSpec getJson(final String path) {
       return connectWebTestClient(path).get().accept(MediaType.APPLICATION_JSON)
                .exchange();
-   }
-
-
-   private static String encodeAsJson(final Object obj) {
-      try {
-         final ObjectMapper mapper = new ObjectMapper();
-         return mapper.writeValueAsString(obj);
-      } catch (final Exception e) {
-         throw new IllegalArgumentException("can not encode Object as JSON", e);
-      }
-   }
-
-
-   public ResponseSpec addUser(final User user) {
-      Objects.requireNonNull(user, "user");
-      final var request = connectWebTestClient("/api/user").post().contentType(MediaType.APPLICATION_JSON).bodyValue(encodeAsJson(user));
-      return request.exchange();
    }
 }
