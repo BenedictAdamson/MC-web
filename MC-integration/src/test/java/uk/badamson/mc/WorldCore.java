@@ -18,8 +18,6 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import static java.util.stream.Collectors.toUnmodifiableSet;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
@@ -41,7 +39,6 @@ import org.testcontainers.lifecycle.TestDescription;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
-import net.jcip.annotations.Immutable;
 import uk.badamson.mc.McContainers.HttpServer;
 
 /**
@@ -70,34 +67,6 @@ import uk.badamson.mc.McContainers.HttpServer;
  * @see WorldCoreScenarioHook
  */
 public final class WorldCore implements AutoCloseable {
-
-   @Immutable
-   public static final class User {
-
-      private final String name;
-      private final String password;
-      private final Set<String> roles;
-
-      public User(final String name, final String password,
-               final Set<String> roles) {
-         this.name = name;
-         this.password = password;
-         this.roles = Set.copyOf(roles);
-      }
-
-      public String getName() {
-         return name;
-      }
-
-      public String getPassword() {
-         return password;
-      }
-
-      public Set<String> getRoles() {
-         return roles;
-      }
-
-   }// class
 
    private static Optional<Throwable> createOutcomeException(
             final Scenario scenario) {
@@ -135,18 +104,19 @@ public final class WorldCore implements AutoCloseable {
 
    private final Map<String, User> users = new HashMap<>();
 
+   private final Map<String, String> userPasswords = new HashMap<>();
+
    private RemoteWebDriver webDriver;
 
    private URI privateNetworkUrl;
 
    private URI localUrl;
 
-   private void addUser(final String name, final String password,
-            final Set<Authority> roles) {
-      containers.addUser(name, password);
-      final Set<String> roleNames = roles.stream().map(r -> r.name())
-               .collect(toUnmodifiableSet());
-      users.put(name, new User(name, password, roleNames));
+   private void addUser(final User user) {
+      containers.addUser(user);
+      final var username = user.getUsername();
+      users.put(username, user);
+      userPasswords.put(username, user.getPassword());
    }
 
    /**
@@ -191,8 +161,10 @@ public final class WorldCore implements AutoCloseable {
    }
 
    private void createUsers() {
-      addUser("jeff", "password1", Set.of(Authority.ROLE_PLAYER));
-      addUser("alan", "password2", Authority.ALL);
+      addUser(new User("jeff", "password1", Authority.ALL, true, true, true,
+               true));
+      addUser(new User("allan", "password2", Set.of(Authority.ROLE_PLAYER),
+               true, true, true, true));
    }
 
    /**
@@ -250,6 +222,11 @@ public final class WorldCore implements AutoCloseable {
       }
    }
 
+   public String getPlaintextUserPassword(final String username) {
+      Objects.requireNonNull(username, "username");
+      return userPasswords.get(username);
+   }
+
    /**
     * <p>
     * Perform an HTTP GET of the front-end of the SUT, using the previously
@@ -280,14 +257,18 @@ public final class WorldCore implements AutoCloseable {
       webDriver.get(privateNetworkUrl.toASCIIString());
    }
 
-   public User getUserWithoutRole(final String role) {
+   public User getUserWithoutRole(final Authority role) {
+      Objects.requireNonNull(role, "role");
       return users.values().stream()
-               .filter(user -> !user.getRoles().contains(role)).findAny().get();
+               .filter(user -> !user.getAuthorities().contains(role)).findAny()
+               .get();
    }
 
-   public User getUserWithRole(final String role) {
+   public User getUserWithRole(final Authority role) {
+      Objects.requireNonNull(role, "role");
       return users.values().stream()
-               .filter(user -> user.getRoles().contains(role)).findAny().get();
+               .filter(user -> user.getAuthorities().contains(role)).findAny()
+               .get();
    }
 
    public RemoteWebDriver getWebDriver() {

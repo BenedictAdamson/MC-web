@@ -33,7 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import uk.badamson.mc.WorldCore.User;
 
 /**
  * <p>
@@ -42,6 +41,16 @@ import uk.badamson.mc.WorldCore.User;
  * </p>
  */
 public class UserSteps {
+
+   private static Authority parseRoleName(final String roleName) {
+      final Authority role;
+      try {
+         role = Authority.valueOf(roleName);
+      } catch (final Exception e) {
+         throw new IllegalArgumentException("roleName", e);
+      }
+      return role;
+   }
 
    @Autowired
    private WorldCore worldCore;
@@ -105,7 +114,8 @@ public class UserSteps {
 
    private void login() {
       Objects.requireNonNull(user, "user");
-      login(user.getName(), user.getPassword());
+      final var username = user.getUsername();
+      login(username, worldCore.getPlaintextUserPassword(username));
    }
 
    private void login(final String name, final String password) {
@@ -150,12 +160,12 @@ public class UserSteps {
    }
 
    @Given("user does not have the {string} role")
-   public void user_does_not_have_role(final String role) {
-      user = worldCore.getUserWithoutRole(role);
+   public void user_does_not_have_role(final String roleName) {
+      user = worldCore.getUserWithoutRole(parseRoleName(roleName));
    }
 
    @Given("user has the {string} role")
-   public void user_has_role(final String role) {
-      user = worldCore.getUserWithRole(role);
+   public void user_has_role(final String roleName) {
+      user = worldCore.getUserWithRole(parseRoleName(roleName));
    }
 }

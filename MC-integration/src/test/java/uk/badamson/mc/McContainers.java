@@ -90,7 +90,7 @@ public class McContainers
    private final BrowserWebDriverContainer<?> browser = new BrowserWebDriverContainer<>()
             .withCapabilities(new FirefoxOptions()).withNetwork(network);
 
-   public void addUser(final String user, final String password) {
+   public void addUser(final User user) {
       // FIXME
    }
 
