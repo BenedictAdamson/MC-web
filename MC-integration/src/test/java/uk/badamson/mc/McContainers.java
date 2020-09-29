@@ -93,7 +93,12 @@ public class McContainers
             .withCapabilities(new FirefoxOptions()).withNetwork(network);
 
    public void addUser(final User user) {
-      // FIXME
+      try {
+         final var response = be.addUser(user);
+         response.expectStatus().is2xxSuccessful();
+      } catch (Exception e) {
+         throw new RuntimeException("Failed to add user", e);
+      }
    }
 
    @Override
