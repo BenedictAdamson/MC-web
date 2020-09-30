@@ -75,11 +75,11 @@ describe('LoginComponent', () => {
 		mockAuthenticationSuccess(userDetails);
 	}
 
-	it('should initilize from the service [A]', (done) => {
+	it('should initialize from the service [A]', (done) => {
 		testNgOnInitAlreadyLoggedIn(done, USER_A);
 	});
 
-	it('should initilize from the service [B]', (done) => {
+	it('should initialize from the service [B]', (done) => {
 		testNgOnInitAlreadyLoggedIn(done, USER_B);
 	});
 
