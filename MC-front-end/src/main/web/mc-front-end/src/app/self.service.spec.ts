@@ -5,6 +5,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 import { Subject } from 'rxjs';
 
 import { SelfService } from './self.service';
+import { User } from './user';
 
 describe('SelfService', () => {
 
@@ -36,8 +37,8 @@ describe('SelfService', () => {
 		expect(!authenticated && 0 < authorities.length).toEqual(false, 'A user that has not been authenticated has no authorities');
 	};
 
-	const USER_A = { username: 'Administrator', password: 'letmein', authorities: ['ROLE_ADMIN'] };
-	const USER_B = { username: 'Benedict', password: 'pasword123', authorities: [] };
+	const USER_A: User = { username: 'Administrator', password: 'letmein', authorities: ['ROLE_ADMIN'] };
+	const USER_B: User = { username: 'Benedict', password: 'pasword123', authorities: [] };
 
 	let httpClient: HttpClient;
 	let httpTestingController: HttpTestingController;
@@ -112,7 +113,7 @@ describe('SelfService', () => {
 		testAuthenticationFailure(done, USER_B.username, USER_B.password);
 	});
 	
-	let mockHttpAuthorizationSuccess = function (userDetails) {
+	let mockHttpAuthorizationSuccess = function (userDetails: User) {
         const request = httpTestingController.expectOne('/api/self');
         expect(request.request.method).toEqual('GET');
         expect(request.request.headers.has("Authorization")).toEqual(true, 'has Authorization header');
@@ -120,7 +121,7 @@ describe('SelfService', () => {
         httpTestingController.verify();
 	};
 
-	let assertAuthenticated = function(userDetails) {
+	let assertAuthenticated = function(userDetails: User) {
 		var authenticated: boolean = getAuthenticated(service);
 		var authorities: string[] = getAuthorities(service);
 		expect(service.username).toEqual(userDetails.username, 'username');
@@ -132,7 +133,7 @@ describe('SelfService', () => {
 	
 	
 
-	let testAuthenticationSuccess = (done, userDetails) => {
+	let testAuthenticationSuccess = (done, userDetails: User) => {
 		service.authenticate(userDetails.username, userDetails.password).subscribe({
 			next: () => { },
 			error: (err) => { fail(err); done() },

@@ -4,10 +4,11 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 
 import { LoginComponent } from './login.component';
 import { SelfService } from '../self.service';
+import { User } from '../user';
 
 describe('LoginComponent', () => {
-	const USER_A = { username: 'Administrator', password: 'letmein', authorities: ['ROLE_ADMIN'] };
-	const USER_B = { username: 'Benedict', password: 'pasword123', authorities: [] };
+	const USER_A: User = { username: 'Administrator', password: 'letmein', authorities: ['ROLE_ADMIN'] };
+	const USER_B: User = { username: 'Benedict', password: 'pasword123', authorities: [] };
 
 	let httpClient: HttpClient;
 	let httpTestingController: HttpTestingController;
@@ -60,14 +61,14 @@ describe('LoginComponent', () => {
 		testNgOnInit();
 	});
 
-	const mockAuthenticationSuccess = function(userDetails) {
+	const mockAuthenticationSuccess = function(userDetails: User) {
 		const request = httpTestingController.expectOne('/api/self');
 		expect(request.request.method).toEqual('GET');
 		request.flush(userDetails, { headers: new HttpHeaders(), status: 200, statusText: 'Ok' });
 		httpTestingController.verify();
 	}
 
-	const testNgOnInitAlreadyLoggedIn = function(done, userDetails) {
+	const testNgOnInitAlreadyLoggedIn = function(done, userDetails: User) {
 		selfService.authenticate(userDetails.username, userDetails.password).subscribe({
 			next: () => { },
 			error: (err) => { fail(err); done() },
@@ -115,7 +116,7 @@ describe('LoginComponent', () => {
 	};
 
 
-	const testLoginFailure = function(done, userDetails) {
+	const testLoginFailure = function(done, userDetails: User) {
 		component.username = userDetails.username;
 		component.password = userDetails.password;
 		component.login().subscribe({
@@ -139,7 +140,7 @@ describe('LoginComponent', () => {
 	});
 
 
-	const testLoginSuccess = function(done, userDetails) {
+	const testLoginSuccess = function(done, userDetails: User) {
 		component.username = userDetails.username;
 		component.password = userDetails.password;
 		component.login().subscribe({
