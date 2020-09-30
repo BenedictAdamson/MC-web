@@ -5,30 +5,32 @@ import { SelfService } from './self.service';
 
 describe('SelfService', () => {
 
-	let getLoggedIn = function(service: SelfService): boolean {
-		var loggedIn: boolean = null;
-		service.loggedIn$.subscribe({
-			next: (l) => loggedIn = l,
+	let getAuthenticated = function(service: SelfService): boolean {
+		var authenticated: boolean = null;
+		service.authenticated$.subscribe({
+			next: (a) => authenticated = a,
 			error: (err) => fail(err),
 			complete: () => { }
 		});
-		return loggedIn;
+		return authenticated;
 	};
 
-	let getUsername = function(service: SelfService): string {
-		var username: string = null;
-		service.username$.subscribe({
-			next: (u) => username = u,
+	let getAuthorities = function(service: SelfService): string[] {
+		var authorities: string[] = null;
+		service.authorities$.subscribe({
+			next: (a) => authorities = a,
 			error: (err) => fail(err),
 			complete: () => { }
 		});
-		return username;
+		return authorities;
 	};
 
 	let assertInvariants: CallableFunction = (s: SelfService) => {
-		var loggedIn: boolean = getLoggedIn(s);
-		var username: string = getUsername(s);
-		expect(loggedIn).toBe(username != null, 'loggedIn iff username is non null.');
+		var authenticated: boolean = getAuthenticated(s);
+		var authorities: string[] = getAuthorities(s);
+		expect(authenticated && s.username == null).toEqual(false, 'Not authenticated if username is null');
+		expect(authenticated && s.password == null).toEqual(false, 'Not authenticated if password is null');
+		expect(!authenticated && 0 < authorities.length).toEqual(false, 'A user that has not been authenticated has no authorities');
 	};
 
 	let service: SelfService;
@@ -40,30 +42,16 @@ describe('SelfService', () => {
 	it('should be created with initial state', () => {
 		expect(service).toBeTruthy();
 		assertInvariants(service);
-		expect(getLoggedIn(service)).toBe(false, 'not loggedIn');
+		expect(service.username).toBe(null, 'null username');
+		expect(service.password).toBe(null, 'null password');
+		expect(getAuthenticated(service)).toBe(false, 'not authenticated');
 	});
 
-	let assertLoggedIn = function() {
+	let assertAuthenticated = function() {
 		assertInvariants(service);
-		var loggedIn: boolean = getLoggedIn(service);
-		var username: string = getUsername(service);
-		expect(username).not.toBe(null, 'username not null');
-		expect(loggedIn).toBe(true, 'loggedIn');
+		var authenticated: boolean = getAuthenticated(service);
+		expect(service.username).not.toBe(null, 'username not null');
+		expect(service.password).not.toBe(null, 'password not null');
+		expect(authenticated).toBe(true, 'authenticated');
 	}
-
-	it('should have username after successful login', (done) => {
-		var nCalls: number = 0;
-		service.login().subscribe({
-			next: () => {
-				assertLoggedIn();
-				++nCalls;
-				done();
-			},
-			error: (err) => done.fail(err),
-			complete: () => {
-				assertLoggedIn();
-				nCalls ? {} : done();
-			}
-		});
-	});
 });
