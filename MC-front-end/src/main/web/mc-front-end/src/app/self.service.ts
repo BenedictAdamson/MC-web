@@ -27,7 +27,9 @@ export class SelfService {
 
 	private username_: string = null;
 	private password_: string = null;
-	private authenticatedRS$: ReplaySubject<boolean> = new ReplaySubject(1);
+	/**
+	 * provides null if not authenticated
+	 */
 	private authoritiesRS$: ReplaySubject<string[]> = new ReplaySubject(1);
 
     /**
@@ -43,8 +45,7 @@ export class SelfService {
 	constructor(
 		private http: HttpClient
 	) {
-		this.authenticatedRS$.next(false);
-		this.authoritiesRS$.next([]);
+		this.authoritiesRS$.next(null);
 	}
 
     /**
@@ -92,9 +93,7 @@ export class SelfService {
 	}
 
 	private processResponse(details: UserDetails): void {
-		var authenticated: boolean = (details != null);
-		var authorities: string[] = details ? details.authorities : [];
-		this.authenticatedRS$.next(authenticated);
+		var authorities: string[] = details ? details.authorities : null;
 		this.authoritiesRS$.next(authorities);
 	}
 
@@ -109,6 +108,8 @@ export class SelfService {
 	*
 	* Iff the authentication is sucessful, #authenticated$ will provide true.
 	* The method however updates the #username and #password attributes even if authentication fails.
+	* The #authorities$ Observable will provide the authorities of the authenticated user,
+	* if authentication is successful.
 	*/
 	authenticate(username: string, password: string): Observable<void> {
 		this.username_ = username;
@@ -128,7 +129,9 @@ export class SelfService {
      * Not authenticated if #username is null or #password is null.
      */
 	get authenticated$(): Observable<boolean> {
-		return this.authenticatedRS$.asObservable();
+		return this.authoritiesRS$.pipe(
+			map(a => a != null)
+		);
 	}
 
 	/**
@@ -140,6 +143,8 @@ export class SelfService {
      * An authenticated user could have no authorities, although that is unlikely in practice. 
 	 */
 	get authorities$(): Observable<string[]> {
-		return this.authoritiesRS$.asObservable();
+		return this.authoritiesRS$.pipe(
+			map(a => a ? a : [])
+		);
 	}
 }
