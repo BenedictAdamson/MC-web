@@ -1,19 +1,33 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 
 import { LoginComponent } from './login.component';
+import { SelfService } from '../self.service';
 
 describe('LoginComponent', () => {
+	let httpClient: HttpClient;
+	let httpTestingController: HttpTestingController;
 	let component: LoginComponent;
 	let fixture: ComponentFixture<LoginComponent>;
 
-	beforeEach(async () => {
-		await TestBed.configureTestingModule({
+	beforeEach(waitForAsync(() => {
+		TestBed.configureTestingModule({
+			imports: [HttpClientTestingModule],
+			providers: [
+				{ provide: SelfService, useClass: SelfService }
+			],
 			declarations: [LoginComponent]
 		})
 			.compileComponents();
-	});
+	}));
 
 	beforeEach(() => {
+        /* Inject for each test:
+         * HTTP requests will be handled by the mock back-end.
+          */
+		httpClient = TestBed.get(HttpClient);
+		httpTestingController = TestBed.get(HttpTestingController);
 		fixture = TestBed.createComponent(LoginComponent);
 		component = fixture.componentInstance;
 		fixture.detectChanges();

@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
+import { SelfService } from '../self.service';
+
 @Component({
 	selector: 'app-login',
 	templateUrl: './login.component.html',
@@ -7,9 +9,12 @@ import { Component, OnInit } from '@angular/core';
 })
 export class LoginComponent implements OnInit {
 
-	constructor() { }
+	constructor(
+		private readonly service: SelfService
+	) { }
 
 	ngOnInit(): void {
+		//FIXME get service values
 	}
 
 	username: string;
