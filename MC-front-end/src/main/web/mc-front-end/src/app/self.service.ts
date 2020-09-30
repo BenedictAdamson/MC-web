@@ -92,7 +92,10 @@ export class SelfService {
 	}
 
 	private processResponse(details: UserDetails): void {
-		//FIXME
+		var authenticated: boolean = (details != null);
+		var authorities: string[] = details ? details.authorities : [];
+		this.authenticatedRS$.next(authenticated);
+		this.authoritiesRS$.next(authorities);
 	}
 
 	/**
