@@ -47,9 +47,13 @@ describe('LoginComponent', () => {
 	});
 
 	const testNgOnInit = function() {
-		component.ngOnInit()
-		expect(component.username).toEqual(selfService.username, 'username');
-		expect(component.password).toEqual(selfService.password, 'password');
+		component.ngOnInit();
+
+		const expectedUsername: string = selfService.username;
+		const expectedPassword: string = selfService.password;
+
+		expect(component.username).toEqual(expectedUsername, 'component username');
+		expect(component.password).toEqual(expectedPassword, 'component password');
 	}
 
 	it('should initilize from the service [null]', () => {
@@ -69,7 +73,7 @@ describe('LoginComponent', () => {
 			error: (err) => { fail(err); done() },
 			complete: () => {
 				testNgOnInit();
-				done()
+				done();
 			}
 		});
 		mockAuthenticationSuccess(userDetails);
