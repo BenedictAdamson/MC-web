@@ -15,10 +15,7 @@ class UserDetails {
 /**
  * @description
  * Provide information about the current user,
- * and an interface for authentication (logging in),
- * as a facade in front of the actual authentication implementation used.
- *
- * Also provides information as Observables, even if the authentication implementation does not do so. 
+ * and an interface for authentication (logging in).
  */
 @Injectable({
 	providedIn: 'root'
