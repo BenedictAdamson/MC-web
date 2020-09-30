@@ -14,10 +14,11 @@ export class LoginComponent implements OnInit {
 	) { }
 
 	ngOnInit(): void {
-		//FIXME get service values
+		this.username = this.service.username;
+		this.password = this.service.password;
 	}
 
-	username: string;
+	username: string = null;
 
-	password: string;
+	password: string = null;
 }
