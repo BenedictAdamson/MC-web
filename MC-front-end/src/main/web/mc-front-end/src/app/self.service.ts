@@ -89,7 +89,9 @@ export class SelfService {
 			);
 	}
 
-	private processResponse(details: UserDetails): void {
+	private processResponse(username: string, password: string, details: UserDetails): void {
+		this.username_ = username;
+		this.password_ = password;
 		var authorities: string[] = details ? details.authorities : null;
 		this.authoritiesRS$.next(authorities);
 	}
@@ -109,11 +111,9 @@ export class SelfService {
 	* if authentication is successful.
 	*/
 	authenticate(username: string, password: string): Observable<void> {
-		this.username_ = username;
-		this.password_ = password;
 		return defer(() =>
 			this.getUserDetails().pipe(
-				tap(ud => this.processResponse(ud)),
+				tap(ud => this.processResponse(username, password, ud)),
 				map(() => null)
 			)
 		);
