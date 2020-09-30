@@ -4,13 +4,9 @@ import { Observable, ReplaySubject, defer, of, from } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { map, mergeMap, tap } from 'rxjs/operators';
 
-const apiUrl: string = '/api/self';
+import { User } from './user';
 
-class UserDetails {
-	username: string;
-	password: string;
-	authorities: string[];
-}
+const apiUrl: string = '/api/self';
 
 /**
  * @description
@@ -71,25 +67,25 @@ export class SelfService {
 	}
 
 	private handleUserDetailsHttpError() {
-		return (error: any): Observable<UserDetails> => {
+		return (error: any): Observable<User> => {
 			console.error(error); // log to console instead
-			return of(null as UserDetails);
+			return of(null as User);
 		};
 	}
 
-	private getUserDetails(): Observable<UserDetails> {
+	private getUserDetails(): Observable<User> {
 		const headers = new HttpHeaders({
 			'Content-Type': 'application/json',
 			'Authorization': 'Basic ' + btoa(this.username + ':' + this.password)
 		});
 
-		return this.http.get<UserDetails>(apiUrl, { headers: headers })
+		return this.http.get<User>(apiUrl, { headers: headers })
 			.pipe(
 				catchError(this.handleUserDetailsHttpError())
 			);
 	}
 
-	private processResponse(username: string, password: string, details: UserDetails): void {
+	private processResponse(username: string, password: string, details: User): void {
 		this.username_ = username;
 		this.password_ = password;
 		var authorities: string[] = details ? details.authorities : null;
