@@ -153,6 +153,11 @@ public class UserSteps {
                containsString("Users"));
    }
 
+   @Given("redirected to home-page")
+   public void redirected_to_home_page() {
+      worldCore.assertCurrentUrl("/");
+   }
+
    @Then("the response is a list of users")
    public void response_is_list_of_users() {
       final var webDriver = worldCore.getWebDriver();

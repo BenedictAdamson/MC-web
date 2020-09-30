@@ -18,6 +18,9 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
@@ -117,6 +120,28 @@ public final class WorldCore implements AutoCloseable {
       final var username = user.getUsername();
       users.put(username, user);
       userPasswords.put(username, user.getPassword());
+   }
+
+   /**
+    * <p>
+    * Require that the current browser URL has a given path component.
+    * </p>
+    *
+    * @param path
+    *           The path component
+    * @throws NullPointerException
+    *            If {@code path} is null.
+    * @throws IllegalArgumentException
+    *            If {@code path} violates RFC 2396
+    * @throws AssertionError
+    *            If the current URL is not equivalent to a URL with the given
+    *            {@code path}.
+    */
+   public void assertCurrentUrl(final String path) {
+      final var expectedUrl = McContainers
+               .createIngressPrivateNetworkUriFromPath(path);
+      assertThat("current URL", webDriver.getCurrentUrl(),
+               is(expectedUrl.toASCIIString()));
    }
 
    /**
