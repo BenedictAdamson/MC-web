@@ -1,11 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, ReplaySubject, defer, of, from } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { map, mergeMap, tap } from 'rxjs/operators';
 
-const httpOptions = {
-	headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-};
+const apiUrl: string = '/api/self';
+
+class UserDetails {
+	username: string;
+	password: string;
+	authorities: string[];
+}
 
 /**
  * @description
@@ -67,6 +72,29 @@ export class SelfService {
 		return this.password_;
 	}
 
+	private handleUserDetailsHttpError() {
+		return (error: any): Observable<UserDetails> => {
+			console.error(error); // log to console instead
+			return of(null as UserDetails);
+		};
+	}
+
+	private getUserDetails(): Observable<UserDetails> {
+		const headers = new HttpHeaders({
+			'Content-Type': 'application/json',
+			'Authorization': 'Basic ' + btoa(this.username + ':' + this.password)
+		});
+
+		return this.http.get<UserDetails>(apiUrl, { headers: headers })
+			.pipe(
+				catchError(this.handleUserDetailsHttpError())
+			);
+	}
+
+	private processResponse(details: UserDetails): void {
+		//FIXME
+	}
+
 	/**
 	 * @description
 	 * Change the credentials of the current user.
@@ -80,10 +108,14 @@ export class SelfService {
 	* The method however updates the #username and #password attributes even if authentication fails.
 	*/
 	authenticate(username: string, password: string): Observable<void> {
-		return defer(() => from(new Promise<void>((resolve, reject) => {
-			// FIXME
-			resolve(null);
-		})));
+		this.username_ = username;
+		this.password_ = password;
+		return defer(() =>
+			this.getUserDetails().pipe(
+				tap(ud => this.processResponse(ud)),
+				map(() => null)
+			)
+		);
 	}
 
     /**

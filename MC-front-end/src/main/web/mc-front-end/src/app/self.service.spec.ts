@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Subject } from 'rxjs';
 
 import { SelfService } from './self.service';
@@ -36,26 +36,26 @@ describe('SelfService', () => {
 		expect(!authenticated && 0 < authorities.length).toEqual(false, 'A user that has not been authenticated has no authorities');
 	};
 
-    const USER_A = { username: 'Administrator', password: null, authorities: ['ROLE_ADMIN'] };
-    const USER_B = { username: 'Benedict', password: null, authorities: [] };
+	const USER_A = { username: 'Administrator', password: 'letmein', authorities: ['ROLE_ADMIN'] };
+	const USER_B = { username: 'Benedict', password: 'pasword123', authorities: [] };
 
-    let httpClient: HttpClient;
-    let httpTestingController: HttpTestingController;
+	let httpClient: HttpClient;
+	let httpTestingController: HttpTestingController;
 
 	let service: SelfService;
 
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule]
-        });
+	beforeEach(() => {
+		TestBed.configureTestingModule({
+			imports: [HttpClientTestingModule]
+		});
 
         /* Inject for each test:
          * HTTP requests will be handled by the mock back-end.
           */
-        httpClient = TestBed.get(HttpClient);
-        httpTestingController = TestBed.get(HttpTestingController);
-    });
+		httpClient = TestBed.get(HttpClient);
+		httpTestingController = TestBed.get(HttpTestingController);
+	});
 	beforeEach(() => {
 		service = new SelfService(httpClient);
 	});
@@ -66,6 +66,50 @@ describe('SelfService', () => {
 		expect(service.username).toBe(null, 'null username');
 		expect(service.password).toBe(null, 'null password');
 		expect(getAuthenticated(service)).toBe(false, 'not authenticated');
+	});
+	
+	let mockHttpAuthorizationFailure = () => {
+        const request = httpTestingController.expectOne('/api/self');
+        expect(request.request.method).toEqual('GET');
+        expect(request.request.headers.has("Authorization")).toEqual(true, 'has Authorization header');
+        request.flush("", {headers: new HttpHeaders(), status: 401, statusText: 'Unauthorized'});
+        httpTestingController.verify();
+	};
+
+	it('should request server for authentication', (done) => {
+		service.authenticate("user", "password").subscribe({
+			next: () => { },
+			error: (err) => { fail(err); done() },
+			complete: () => {
+				assertInvariants(service);
+				done()
+			}
+		});
+        mockHttpAuthorizationFailure();
+	});
+	
+
+	let testAuthenticationFailure = (done, username: string, password: string) => {
+		service.authenticate(username, password).subscribe({
+			next: () => { },
+			error: (err) => { fail(err); done() },
+			complete: () => {
+				assertInvariants(service);
+				expect(getAuthenticated(service)).toEqual(false, 'not authenticated');
+				expect(service.username).toEqual(username, 'updated username');
+				expect(service.password).toEqual(password, 'updated password');
+				done()
+			}
+		});
+        mockHttpAuthorizationFailure();
+	};
+
+	it('should handle authentication failure [A]', (done) => {
+		testAuthenticationFailure(done, USER_A.username, USER_A.password);
+	});
+
+	it('should handle authentication failure [B]', (done) => {
+		testAuthenticationFailure(done, USER_B.username, USER_B.password);
 	});
 
 	let assertAuthenticated = function() {
