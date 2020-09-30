@@ -1,6 +1,11 @@
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, ReplaySubject, defer, of, from } from 'rxjs';
 import { map, mergeMap, tap } from 'rxjs/operators';
+
+const httpOptions = {
+	headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+};
 
 /**
  * @description
@@ -14,7 +19,7 @@ import { map, mergeMap, tap } from 'rxjs/operators';
 	providedIn: 'root'
 })
 export class SelfService {
-	
+
 	private username_: string = null;
 	private password_: string = null;
 	private authenticatedRS$: ReplaySubject<boolean> = new ReplaySubject(1);
@@ -30,7 +35,9 @@ export class SelfService {
      *
      * Instancing this class does not trigger a login request or any network traffic.
      */
-	constructor() {
+	constructor(
+		private http: HttpClient
+	) {
 		this.authenticatedRS$.next(false);
 		this.authoritiesRS$.next([]);
 	}
@@ -43,9 +50,9 @@ export class SelfService {
      * which includes the case that the user is not logged in.
      * The current user name can be known even if that user has not been authenticated.
      */
-     get username(): string {
-	   return this.username_;
-     }
+	get username(): string {
+		return this.username_;
+	}
 
     /**
      * @description
@@ -56,28 +63,28 @@ export class SelfService {
      * The current password name can be known even if that user has not been authenticated,
      * or if authentication has been tried but failed (which includes the case that the password is invalid).
      */
-     get password(): string {
-	   return this.password_;
-     }
+	get password(): string {
+		return this.password_;
+	}
 
-     /**
-      * @description
-      * Change the credentials of the current user.
-      *
-     * The method attempts authentication (login) of the user.
-	 * That indirectly makes use of an HTTP request, which is a cold Observable,
-	 * so this is a cold Observable too.
-	 * That is, the expensive HTTP request will not be made until something subscribes to this Observable.
+	/**
+	 * @description
+	 * Change the credentials of the current user.
 	 *
-	 * Iff the authentication is sucessful, #authenticated$ will provide true.
-     * The method however updates the #username and #password attributes even if authentication fails.
-	 */
-     authenticate(username: string, password: string): Observable<void> {
+	* The method attempts authentication (login) of the user.
+	* That indirectly makes use of an HTTP request, which is a cold Observable,
+	* so this is a cold Observable too.
+	* That is, the expensive HTTP request will not be made until something subscribes to this Observable.
+	*
+	* Iff the authentication is sucessful, #authenticated$ will provide true.
+	* The method however updates the #username and #password attributes even if authentication fails.
+	*/
+	authenticate(username: string, password: string): Observable<void> {
 		return defer(() => from(new Promise<void>((resolve, reject) => {
 			// FIXME
 			resolve(null);
 		})));
-}
+	}
 
     /**
      * @description
@@ -88,7 +95,7 @@ export class SelfService {
 	get authenticated$(): Observable<boolean> {
 		return this.authenticatedRS$.asObservable();
 	}
-	
+
 	/**
 	 * @description
      * The authorities (authorised roles) of the current user.

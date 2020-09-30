@@ -1,4 +1,7 @@
 import { Injectable } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Subject } from 'rxjs';
 
 import { SelfService } from './self.service';
@@ -33,10 +36,28 @@ describe('SelfService', () => {
 		expect(!authenticated && 0 < authorities.length).toEqual(false, 'A user that has not been authenticated has no authorities');
 	};
 
+    const USER_A = { username: 'Administrator', password: null, authorities: ['ROLE_ADMIN'] };
+    const USER_B = { username: 'Benedict', password: null, authorities: [] };
+
+    let httpClient: HttpClient;
+    let httpTestingController: HttpTestingController;
+
 	let service: SelfService;
 
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            imports: [HttpClientTestingModule]
+        });
+
+        /* Inject for each test:
+         * HTTP requests will be handled by the mock back-end.
+          */
+        httpClient = TestBed.get(HttpClient);
+        httpTestingController = TestBed.get(HttpTestingController);
+    });
 	beforeEach(() => {
-		service = new SelfService();
+		service = new SelfService(httpClient);
 	});
 
 	it('should be created with initial state', () => {
