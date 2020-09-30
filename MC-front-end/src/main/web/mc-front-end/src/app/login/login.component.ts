@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable, of } from 'rxjs';
 
 import { SelfService } from '../self.service';
 
@@ -21,4 +22,13 @@ export class LoginComponent implements OnInit {
 	username: string = null;
 
 	password: string = null;
+
+	/**
+     * @description
+     * Attempts to authenticate using the #username and #password,
+     * through the SelfService associated with this component.
+     */
+	login(): Observable<void> {
+		return this.service.authenticate(this.username, this.password);
+	}
 }
