@@ -85,32 +85,33 @@ export class SelfService {
 			);
 	}
 
-	private processResponse(username: string, password: string, details: User): void {
+	private processResponse(username: string, password: string, details: User): boolean {
 		this.username_ = username;
 		this.password_ = password;
 		var authorities: string[] = details ? details.authorities : null;
 		this.authoritiesRS$.next(authorities);
+		return details != null;
 	}
 
 	/**
-	 * @description
-	 * Change the credentials of the current user.
+     * @description
+     * Change the credentials of the current user.
+     *
+	 * The method attempts authentication (login) of the user,
+	 * providing a value indicating whether authentication was successful.
+	 * That indirectly makes use of an HTTP request, which is a cold Observable,
+	 * so this is a cold Observable too.
+	 * That is, the expensive HTTP request will not be made until something subscribes to this Observable.
 	 *
-	* The method attempts authentication (login) of the user.
-	* That indirectly makes use of an HTTP request, which is a cold Observable,
-	* so this is a cold Observable too.
-	* That is, the expensive HTTP request will not be made until something subscribes to this Observable.
-	*
-	* Iff the authentication is sucessful, #authenticated$ will provide true.
-	* The method however updates the #username and #password attributes even if authentication fails.
-	* The #authorities$ Observable will provide the authorities of the authenticated user,
-	* if authentication is successful.
-	*/
-	authenticate(username: string, password: string): Observable<void> {
+	 * Iff the authentication is sucessful, #authenticated$ will provide true.
+	 * The method however updates the #username and #password attributes even if authentication fails.
+	 * The #authorities$ Observable will provide the authorities of the authenticated user,
+	 * if authentication is successful.
+	 */
+	authenticate(username: string, password: string): Observable<boolean> {
 		return defer(() =>
 			this.getUserDetails().pipe(
-				tap(ud => this.processResponse(username, password, ud)),
-				map(() => null)
+				map(ud => this.processResponse(username, password, ud))
 			)
 		);
 	}

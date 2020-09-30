@@ -2,7 +2,6 @@ import { Router } from '@angular/router';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { Spy } from 'jasmine-core';
 
 import { LoginComponent } from './login.component';
 import { SelfService } from '../self.service';
@@ -12,7 +11,7 @@ describe('LoginComponent', () => {
 	const USER_A: User = { username: 'Administrator', password: 'letmein', authorities: ['ROLE_ADMIN'] };
 	const USER_B: User = { username: 'Benedict', password: 'pasword123', authorities: [] };
 
-	let routerSpy: Spy;
+	let routerSpy;
 	let httpClient: HttpClient;
 	let httpTestingController: HttpTestingController;
 	let selfService: SelfService;
@@ -131,6 +130,7 @@ describe('LoginComponent', () => {
 			complete: () => {
 				expect(component.username).toEqual(selfService.username, 'username');
 				expect(component.password).toEqual(selfService.password, 'password');
+				expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(0);
 				done()
 			}
 		});
@@ -155,6 +155,8 @@ describe('LoginComponent', () => {
 			complete: () => {
 				expect(component.username).toEqual(selfService.username, 'username');
 				expect(component.password).toEqual(selfService.password, 'password');
+				expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(1);
+				expect(routerSpy.navigateByUrl.calls.argsFor(0)).withContext('router.navigateByUrl args').toEqual(['/']);
 				done()
 			}
 		});

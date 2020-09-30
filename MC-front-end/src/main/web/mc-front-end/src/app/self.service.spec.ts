@@ -68,13 +68,13 @@ describe('SelfService', () => {
 		expect(service.password).toBe(null, 'null password');
 		expect(getAuthenticated(service)).toBe(false, 'not authenticated');
 	});
-	
+
 	let mockHttpAuthorizationFailure = () => {
-        const request = httpTestingController.expectOne('/api/self');
-        expect(request.request.method).toEqual('GET');
-        expect(request.request.headers.has("Authorization")).toEqual(true, 'has Authorization header');
-        request.flush("", {headers: new HttpHeaders(), status: 401, statusText: 'Unauthorized'});
-        httpTestingController.verify();
+		const request = httpTestingController.expectOne('/api/self');
+		expect(request.request.method).toEqual('GET');
+		expect(request.request.headers.has("Authorization")).toEqual(true, 'has Authorization header');
+		request.flush("", { headers: new HttpHeaders(), status: 401, statusText: 'Unauthorized' });
+		httpTestingController.verify();
 	};
 
 	it('should request server for authentication', (done) => {
@@ -86,13 +86,15 @@ describe('SelfService', () => {
 				done()
 			}
 		});
-        mockHttpAuthorizationFailure();
+		mockHttpAuthorizationFailure();
 	});
-	
+
 
 	let testAuthenticationFailure = (done, username: string, password: string) => {
 		service.authenticate(username, password).subscribe({
-			next: () => { },
+			next: (success) => {
+				expect(success).withContext('success').toBeFalse();
+			},
 			error: (err) => { fail(err); done() },
 			complete: () => {
 				assertInvariants(service);
@@ -102,7 +104,7 @@ describe('SelfService', () => {
 				done()
 			}
 		});
-        mockHttpAuthorizationFailure();
+		mockHttpAuthorizationFailure();
 	};
 
 	it('should handle authentication failure [A]', (done) => {
@@ -112,13 +114,13 @@ describe('SelfService', () => {
 	it('should handle authentication failure [B]', (done) => {
 		testAuthenticationFailure(done, USER_B.username, USER_B.password);
 	});
-	
-	let mockHttpAuthorizationSuccess = function (userDetails: User) {
-        const request = httpTestingController.expectOne('/api/self');
-        expect(request.request.method).toEqual('GET');
-        expect(request.request.headers.has("Authorization")).toEqual(true, 'has Authorization header');
-        request.flush(userDetails, {headers: new HttpHeaders(), status: 200, statusText: 'Ok'});
-        httpTestingController.verify();
+
+	let mockHttpAuthorizationSuccess = function(userDetails: User) {
+		const request = httpTestingController.expectOne('/api/self');
+		expect(request.request.method).toEqual('GET');
+		expect(request.request.headers.has("Authorization")).toEqual(true, 'has Authorization header');
+		request.flush(userDetails, { headers: new HttpHeaders(), status: 200, statusText: 'Ok' });
+		httpTestingController.verify();
 	};
 
 	let assertAuthenticated = function(userDetails: User) {
@@ -129,13 +131,15 @@ describe('SelfService', () => {
 		expect(authorities).toEqual(userDetails.authorities, 'authorities');
 		expect(authenticated).toEqual(true, 'authenticated');
 	}
-	
-	
-	
+
+
+
 
 	let testAuthenticationSuccess = (done, userDetails: User) => {
 		service.authenticate(userDetails.username, userDetails.password).subscribe({
-			next: () => { },
+			next: (success) => {
+				expect(success).withContext('success').toBeTrue();
+			},
 			error: (err) => { fail(err); done() },
 			complete: () => {
 				assertInvariants(service);
@@ -143,7 +147,7 @@ describe('SelfService', () => {
 				done()
 			}
 		});
-        mockHttpAuthorizationSuccess(userDetails);
+		mockHttpAuthorizationSuccess(userDetails);
 	};
 
 	it('should handle authentication success [A]', (done) => {

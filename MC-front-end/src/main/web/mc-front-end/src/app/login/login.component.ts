@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
+import { map, mergeMap, tap } from 'rxjs/operators';
 
 import { SelfService } from '../self.service';
 
@@ -31,6 +32,13 @@ export class LoginComponent implements OnInit {
      * through the SelfService associated with this component.
      */
 	login(): Observable<void> {
-		return this.service.authenticate(this.username, this.password);
+		return this.service.authenticate(this.username, this.password).pipe(
+			tap((success) => {
+				if (success) {
+					this.router.navigateByUrl('/')
+				}
+			}),
+			map(() => null)
+		);
 	}
 }
