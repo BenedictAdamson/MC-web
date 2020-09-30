@@ -1,6 +1,8 @@
+import { Router } from '@angular/router';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { Spy } from 'jasmine-core';
 
 import { LoginComponent } from './login.component';
 import { SelfService } from '../self.service';
@@ -10,6 +12,7 @@ describe('LoginComponent', () => {
 	const USER_A: User = { username: 'Administrator', password: 'letmein', authorities: ['ROLE_ADMIN'] };
 	const USER_B: User = { username: 'Benedict', password: 'pasword123', authorities: [] };
 
+	let routerSpy: Spy;
 	let httpClient: HttpClient;
 	let httpTestingController: HttpTestingController;
 	let selfService: SelfService;
@@ -17,9 +20,12 @@ describe('LoginComponent', () => {
 	let component: LoginComponent;
 
 	beforeEach(waitForAsync(() => {
+		routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
+		routerSpy.navigateByUrl.and.returnValue(null);
 		TestBed.configureTestingModule({
 			imports: [HttpClientTestingModule],
 			providers: [
+				{ provide: Router, useValue: routerSpy },
 				{ provide: SelfService, useClass: SelfService }
 			],
 			declarations: [LoginComponent]

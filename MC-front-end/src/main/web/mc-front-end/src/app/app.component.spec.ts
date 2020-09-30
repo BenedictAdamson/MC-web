@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 
+import { Spy } from 'jasmine-core';
 import { Subject } from 'rxjs';
 
 import { AppComponent } from './app.component';
+import { HomeComponent } from './home/home.component';
 import { SelfComponent } from './self/self.component';
 import { SelfService } from './self.service';
 
@@ -19,7 +22,11 @@ describe('AppComponent', () => {
 			declarations: [
 				AppComponent, SelfComponent
 			],
-			imports: [HttpClientTestingModule, RouterTestingModule]
+			imports: [HttpClientTestingModule,
+				RouterTestingModule.withRoutes(
+					[{ path: '', component: HomeComponent }]
+				)
+			]
 		}).compileComponents();
 	}));
 

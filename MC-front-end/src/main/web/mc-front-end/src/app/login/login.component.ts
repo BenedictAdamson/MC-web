@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 
 import { SelfService } from '../self.service';
@@ -11,6 +12,7 @@ import { SelfService } from '../self.service';
 export class LoginComponent implements OnInit {
 
 	constructor(
+		private readonly router: Router,
 		private readonly service: SelfService
 	) { }
 
