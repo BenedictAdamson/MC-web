@@ -73,10 +73,10 @@ export class SelfService {
 		};
 	}
 
-	private getUserDetails(): Observable<User> {
+	private getUserDetails(username: string, password: string): Observable<User> {
 		const headers = new HttpHeaders({
 			'Content-Type': 'application/json',
-			'Authorization': 'Basic ' + btoa(this.username + ':' + this.password)
+			'Authorization': 'Basic ' + btoa(username + ':' + password)
 		});
 
 		return this.http.get<User>(apiUrl, { headers: headers })
@@ -110,7 +110,7 @@ export class SelfService {
 	 */
 	authenticate(username: string, password: string): Observable<boolean> {
 		return defer(() =>
-			this.getUserDetails().pipe(
+			this.getUserDetails(username, password).pipe(
 				map(ud => this.processResponse(username, password, ud))
 			)
 		);
