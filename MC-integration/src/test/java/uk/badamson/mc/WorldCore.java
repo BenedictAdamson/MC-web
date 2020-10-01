@@ -100,6 +100,10 @@ public final class WorldCore implements AutoCloseable {
       };
    }
 
+   private static String getPathOfUrl(final String url) {
+      return URI.create(url).getPath();
+   }
+
    private final McContainers containers = new McContainers();
 
    private final Map<String, User> users = new HashMap<>();
@@ -199,7 +203,7 @@ public final class WorldCore implements AutoCloseable {
     * @return the path; not null.
     */
    public String getCurrentUrlPath() {
-      return URI.create(webDriver.getCurrentUrl()).getPath();
+      return getPathOfUrl(webDriver.getCurrentUrl());
    }
 
    /**
