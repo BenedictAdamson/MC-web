@@ -124,17 +124,12 @@ describe('LoginComponent', () => {
 	const testLoginFailure = function(done, userDetails: User) {
 		component.username = userDetails.username;
 		component.password = userDetails.password;
-		component.login().subscribe({
-			next: () => { },
-			error: (err) => { fail(err); done() },
-			complete: () => {
-				expect(component.username).toEqual(selfService.username, 'username');
-				expect(component.password).toEqual(selfService.password, 'password');
-				expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(0);
-				done()
-			}
-		});
+		component.login();
 		mockHttpAuthorizationFailure();
+		expect(component.username).toEqual(selfService.username, 'username');
+		expect(component.password).toEqual(selfService.password, 'password');
+		expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(0);
+		done()
 	};
 
 	it('should handle login failure [A]', (done) => {
@@ -149,18 +144,13 @@ describe('LoginComponent', () => {
 	const testLoginSuccess = function(done, userDetails: User) {
 		component.username = userDetails.username;
 		component.password = userDetails.password;
-		component.login().subscribe({
-			next: () => { },
-			error: (err) => { fail(err); done() },
-			complete: () => {
-				expect(component.username).toEqual(selfService.username, 'username');
-				expect(component.password).toEqual(selfService.password, 'password');
-				expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(1);
-				expect(routerSpy.navigateByUrl.calls.argsFor(0)).withContext('router.navigateByUrl args').toEqual(['/']);
-				done()
-			}
-		});
+		component.login();
 		mockAuthenticationSuccess(userDetails);
+		expect(component.username).toEqual(selfService.username, 'username');
+		expect(component.password).toEqual(selfService.password, 'password');
+		expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(1);
+		expect(routerSpy.navigateByUrl.calls.argsFor(0)).withContext('router.navigateByUrl args').toEqual(['/']);
+		done()
 	};
 
 	it('should handle login success [A]', (done) => {

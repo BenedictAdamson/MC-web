@@ -31,14 +31,13 @@ export class LoginComponent implements OnInit {
      * Attempts to authenticate using the #username and #password,
      * through the SelfService associated with this component.
      */
-	login(): Observable<void> {
-		return this.service.authenticate(this.username, this.password).pipe(
+	login(): void {
+		this.service.authenticate(this.username, this.password).pipe(
 			tap((success) => {
 				if (success) {
 					this.router.navigateByUrl('/')
 				}
-			}),
-			map(() => null)
-		);
+			})
+		).subscribe();
 	}
 }
