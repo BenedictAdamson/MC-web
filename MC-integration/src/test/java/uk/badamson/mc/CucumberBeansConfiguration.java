@@ -29,7 +29,7 @@ public class CucumberBeansConfiguration {
 
    @Bean
    public WorldCore getWorldCore(
-            @Value("${failure.recording.directory:#{null}}") final Path failureRecordingDirectory) {
+            @Value("${failure.recording.directory:target}") final Path failureRecordingDirectory) {
       return new WorldCore(failureRecordingDirectory);
    }
 }
