@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -34,6 +36,7 @@ import javax.annotation.PreDestroy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testcontainers.lifecycle.TestDescription;
 
 import io.cucumber.java.After;
@@ -330,6 +333,37 @@ public final class WorldCore implements AutoCloseable {
       final var testDescription = createTestDescription(scenario);
       final var exception = createOutcomeException(scenario);
       containers.afterTest(testDescription, exception);
+   }
+
+   /**
+    * <p>
+    * Wait until the {@linkplain #getCurrentUrlPath() path component of the
+    * current URL of the browser} becomes equal to a given path, of a timeout
+    * expires.
+    * </p>
+    *
+    * @param timeout
+    *           The maximum time, in seconds, to wait for the path of the
+    *           browser to become equal to the given {@code path}.
+    * @param path
+    *           The wanted path
+    * @throws TimeoutException
+    *            If the browser path does not become equal to the given
+    *            {@code path} within the given {@code timeout}.
+    */
+   public void waitUntilCurrentUrlPath(final long timeout, final String path)
+            throws TimeoutException {
+      final var current = new AtomicReference<String>();
+      try {
+         new WebDriverWait(webDriver, timeout).until(driver -> {
+            final var p = getPathOfUrl(driver.getCurrentUrl());
+            current.set(p);
+            return p.equals(path);
+         });
+      } catch (final org.openqa.selenium.TimeoutException e) {
+         throw new TimeoutException("Timeout while waiting URL path (currently "
+                  + current.get() + ") to become " + path);
+      }
    }
 
 }// class

@@ -25,6 +25,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
 import java.util.Objects;
+import java.util.concurrent.TimeoutException;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -108,28 +109,19 @@ public class UserSteps {
    }
 
    @Given("logged in")
-   public void logged_in() {
+   public void logged_in() throws TimeoutException {
       login();
    }
 
-   private void login() {
+   private void login() throws TimeoutException {
       Objects.requireNonNull(user, "user");
       final var username = user.getUsername();
-      login(username, worldCore.getPlaintextUserPassword(username));
-   }
-
-   private void login(final String name, final String password) {
-      getHomePage();
-      final var webDriver = worldCore.getWebDriver();
-      webDriver.findElementById("login").click();
-      webDriver.findElementByName("username").sendKeys(name);
-      webDriver.findElementByXPath("//input[@type='password']")
-               .sendKeys(password);
-      webDriver.findElementByXPath("//button[@type='submit']").submit();
+      submitLogin(username, worldCore.getPlaintextUserPassword(username));
+      worldCore.waitUntilCurrentUrlPath(17, "/");
    }
 
    @When("log in using correct password")
-   public void login_using_correct_password() {
+   public void login_using_correct_password() throws TimeoutException {
       login();
    }
 
@@ -162,6 +154,16 @@ public class UserSteps {
    public void response_is_list_of_users() {
       final var webDriver = worldCore.getWebDriver();
       element = webDriver.findElementByTagName("ul");
+   }
+
+   private void submitLogin(final String name, final String password) {
+      getHomePage();
+      final var webDriver = worldCore.getWebDriver();
+      webDriver.findElementById("login").click();
+      webDriver.findElementByName("username").sendKeys(name);
+      webDriver.findElementByXPath("//input[@type='password']")
+               .sendKeys(password);
+      webDriver.findElementByXPath("//button[@type='submit']").submit();
    }
 
    @Given("user does not have the {string} role")
