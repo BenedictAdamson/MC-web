@@ -155,7 +155,7 @@ public class UserSteps {
 
    @Given("redirected to home-page")
    public void redirected_to_home_page() {
-      worldCore.assertCurrentUrl("/");
+      assertThat("URL path", worldCore.getCurrentUrlPath(), is("/"));
    }
 
    @Then("the response is a list of users")

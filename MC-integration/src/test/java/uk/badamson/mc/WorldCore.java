@@ -18,9 +18,6 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
@@ -124,28 +121,6 @@ public final class WorldCore implements AutoCloseable {
 
    /**
     * <p>
-    * Require that the current browser URL has a given path component.
-    * </p>
-    *
-    * @param path
-    *           The path component
-    * @throws NullPointerException
-    *            If {@code path} is null.
-    * @throws IllegalArgumentException
-    *            If {@code path} violates RFC 2396
-    * @throws AssertionError
-    *            If the current URL is not equivalent to a URL with the given
-    *            {@code path}.
-    */
-   public void assertCurrentUrl(final String path) {
-      final var expectedUrl = McContainers
-               .createIngressPrivateNetworkUriFromPath(path);
-      assertThat("current URL", webDriver.getCurrentUrl(),
-               is(expectedUrl.toASCIIString()));
-   }
-
-   /**
-    * <p>
     * Prepare the SUT and this interface for execution of a Cucumber scenario.
     * </p>
     * <p>
@@ -208,6 +183,23 @@ public final class WorldCore implements AutoCloseable {
     */
    public void endScenario(final Scenario scenario) {
       tellContainersTestOutcome(scenario);
+   }
+
+   /**
+    * <p>
+    * The {@linkplain URI#getPath() path} component of the
+    * {@linkplain WebDriver#getCurrentUrl() current URL} of the browser.
+    * </p>
+    * <p>
+    * Tests should use value, rather than the current URL of the browser,
+    * because the current URL includes the server host-name, which is a test
+    * implementation detail.
+    * </p>
+    *
+    * @return the path; not null.
+    */
+   public String getCurrentUrlPath() {
+      return URI.create(webDriver.getCurrentUrl()).getPath();
    }
 
    /**
