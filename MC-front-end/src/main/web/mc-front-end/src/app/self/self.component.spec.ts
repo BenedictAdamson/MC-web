@@ -1,18 +1,20 @@
-import { Injectable } from '@angular/core';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { Subject } from 'rxjs';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 
 import { SelfComponent } from './self.component';
 import { SelfService } from '../self.service';
 
 
 describe('SelfComponent', () => {
+	let httpClient: HttpClient;
+	let httpTestingController: HttpTestingController;
 	let fixture: ComponentFixture<SelfComponent>;
 	let component: SelfComponent;
 
-	let getLoggedIn = function(component: SelfComponent): boolean {
+	let getAuthenticated = function(component: SelfComponent): boolean {
 		var loggedIn: boolean = null;
-		component.loggedIn$.subscribe({
+		component.authenticated$.subscribe({
 			next: (l) => loggedIn = l,
 			error: (err) => fail(err),
 			complete: () => { }
@@ -20,18 +22,9 @@ describe('SelfComponent', () => {
 		return loggedIn;
 	};
 
-	let getUsername = function(component: SelfComponent): string {
-		var username: string = null;
-		component.username$.subscribe({
-			next: (u) => username = u,
-			error: (err) => fail(err),
-			complete: () => { }
-		});
-		return username;
-	};
-
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
+			imports: [HttpClientTestingModule],
 			providers: [
 				{ provide: SelfService, useClass: SelfService }
 			],
@@ -41,6 +34,11 @@ describe('SelfComponent', () => {
 		}).compileComponents();
 	}));
 	beforeEach(() => {
+        /* Inject for each test:
+         * HTTP requests will be handled by the mock back-end.
+          */
+		httpClient = TestBed.get(HttpClient);
+		httpTestingController = TestBed.get(HttpTestingController);
 		fixture = TestBed.createComponent(SelfComponent);
 		component = fixture.componentInstance;
 	});
@@ -49,25 +47,9 @@ describe('SelfComponent', () => {
 		expect(component).toBeDefined();
 	});
 
-	it('should not initially be logged in', () => {
-		expect(getLoggedIn(component)).toBe(false, 'not loggedIn');
-		expect(getUsername(component)).toBeNull();
-	});
-
-	it('should have an identity after login', (done) => {
-		var nCalls: number = 0;
-		component.login().subscribe({
-			next: () => {
-				var loggedIn: boolean = getLoggedIn(component);
-				var username: string = getUsername(component);
-				expect(username).not.toBe(null, 'username not null');
-				expect(loggedIn).toBe(true, 'loggedIn');
-				++nCalls;
-				done();
-			},
-			error: (err) => done.fail(err),
-			complete: () => (!nCalls) ? done.fail('no values') : {}
-		});
+	it('should not initially be authenticated', () => {
+		expect(getAuthenticated(component)).toBe(false, 'not authenticated');
+		expect(component.username).toBeNull();
 	});
 
 	it('should initially provide a login link', () => {
@@ -78,26 +60,4 @@ describe('SelfComponent', () => {
 		expect(button.textContent).toContain('login');
 	});
 
-	let checkElement = function() {
-		var username: string = getUsername(component);
-		const element: HTMLElement = fixture.nativeElement;
-		expect(element.textContent).toContain(username);
-	}
-
-	it('should display user-name after login', (done) => {
-		var nCalls: number = 0;
-		component.login().subscribe({
-			next: () => {
-				fixture.detectChanges();
-				checkElement();
-				++nCalls;
-				done();
-			},
-			error: (err) => done.fail(err),
-			complete: () => {
-				checkElement();
-				nCalls ? {} : done();
-			}
-		});
-	});
 });
