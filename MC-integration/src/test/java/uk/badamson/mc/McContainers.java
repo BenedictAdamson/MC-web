@@ -22,12 +22,16 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
 
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.containers.BrowserWebDriverContainer;
+import org.testcontainers.containers.BrowserWebDriverContainer.VncRecordingMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.lifecycle.Startable;
@@ -89,8 +93,27 @@ public class McContainers
    private final McReverseProxyContainer in = new McReverseProxyContainer()
             .withNetwork(network).withNetworkAliases(REVERSE_PROXY_HOST);
 
-   private final BrowserWebDriverContainer<?> browser = new BrowserWebDriverContainer<>()
-            .withCapabilities(new FirefoxOptions()).withNetwork(network);
+   private final BrowserWebDriverContainer<?> browser;
+
+   /**
+    * @param failureRecordingDirectory
+    *           The location of a directory in which to store files holding
+    *           verbose information about failed test cases. Or {@code null} if
+    *           no such records are to be made.
+    */
+   public McContainers(final Path failureRecordingDirectory) {
+      browser = new BrowserWebDriverContainer<>();
+      browser.withCapabilities(new FirefoxOptions()).withNetwork(network);
+      if (failureRecordingDirectory != null) {
+         try {
+            Files.createDirectories(failureRecordingDirectory);
+         } catch (final IOException e) {
+            throw new IllegalArgumentException(e);
+         }
+         browser.withRecordingMode(VncRecordingMode.RECORD_FAILING,
+                  failureRecordingDirectory.toFile());
+      }
+   }
 
    public void addUser(final User user) {
       try {

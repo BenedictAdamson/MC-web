@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -107,7 +108,7 @@ public final class WorldCore implements AutoCloseable {
       return URI.create(url).getPath();
    }
 
-   private final McContainers containers = new McContainers();
+   private final McContainers containers;
 
    private final Map<String, User> users = new HashMap<>();
 
@@ -118,6 +119,16 @@ public final class WorldCore implements AutoCloseable {
    private URI privateNetworkUrl;
 
    private URI localUrl;
+
+   /**
+    * @param failureRecordingDirectory
+    *           The location of a directory in which to store files holding
+    *           verbose information about failed test cases. Or {@code null} if
+    *           no such records are to be made.
+    */
+   public WorldCore(final Path failureRecordingDirectory) {
+      containers = new McContainers(failureRecordingDirectory);
+   }
 
    private void addUser(final User user) {
       containers.addUser(user);

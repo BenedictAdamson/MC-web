@@ -57,7 +57,7 @@ public class PristineIT implements AutoCloseable {
     * for each test. This is a big win, because creating all the containers is
     * very expensive.
     */
-   private static final McContainers containers = new McContainers();
+   private static final McContainers containers = new McContainers(null);
 
    @BeforeAll
    public static void open() {
