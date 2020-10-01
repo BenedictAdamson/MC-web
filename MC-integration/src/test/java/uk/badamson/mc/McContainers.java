@@ -103,7 +103,9 @@ public class McContainers
     */
    public McContainers(final Path failureRecordingDirectory) {
       browser = new BrowserWebDriverContainer<>();
-      browser.withCapabilities(new FirefoxOptions()).withNetwork(network);
+      browser.withCapabilities(new FirefoxOptions().addPreference(
+               "security.insecure_field_warning.contextual.enabled", false))
+               .withNetwork(network);
       if (failureRecordingDirectory != null) {
          try {
             Files.createDirectories(failureRecordingDirectory);
