@@ -28,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.TimeoutException;
+import static java.util.stream.Collectors.*;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -94,9 +95,11 @@ public class UserSteps {
    }
 
    private void assertNoErrorMessages() {
-      assertThat("No error messages",
-               worldCore.getWebDriver().findElements(By.className("error")),
-               is(empty()));
+      final var elements = worldCore.getWebDriver()
+               .findElements(By.className("error"));
+      // Report the error messages, to provide better diagnostics
+      assertThat("No error messages", elements.stream().map(e -> e.getText())
+               .collect(toUnmodifiableList()), is(empty()));
    }
 
    @Then("can get the list of users")
