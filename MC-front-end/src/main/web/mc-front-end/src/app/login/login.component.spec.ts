@@ -52,6 +52,10 @@ describe('LoginComponent', () => {
 		expect(component.password).toBeNull();
 	});
 
+	it('should create with rejected flag clear', () => {
+		expect(component.rejected).toBeFalse();
+	});
+
 	const testNgOnInit = function() {
 		component.ngOnInit();
 

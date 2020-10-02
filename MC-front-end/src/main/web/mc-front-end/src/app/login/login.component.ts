@@ -27,6 +27,12 @@ export class LoginComponent implements OnInit {
 	password: string = null;
 
 	/**
+	 * Whether these credentials have been explicitly rejected by the server.
+     * This will be false if the credentials have not *yet* been checked by the server.
+	 */
+	rejected: boolean = false;
+
+	/**
      * @description
      * Attempts to authenticate using the #username and #password,
      * through the SelfService associated with this component.
