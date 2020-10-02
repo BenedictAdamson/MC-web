@@ -70,10 +70,10 @@ describe('SelfComponent', () => {
 		});
 	});
 
-	it('should initially provide a login button', () => {
+	it('should initially provide a login link', () => {
 		fixture.detectChanges();
 		const element: HTMLElement = fixture.nativeElement;
-		const button = element.querySelector('button');
+		const button = element.querySelector('a[id="login"]');
 		expect(button).not.toBeNull();
 		expect(button.textContent).toContain('login');
 	});

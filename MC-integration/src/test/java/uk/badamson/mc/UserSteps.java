@@ -95,8 +95,7 @@ public class UserSteps {
       webDriver.findElementByName("username").sendKeys(name);
       webDriver.findElementByXPath("//input[@type='password']")
                .sendKeys(password);
-      webDriver.findElementByXPath(
-               "//input[@type='submit'] or //button[@type='submit']").submit();
+      webDriver.findElementByXPath("//button[@type='submit']").submit();
    }
 
    @When("log in using correct password")

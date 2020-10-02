@@ -72,24 +72,6 @@ public class McContainers
       return BASE_PRIVATE_NETWORK_URI.resolve(path);
    }
 
-   public URI createUriFromPath(final HttpServer server, final String path) {
-      GenericContainer<?> container = null;
-      switch (server) {
-      case BACK_END:
-         container = be;
-         break;
-      case FRONT_END:
-         container = fe;
-         break;
-      case INGRESS:
-         container = in;
-         break;
-      }
-      final var base = URI.create("http://" + container.getHost() + ":"
-               + container.getFirstMappedPort());
-      return base.resolve(path);
-   }
-
    private final Network network = Network.newNetwork();
 
    private final McDatabaseContainer db = new McDatabaseContainer(
@@ -108,7 +90,7 @@ public class McContainers
    private final BrowserWebDriverContainer<?> browser = new BrowserWebDriverContainer<>()
             .withCapabilities(new FirefoxOptions()).withNetwork(network);
 
-   public void addPlayer(final String user, final String password) {
+   public void addUser(final String user, final String password) {
       // FIXME
    }
 
@@ -143,6 +125,24 @@ public class McContainers
       be.close();
       db.close();
       network.close();
+   }
+
+   public URI createUriFromPath(final HttpServer server, final String path) {
+      GenericContainer<?> container = null;
+      switch (server) {
+      case BACK_END:
+         container = be;
+         break;
+      case FRONT_END:
+         container = fe;
+         break;
+      case INGRESS:
+         container = in;
+         break;
+      }
+      final var base = URI.create("http://" + container.getHost() + ":"
+               + container.getFirstMappedPort());
+      return base.resolve(path);
    }
 
    public RemoteWebDriver getWebDriver() {
