@@ -62,8 +62,8 @@ describe('LoginComponent', () => {
 		const expectedUsername: string = selfService.username;
 		const expectedPassword: string = selfService.password;
 
-		expect(component.username).toEqual(expectedUsername, 'component username');
-		expect(component.password).toEqual(expectedPassword, 'component password');
+		expect(component.username).withContext('username').toEqual(expectedUsername);
+		expect(component.password).withContext('password').toEqual(expectedPassword);
 	}
 
 	it('should initilize from the service [null]', () => {
