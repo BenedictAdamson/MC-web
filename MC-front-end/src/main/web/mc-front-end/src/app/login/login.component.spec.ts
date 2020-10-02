@@ -131,8 +131,8 @@ describe('LoginComponent', () => {
 		component.password = userDetails.password;
 		component.login();
 		mockHttpAuthorizationFailure();
-		expect(component.username).toEqual(selfService.username, 'username');
-		expect(component.password).toEqual(selfService.password, 'password');
+		expect(component.username).withContext('username').toEqual(selfService.username);
+		expect(component.password).withContext('password').toEqual(selfService.password);
 		expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(0);
 		done()
 	};
@@ -151,8 +151,8 @@ describe('LoginComponent', () => {
 		component.password = userDetails.password;
 		component.login();
 		mockAuthenticationSuccess(userDetails);
-		expect(component.username).toEqual(selfService.username, 'username');
-		expect(component.password).toEqual(selfService.password, 'password');
+		expect(component.username).withContext('username').toEqual(selfService.username);
+		expect(component.password).withContext('password').toEqual(selfService.password);
 		expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(1);
 		expect(routerSpy.navigateByUrl.calls.argsFor(0)).withContext('router.navigateByUrl args').toEqual(['/']);
 		done()
