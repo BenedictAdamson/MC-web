@@ -114,8 +114,6 @@ public final class WorldCore implements AutoCloseable {
 
    private final Map<String, User> unknownUsers = new HashMap<>();
 
-   private final Map<String, String> userPasswords = new HashMap<>();
-
    private RemoteWebDriver webDriver;
 
    private URI privateNetworkUrl;
@@ -133,16 +131,13 @@ public final class WorldCore implements AutoCloseable {
    }
 
    private void addUnknownUser(final User user) {
-      final var username = user.getUsername();
-      unknownUsers.put(username, user);
-      userPasswords.put(username, user.getPassword());
+      unknownUsers.put(user.getUsername(), user);
    }
 
    private void addUser(final User user) {
       containers.addUser(user);// records the user in the DB, through the BE
-      final var username = user.getUsername();
-      users.put(username, user);
-      userPasswords.put(username, user.getPassword());
+      users.put(user.getUsername(), user);
+
    }
 
    /**
@@ -265,11 +260,6 @@ public final class WorldCore implements AutoCloseable {
       } catch (IOException | NullPointerException e) {
          throw new IllegalStateException(e);
       }
-   }
-
-   public String getPlaintextUserPassword(final String username) {
-      Objects.requireNonNull(username, "username");
-      return userPasswords.get(username);
    }
 
    public User getUnknownUser() {

@@ -18,6 +18,7 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
@@ -28,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.TimeoutException;
-import static java.util.stream.Collectors.*;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -201,8 +201,7 @@ public class UserSteps {
 
    private void tryToLogin() {
       Objects.requireNonNull(user, "user");
-      final var username = user.getUsername();
-      submitLogin(username, worldCore.getPlaintextUserPassword(username));
+      submitLogin(user.getUsername(), user.getPassword());
       try {// await success or error message
          new WebDriverWait(worldCore.getWebDriver(), 17).until(driver -> "/"
                   .equals(WorldCore.getPathOfUrl(driver.getCurrentUrl()))
