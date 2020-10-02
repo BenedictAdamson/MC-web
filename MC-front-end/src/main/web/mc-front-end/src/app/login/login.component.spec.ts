@@ -64,6 +64,7 @@ describe('LoginComponent', () => {
 
 		expect(component.username).withContext('username').toEqual(expectedUsername);
 		expect(component.password).withContext('password').toEqual(expectedPassword);
+		expect(component.rejected).withContext('rejected').toBeFalse();
 	}
 
 	it('should initilize from the service [null]', () => {
