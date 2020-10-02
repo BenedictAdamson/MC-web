@@ -25,12 +25,14 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.en.Given;
@@ -76,6 +78,15 @@ public class UserSteps {
                is(expectedPath));
    }
 
+   private void assertHasElementWithTag(final String tag) {
+      Objects.requireNonNull(tag, "tag");
+      try {
+         element = worldCore.getWebDriver().findElement(By.tagName(tag));
+      } catch (final NoSuchElementException e) {
+         throw new AssertionFailedError("has element with tag " + tag, e);
+      }
+   }
+
    public void assertHaveErrorMessages() {
       assertThat("Error message(s)",
                worldCore.getWebDriver().findElements(By.className("error")),
@@ -96,8 +107,8 @@ public class UserSteps {
    @Then("MC does not present adding a user as an option")
    public void does_not_present_adding_user_option() {
       getUrlUsingBrowser("/user");
-      final var webDriver = worldCore.getWebDriver();
-      assertThat("No add-user link", webDriver.findElements(By.id("add-user")),
+      assertThat("No add-user link",
+               worldCore.getWebDriver().findElements(By.id("add-user")),
                empty());
    }
 
@@ -123,8 +134,7 @@ public class UserSteps {
    @Then("the list of users has at least one user")
    public void list_of_users_not_empty() {
       Objects.requireNonNull(element);
-      assertThat("list entries", element.findElements(By.tagName("li")),
-               not(empty()));
+      assertThat(element.findElements(By.tagName("li")), not(empty()));
    }
 
    @Given("logged in")
@@ -156,21 +166,19 @@ public class UserSteps {
 
    @Then("MC serves the users page")
    public void mc_serves_users_page() {
-      final var webDriver = worldCore.getWebDriver();
-      element = webDriver.findElement(By.tagName("h2"));
+      assertHasElementWithTag("h2");
       assertThat("Has a header saying \"Users\"", element.getText(),
                containsString("Users"));
    }
 
-   @Given("redirected to home-page")
+   @Then("redirected to home-page")
    public void redirected_to_home_page() {
       assertThat("URL path", worldCore.getCurrentUrlPath(), is("/"));
    }
 
    @Then("the response is a list of users")
    public void response_is_list_of_users() {
-      final var webDriver = worldCore.getWebDriver();
-      element = webDriver.findElement(By.tagName("ul"));
+      assertHasElementWithTag("ul");
    }
 
    private void submitLogin(final String name, final String password) {
