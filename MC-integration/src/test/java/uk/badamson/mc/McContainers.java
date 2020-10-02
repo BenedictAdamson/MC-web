@@ -22,12 +22,16 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
 
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.containers.BrowserWebDriverContainer;
+import org.testcontainers.containers.BrowserWebDriverContainer.VncRecordingMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.lifecycle.Startable;
@@ -61,6 +65,7 @@ public class McContainers
 
    private static final String DB_ROOT_PASSWORD = "secret2";
    private static final String DB_USER_PASSWORD = "secret3";
+   private static final String ADMINISTARTOR_PASSWORD = "secret4";
 
    private static void assertThatNoErrorMessagesLogged(final String container,
             final String logs) {
@@ -79,7 +84,8 @@ public class McContainers
                      .withNetworkAliases(DB_HOST);
 
    private final McBackEndContainer be = new McBackEndContainer(DB_HOST,
-            DB_USER_PASSWORD).withNetwork(network).withNetworkAliases(BE_HOST);
+            DB_USER_PASSWORD, ADMINISTARTOR_PASSWORD).withNetwork(network)
+                     .withNetworkAliases(BE_HOST);
 
    private final McFrontEndContainer fe = new McFrontEndContainer()
             .withNetwork(network).withNetworkAliases(FE_HOST);
@@ -87,11 +93,37 @@ public class McContainers
    private final McReverseProxyContainer in = new McReverseProxyContainer()
             .withNetwork(network).withNetworkAliases(REVERSE_PROXY_HOST);
 
-   private final BrowserWebDriverContainer<?> browser = new BrowserWebDriverContainer<>()
-            .withCapabilities(new FirefoxOptions()).withNetwork(network);
+   private final BrowserWebDriverContainer<?> browser;
 
-   public void addUser(final String user, final String password) {
-      // FIXME
+   /**
+    * @param failureRecordingDirectory
+    *           The location of a directory in which to store files holding
+    *           verbose information about failed test cases. Or {@code null} if
+    *           no such records are to be made.
+    */
+   public McContainers(final Path failureRecordingDirectory) {
+      browser = new BrowserWebDriverContainer<>();
+      browser.withCapabilities(new FirefoxOptions().addPreference(
+               "security.insecure_field_warning.contextual.enabled", false))
+               .withNetwork(network);
+      if (failureRecordingDirectory != null) {
+         try {
+            Files.createDirectories(failureRecordingDirectory);
+         } catch (final IOException e) {
+            throw new IllegalArgumentException(e);
+         }
+         browser.withRecordingMode(VncRecordingMode.RECORD_FAILING,
+                  failureRecordingDirectory.toFile());
+      }
+   }
+
+   public void addUser(final User user) {
+      try {
+         final var response = be.addUser(user);
+         response.expectStatus().is2xxSuccessful();
+      } catch (final Exception e) {
+         throw new RuntimeException("Failed to add user", e);
+      }
    }
 
    @Override

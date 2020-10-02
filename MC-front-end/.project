@@ -30,6 +30,5 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>org.eclipse.m2e.core.maven2Nature</nature>
 		<nature>org.eclipse.wst.jsdt.core.jsNature</nature>
-		<nature>ch.acanda.eclipse.pmd.builder.PMDNature</nature>
 	</natures>
 </projectDescription>

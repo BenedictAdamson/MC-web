@@ -18,6 +18,9 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.nio.file.Path;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -25,7 +28,8 @@ import org.springframework.context.annotation.Configuration;
 public class CucumberBeansConfiguration {
 
    @Bean
-   public WorldCore getWorldCore() {
-      return new WorldCore();
+   public WorldCore getWorldCore(
+            @Value("${failure.recording.directory:target}") final Path failureRecordingDirectory) {
+      return new WorldCore(failureRecordingDirectory);
    }
 }
