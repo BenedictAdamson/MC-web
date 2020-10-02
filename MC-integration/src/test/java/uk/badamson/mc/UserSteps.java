@@ -23,12 +23,14 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.en.Given;
@@ -67,6 +69,23 @@ public class UserSteps {
    @When("adding a user named {string} with  password {string}")
    public void adding_a_user(final String user, final String password) {
       // TODO
+   }
+
+   private void assertCurrentUrlPath(final String expectedPath) {
+      assertThat("Current URL path", worldCore.getCurrentUrlPath(),
+               is(expectedPath));
+   }
+
+   public void assertHaveErrorMessages() {
+      assertThat("Error message(s)",
+               worldCore.getWebDriver().findElementsByClassName("error"),
+               not(empty()));
+   }
+
+   private void assertNoErrorMessages() {
+      assertThat("No error messages",
+               worldCore.getWebDriver().findElementsByClassName("error"),
+               is(empty()));
    }
 
    @Then("can get the list of users")
@@ -109,32 +128,30 @@ public class UserSteps {
    }
 
    @Given("logged in")
-   public void logged_in() throws TimeoutException {
-      login();
-   }
-
-   private void login() throws TimeoutException {
-      Objects.requireNonNull(user, "user");
-      final var username = user.getUsername();
-      submitLogin(username, worldCore.getPlaintextUserPassword(username));
-      worldCore.waitUntilCurrentUrlPath(17, "/");
+   public void logged_in() {
+      tryToLogin();
+      assertCurrentUrlPath("/");
    }
 
    @When("log in using correct password")
    public void login_using_correct_password() throws TimeoutException {
-      login();
+      tryToLogin();
    }
 
    @Then("MC accepts the login")
    public void mc_accepts_login() {
-      final var webDriver = worldCore.getWebDriver();
-      assertThat("No error messages",
-               webDriver.findElementsByClassName("error"), is(empty()));
+      assertAll(() -> assertCurrentUrlPath("/"), () -> assertNoErrorMessages());
    }
 
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() {
       // TODO
+   }
+
+   @Then("MC rejects the login")
+   public void mc_rejects_login() {
+      assertAll(() -> assertCurrentUrlPath("/login"),
+               () -> assertHaveErrorMessages());
    }
 
    @Then("MC serves the users page")
@@ -164,6 +181,30 @@ public class UserSteps {
       webDriver.findElementByXPath("//input[@type='password']")
                .sendKeys(password);
       webDriver.findElementByXPath("//button[@type='submit']").submit();
+   }
+
+   @When("try to login")
+   public void try_to_login() throws Exception {
+      tryToLogin();
+   }
+
+   private void tryToLogin() {
+      Objects.requireNonNull(user, "user");
+      final var username = user.getUsername();
+      submitLogin(username, worldCore.getPlaintextUserPassword(username));
+      try {// await success or error message
+         new WebDriverWait(worldCore.getWebDriver(), 17).until(driver -> "/"
+                  .equals(WorldCore.getPathOfUrl(driver.getCurrentUrl()))
+                  || !driver.findElements(By.className("error")).isEmpty());
+      } catch (final Exception e) {// give better diagnostics
+         throw new IllegalStateException(
+                  "No indication of login success or failure", e);
+      }
+   }
+
+   @Given("unknown user")
+   public void unknown_user() {
+      user = worldCore.getUnknownUser();
    }
 
    @Given("user does not have the {string} role")

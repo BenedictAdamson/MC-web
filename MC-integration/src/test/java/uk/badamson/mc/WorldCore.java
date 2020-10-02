@@ -104,13 +104,15 @@ public final class WorldCore implements AutoCloseable {
       };
    }
 
-   private static String getPathOfUrl(final String url) {
+   static String getPathOfUrl(final String url) {
       return URI.create(url).getPath();
    }
 
    private final McContainers containers;
 
    private final Map<String, User> users = new HashMap<>();
+
+   private final Map<String, User> unknownUsers = new HashMap<>();
 
    private final Map<String, String> userPasswords = new HashMap<>();
 
@@ -128,6 +130,12 @@ public final class WorldCore implements AutoCloseable {
     */
    public WorldCore(final Path failureRecordingDirectory) {
       containers = new McContainers(failureRecordingDirectory);
+   }
+
+   private void addUnknownUser(final User user) {
+      final var username = user.getUsername();
+      unknownUsers.put(username, user);
+      userPasswords.put(username, user.getPassword());
    }
 
    private void addUser(final User user) {
@@ -183,6 +191,8 @@ public final class WorldCore implements AutoCloseable {
                true));
       addUser(new User("allan", "password2", Set.of(Authority.ROLE_PLAYER),
                true, true, true, true));
+      addUnknownUser(new User("mark", "password3", Authority.ALL, true, true,
+               true, true));
    }
 
    /**
@@ -260,6 +270,10 @@ public final class WorldCore implements AutoCloseable {
    public String getPlaintextUserPassword(final String username) {
       Objects.requireNonNull(username, "username");
       return userPasswords.get(username);
+   }
+
+   public User getUnknownUser() {
+      return users.values().stream().findAny().get();
    }
 
    /**
