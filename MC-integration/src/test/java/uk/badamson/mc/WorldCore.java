@@ -320,7 +320,7 @@ public final class WorldCore implements AutoCloseable {
                .get();
    }
 
-   public RemoteWebDriver getWebDriver() {
+   public WebDriver getWebDriver() {
       Objects.requireNonNull(webDriver, "webDriver");
       return webDriver;
    }

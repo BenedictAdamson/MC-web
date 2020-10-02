@@ -21,6 +21,7 @@ package uk.badamson.mc;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 
+import org.openqa.selenium.By;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.en.Given;
@@ -46,7 +47,8 @@ public class HomePageSteps {
 
    @Then("the home page header includes the name of the game")
    public void home_page_header_includes_name_of_game() {
-      assertThat(worldCore.getWebDriver().findElementByTagName("h1").getText(),
+      assertThat(
+               worldCore.getWebDriver().findElement(By.tagName("h1")).getText(),
                containsString(GAME_NAME));
    }
 

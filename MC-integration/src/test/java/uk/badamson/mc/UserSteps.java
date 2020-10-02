@@ -78,13 +78,13 @@ public class UserSteps {
 
    public void assertHaveErrorMessages() {
       assertThat("Error message(s)",
-               worldCore.getWebDriver().findElementsByClassName("error"),
+               worldCore.getWebDriver().findElements(By.className("error")),
                not(empty()));
    }
 
    private void assertNoErrorMessages() {
       assertThat("No error messages",
-               worldCore.getWebDriver().findElementsByClassName("error"),
+               worldCore.getWebDriver().findElements(By.className("error")),
                is(empty()));
    }
 
@@ -97,7 +97,7 @@ public class UserSteps {
    public void does_not_present_adding_user_option() {
       getUrlUsingBrowser("/user");
       final var webDriver = worldCore.getWebDriver();
-      assertThat("No add-user link", webDriver.findElementsById("add-user"),
+      assertThat("No add-user link", webDriver.findElements(By.id("add-user")),
                empty());
    }
 
@@ -157,7 +157,7 @@ public class UserSteps {
    @Then("MC serves the users page")
    public void mc_serves_users_page() {
       final var webDriver = worldCore.getWebDriver();
-      element = webDriver.findElementByTagName("h2");
+      element = webDriver.findElement(By.tagName("h2"));
       assertThat("Has a header saying \"Users\"", element.getText(),
                containsString("Users"));
    }
@@ -170,17 +170,17 @@ public class UserSteps {
    @Then("the response is a list of users")
    public void response_is_list_of_users() {
       final var webDriver = worldCore.getWebDriver();
-      element = webDriver.findElementByTagName("ul");
+      element = webDriver.findElement(By.tagName("ul"));
    }
 
    private void submitLogin(final String name, final String password) {
       getHomePage();
       final var webDriver = worldCore.getWebDriver();
-      webDriver.findElementById("login").click();
-      webDriver.findElementByName("username").sendKeys(name);
-      webDriver.findElementByXPath("//input[@type='password']")
+      webDriver.findElement(By.id("login")).click();
+      webDriver.findElement(By.name("username")).sendKeys(name);
+      webDriver.findElement(By.xpath("//input[@type='password']"))
                .sendKeys(password);
-      webDriver.findElementByXPath("//button[@type='submit']").submit();
+      webDriver.findElement(By.xpath("//button[@type='submit']")).submit();
    }
 
    @When("try to login")
