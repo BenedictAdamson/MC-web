@@ -138,8 +138,15 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       return WebTestClient.bindToServer().baseUrl(uri.toString()).build();
    }
 
-   WebTestClient.ResponseSpec getJson(final String path) {
+   private WebTestClient.ResponseSpec getJson(final String path) {
       return connectWebTestClient(path).get().accept(MediaType.APPLICATION_JSON)
+               .exchange();
+   }
+
+   public WebTestClient.ResponseSpec getJsonAsAdministrator(final String path) {
+      return connectWebTestClient(path).get().accept(MediaType.APPLICATION_JSON)
+               .headers(headers -> headers.setBasicAuth(
+                        User.ADMINISTRATOR_USERNAME, administratorPassword))
                .exchange();
    }
 }

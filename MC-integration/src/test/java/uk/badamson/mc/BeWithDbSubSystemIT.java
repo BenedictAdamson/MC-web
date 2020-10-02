@@ -18,11 +18,14 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.io.IOException;
+import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.AfterEach;
@@ -32,9 +35,12 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.opentest4j.AssertionFailedError;
 import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.badamson.mc.repository.McDatabaseContainer;
 
@@ -80,6 +86,14 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       final ResponseSpec response = be.addUser(user);
 
       response.expectStatus().isCreated();
+      final List<User> users;
+      try {
+         users = getUsers1();
+      } catch (final IOException e) {
+         throw new AssertionFailedError("Unable to get list of users", e);
+      }
+      assertThat("Added user", users.stream()
+               .anyMatch(u -> user.getUsername().equals(u.getUsername())));
    }
 
    private void assertThatNoErrorMessagesLogged(final String logs) {
@@ -91,6 +105,26 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       be.close();
       db.close();
       network.close();
+   }
+
+   @Test
+   @Order(2)
+   public void getUsers() {
+      try {
+         getUsers1();
+      } catch (final IOException e) {
+         throw new AssertionFailedError("Unable to get list of users", e);
+      }
+   }
+
+   private List<User> getUsers1() throws IOException {
+      final String usersAsJson = be.getJsonAsAdministrator("/api/user")
+               .returnResult(String.class).getResponseBody()
+               .blockFirst(Duration.ofSeconds(9));
+      final var mapper = new ObjectMapper();
+      final var typeId = mapper.getTypeFactory()
+               .constructCollectionType(List.class, User.class);
+      return mapper.readValue(usersAsJson, typeId);
    }
 
    @BeforeEach
