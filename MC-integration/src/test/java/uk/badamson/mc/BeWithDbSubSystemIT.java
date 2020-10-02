@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -58,6 +59,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
 
    private static final String DB_ROOT_PASSWORD = "secret2";
    private static final String DB_USER_PASSWORD = "secret3";
+   private static final String ADMINISTARTOR_PASSWORD = "secret4";
 
    private final Network network = Network.newNetwork();
 
@@ -66,7 +68,19 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
                      .withNetworkAliases(DB_HOST);
 
    private final McBackEndContainer be = new McBackEndContainer(DB_HOST,
-            DB_USER_PASSWORD).withNetwork(network).withNetworkAliases(BE_HOST);
+            DB_USER_PASSWORD, ADMINISTARTOR_PASSWORD).withNetwork(network)
+                     .withNetworkAliases(BE_HOST);
+
+   @Test
+   @Order(2)
+   public void addUser() {
+      final var user = new User("jeff", "password", Authority.ALL, true, true,
+               true, true);
+
+      final ResponseSpec response = be.addUser(user);
+
+      response.expectStatus().isCreated();
+   }
 
    private void assertThatNoErrorMessagesLogged(final String logs) {
       assertThat(logs, not(containsString("ERROR")));

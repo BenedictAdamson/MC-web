@@ -1,77 +1,144 @@
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, ReplaySubject, defer, of, from } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { map, mergeMap, tap } from 'rxjs/operators';
+
+import { User } from './user';
+
+const apiUrl: string = '/api/self';
 
 /**
  * @description
- * Provide information about the currently logged in user,
- * and an interface for logging in.,
- * as a facade in front of the actual authentication implementation used.
- *
- * Also provides information as Observables, even if the authentication implementation does not do so. 
+ * Provide information about the current user,
+ * and an interface for authentication (logging in).
  */
 @Injectable({
 	providedIn: 'root'
 })
 export class SelfService {
 
-	private usernameRS$: ReplaySubject<string> = new ReplaySubject(1);
+	private username_: string = null;
+	private password_: string = null;
+	/**
+	 * provides null if not authenticated
+	 */
+	private authoritiesRS$: ReplaySubject<string[]> = new ReplaySubject(1);
 
     /**
      * @description
      * Initial state:
-     * not ##isLoggedIn()
+     * * null username
+     * * null password
+     * * not ##authenticated$
+     * * no ##authorities$
      *
      * Instancing this class does not trigger a login request or any network traffic.
      */
-	constructor() {
-		this.usernameRS$.next(null);
+	constructor(
+		private http: HttpClient
+	) {
+		this.authoritiesRS$.next(null);
 	}
 
     /**
      * @description
-     * The name of the currently logged in user.
+     * The name of the current user.
      *
-     * Provides null if the user name is unknown,
+     * null if the user name is unknown,
      * which includes the case that the user is not logged in.
-     * Subscribing to this Observable does not trigger a login request.
-     *
-     * This Observable will publish new values when the currently logged in user changes.
-     * That is, this is a hot observable.
+     * The current user name can be known even if that user has not been authenticated.
      */
-	get username$(): Observable<string> {
-		return this.usernameRS$;
-	};
+	get username(): string {
+		return this.username_;
+	}
 
     /**
      * @description
-     * Whether the current user is logged in (authenticated).
+     * The password of the current user.
      *
-     * Provides true iff #username$ provides non null.
+     * null if the password is unknown,
+     * which includes the case that the user is not logged in.
+     * The current password name can be known even if that user has not been authenticated,
+     * or if authentication has been tried but failed (which includes the case that the password is invalid).
      */
-	get loggedIn$(): Observable<boolean> {
-		return this.username$.pipe(
-			map(n => n != null)
-		);
+	get password(): string {
+		return this.password_;
 	}
 
+	private handleUserDetailsHttpError() {
+		return (error: any): Observable<User> => {
+			console.error(error); // log to console instead
+			return of(null as User);
+		};
+	}
+
+	private getUserDetails(username: string, password: string): Observable<User> {
+		const headers = new HttpHeaders({
+			'Content-Type': 'application/json',
+			'Authorization': 'Basic ' + btoa(username + ':' + password)
+		});
+
+		return this.http.get<User>(apiUrl, { headers: headers })
+			.pipe(
+				catchError(this.handleUserDetailsHttpError())
+			);
+	}
+
+	private processResponse(username: string, password: string, details: User): boolean {
+		this.username_ = username;
+		this.password_ = password;
+		var authorities: string[] = details ? details.authorities : null;
+		this.authoritiesRS$.next(authorities);
+		return details != null;
+	}
 
 	/**
-	 * @description
-     * Attempt login (authentication) of the current user,
-     * using the associated Keycloak service.
+     * @description
+     * Change the credentials of the current user.
      *
-	 * This indirectly makes use of an HTTP request, which is a cold Observable,
+	 * The method attempts authentication (login) of the user,
+	 * providing a value indicating whether authentication was successful.
+	 * That indirectly makes use of an HTTP request, which is a cold Observable,
 	 * so this is a cold Observable too.
 	 * That is, the expensive HTTP request will not be made until something subscribes to this Observable.
 	 *
-	 * Iff the login is sucessful, the #getUsername() will be non null.
+	 * Iff the authentication is sucessful, #authenticated$ will provide true.
+	 * The method however updates the #username and #password attributes even if authentication fails.
+	 * The #authorities$ Observable will provide the authorities of the authenticated user,
+	 * if authentication is successful.
 	 */
-	login(): Observable<void> {
-		return defer(() => from(new Promise<void>((resolve, reject) => {
-			// FIXME
-			this.usernameRS$.next('jeff');
-			resolve(null);
-		})));
-}
+	authenticate(username: string, password: string): Observable<boolean> {
+		return defer(() =>
+			this.getUserDetails(username, password).pipe(
+				map(ud => this.processResponse(username, password, ud))
+			)
+		);
+	}
+
+    /**
+     * @description
+     * Whether the current user is authenticated (logged in).
+     *
+     * Not authenticated if #username is null or #password is null.
+     */
+	get authenticated$(): Observable<boolean> {
+		return this.authoritiesRS$.pipe(
+			map(a => a != null)
+		);
+	}
+
+	/**
+	 * @description
+     * The authorities (authorised roles) of the current user.
+     *
+     * These values are for role based access control (RBAC).
+     * A user that has not been authenticated has no authorities.
+     * An authenticated user could have no authorities, although that is unlikely in practice. 
+	 */
+	get authorities$(): Observable<string[]> {
+		return this.authoritiesRS$.pipe(
+			map(a => a ? a : [])
+		);
+	}
 }

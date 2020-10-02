@@ -22,11 +22,14 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -34,12 +37,12 @@ import javax.annotation.PreDestroy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testcontainers.lifecycle.TestDescription;
 
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
-import net.jcip.annotations.Immutable;
 import uk.badamson.mc.McContainers.HttpServer;
 
 /**
@@ -68,34 +71,6 @@ import uk.badamson.mc.McContainers.HttpServer;
  * @see WorldCoreScenarioHook
  */
 public final class WorldCore implements AutoCloseable {
-
-   @Immutable
-   public static final class User {
-
-      private final String name;
-      private final String password;
-      private final Set<String> roles;
-
-      public User(final String name, final String password,
-               final Set<String> roles) {
-         this.name = name;
-         this.password = password;
-         this.roles = Set.copyOf(roles);
-      }
-
-      public String getName() {
-         return name;
-      }
-
-      public String getPassword() {
-         return password;
-      }
-
-      public Set<String> getRoles() {
-         return roles;
-      }
-
-   }// class
 
    private static Optional<Throwable> createOutcomeException(
             final Scenario scenario) {
@@ -129,9 +104,15 @@ public final class WorldCore implements AutoCloseable {
       };
    }
 
-   private final McContainers containers = new McContainers();
+   private static String getPathOfUrl(final String url) {
+      return URI.create(url).getPath();
+   }
+
+   private final McContainers containers;
 
    private final Map<String, User> users = new HashMap<>();
+
+   private final Map<String, String> userPasswords = new HashMap<>();
 
    private RemoteWebDriver webDriver;
 
@@ -139,10 +120,21 @@ public final class WorldCore implements AutoCloseable {
 
    private URI localUrl;
 
-   private void addUser(final String name, final String password,
-            final Set<String> roles) {
-      containers.addUser(name, password);
-      users.put(name, new User(name, password, roles));
+   /**
+    * @param failureRecordingDirectory
+    *           The location of a directory in which to store files holding
+    *           verbose information about failed test cases. Or {@code null} if
+    *           no such records are to be made.
+    */
+   public WorldCore(final Path failureRecordingDirectory) {
+      containers = new McContainers(failureRecordingDirectory);
+   }
+
+   private void addUser(final User user) {
+      containers.addUser(user);
+      final var username = user.getUsername();
+      users.put(username, user);
+      userPasswords.put(username, user.getPassword());
    }
 
    /**
@@ -187,8 +179,10 @@ public final class WorldCore implements AutoCloseable {
    }
 
    private void createUsers() {
-      addUser("jeff", "password1", Set.of("player"));
-      addUser("alan", "password2", Set.of("player", "manage-users"));
+      addUser(new User("jeff", "password1", Authority.ALL, true, true, true,
+               true));
+      addUser(new User("allan", "password2", Set.of(Authority.ROLE_PLAYER),
+               true, true, true, true));
    }
 
    /**
@@ -207,6 +201,23 @@ public final class WorldCore implements AutoCloseable {
     */
    public void endScenario(final Scenario scenario) {
       tellContainersTestOutcome(scenario);
+   }
+
+   /**
+    * <p>
+    * The {@linkplain URI#getPath() path} component of the
+    * {@linkplain WebDriver#getCurrentUrl() current URL} of the browser.
+    * </p>
+    * <p>
+    * Tests should use value, rather than the current URL of the browser,
+    * because the current URL includes the server host-name, which is a test
+    * implementation detail.
+    * </p>
+    *
+    * @return the path; not null.
+    */
+   public String getCurrentUrlPath() {
+      return getPathOfUrl(webDriver.getCurrentUrl());
    }
 
    /**
@@ -246,6 +257,11 @@ public final class WorldCore implements AutoCloseable {
       }
    }
 
+   public String getPlaintextUserPassword(final String username) {
+      Objects.requireNonNull(username, "username");
+      return userPasswords.get(username);
+   }
+
    /**
     * <p>
     * Perform an HTTP GET of the front-end of the SUT, using the previously
@@ -276,9 +292,18 @@ public final class WorldCore implements AutoCloseable {
       webDriver.get(privateNetworkUrl.toASCIIString());
    }
 
-   public User getUserWithRole(final String role) {
+   public User getUserWithoutRole(final Authority role) {
+      Objects.requireNonNull(role, "role");
       return users.values().stream()
-               .filter(user -> user.getRoles().contains(role)).findAny().get();
+               .filter(user -> !user.getAuthorities().contains(role)).findAny()
+               .get();
+   }
+
+   public User getUserWithRole(final Authority role) {
+      Objects.requireNonNull(role, "role");
+      return users.values().stream()
+               .filter(user -> user.getAuthorities().contains(role)).findAny()
+               .get();
    }
 
    public RemoteWebDriver getWebDriver() {
@@ -319,6 +344,37 @@ public final class WorldCore implements AutoCloseable {
       final var testDescription = createTestDescription(scenario);
       final var exception = createOutcomeException(scenario);
       containers.afterTest(testDescription, exception);
+   }
+
+   /**
+    * <p>
+    * Wait until the {@linkplain #getCurrentUrlPath() path component of the
+    * current URL of the browser} becomes equal to a given path, of a timeout
+    * expires.
+    * </p>
+    *
+    * @param timeout
+    *           The maximum time, in seconds, to wait for the path of the
+    *           browser to become equal to the given {@code path}.
+    * @param path
+    *           The wanted path
+    * @throws TimeoutException
+    *            If the browser path does not become equal to the given
+    *            {@code path} within the given {@code timeout}.
+    */
+   public void waitUntilCurrentUrlPath(final long timeout, final String path)
+            throws TimeoutException {
+      final var current = new AtomicReference<String>();
+      try {
+         new WebDriverWait(webDriver, timeout).until(driver -> {
+            final var p = getPathOfUrl(driver.getCurrentUrl());
+            current.set(p);
+            return p.equals(path);
+         });
+      } catch (final org.openqa.selenium.TimeoutException e) {
+         throw new TimeoutException("Timeout while waiting URL path (currently "
+                  + current.get() + ") to become " + path);
+      }
    }
 
 }// class

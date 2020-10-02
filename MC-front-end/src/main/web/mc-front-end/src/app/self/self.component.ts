@@ -18,16 +18,8 @@ export class SelfComponent implements OnInit {
 		// Do nothing
 	}
 
-	username$: Observable<string> = this.service.username$;
+	get username(): string { return this.service.username; };
 
-	loggedIn$: Observable<boolean> = this.service.loggedIn$;
+	authenticated$: Observable<boolean> = this.service.authenticated$;
 
-	/**
-	 * This indirectly makes use of an HTTP request, which is a cold Observable,
-     * so this is a cold Observable too.
-     * That is, the expensive HTTP request will not be made until something subscribes to this Observable.
-	 */
-	login(): Observable<void> {
-		return this.service.login();
-	}
 }

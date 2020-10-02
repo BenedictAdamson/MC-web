@@ -57,7 +57,7 @@ public class PristineIT implements AutoCloseable {
     * for each test. This is a big win, because creating all the containers is
     * very expensive.
     */
-   private static final McContainers containers = new McContainers();
+   private static final McContainers containers = new McContainers(null);
 
    @BeforeAll
    public static void open() {
@@ -106,6 +106,20 @@ public class PristineIT implements AutoCloseable {
       } catch (IOException | NullPointerException e) {
          throw new IllegalStateException(e);
       }
+   }
+
+   @Test
+   @Order(3)
+   public void getUsersPageFromFrontEnd() {
+      assertGetHttpStatus(HttpServer.FRONT_END, "/user",
+               HttpURLConnection.HTTP_OK);
+   }
+
+   @Test
+   @Order(3)
+   public void getUsersPageThroughIngress() {
+      assertGetHttpStatus(HttpServer.INGRESS, "/user",
+               HttpURLConnection.HTTP_OK);
    }
 
    @Test

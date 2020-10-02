@@ -21,16 +21,20 @@ package uk.badamson.mc;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.WaitingConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * <p>
@@ -56,11 +60,36 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    public static final String CONNECTION_MESSAGE = "successfully connected to server";
 
-   McBackEndContainer(final String mongoDbHost, final String mongoDbPassword) {
+   private static String encodeAsJson(final Object obj) {
+      try {
+         final ObjectMapper mapper = new ObjectMapper();
+         return mapper.writeValueAsString(obj);
+      } catch (final Exception e) {
+         throw new IllegalArgumentException("can not encode Object as JSON", e);
+      }
+   }
+
+   private final String administratorPassword;
+
+   McBackEndContainer(final String mongoDbHost, final String mongoDbPassword,
+            final String administratorPassword) {
       super(IMAGE);
+      this.administratorPassword = Objects.requireNonNull(administratorPassword,
+               "administratorPassword");
       waitingFor(WAIT_STRATEGY);
       withEnv("SPRING_DATA_MONGODB_PASSWORD", mongoDbPassword);
+      withEnv("ADMINISTRATOR_PASSWORD", administratorPassword);
       withCommand("--spring.data.mongodb.host=" + mongoDbHost);
+   }
+
+   public ResponseSpec addUser(final User user) {
+      Objects.requireNonNull(user, "user");
+      final var request = connectWebTestClient("/api/user").post()
+               .contentType(MediaType.APPLICATION_JSON)
+               .headers(headers -> headers.setBasicAuth(
+                        User.ADMINISTRATOR_USERNAME, administratorPassword))
+               .bodyValue(encodeAsJson(user));
+      return request.exchange();
    }
 
    void assertHealthCheckOk() {

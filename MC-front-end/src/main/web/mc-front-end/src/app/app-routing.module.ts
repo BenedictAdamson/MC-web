@@ -12,23 +12,20 @@ import { UsersComponent } from './users/users.component';
  */
 const routes: Routes = [
 	{
-		path: '',
-		component: HomeComponent,
-		pathMatch: 'full'
+		path: 'user/:username',
+		component: UserComponent
 	},
 	{
 		path: 'login',
-		component: LoginComponent,
-		pathMatch: 'full'
+		component: LoginComponent
 	},
 	{
 		path: 'user',
-		component: UsersComponent,
-		pathMatch: 'full'
+		component: UsersComponent
 	},
 	{
-		path: 'user/:username',
-		component: UserComponent,
+		path: '',
+		component: HomeComponent,
 		pathMatch: 'full'
 	}
 ];
