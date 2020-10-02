@@ -40,6 +40,7 @@ export class LoginComponent implements OnInit {
 	login(): void {
 		this.service.authenticate(this.username, this.password).pipe(
 			tap((success) => {
+				this.rejected = !success;
 				if (success) {
 					this.router.navigateByUrl('/')
 				}
