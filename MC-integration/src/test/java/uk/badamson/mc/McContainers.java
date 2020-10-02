@@ -18,13 +18,17 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import java.net.URI;
 import java.util.Optional;
-import java.util.concurrent.TimeoutException;
 
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.containers.BrowserWebDriverContainer;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.lifecycle.Startable;
 import org.testcontainers.lifecycle.TestDescription;
@@ -43,36 +47,83 @@ import uk.badamson.mc.repository.McDatabaseContainer;
 public class McContainers
          implements Startable, AutoCloseable, TestLifecycleAware {
 
-   private static final URI BASE_URI = URI
-            .create("http://" + McReverseProxyContainer.HOST);
+   public static enum HttpServer {
+      BACK_END, FRONT_END, INGRESS
+   }// enum
 
-   public static final String INGRESS_HOST = BASE_URI.getAuthority();
+   private static final String BE_HOST = "be";
+   private static final String DB_HOST = "db";
+   private static final String FE_HOST = "fe";
+   private static final String REVERSE_PROXY_HOST = "in";
 
-   public static String createUrlFromPath(final String path) {
-      return BASE_URI.resolve(path).toASCIIString();
+   private static final URI BASE_PRIVATE_NETWORK_URI = URI
+            .create("http://" + REVERSE_PROXY_HOST);
+
+   private static final String DB_ROOT_PASSWORD = "secret2";
+   private static final String DB_USER_PASSWORD = "secret3";
+
+   private static void assertThatNoErrorMessagesLogged(final String container,
+            final String logs) {
+      assertThat(container + " logs no errors", logs,
+               not(containsString("ERROR:")));
+   }
+
+   public static URI createIngressPrivateNetworkUriFromPath(final String path) {
+      return BASE_PRIVATE_NETWORK_URI.resolve(path);
+   }
+
+   public URI createUriFromPath(final HttpServer server, final String path) {
+      GenericContainer<?> container = null;
+      switch (server) {
+      case BACK_END:
+         container = be;
+         break;
+      case FRONT_END:
+         container = fe;
+         break;
+      case INGRESS:
+         container = in;
+         break;
+      }
+      final var base = URI.create("http://" + container.getHost() + ":"
+               + container.getFirstMappedPort());
+      return base.resolve(path);
    }
 
    private final Network network = Network.newNetwork();
 
-   private final McDatabaseContainer db = new McDatabaseContainer()
-            .withNetwork(network);
+   private final McDatabaseContainer db = new McDatabaseContainer(
+            DB_ROOT_PASSWORD, DB_USER_PASSWORD).withNetwork(network)
+                     .withNetworkAliases(DB_HOST);
 
-   private final McBackEndContainer be = new McBackEndContainer()
-            .withNetwork(network).withCommand("--spring.data.mongodb.host=db");
+   private final McBackEndContainer be = new McBackEndContainer(DB_HOST,
+            DB_USER_PASSWORD).withNetwork(network).withNetworkAliases(BE_HOST);
 
    private final McFrontEndContainer fe = new McFrontEndContainer()
-            .withNetwork(network);
+            .withNetwork(network).withNetworkAliases(FE_HOST);
 
    private final McReverseProxyContainer in = new McReverseProxyContainer()
-            .withNetwork(network);
+            .withNetwork(network).withNetworkAliases(REVERSE_PROXY_HOST);
 
    private final BrowserWebDriverContainer<?> browser = new BrowserWebDriverContainer<>()
             .withCapabilities(new FirefoxOptions()).withNetwork(network);
+
+   public void addPlayer(final String user, final String password) {
+      // FIXME
+   }
 
    @Override
    public void afterTest(final TestDescription description,
             final Optional<Throwable> throwable) {
       browser.afterTest(description, throwable);
+   }
+
+   public void assertThatNoErrorMessagesLogged() {
+      assertThatNoErrorMessagesLogged("db", db.getLogs());
+      assertThatNoErrorMessagesLogged("be", be.getLogs());
+      assertThatNoErrorMessagesLogged("fe", fe.getLogs());
+      assertThatNoErrorMessagesLogged("in", in.getLogs());
+      assertThatNoErrorMessagesLogged("browser", browser.getLogs());
    }
 
    @Override
@@ -104,18 +155,11 @@ public class McContainers
        * Start the containers bottom-up, and wait until each is ready, to reduce
        * the number of transient connection errors.
        */
-      try {
-         db.start();
-         db.waitUntilAcceptsConnections();
-         be.start();
-         be.waitUntilReady();
-         be.awaitHealthCheckOk();
-         fe.start();
-         in.start();
-         browser.start();
-      } catch (TimeoutException | InterruptedException e) {
-         throw new RuntimeException("Unable to start all mc containers", e);
-      }
+      db.start();
+      be.start();
+      fe.start();
+      in.start();
+      browser.start();
    }
 
    @Override
@@ -129,6 +173,6 @@ public class McContainers
       fe.stop();
       be.stop();
       db.stop();
+      close();
    }
-
 }

@@ -35,6 +35,7 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "mc.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        provides: db
     spec:
       containers:
       - name: mc-db
@@ -53,16 +54,20 @@ spec:
         - name: MONGO_INITDB_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-db-password-secret
-              key: root-password
+              name: {{ .Release.Name }}-secrets
+              key: db-root-password
         - name: MC_INIT_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-db-password-secret
-              key: user-password
+              name: {{ .Release.Name }}-secrets
+              key: db-user-password
         volumeMounts:
         - mountPath: /data/db
           name: mc-data-db
+        resources:
+          requests:
+            cpu: "0.5"
+            memory: "256M"
       volumes:
       - name: mc-data-db
         emptyDir: {}

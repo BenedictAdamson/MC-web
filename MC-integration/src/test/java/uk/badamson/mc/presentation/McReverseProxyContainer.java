@@ -37,8 +37,6 @@ public final class McReverseProxyContainer
 
    public static final int PORT = 80;
 
-   public static final String HOST = "in";
-
    private static final ImageFromDockerfile IMAGE = new ImageFromDockerfile()
             .withFileFromClasspath("Dockerfile", "reverse-proxy.Dockerfile")
             .withFileFromClasspath("rp.conf", "reverse-proxy.rp.conf");
@@ -46,7 +44,6 @@ public final class McReverseProxyContainer
    public McReverseProxyContainer() {
       super(IMAGE);
       addExposedPort(PORT);
-      withNetworkAliases(HOST);
       waitingFor(Wait.forListeningPort());
    }
 

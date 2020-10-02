@@ -49,8 +49,6 @@ public final class McDatabaseContainer
 
    public static final int PORT = 27017;
 
-   public static final String HOST = "db";
-
    public static final String AUTHENTICATION_DB = "admin";
 
    public static final String DB = "mc";
@@ -58,18 +56,6 @@ public final class McDatabaseContainer
    private static final String NORMAL_USER = "mc";
 
    private static final String ROOT_USER = "admin";
-
-   private static final String ROOT_PASSWORD = "letmein";
-
-   private static final String USER_PASSWORD = "password123";
-
-   public static final MongoCredential USER_CREDENTIALS = MongoCredential
-            .createCredential(NORMAL_USER, AUTHENTICATION_DB,
-                     USER_PASSWORD.toCharArray());
-
-   public static final MongoCredential ROOT_CREDENTIALS = MongoCredential
-            .createCredential(ROOT_USER, AUTHENTICATION_DB,
-                     ROOT_PASSWORD.toCharArray());
 
    public static final MongoCredential BAD_CREDENTIALS = MongoCredential
             .createCredential("BAD", AUTHENTICATION_DB, "BAD".toCharArray());
@@ -85,13 +71,21 @@ public final class McDatabaseContainer
             .withStrategy(
                      Wait.forLogMessage(".*[Ww]aiting for connection.*", 1));
 
-   public McDatabaseContainer() {
+   public final MongoCredential userCredentials;
+
+   public final MongoCredential rootCredentials;
+
+   public McDatabaseContainer(final String rootPassword,
+            final String userPassword) {
       super(IMAGE);
+      userCredentials = MongoCredential.createCredential(NORMAL_USER,
+               AUTHENTICATION_DB, userPassword.toCharArray());
+      rootCredentials = MongoCredential.createCredential(ROOT_USER,
+               AUTHENTICATION_DB, rootPassword.toCharArray());
       addExposedPort(PORT);
-      withEnv("MONGO_INITDB_ROOT_PASSWORD", ROOT_PASSWORD);
-      withEnv("MC_INIT_PASSWORD", USER_PASSWORD);
+      withEnv("MONGO_INITDB_ROOT_PASSWORD", rootPassword);
+      withEnv("MC_INIT_PASSWORD", userPassword);
       withCommand("--bind_ip", "0.0.0.0");
-      withNetworkAliases(HOST);
       withMinimumRunningDuration(STARTUP_TIME);
       waitingFor(WAIT_STRATEGY);
    }
@@ -105,11 +99,5 @@ public final class McDatabaseContainer
 
    private ServerAddress getServerAddress() {
       return new ServerAddress(getHost(), getMappedPort(PORT));
-   }
-
-   public void waitUntilAcceptsConnections() {
-      try (final var client = createClient(ROOT_CREDENTIALS);) {
-         client.getDatabase(DB);
-      }
    }
 }

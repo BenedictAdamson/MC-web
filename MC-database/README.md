@@ -1,7 +1,9 @@
 # MC-database
 © Copyright Benedict Adamson 2018-20.
 
-MC-database is the database server of the Mission Command game. It is a [mongoDB](https://www.mongodb.com/) document database server.
+MC-database is the game database server of the Mission Command game.
+It is a [mongoDB](https://www.mongodb.com/) document database server.
+It is distinct from the MC-auth-db component, which is the authentication and authorization database server.
 
 MC-database is a Docker image, based on the official [`mongo` image](https://hub.docker.com/_/mongo) published by monogoDB. A Docker image for MC-database is available from the  public repository
 [https://hub.docker.com/r/benedictadamson/mc-database](https://hub.docker.com/r/benedictadamson/mc-database).

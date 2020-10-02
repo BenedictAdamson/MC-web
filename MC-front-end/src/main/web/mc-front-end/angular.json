@@ -136,5 +136,8 @@
       }
     }
   },
-  "defaultProject": "mc-front-end"
+  "defaultProject": "mc-front-end",
+  "cli": {
+    "analytics": false
+  }
 }

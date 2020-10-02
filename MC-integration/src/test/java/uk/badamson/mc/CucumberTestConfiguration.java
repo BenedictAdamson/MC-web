@@ -18,7 +18,7 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.context.annotation.Import;
 
 import io.cucumber.spring.CucumberContextConfiguration;
 
@@ -29,7 +29,7 @@ import io.cucumber.spring.CucumberContextConfiguration;
  * </p>
  */
 @CucumberContextConfiguration
-@AutoConfigureWebTestClient
+@Import(value = { CucumberBeansConfiguration.class })
 public class CucumberTestConfiguration {
 
 }
