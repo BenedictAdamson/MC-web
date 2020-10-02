@@ -139,7 +139,7 @@ public final class WorldCore implements AutoCloseable {
    }
 
    private void addUser(final User user) {
-      containers.addUser(user);
+      containers.addUser(user);// records the user in the DB, through the BE
       final var username = user.getUsername();
       users.put(username, user);
       userPasswords.put(username, user.getPassword());
