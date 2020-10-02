@@ -90,7 +90,7 @@ export class SelfService {
 		this.password_ = password;
 		var authorities: string[] = details ? details.authorities : null;
 		this.authoritiesRS$.next(authorities);
-		return details != null;
+		return authorities != null;
 	}
 
 	/**
