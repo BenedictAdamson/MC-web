@@ -321,8 +321,18 @@ public final class WorldCore implements AutoCloseable {
    @PostConstruct
    public void open() {
       containers.start();
-      webDriver = containers.getWebDriver();
-      createUsers();
+      try {
+         /*
+          * @PreDestroy method will not be called if we throw an exception, so
+          * must roll-back ourself in that case. Important because this
+          * allocates expensive resources.
+          */
+         webDriver = containers.getWebDriver();
+         createUsers();
+      } catch (Exception e) {
+         close();
+         throw e;
+      }
    }
 
    /**
