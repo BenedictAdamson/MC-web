@@ -113,35 +113,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<!--Work around Failsafe/Surefire not yet using Test Engine discovery 
-					functionality of JUnit 5 -->
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>Cucumber-integration-test</id>
-						<phase>integration-test</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<target>
-						<java classname="org.junit.platform.console.ConsoleLauncher"
-							fork="true" failonerror="true" newenvironment="true"
-							maxmemory="512m" classpathref="maven.test.classpath">
-							<arg value="--include-engine" />
-							<arg value="cucumber" />
-							<arg value="--select-package=uk.badamson.mc" />
-							<arg value="--include-tag" />
-							<arg value="integration" />
-							<arg value="--reports-dir=target/failsafe-reports" /> <!-- expected location if had used failsafe plugin -->
-						</java>
-					</target>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<executions>
@@ -169,6 +140,46 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<includes>
+						<include>**/*IT.java</include>
+					</includes>
+					<excludes>
+						<!-- Will run the expensive Cucumber integration tests after the other 
+							integration tests. -->
+						<exclude>**/*CucumberIT.java</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!--Work around Failsafe/Surefire not yet using Test Engine discovery 
+					functionality of JUnit 5. Run after the Failsafe executed integration tests, 
+					because those tests are faster and check that the Cucumber tests can be run. -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>Cucumber-integration-test</id>
+						<phase>integration-test</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<target>
+						<java classname="org.junit.platform.console.ConsoleLauncher"
+							fork="true" failonerror="true" newenvironment="true"
+							maxmemory="512m" classpathref="maven.test.classpath">
+							<arg value="--include-engine" />
+							<arg value="cucumber" />
+							<arg value="--select-package=uk.badamson.mc" />
+							<arg value="--include-tag" />
+							<arg value="integration" />
+							<arg value="--reports-dir=target/failsafe-reports" /> <!-- expected location if had used failsafe plugin -->
+						</java>
+					</target>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
