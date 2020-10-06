@@ -66,6 +66,9 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    private static final String DB_USER_PASSWORD = "secret3";
    private static final String ADMINISTARTOR_PASSWORD = "secret4";
 
+   private static final User USER_A = new User("jeff", "password",
+            Authority.ALL, true, true, true, true);
+
    private final Network network = Network.newNetwork();
 
    private final McDatabaseContainer db = new McDatabaseContainer(
@@ -79,10 +82,8 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    @Test
    @Order(2)
    public void addUser() {
-      final var user = new User("jeff", "password", Authority.ALL, true, true,
-               true, true);
 
-      final ResponseSpec response = be.addUser(user);
+      final ResponseSpec response = be.addUser(USER_A);
 
       response.expectStatus().isCreated();
       final List<User> users;
@@ -92,7 +93,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
          throw new AssertionFailedError("Unable to get list of users", e);
       }
       assertThat("Added user", users.stream()
-               .anyMatch(u -> user.getUsername().equals(u.getUsername())));
+               .anyMatch(u -> USER_A.getUsername().equals(u.getUsername())));
    }
 
    private void assertThatNoErrorMessagesLogged(final String logs) {
