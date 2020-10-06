@@ -19,8 +19,7 @@ package uk.badamson.mc;
  */
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.IOException;
@@ -110,11 +109,13 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    @Test
    @Order(2)
    public void getUsers() {
+      final List<User> users;
       try {
-         getUsers1();
+         users = getUsers1();
       } catch (final IOException e) {
          throw new AssertionFailedError("Unable to get list of users", e);
       }
+      assertThat("List of users", users, not(empty()));
    }
 
    private List<User> getUsers1() throws IOException {
