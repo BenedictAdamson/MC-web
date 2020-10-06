@@ -18,17 +18,22 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.en.Given;
@@ -69,6 +74,34 @@ public class UserSteps {
       // TODO
    }
 
+   private void assertCurrentUrlPath(final String expectedPath) {
+      assertThat("Current URL path", worldCore.getCurrentUrlPath(),
+               is(expectedPath));
+   }
+
+   private void assertHasElementWithTag(final String tag) {
+      Objects.requireNonNull(tag, "tag");
+      try {
+         element = worldCore.getWebDriver().findElement(By.tagName(tag));
+      } catch (final NoSuchElementException e) {
+         throw new AssertionFailedError("has element with tag " + tag, e);
+      }
+   }
+
+   public void assertHaveErrorMessages() {
+      assertThat("Error message(s)",
+               worldCore.getWebDriver().findElements(By.className("error")),
+               not(empty()));
+   }
+
+   private void assertNoErrorMessages() {
+      final var elements = worldCore.getWebDriver()
+               .findElements(By.className("error"));
+      // Report the error messages, to provide better diagnostics
+      assertThat("No error messages", elements.stream().map(e -> e.getText())
+               .collect(toUnmodifiableList()), is(empty()));
+   }
+
    @Then("can get the list of users")
    public void can_get_list_of_users() {
       // TODO
@@ -77,8 +110,8 @@ public class UserSteps {
    @Then("MC does not present adding a user as an option")
    public void does_not_present_adding_user_option() {
       getUrlUsingBrowser("/user");
-      final var webDriver = worldCore.getWebDriver();
-      assertThat("No add-user link", webDriver.findElementsById("add-user"),
+      assertThat("No add-user link",
+               worldCore.getWebDriver().findElements(By.id("add-user")),
                empty());
    }
 
@@ -104,32 +137,23 @@ public class UserSteps {
    @Then("the list of users has at least one user")
    public void list_of_users_not_empty() {
       Objects.requireNonNull(element);
-      assertThat("list entries", element.findElements(By.tagName("li")),
-               not(empty()));
+      assertThat(element.findElements(By.tagName("li")), not(empty()));
    }
 
    @Given("logged in")
-   public void logged_in() throws TimeoutException {
-      login();
-   }
-
-   private void login() throws TimeoutException {
-      Objects.requireNonNull(user, "user");
-      final var username = user.getUsername();
-      submitLogin(username, worldCore.getPlaintextUserPassword(username));
-      worldCore.waitUntilCurrentUrlPath(17, "/");
+   public void logged_in() {
+      tryToLogin();
+      assertCurrentUrlPath("/");
    }
 
    @When("log in using correct password")
    public void login_using_correct_password() throws TimeoutException {
-      login();
+      tryToLogin();
    }
 
    @Then("MC accepts the login")
    public void mc_accepts_login() {
-      final var webDriver = worldCore.getWebDriver();
-      assertThat("No error messages",
-               webDriver.findElementsByClassName("error"), is(empty()));
+      assertAll(() -> assertCurrentUrlPath("/"), () -> assertNoErrorMessages());
    }
 
    @Then("MC accepts the addition")
@@ -137,33 +161,60 @@ public class UserSteps {
       // TODO
    }
 
+   @Then("MC rejects the login")
+   public void mc_rejects_login() {
+      assertAll(() -> assertCurrentUrlPath("/login"),
+               () -> assertHaveErrorMessages());
+   }
+
    @Then("MC serves the users page")
    public void mc_serves_users_page() {
-      final var webDriver = worldCore.getWebDriver();
-      element = webDriver.findElementByTagName("h2");
+      assertHasElementWithTag("h2");
       assertThat("Has a header saying \"Users\"", element.getText(),
                containsString("Users"));
    }
 
-   @Given("redirected to home-page")
+   @Then("redirected to home-page")
    public void redirected_to_home_page() {
       assertThat("URL path", worldCore.getCurrentUrlPath(), is("/"));
    }
 
    @Then("the response is a list of users")
    public void response_is_list_of_users() {
-      final var webDriver = worldCore.getWebDriver();
-      element = webDriver.findElementByTagName("ul");
+      assertHasElementWithTag("ul");
    }
 
    private void submitLogin(final String name, final String password) {
       getHomePage();
       final var webDriver = worldCore.getWebDriver();
-      webDriver.findElementById("login").click();
-      webDriver.findElementByName("username").sendKeys(name);
-      webDriver.findElementByXPath("//input[@type='password']")
+      webDriver.findElement(By.id("login")).click();
+      webDriver.findElement(By.name("username")).sendKeys(name);
+      webDriver.findElement(By.xpath("//input[@type='password']"))
                .sendKeys(password);
-      webDriver.findElementByXPath("//button[@type='submit']").submit();
+      webDriver.findElement(By.xpath("//button[@type='submit']")).submit();
+   }
+
+   @When("try to login")
+   public void try_to_login() throws Exception {
+      tryToLogin();
+   }
+
+   private void tryToLogin() {
+      Objects.requireNonNull(user, "user");
+      submitLogin(user.getUsername(), user.getPassword());
+      try {// await success or error message
+         new WebDriverWait(worldCore.getWebDriver(), 17).until(driver -> "/"
+                  .equals(WorldCore.getPathOfUrl(driver.getCurrentUrl()))
+                  || !driver.findElements(By.className("error")).isEmpty());
+      } catch (final Exception e) {// give better diagnostics
+         throw new IllegalStateException(
+                  "No indication of login success or failure", e);
+      }
+   }
+
+   @Given("unknown user")
+   public void unknown_user() {
+      user = worldCore.getUnknownUser();
    }
 
    @Given("user does not have the {string} role")

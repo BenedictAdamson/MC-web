@@ -117,6 +117,23 @@ public class McContainers
       }
    }
 
+   /**
+    * <p>
+    * Add a user in the database, through the back-end, using the API of the
+    * back-end.
+    * </p>
+    * <p>
+    * As this does not use the front-end, it is more suitable for setting up
+    * test-cases.
+    * </p>
+    *
+    * @param user
+    *           The user to add.
+    * @throws NullPointerException
+    *            If {@code user} is null
+    * @throws RuntimeException
+    *            If the addition was rejected by the back-end.
+    */
    public void addUser(final User user) {
       try {
          final var response = be.addUser(user);

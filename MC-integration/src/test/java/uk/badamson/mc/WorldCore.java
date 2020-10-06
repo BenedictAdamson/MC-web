@@ -104,7 +104,7 @@ public final class WorldCore implements AutoCloseable {
       };
    }
 
-   private static String getPathOfUrl(final String url) {
+   static String getPathOfUrl(final String url) {
       return URI.create(url).getPath();
    }
 
@@ -112,7 +112,7 @@ public final class WorldCore implements AutoCloseable {
 
    private final Map<String, User> users = new HashMap<>();
 
-   private final Map<String, String> userPasswords = new HashMap<>();
+   private final Map<String, User> unknownUsers = new HashMap<>();
 
    private RemoteWebDriver webDriver;
 
@@ -130,11 +130,14 @@ public final class WorldCore implements AutoCloseable {
       containers = new McContainers(failureRecordingDirectory);
    }
 
+   private void addUnknownUser(final User user) {
+      unknownUsers.put(user.getUsername(), user);
+   }
+
    private void addUser(final User user) {
-      containers.addUser(user);
-      final var username = user.getUsername();
-      users.put(username, user);
-      userPasswords.put(username, user.getPassword());
+      containers.addUser(user);// records the user in the DB, through the BE
+      users.put(user.getUsername(), user);
+
    }
 
    /**
@@ -183,6 +186,8 @@ public final class WorldCore implements AutoCloseable {
                true));
       addUser(new User("allan", "password2", Set.of(Authority.ROLE_PLAYER),
                true, true, true, true));
+      addUnknownUser(new User("mark", "password3", Authority.ALL, true, true,
+               true, true));
    }
 
    /**
@@ -257,9 +262,8 @@ public final class WorldCore implements AutoCloseable {
       }
    }
 
-   public String getPlaintextUserPassword(final String username) {
-      Objects.requireNonNull(username, "username");
-      return userPasswords.get(username);
+   public User getUnknownUser() {
+      return users.values().stream().findAny().get();
    }
 
    /**
@@ -306,7 +310,7 @@ public final class WorldCore implements AutoCloseable {
                .get();
    }
 
-   public RemoteWebDriver getWebDriver() {
+   public WebDriver getWebDriver() {
       Objects.requireNonNull(webDriver, "webDriver");
       return webDriver;
    }
