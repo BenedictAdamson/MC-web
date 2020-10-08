@@ -271,7 +271,7 @@ public final class WorldCore implements AutoCloseable {
    }
 
    public User getUnknownUser() {
-      return users.values().stream().findAny().get();
+      return unknownUsers.values().stream().findAny().get();
    }
 
    /**
