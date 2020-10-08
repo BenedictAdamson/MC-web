@@ -58,6 +58,10 @@ public class McContainers
       BACK_END, FRONT_END, INGRESS
    }// enum
 
+   private static final SimpleDateFormat FILENAME_TIMESTAMP_FORMAT = new SimpleDateFormat(
+            "YYYYMMdd-HHmmss");
+   private static final String FILENAME_FORMAT = "FAILED-%s-%s-%s.log";
+
    private static final String BE_HOST = "be";
    private static final String DB_HOST = "db";
    private static final String FE_HOST = "fe";
@@ -159,20 +163,18 @@ public class McContainers
    }
 
    private void retainLogFiles(String prefix) {
-      retainLogFile(failureRecordingDirectory, DB_HOST, prefix, db);
-      retainLogFile(failureRecordingDirectory, BE_HOST, prefix, be);
-      retainLogFile(failureRecordingDirectory, FE_HOST, prefix, fe);
-      retainLogFile(failureRecordingDirectory, REVERSE_PROXY_HOST, prefix, in);
+      final var timestamp = FILENAME_TIMESTAMP_FORMAT.format(new Date());
+      retainLogFile(failureRecordingDirectory, prefix, timestamp, DB_HOST, db);
+      retainLogFile(failureRecordingDirectory, prefix, timestamp, BE_HOST, be);
+      retainLogFile(failureRecordingDirectory, prefix, timestamp, FE_HOST, fe);
+      retainLogFile(failureRecordingDirectory, prefix, timestamp,
+               REVERSE_PROXY_HOST, in);
    }
 
-   private static final SimpleDateFormat FILENAME_TIMESTAMP_FORMAT = new SimpleDateFormat(
-            "YYYYMMdd-HHmmss");
-   private static final String FILENAME_FORMAT = "FAILED-%s-%s.log";
-
-   private static void retainLogFile(Path directory, String prefix, String host,
-            GenericContainer<?> container) {
-      final String leafName = String.format(FILENAME_FORMAT, prefix, host,
-               FILENAME_TIMESTAMP_FORMAT.format(new Date()));
+   private static void retainLogFile(Path directory, String prefix,
+            String timestamp, String host, GenericContainer<?> container) {
+      final String leafName = String.format(FILENAME_FORMAT, prefix, timestamp,
+               host);
       final Path path = directory.resolve(leafName);
       try {
          Files.writeString(path, container.getLogs(), StandardCharsets.UTF_8);
