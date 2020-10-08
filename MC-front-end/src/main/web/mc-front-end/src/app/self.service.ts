@@ -75,8 +75,7 @@ export class SelfService {
 
 	private getUserDetails(username: string, password: string): Observable<User> {
 		const headers = new HttpHeaders({
-			'Content-Type': 'application/json',
-			'Authorization': 'Basic ' + btoa(username + ':' + password)
+			authorization: 'Basic ' + btoa(username + ':' + password)
 		});
 
 		return this.http.get<User>(apiUrl, { headers: headers })

@@ -122,7 +122,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
                TimeUnit.SECONDS);
    }
 
-   private WebTestClient connectWebTestClient(final String path) {
+   public WebTestClient connectWebTestClient(final String path) {
       final var scheme = "http";
       final String userInfo = null;
       final String query = null;

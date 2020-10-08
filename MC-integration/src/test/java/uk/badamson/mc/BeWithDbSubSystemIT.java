@@ -20,6 +20,8 @@ package uk.badamson.mc;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -36,6 +38,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.opentest4j.AssertionFailedError;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.WebTestClient.RequestHeadersSpec;
 import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -67,6 +71,9 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    private static final String DB_USER_PASSWORD = "secret3";
    private static final String ADMINISTARTOR_PASSWORD = "secret4";
 
+   private static final User USER_A = new User("jeff", "password",
+            Authority.ALL, true, true, true, true);
+
    private final Network network = Network.newNetwork();
 
    private final McDatabaseContainer db = new McDatabaseContainer(
@@ -80,10 +87,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    @Test
    @Order(2)
    public void addUser() {
-      final var user = new User("jeff", "password", Authority.ALL, true, true,
-               true, true);
-
-      final ResponseSpec response = be.addUser(user);
+      final ResponseSpec response = be.addUser(USER_A);
 
       response.expectStatus().isCreated();
       final List<User> users;
@@ -93,7 +97,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
          throw new AssertionFailedError("Unable to get list of users", e);
       }
       assertThat("Added user", users.stream()
-               .anyMatch(u -> user.getUsername().equals(u.getUsername())));
+               .anyMatch(u -> USER_A.getUsername().equals(u.getUsername())));
    }
 
    private void assertThatNoErrorMessagesLogged(final String logs) {
@@ -107,14 +111,70 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       network.close();
    }
 
+   private RequestHeadersSpec<?> createGetSelfRequest(final String username,
+            final String password) {
+      return be.connectWebTestClient("/api/self").get()
+               .accept(MediaType.APPLICATION_JSON)
+               .headers(headers -> headers.setBasicAuth(username, password));
+   }
+
+   @Test
+   @Order(2)
+   public void getSelf_unknownUser() throws Exception {
+      final var user = USER_A;
+      final var request = createGetSelfRequest(user.getUsername(),
+               user.getPassword());
+
+      final var response = request.exchange();
+
+      response.expectStatus().isUnauthorized();
+   }
+
+   @Test
+   @Order(3)
+   public void getSelf_valid() throws Exception {
+      final var user = USER_A;
+      be.addUser(user);
+      final var request = createGetSelfRequest(user.getUsername(),
+               user.getPassword());
+
+      final var response = request.exchange();
+
+      response.expectStatus().isOk();
+      final String responseJson = response.returnResult(String.class)
+               .getResponseBody().blockFirst(Duration.ofSeconds(9));
+      final User responseUser = new ObjectMapper().readValue(responseJson,
+               User.class);
+      assertAll("responded with user details",
+               () -> assertThat("username", responseUser.getUsername(),
+                        is(user.getUsername())),
+               () -> assertThat("authorities", responseUser.getAuthorities(),
+                        is(user.getAuthorities())));
+   }
+
+   @Test
+   @Order(4)
+   public void getSelf_wrongPassword() throws Exception {
+      final var user = USER_A;
+      be.addUser(user);
+      final var request = createGetSelfRequest(user.getUsername(),
+               "*" + user.getPassword());
+
+      final var response = request.exchange();
+
+      response.expectStatus().isUnauthorized();
+   }
+
    @Test
    @Order(2)
    public void getUsers() {
+      final List<User> users;
       try {
-         getUsers1();
+         users = getUsers1();
       } catch (final IOException e) {
          throw new AssertionFailedError("Unable to get list of users", e);
       }
+      assertThat("List of users", users, not(empty()));
    }
 
    private List<User> getUsers1() throws IOException {

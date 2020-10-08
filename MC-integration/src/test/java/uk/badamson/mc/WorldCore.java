@@ -182,6 +182,10 @@ public final class WorldCore implements AutoCloseable {
    }
 
    private void createUsers() {
+      users.put(User.ADMINISTRATOR_USERNAME,
+               new User(User.ADMINISTRATOR_USERNAME,
+                        McContainers.ADMINISTARTOR_PASSWORD, Authority.ALL,
+                        true, true, true, true));
       addUser(new User("jeff", "password1", Authority.ALL, true, true, true,
                true));
       addUser(new User("allan", "password2", Set.of(Authority.ROLE_PLAYER),
@@ -206,6 +210,10 @@ public final class WorldCore implements AutoCloseable {
     */
    public void endScenario(final Scenario scenario) {
       tellContainersTestOutcome(scenario);
+   }
+
+   public User getAdministratorUser() {
+      return users.get(User.ADMINISTRATOR_USERNAME);
    }
 
    /**
@@ -263,7 +271,7 @@ public final class WorldCore implements AutoCloseable {
    }
 
    public User getUnknownUser() {
-      return users.values().stream().findAny().get();
+      return unknownUsers.values().stream().findAny().get();
    }
 
    /**
@@ -305,9 +313,10 @@ public final class WorldCore implements AutoCloseable {
 
    public User getUserWithRole(final Authority role) {
       Objects.requireNonNull(role, "role");
-      return users.values().stream()
-               .filter(user -> user.getAuthorities().contains(role)).findAny()
-               .get();
+      return users.values().stream().filter(user -> user.getAuthorities()
+               .contains(role)
+               && !User.ADMINISTRATOR_USERNAME.equals(user.getUsername()))
+               .findAny().get();
    }
 
    public WebDriver getWebDriver() {
@@ -321,8 +330,18 @@ public final class WorldCore implements AutoCloseable {
    @PostConstruct
    public void open() {
       containers.start();
-      webDriver = containers.getWebDriver();
-      createUsers();
+      try {
+         /*
+          * @PreDestroy method will not be called if we throw an exception, so
+          * must roll-back ourself in that case. Important because this
+          * allocates expensive resources.
+          */
+         webDriver = containers.getWebDriver();
+         createUsers();
+      } catch (final Exception e) {
+         close();
+         throw e;
+      }
    }
 
    /**
@@ -346,7 +365,7 @@ public final class WorldCore implements AutoCloseable {
 
    private void tellContainersTestOutcome(final Scenario scenario) {
       final var testDescription = createTestDescription(scenario);
-      final var exception = createOutcomeException(scenario);
+      final Optional<Throwable> exception = createOutcomeException(scenario);
       containers.afterTest(testDescription, exception);
    }
 

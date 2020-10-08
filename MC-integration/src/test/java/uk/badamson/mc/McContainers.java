@@ -24,8 +24,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Optional;
 
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -55,6 +58,10 @@ public class McContainers
       BACK_END, FRONT_END, INGRESS
    }// enum
 
+   private static final SimpleDateFormat FILENAME_TIMESTAMP_FORMAT = new SimpleDateFormat(
+            "YYYYMMdd-HHmmss");
+   private static final String FILENAME_FORMAT = "FAILED-%s-%s-%s.log";
+
    private static final String BE_HOST = "be";
    private static final String DB_HOST = "db";
    private static final String FE_HOST = "fe";
@@ -65,7 +72,7 @@ public class McContainers
 
    private static final String DB_ROOT_PASSWORD = "secret2";
    private static final String DB_USER_PASSWORD = "secret3";
-   private static final String ADMINISTARTOR_PASSWORD = "secret4";
+   public static final String ADMINISTARTOR_PASSWORD = "secret4";
 
    private static void assertThatNoErrorMessagesLogged(final String container,
             final String logs) {
@@ -76,6 +83,21 @@ public class McContainers
    public static URI createIngressPrivateNetworkUriFromPath(final String path) {
       return BASE_PRIVATE_NETWORK_URI.resolve(path);
    }
+
+   private static void retainLogFile(final Path directory, final String prefix,
+            final String timestamp, final String host,
+            final GenericContainer<?> container) {
+      final String leafName = String.format(FILENAME_FORMAT, prefix, timestamp,
+               host);
+      final Path path = directory.resolve(leafName);
+      try {
+         Files.writeString(path, container.getLogs(), StandardCharsets.UTF_8);
+      } catch (final IOException e) {
+         throw new RuntimeException(e);
+      }
+   }
+
+   private final Path failureRecordingDirectory;
 
    private final Network network = Network.newNetwork();
 
@@ -102,6 +124,7 @@ public class McContainers
     *           no such records are to be made.
     */
    public McContainers(final Path failureRecordingDirectory) {
+      this.failureRecordingDirectory = failureRecordingDirectory;
       browser = new BrowserWebDriverContainer<>();
       browser.withCapabilities(new FirefoxOptions().addPreference(
                "security.insecure_field_warning.contextual.enabled", false))
@@ -147,6 +170,9 @@ public class McContainers
    public void afterTest(final TestDescription description,
             final Optional<Throwable> throwable) {
       browser.afterTest(description, throwable);
+      if (failureRecordingDirectory != null && throwable.isPresent()) {
+         retainLogFiles(description.getFilesystemFriendlyName());
+      }
    }
 
    public void assertThatNoErrorMessagesLogged() {
@@ -196,6 +222,15 @@ public class McContainers
 
    public RemoteWebDriver getWebDriver() {
       return browser.getWebDriver();
+   }
+
+   private void retainLogFiles(final String prefix) {
+      final var timestamp = FILENAME_TIMESTAMP_FORMAT.format(new Date());
+      retainLogFile(failureRecordingDirectory, prefix, timestamp, DB_HOST, db);
+      retainLogFile(failureRecordingDirectory, prefix, timestamp, BE_HOST, be);
+      retainLogFile(failureRecordingDirectory, prefix, timestamp, FE_HOST, fe);
+      retainLogFile(failureRecordingDirectory, prefix, timestamp,
+               REVERSE_PROXY_HOST, in);
    }
 
    @Override
