@@ -19,7 +19,10 @@ package uk.badamson.mc;
  */
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.IOException;
@@ -35,6 +38,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.opentest4j.AssertionFailedError;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -82,7 +86,6 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    @Test
    @Order(2)
    public void addUser() {
-
       final ResponseSpec response = be.addUser(USER_A);
 
       response.expectStatus().isCreated();
@@ -105,6 +108,28 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       be.close();
       db.close();
       network.close();
+   }
+
+   @Test
+   @Order(3)
+   public void getSelf() throws Exception {
+      final var user = USER_A;
+      be.addUser(user);
+      final var request = be.connectWebTestClient("/api/self").get()
+               .accept(MediaType.APPLICATION_JSON).headers(headers -> headers
+                        .setBasicAuth(user.getUsername(), user.getPassword()));
+
+      final var response = request.exchange();
+
+      response.expectStatus().isOk();
+      final String responseJson = response.returnResult(String.class)
+               .getResponseBody().blockFirst(Duration.ofSeconds(9));
+      final User responseUser = new ObjectMapper().readValue(responseJson, User.class);
+      assertAll("responded with user details",
+               () -> assertThat("username", responseUser.getUsername(),
+                        is(user.getUsername())),
+               () -> assertThat("authorities", responseUser.getAuthorities(),
+                        is(user.getAuthorities())));
    }
 
    @Test
