@@ -39,6 +39,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.opentest4j.AssertionFailedError;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.WebTestClient.RequestHeadersSpec;
 import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -110,26 +111,58 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       network.close();
    }
 
+   private RequestHeadersSpec<?> createGetSelfRequest(final String username,
+            final String password) {
+      return be.connectWebTestClient("/api/self").get()
+               .accept(MediaType.APPLICATION_JSON)
+               .headers(headers -> headers.setBasicAuth(username, password));
+   }
+
+   @Test
+   @Order(2)
+   public void getSelf_unknownUser() throws Exception {
+      final var user = USER_A;
+      final var request = createGetSelfRequest(user.getUsername(),
+               user.getPassword());
+
+      final var response = request.exchange();
+
+      response.expectStatus().isUnauthorized();
+   }
+
    @Test
    @Order(3)
-   public void getSelf() throws Exception {
+   public void getSelf_valid() throws Exception {
       final var user = USER_A;
       be.addUser(user);
-      final var request = be.connectWebTestClient("/api/self").get()
-               .accept(MediaType.APPLICATION_JSON).headers(headers -> headers
-                        .setBasicAuth(user.getUsername(), user.getPassword()));
+      final var request = createGetSelfRequest(user.getUsername(),
+               user.getPassword());
 
       final var response = request.exchange();
 
       response.expectStatus().isOk();
       final String responseJson = response.returnResult(String.class)
                .getResponseBody().blockFirst(Duration.ofSeconds(9));
-      final User responseUser = new ObjectMapper().readValue(responseJson, User.class);
+      final User responseUser = new ObjectMapper().readValue(responseJson,
+               User.class);
       assertAll("responded with user details",
                () -> assertThat("username", responseUser.getUsername(),
                         is(user.getUsername())),
                () -> assertThat("authorities", responseUser.getAuthorities(),
                         is(user.getAuthorities())));
+   }
+
+   @Test
+   @Order(4)
+   public void getSelf_wrongPassword() throws Exception {
+      final var user = USER_A;
+      be.addUser(user);
+      final var request = createGetSelfRequest(user.getUsername(),
+               "*" + user.getPassword());
+
+      final var response = request.exchange();
+
+      response.expectStatus().isUnauthorized();
    }
 
    @Test
