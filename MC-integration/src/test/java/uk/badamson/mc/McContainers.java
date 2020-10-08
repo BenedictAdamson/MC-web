@@ -24,8 +24,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Optional;
 
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -77,6 +80,8 @@ public class McContainers
       return BASE_PRIVATE_NETWORK_URI.resolve(path);
    }
 
+   private final Path failureRecordingDirectory;
+
    private final Network network = Network.newNetwork();
 
    private final McDatabaseContainer db = new McDatabaseContainer(
@@ -102,6 +107,7 @@ public class McContainers
     *           no such records are to be made.
     */
    public McContainers(final Path failureRecordingDirectory) {
+      this.failureRecordingDirectory = failureRecordingDirectory;
       browser = new BrowserWebDriverContainer<>();
       browser.withCapabilities(new FirefoxOptions().addPreference(
                "security.insecure_field_warning.contextual.enabled", false))
@@ -147,6 +153,32 @@ public class McContainers
    public void afterTest(final TestDescription description,
             final Optional<Throwable> throwable) {
       browser.afterTest(description, throwable);
+      if (failureRecordingDirectory != null && throwable.isPresent()) {
+         retainLogFiles(description.getFilesystemFriendlyName());
+      }
+   }
+
+   private void retainLogFiles(String prefix) {
+      retainLogFile(failureRecordingDirectory, DB_HOST, prefix, db);
+      retainLogFile(failureRecordingDirectory, BE_HOST, prefix, be);
+      retainLogFile(failureRecordingDirectory, FE_HOST, prefix, fe);
+      retainLogFile(failureRecordingDirectory, REVERSE_PROXY_HOST, prefix, in);
+   }
+
+   private static final SimpleDateFormat FILENAME_TIMESTAMP_FORMAT = new SimpleDateFormat(
+            "YYYYMMdd-HHmmss");
+   private static final String FILENAME_FORMAT = "FAILED-%s-%s.log";
+
+   private static void retainLogFile(Path directory, String prefix, String host,
+            GenericContainer<?> container) {
+      final String leafName = String.format(FILENAME_FORMAT, prefix, host,
+               FILENAME_TIMESTAMP_FORMAT.format(new Date()));
+      final Path path = directory.resolve(leafName);
+      try {
+         Files.writeString(path, container.getLogs(), StandardCharsets.UTF_8);
+      } catch (IOException e) {
+         throw new RuntimeException(e);
+      }
    }
 
    public void assertThatNoErrorMessagesLogged() {

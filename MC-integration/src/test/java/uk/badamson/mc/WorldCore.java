@@ -329,7 +329,7 @@ public final class WorldCore implements AutoCloseable {
           */
          webDriver = containers.getWebDriver();
          createUsers();
-      } catch (Exception e) {
+      } catch (final Exception e) {
          close();
          throw e;
       }
@@ -356,7 +356,7 @@ public final class WorldCore implements AutoCloseable {
 
    private void tellContainersTestOutcome(final Scenario scenario) {
       final var testDescription = createTestDescription(scenario);
-      final var exception = createOutcomeException(scenario);
+      final Optional<Throwable> exception = createOutcomeException(scenario);
       containers.afterTest(testDescription, exception);
    }
 
