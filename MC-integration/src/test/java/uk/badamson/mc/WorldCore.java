@@ -313,9 +313,10 @@ public final class WorldCore implements AutoCloseable {
 
    public User getUserWithRole(final Authority role) {
       Objects.requireNonNull(role, "role");
-      return users.values().stream()
-               .filter(user -> user.getAuthorities().contains(role)).findAny()
-               .get();
+      return users.values().stream().filter(user -> user.getAuthorities()
+               .contains(role)
+               && !User.ADMINISTRATOR_USERNAME.equals(user.getUsername()))
+               .findAny().get();
    }
 
    public WebDriver getWebDriver() {
