@@ -182,6 +182,10 @@ public final class WorldCore implements AutoCloseable {
    }
 
    private void createUsers() {
+      users.put(User.ADMINISTRATOR_USERNAME,
+               new User(User.ADMINISTRATOR_USERNAME,
+                        McContainers.ADMINISTARTOR_PASSWORD, Authority.ALL,
+                        true, true, true, true));
       addUser(new User("jeff", "password1", Authority.ALL, true, true, true,
                true));
       addUser(new User("allan", "password2", Set.of(Authority.ROLE_PLAYER),
@@ -206,6 +210,10 @@ public final class WorldCore implements AutoCloseable {
     */
    public void endScenario(final Scenario scenario) {
       tellContainersTestOutcome(scenario);
+   }
+
+   public User getAdministratorUser() {
+      return users.get(User.ADMINISTRATOR_USERNAME);
    }
 
    /**

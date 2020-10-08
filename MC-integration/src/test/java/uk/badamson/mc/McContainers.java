@@ -72,7 +72,7 @@ public class McContainers
 
    private static final String DB_ROOT_PASSWORD = "secret2";
    private static final String DB_USER_PASSWORD = "secret3";
-   private static final String ADMINISTARTOR_PASSWORD = "secret4";
+   public static final String ADMINISTARTOR_PASSWORD = "secret4";
 
    private static void assertThatNoErrorMessagesLogged(final String container,
             final String logs) {
@@ -82,6 +82,19 @@ public class McContainers
 
    public static URI createIngressPrivateNetworkUriFromPath(final String path) {
       return BASE_PRIVATE_NETWORK_URI.resolve(path);
+   }
+
+   private static void retainLogFile(final Path directory, final String prefix,
+            final String timestamp, final String host,
+            final GenericContainer<?> container) {
+      final String leafName = String.format(FILENAME_FORMAT, prefix, timestamp,
+               host);
+      final Path path = directory.resolve(leafName);
+      try {
+         Files.writeString(path, container.getLogs(), StandardCharsets.UTF_8);
+      } catch (final IOException e) {
+         throw new RuntimeException(e);
+      }
    }
 
    private final Path failureRecordingDirectory;
@@ -162,27 +175,6 @@ public class McContainers
       }
    }
 
-   private void retainLogFiles(String prefix) {
-      final var timestamp = FILENAME_TIMESTAMP_FORMAT.format(new Date());
-      retainLogFile(failureRecordingDirectory, prefix, timestamp, DB_HOST, db);
-      retainLogFile(failureRecordingDirectory, prefix, timestamp, BE_HOST, be);
-      retainLogFile(failureRecordingDirectory, prefix, timestamp, FE_HOST, fe);
-      retainLogFile(failureRecordingDirectory, prefix, timestamp,
-               REVERSE_PROXY_HOST, in);
-   }
-
-   private static void retainLogFile(Path directory, String prefix,
-            String timestamp, String host, GenericContainer<?> container) {
-      final String leafName = String.format(FILENAME_FORMAT, prefix, timestamp,
-               host);
-      final Path path = directory.resolve(leafName);
-      try {
-         Files.writeString(path, container.getLogs(), StandardCharsets.UTF_8);
-      } catch (IOException e) {
-         throw new RuntimeException(e);
-      }
-   }
-
    public void assertThatNoErrorMessagesLogged() {
       assertThatNoErrorMessagesLogged("db", db.getLogs());
       assertThatNoErrorMessagesLogged("be", be.getLogs());
@@ -230,6 +222,15 @@ public class McContainers
 
    public RemoteWebDriver getWebDriver() {
       return browser.getWebDriver();
+   }
+
+   private void retainLogFiles(final String prefix) {
+      final var timestamp = FILENAME_TIMESTAMP_FORMAT.format(new Date());
+      retainLogFile(failureRecordingDirectory, prefix, timestamp, DB_HOST, db);
+      retainLogFile(failureRecordingDirectory, prefix, timestamp, BE_HOST, be);
+      retainLogFile(failureRecordingDirectory, prefix, timestamp, FE_HOST, fe);
+      retainLogFile(failureRecordingDirectory, prefix, timestamp,
+               REVERSE_PROXY_HOST, in);
    }
 
    @Override

@@ -226,4 +226,9 @@ public class UserSteps {
    public void user_has_role(final String roleName) {
       user = worldCore.getUserWithRole(parseRoleName(roleName));
    }
+
+   @Given("user is the administrator")
+   public void user_is_administrator() {
+      user = worldCore.getAdministratorUser();
+   }
 }
