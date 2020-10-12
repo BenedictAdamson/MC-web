@@ -150,6 +150,10 @@ public class UserSteps {
       }
    }
 
+   private String getBodyText() {
+      return worldCore.getWebDriver().findElement(By.tagName("body")).getText();
+   }
+
    private void getHomePage() {
       getUrlUsingBrowser("/");
    }
@@ -189,7 +193,9 @@ public class UserSteps {
 
    @Then("MC accepts the login")
    public void mc_accepts_login() {
-      assertAll(() -> assertCurrentUrlPath("/"), () -> assertNoErrorMessages());
+      assertAll(() -> assertCurrentUrlPath("/"), () -> assertNoErrorMessages(),
+               () -> assertThat("Reports that is logged in", getBodyText(),
+                        containsString("Logged in")));
    }
 
    @Then("MC accepts the addition")
