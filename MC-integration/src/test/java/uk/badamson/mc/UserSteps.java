@@ -73,7 +73,8 @@ public class UserSteps {
 
    @When("adding a user named {string} with  password {string}")
    public void adding_a_user(final String user, final String password) {
-      getUrlUsingBrowser("/users");
+      tryToGetUsersPage();
+      awaitSuccessOrErrorMessage("/user");
       final var webDriver = worldCore.getWebDriver();
       webDriver.findElement(ADD_USER_LINK_LOCATOR).click();
       webDriver.findElement(By.name("username")).sendKeys(user);
@@ -160,7 +161,8 @@ public class UserSteps {
 
    @When("getting the users")
    public void getting_users() {
-      getUrlUsingBrowser("/user");
+      tryToGetUsersPage();
+      awaitSuccessOrErrorMessage("/user");
    }
 
    private void getUrlUsingBrowser(final String path) {
@@ -237,6 +239,11 @@ public class UserSteps {
    @When("try to login")
    public void try_to_login() throws Exception {
       tryToLogin();
+   }
+
+   private void tryToGetUsersPage() {
+      final var webDriver = worldCore.getWebDriver();
+      webDriver.findElement(By.xpath("//a[@href='user']")).click();
    }
 
    private void tryToLogin() {
