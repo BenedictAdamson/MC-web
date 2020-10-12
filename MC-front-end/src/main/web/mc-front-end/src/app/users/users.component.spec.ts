@@ -3,45 +3,69 @@ import { of } from 'rxjs';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { SelfService } from '../self.service';
 import { User } from '../user';
 import { UsersComponent } from './users.component';
 import { UserService } from '../user.service';
 
 describe('UsersComponent', () => {
-    let component: UsersComponent;
-    let fixture: ComponentFixture<UsersComponent>;
+	let component: UsersComponent;
+	let fixture: ComponentFixture<UsersComponent>;
 
-    const USER_A = { username: 'Administrator', password: null, authorities: ['ROLE_ADMIN'] };
-    const USER_B = { username: 'Benedict', password: null, authorities: [] };
+	const USER_ADMIN = { username: 'Administrator', password: null, authorities: ['ROLE_MANAGE_USERS'] };
+	const USER_NORMAL = { username: 'Benedict', password: null, authorities: [] };
 
-    const setUp = (testUsers: User[]) => {
-        const userServiceStub = jasmine.createSpyObj('UserService', ['getUsers']);
-        userServiceStub.getUsers.and.returnValue(of(testUsers));
+	const setUp = (self: User, testUsers: User[]) => {
+		const selfServiceStub = jasmine.createSpyObj('SelfService', ['username', 'authorities$']);
+		selfServiceStub.username.and.returnValue(self.username);
+		selfServiceStub.authorities$.and.returnValue(of(self.authorities));
 
-        TestBed.configureTestingModule({
-            declarations: [UsersComponent],
-            imports: [RouterTestingModule],
-            providers: [
-                { provide: UserService, useValue: userServiceStub }]
-        });
+		const userServiceStub = jasmine.createSpyObj('UserService', ['getUsers']);
+		userServiceStub.getUsers.and.returnValue(of(testUsers));
 
-        fixture = TestBed.createComponent(UsersComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
-    };
+		TestBed.configureTestingModule({
+			declarations: [UsersComponent],
+			imports: [RouterTestingModule],
+			providers: [
+				{ provide: SelfService, useValue: selfServiceStub },
+				{ provide: UserService, useValue: userServiceStub }
+			]
+		});
 
-    const canCreate = (testUsers: User[]) => {
-        setUp(testUsers);
+		fixture = TestBed.createComponent(UsersComponent);
+		component = fixture.componentInstance;
+		fixture.detectChanges();
+	};
 
-        expect(component).toBeTruthy();
-        expect(component.users).toBe(testUsers);
-    };
+	const canCreate = (self: User, testUsers: User[]) => {
+		setUp(self, testUsers);
 
-    it('can create [1]', () => {
-        canCreate([USER_A]);
-    });
+		expect(component).toBeTruthy();
+		expect(component.users).toBe(testUsers);
+	};
 
-    it('can create [2]', () => {
-        canCreate([USER_A, USER_B]);
-    });
+	it('can create [1]', () => {
+		canCreate(USER_ADMIN, [USER_ADMIN]);
+	});
+
+	it('can create [2]', () => {
+		canCreate(USER_NORMAL, [USER_ADMIN, USER_NORMAL]);
+	});
+
+	it('does not provide an add-user link for normal users', () => {
+		setUp(USER_NORMAL, [USER_ADMIN, USER_NORMAL]);
+
+		const element: HTMLElement = fixture.nativeElement;
+		const link = element.querySelector('a[id="add-user"]');
+		expect(link).toBeNull();
+	});
+
+	it('provides an add-user link for an administrator', () => {
+		setUp(USER_ADMIN, [USER_ADMIN, USER_NORMAL]);
+
+		const element: HTMLElement = fixture.nativeElement;
+		const link = element.querySelector('a[id="add-user"]');
+		expect(link).not.toBeNull();
+		expect(link.textContent).toContain('add user');
+	});
 });
