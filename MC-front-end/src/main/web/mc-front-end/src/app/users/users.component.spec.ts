@@ -1,4 +1,5 @@
-import { of } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, ReplaySubject, defer, of, from } from 'rxjs';
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -8,6 +9,21 @@ import { User } from '../user';
 import { UsersComponent } from './users.component';
 import { UserService } from '../user.service';
 
+class MockSelfService {
+
+	constructor(private self: User) { };
+
+	get username(): string {
+		return this.self.username;
+	}
+
+
+	get authorities$(): Observable<string[]> {
+		return of(this.self.authorities);
+	}
+}
+
+
 describe('UsersComponent', () => {
 	let component: UsersComponent;
 	let fixture: ComponentFixture<UsersComponent>;
@@ -16,10 +32,6 @@ describe('UsersComponent', () => {
 	const USER_NORMAL = { username: 'Benedict', password: null, authorities: [] };
 
 	const setUp = (self: User, testUsers: User[]) => {
-		const selfServiceStub = jasmine.createSpyObj('SelfService', ['username', 'authorities$']);
-		selfServiceStub.username.and.returnValue(self.username);
-		selfServiceStub.authorities$.and.returnValue(of(self.authorities));
-
 		const userServiceStub = jasmine.createSpyObj('UserService', ['getUsers']);
 		userServiceStub.getUsers.and.returnValue(of(testUsers));
 
@@ -27,7 +39,7 @@ describe('UsersComponent', () => {
 			declarations: [UsersComponent],
 			imports: [RouterTestingModule],
 			providers: [
-				{ provide: SelfService, useValue: selfServiceStub },
+				{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } },
 				{ provide: UserService, useValue: userServiceStub }
 			]
 		});
