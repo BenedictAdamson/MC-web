@@ -1,23 +1,36 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+import { SelfService } from '../self.service';
 import { User } from '../user';
 import { UserService } from '../user.service';
 
 @Component({
-    selector: 'app-users',
-    templateUrl: './users.component.html',
-    styleUrls: ['./users.component.css']
+	selector: 'app-users',
+	templateUrl: './users.component.html',
+	styleUrls: ['./users.component.css']
 })
 export class UsersComponent implements OnInit {
 
-    users: User[];
+	users: User[];
 
-    constructor(private userService: UserService) { }
+	constructor(private selfService: SelfService, private userService: UserService) { }
 
-    ngOnInit() {
-        this.getUsers();
-    }
+	ngOnInit() {
+		this.userService.getUsers().subscribe(users => this.users = users);
+	}
+	
+	/**
+	 * @description
+     * Whether the current user has permission to manage (add and remove) users.
+     *
+     * A user that has not been authenticated does not have that permission.
+	 */
+	get mayManageUsers$(): Observable<boolean> {
+		return this.selfService.authorities$.pipe(
+			map(authorities => authorities.includes('ROLE_MANAGE_USERS'))
+		);
+	}
 
-    getUsers(): void {
-        this.userService.getUsers().subscribe(users => this.users = users);
-    }
 }

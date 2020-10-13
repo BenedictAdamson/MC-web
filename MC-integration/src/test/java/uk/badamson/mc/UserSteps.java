@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -47,6 +48,8 @@ import io.cucumber.java.en.When;
  * </p>
  */
 public class UserSteps {
+
+   private static final By ADD_USER_LINK_LOCATOR = By.id("add-user");
 
    private static Authority parseRoleName(final String roleName) {
       final Authority role;
@@ -71,7 +74,14 @@ public class UserSteps {
 
    @When("adding a user named {string} with  password {string}")
    public void adding_a_user(final String user, final String password) {
-      // TODO
+      tryToGetUsersPage();
+      awaitSuccessOrErrorMessage("/user");
+      final var webDriver = worldCore.getWebDriver();
+      webDriver.findElement(ADD_USER_LINK_LOCATOR).click();
+      webDriver.findElement(By.name("username")).sendKeys(user);
+      webDriver.findElement(By.xpath("//input[@type='password']"))
+               .sendKeys(password);
+      webDriver.findElement(By.xpath("//button[@type='submit']")).submit();
    }
 
    private void assertCurrentUrlPath(final String expectedPath) {
@@ -79,19 +89,16 @@ public class UserSteps {
                is(expectedPath));
    }
 
-   private void assertHasElementWithTag(final String tag) {
-      Objects.requireNonNull(tag, "tag");
-      try {
-         element = worldCore.getWebDriver().findElement(By.tagName(tag));
-      } catch (final NoSuchElementException e) {
-         throw new AssertionFailedError("has element with tag " + tag, e);
-      }
-   }
-
    public void assertHaveErrorMessages() {
       assertThat("Error message(s)",
                worldCore.getWebDriver().findElements(By.className("error")),
                not(empty()));
+   }
+
+   private void assertIsUsersPage() {
+      findElementWithTag("h2");
+      assertThat("Has a header saying \"Users\"", element.getText(),
+               containsString("Users"));
    }
 
    private void assertNoErrorMessages() {
@@ -102,17 +109,54 @@ public class UserSteps {
                .collect(toUnmodifiableList()), is(empty()));
    }
 
+   private void awaitSuccessOrErrorMessage(final String expectedSuccessUrlPath)
+            throws IllegalStateException {
+      var currentPath = new AtomicReference<String>();
+      try {
+         new WebDriverWait(worldCore.getWebDriver(), 17).until(driver -> {
+            currentPath.set(WorldCore.getPathOfUrl(driver.getCurrentUrl()));
+            return expectedSuccessUrlPath.equals(currentPath.get())
+                     || !driver.findElements(By.className("error")).isEmpty();
+         });
+      } catch (final Exception e) {// give better diagnostics
+         throw new IllegalStateException(
+                  "No indication of success or failure (at " + currentPath.get()
+                           + ")",
+                  e);
+      }
+   }
+
    @Then("can get the list of users")
    public void can_get_list_of_users() {
-      // TODO
+      getUrlUsingBrowser("/user");
+      assertIsUsersPage();
    }
 
    @Then("MC does not present adding a user as an option")
    public void does_not_present_adding_user_option() {
       getUrlUsingBrowser("/user");
       assertThat("No add-user link",
-               worldCore.getWebDriver().findElements(By.id("add-user")),
+               worldCore.getWebDriver().findElements(ADD_USER_LINK_LOCATOR),
                empty());
+   }
+
+   /*
+    * Sets {@code this.element} to the found element.
+    *
+    * @throws AssertionFailedError if no such element is present.
+    */
+   private void findElementWithTag(final String tag) {
+      Objects.requireNonNull(tag, "tag");
+      try {
+         element = worldCore.getWebDriver().findElement(By.tagName(tag));
+      } catch (final NoSuchElementException e) {
+         element = null;
+         throw new AssertionFailedError("has element with tag " + tag, e);
+      }
+   }
+
+   private String getBodyText() {
+      return worldCore.getWebDriver().findElement(By.tagName("body")).getText();
    }
 
    private void getHomePage() {
@@ -121,7 +165,8 @@ public class UserSteps {
 
    @When("getting the users")
    public void getting_users() {
-      getUrlUsingBrowser("/user");
+      tryToGetUsersPage();
+      awaitSuccessOrErrorMessage("/user");
    }
 
    private void getUrlUsingBrowser(final String path) {
@@ -131,7 +176,8 @@ public class UserSteps {
 
    @Then("the list of users includes a user named {string}")
    public void list_of_users_includes(final String name) {
-      // TODO
+      findElementWithTag("ul");
+      assertThat(element.getText(), containsString(name));
    }
 
    @Then("the list of users has at least one user")
@@ -153,12 +199,18 @@ public class UserSteps {
 
    @Then("MC accepts the login")
    public void mc_accepts_login() {
-      assertAll(() -> assertCurrentUrlPath("/"), () -> assertNoErrorMessages());
+      assertAll(() -> assertCurrentUrlPath("/"), () -> assertNoErrorMessages(),
+               () -> assertThat("Reports that is logged in", getBodyText(),
+                        containsString("Logged in")));
    }
 
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() {
-      // TODO
+      try {
+         awaitSuccessOrErrorMessage("/user");
+      } catch (IllegalStateException e) {
+         throw new AssertionFailedError(e.getMessage(), e);
+      }
    }
 
    @Then("MC rejects the login")
@@ -169,9 +221,7 @@ public class UserSteps {
 
    @Then("MC serves the users page")
    public void mc_serves_users_page() {
-      assertHasElementWithTag("h2");
-      assertThat("Has a header saying \"Users\"", element.getText(),
-               containsString("Users"));
+      assertIsUsersPage();
    }
 
    @Then("redirected to home-page")
@@ -181,7 +231,7 @@ public class UserSteps {
 
    @Then("the response is a list of users")
    public void response_is_list_of_users() {
-      assertHasElementWithTag("ul");
+      findElementWithTag("ul");
    }
 
    private void submitLogin(final String name, final String password) {
@@ -199,17 +249,15 @@ public class UserSteps {
       tryToLogin();
    }
 
+   private void tryToGetUsersPage() {
+      final var webDriver = worldCore.getWebDriver();
+      webDriver.findElement(By.id("users")).click();
+   }
+
    private void tryToLogin() {
       Objects.requireNonNull(user, "user");
       submitLogin(user.getUsername(), user.getPassword());
-      try {// await success or error message
-         new WebDriverWait(worldCore.getWebDriver(), 17).until(driver -> "/"
-                  .equals(WorldCore.getPathOfUrl(driver.getCurrentUrl()))
-                  || !driver.findElements(By.className("error")).isEmpty());
-      } catch (final Exception e) {// give better diagnostics
-         throw new IllegalStateException(
-                  "No indication of login success or failure", e);
-      }
+      awaitSuccessOrErrorMessage("/");
    }
 
    @Given("unknown user")

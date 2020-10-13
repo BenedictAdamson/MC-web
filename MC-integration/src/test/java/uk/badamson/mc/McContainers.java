@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
 
+import org.openqa.selenium.OutputType;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.containers.BrowserWebDriverContainer;
@@ -60,7 +61,8 @@ public class McContainers
 
    private static final SimpleDateFormat FILENAME_TIMESTAMP_FORMAT = new SimpleDateFormat(
             "YYYYMMdd-HHmmss");
-   private static final String FILENAME_FORMAT = "FAILED-%s-%s-%s.log";
+   private static final String LOGFILE_FILENAME_FORMAT = "FAILED-%s-%s-%s.log";
+   private static final String SCREENSHOT_FILENAME_FORMAT = "FAILED-%s-%s.png";
 
    private static final String BE_HOST = "be";
    private static final String DB_HOST = "db";
@@ -87,8 +89,8 @@ public class McContainers
    private static void retainLogFile(final Path directory, final String prefix,
             final String timestamp, final String host,
             final GenericContainer<?> container) {
-      final String leafName = String.format(FILENAME_FORMAT, prefix, timestamp,
-               host);
+      final String leafName = String.format(LOGFILE_FILENAME_FORMAT, prefix,
+               timestamp, host);
       final Path path = directory.resolve(leafName);
       try {
          Files.writeString(path, container.getLogs(), StandardCharsets.UTF_8);
@@ -171,7 +173,10 @@ public class McContainers
             final Optional<Throwable> throwable) {
       browser.afterTest(description, throwable);
       if (failureRecordingDirectory != null && throwable.isPresent()) {
-         retainLogFiles(description.getFilesystemFriendlyName());
+         final var timestamp = FILENAME_TIMESTAMP_FORMAT.format(new Date());
+         final var filenamePrefix = description.getFilesystemFriendlyName();
+         retainLogFiles(filenamePrefix, timestamp);
+         retainScreenshot(filenamePrefix, timestamp);
       }
    }
 
@@ -224,13 +229,24 @@ public class McContainers
       return browser.getWebDriver();
    }
 
-   private void retainLogFiles(final String prefix) {
-      final var timestamp = FILENAME_TIMESTAMP_FORMAT.format(new Date());
+   private void retainLogFiles(final String prefix, final String timestamp) {
       retainLogFile(failureRecordingDirectory, prefix, timestamp, DB_HOST, db);
       retainLogFile(failureRecordingDirectory, prefix, timestamp, BE_HOST, be);
       retainLogFile(failureRecordingDirectory, prefix, timestamp, FE_HOST, fe);
       retainLogFile(failureRecordingDirectory, prefix, timestamp,
                REVERSE_PROXY_HOST, in);
+   }
+
+   private void retainScreenshot(final String prefix, final String timestamp) {
+      final String leafName = String.format(SCREENSHOT_FILENAME_FORMAT, prefix,
+               timestamp);
+      final Path path = failureRecordingDirectory.resolve(leafName);
+      try {
+         final byte[] bytes = getWebDriver().getScreenshotAs(OutputType.BYTES);
+         Files.write(path, bytes);
+      } catch (final Exception e) {
+         throw new RuntimeException(e);
+      }
    }
 
    @Override

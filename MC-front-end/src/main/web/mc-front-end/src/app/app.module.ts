@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
+import { AddUserComponent } from './add-user/add-user.component';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { LoginComponent } from './login/login.component';
@@ -24,6 +25,7 @@ import { SelfComponent } from './self/self.component';
 		RouterModule
 	],
 	declarations: [
+		AddUserComponent,
 		AppComponent,
 		HomeComponent,
 		LoginComponent,
