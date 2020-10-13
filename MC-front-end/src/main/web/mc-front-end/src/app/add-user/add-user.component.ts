@@ -7,7 +7,7 @@ import { User } from '../user';
 import { UserService } from '../user.service';
 
 @Component({
-	selector: 'app-login',
+	selector: 'app-add-user',
 	templateUrl: './add-user.component.html',
 	styleUrls: ['./add-user.component.css']
 })
