@@ -134,6 +134,10 @@ describe('AddUserComponent', () => {
 		expect(component.rejected).withContext('rejected').toBeFalse();
 		expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(1);
 		expect(routerSpy.navigateByUrl.calls.argsFor(0)).withContext('router.navigateByUrl args').toEqual(['/user']);
+		const addedUser: User = userService.users[userService.users.length - 1];
+		expect(addedUser.username).withContext('added username').toEqual(userDetails.username);
+		expect(addedUser.password).withContext('added password').toEqual(userDetails.password);
+		expect(addedUser.authorities).withContext('added authorities').toEqual([]);
 	};
 
 	it('should handle addition success [A]', fakeAsync(() => {

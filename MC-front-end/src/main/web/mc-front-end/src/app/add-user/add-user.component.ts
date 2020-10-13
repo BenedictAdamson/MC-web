@@ -39,7 +39,7 @@ export class AddUserComponent implements OnInit {
      * through the UserService associated with this component.
      */
 	add(): void {
-		const user: User = { username: this.username, password: 'FIXME', authorities: [] };//FIXME
+		const user: User = { username: this.username, password: this.password, authorities: [] };
 		this.service.add(user).subscribe(
 			ok => {
 				this.rejected = !ok;
