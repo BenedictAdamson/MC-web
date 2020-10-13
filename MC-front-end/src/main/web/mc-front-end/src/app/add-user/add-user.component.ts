@@ -34,10 +34,10 @@ export class AddUserComponent implements OnInit {
 
 	/**
      * @description
-     * Attempts to authenticate using the #username and #password,
+     * Attempts to add a user using the #username and #password,
      * through the SelfService associated with this component.
      */
-	login(): void {
+	add(): void {
 		this.service.authenticate(this.username, this.password).pipe(
 			tap((success) => {
 				this.rejected = !success;

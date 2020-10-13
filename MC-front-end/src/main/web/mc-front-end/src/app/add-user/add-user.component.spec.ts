@@ -126,10 +126,10 @@ describe('AddUserComponent', () => {
 	};
 
 
-	const testLoginFailure = function(done, userDetails: User) {
+	const testAddFailure = function(done, userDetails: User) {
 		component.username = userDetails.username;
 		component.password = userDetails.password;
-		component.login();
+		component.add();
 		mockHttpAuthorizationFailure();
 		expect(component.username).withContext('username').toEqual(selfService.username);
 		expect(component.password).withContext('password').toEqual(selfService.password);
@@ -139,18 +139,18 @@ describe('AddUserComponent', () => {
 	};
 
 	it('should handle login failure [A]', (done) => {
-		testLoginFailure(done, USER_A);
+		testAddFailure(done, USER_A);
 	});
 
 	it('should handle login failure [B]', (done) => {
-		testLoginFailure(done, USER_B);
+		testAddFailure(done, USER_B);
 	});
 
 
-	const testLoginSuccess = function(done, userDetails: User) {
+	const testAddSuccess = function(done, userDetails: User) {
 		component.username = userDetails.username;
 		component.password = userDetails.password;
-		component.login();
+		component.add();
 		mockAuthenticationSuccess(userDetails);
 		expect(component.username).withContext('username').toEqual(selfService.username);
 		expect(component.password).withContext('password').toEqual(selfService.password);
@@ -161,10 +161,10 @@ describe('AddUserComponent', () => {
 	};
 
 	it('should handle login success [A]', (done) => {
-		testLoginSuccess(done, USER_A);
+		testAddSuccess(done, USER_A);
 	});
 
 	it('should handle login success [B]', (done) => {
-		testLoginSuccess(done, USER_B);
+		testAddSuccess(done, USER_B);
 	});
 });
