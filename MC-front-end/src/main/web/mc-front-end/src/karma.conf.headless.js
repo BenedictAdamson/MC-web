@@ -11,6 +11,6 @@ module.exports = function (config) {
     config.set({
         singleRun: true,
         autoWatch: false,
-        browsers: ['ChromeHeadless']
+        browsers: ['ChromeHeadlessNoSandbox']
     });
 };
