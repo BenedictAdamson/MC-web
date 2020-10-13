@@ -1,20 +1,41 @@
 import { Router } from '@angular/router';
+import { Observable, of } from 'rxjs';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { fakeAsync, tick } from 'zone.js/dist/zone-testing';
 
 import { AddUserComponent } from './add-user.component';
-import { SelfService } from '../self.service';
+import { UserService } from '../user.service';
 import { User } from '../user';
 
+class MockUserService {
+	users: User[] = [];
+
+	getUsers(): Observable<User[]> {
+		return of(this.users);
+	}
+
+	getUser(username: string): Observable<User> {
+		for (let user of this.users) {
+			if (user.username == username) return of(user);
+		}
+		return of(null);
+	}
+
+	add(user: User): Observable<boolean> {
+		for (let present of this.users) {
+			if (present.username == user.username) return of(false);
+		}
+		this.users.push(user);
+		return of(true);
+	}
+}
+
 describe('AddUserComponent', () => {
-	const USER_A: User = { username: 'Administrator', password: 'letmein', authorities: ['ROLE_ADMIN'] };
+	const USER_A: User = { username: 'Administrator', password: 'letmein', authorities: [] };
 	const USER_B: User = { username: 'Benedict', password: 'pasword123', authorities: [] };
 
 	let routerSpy;
-	let httpClient: HttpClient;
-	let httpTestingController: HttpTestingController;
-	let selfService: SelfService;
+	let userService: MockUserService;
 	let fixture: ComponentFixture<AddUserComponent>;
 	let component: AddUserComponent;
 
@@ -22,10 +43,10 @@ describe('AddUserComponent', () => {
 		routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
 		routerSpy.navigateByUrl.and.returnValue(null);
 		TestBed.configureTestingModule({
-			imports: [HttpClientTestingModule],
+			imports: [],
 			providers: [
 				{ provide: Router, useValue: routerSpy },
-				{ provide: SelfService, useClass: SelfService }
+				{ provide: UserService, useClass: MockUserService }
 			],
 			declarations: [AddUserComponent]
 		})
@@ -33,12 +54,7 @@ describe('AddUserComponent', () => {
 	}));
 
 	beforeEach(() => {
-        /* Inject for each test:
-         * HTTP requests will be handled by the mock back-end.
-          */
-		httpClient = TestBed.get(HttpClient);
-		httpTestingController = TestBed.get(HttpTestingController);
-		selfService = TestBed.get(SelfService);
+		userService = TestBed.get(UserService);
 		fixture = TestBed.createComponent(AddUserComponent);
 		component = fixture.componentInstance;
 		fixture.detectChanges();
@@ -48,54 +64,20 @@ describe('AddUserComponent', () => {
 		expect(component).toBeTruthy();
 	});
 
-	it('should create with null password', () => {
-		expect(component.password).toBeNull();
+	it('should create with empty password', () => {
+		expect(component.password).toEqual('');
 	});
 
 	it('should create with rejected flag clear', () => {
 		expect(component.rejected).toBeFalse();
 	});
 
-	const testNgOnInit = function() {
+	it('should initilize to empty', () => {
 		component.ngOnInit();
 
-		const expectedUsername: string = selfService.username;
-		const expectedPassword: string = selfService.password;
-
-		expect(component.username).withContext('username').toEqual(expectedUsername);
-		expect(component.password).withContext('password').toEqual(expectedPassword);
+		expect(component.username).withContext('username').toEqual('');
+		expect(component.password).withContext('password').toEqual('');
 		expect(component.rejected).withContext('rejected').toBeFalse();
-	}
-
-	it('should initilize from the service [null]', () => {
-		testNgOnInit();
-	});
-
-	const mockAuthenticationSuccess = function(userDetails: User) {
-		const request = httpTestingController.expectOne('/api/self');
-		expect(request.request.method).toEqual('GET');
-		request.flush(userDetails, { headers: new HttpHeaders(), status: 200, statusText: 'Ok' });
-		httpTestingController.verify();
-	}
-
-	const testNgOnInitAlreadyLoggedIn = function(done, userDetails: User) {
-		selfService.authenticate(userDetails.username, userDetails.password).subscribe({
-			next: () => { },
-			error: (err) => { fail(err); done() },
-			complete: () => {
-				testNgOnInit();
-				done();
-			}
-		});
-		mockAuthenticationSuccess(userDetails);
-	}
-
-	it('should initialize from the service [A]', (done) => {
-		testNgOnInitAlreadyLoggedIn(done, USER_A);
-	});
-
-	it('should initialize from the service [B]', (done) => {
-		testNgOnInitAlreadyLoggedIn(done, USER_B);
 	});
 
 	it('should have a username field', () => {
@@ -117,54 +99,49 @@ describe('AddUserComponent', () => {
 		expect(field).not.toBeNull('has <button type="submit">');
 	});
 
-	let mockHttpAuthorizationFailure = () => {
-		const request = httpTestingController.expectOne('/api/self');
-		expect(request.request.method).toEqual('GET');
-		expect(request.request.headers.has("Authorization")).toEqual(true, 'has Authorization header');
-		request.flush("", { headers: new HttpHeaders(), status: 401, statusText: 'Unauthorized' });
-		httpTestingController.verify();
-	};
 
+	const testAddFailure = function(user: User) {
+		userService.users.push(user);// will fail because a duplicate username
+		component.username = user.username;
+		component.password = user.password;
 
-	const testAddFailure = function(done, userDetails: User) {
-		component.username = userDetails.username;
-		component.password = userDetails.password;
 		component.add();
-		mockHttpAuthorizationFailure();
-		expect(component.username).withContext('username').toEqual(selfService.username);
-		expect(component.password).withContext('password').toEqual(selfService.password);
+		tick();
+		fixture.detectChanges();
+
+		expect(component.username).withContext('username').toEqual(user.username);
+		expect(component.password).withContext('password').toEqual(user.password);
 		expect(component.rejected).withContext('rejected').toBeTrue();
 		expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(0);
-		done()
 	};
 
-	it('should handle login failure [A]', (done) => {
-		testAddFailure(done, USER_A);
-	});
+	it('should handle addition failure [A]', fakeAsync(() => {
+		testAddFailure(USER_A);
+	}));
 
-	it('should handle login failure [B]', (done) => {
-		testAddFailure(done, USER_B);
-	});
+	it('should handle addition failure [B]', fakeAsync(() => {
+		testAddFailure(USER_B);
+	}));
 
 
-	const testAddSuccess = function(done, userDetails: User) {
+	const testAddSuccess = function(userDetails: User) {
 		component.username = userDetails.username;
 		component.password = userDetails.password;
+
 		component.add();
-		mockAuthenticationSuccess(userDetails);
-		expect(component.username).withContext('username').toEqual(selfService.username);
-		expect(component.password).withContext('password').toEqual(selfService.password);
+		tick();
+		fixture.detectChanges();
+
 		expect(component.rejected).withContext('rejected').toBeFalse();
 		expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(1);
-		expect(routerSpy.navigateByUrl.calls.argsFor(0)).withContext('router.navigateByUrl args').toEqual(['/']);
-		done()
+		expect(routerSpy.navigateByUrl.calls.argsFor(0)).withContext('router.navigateByUrl args').toEqual(['/user']);
 	};
 
-	it('should handle login success [A]', (done) => {
-		testAddSuccess(done, USER_A);
-	});
+	it('should handle addition success [A]', fakeAsync(() => {
+		testAddSuccess(USER_A);
+	}));
 
-	it('should handle login success [B]', (done) => {
-		testAddSuccess(done, USER_B);
-	});
+	it('should handle addition success [B]', fakeAsync(() => {
+		testAddSuccess(USER_B);
+	}));
 });

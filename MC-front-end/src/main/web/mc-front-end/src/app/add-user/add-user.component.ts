@@ -3,7 +3,8 @@ import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { map, mergeMap, tap } from 'rxjs/operators';
 
-import { SelfService } from '../self.service';
+import { User } from '../user';
+import { UserService } from '../user.service';
 
 @Component({
 	selector: 'app-login',
@@ -14,37 +15,38 @@ export class AddUserComponent implements OnInit {
 
 	constructor(
 		private readonly router: Router,
-		private readonly service: SelfService
+		private readonly service: UserService
 	) { }
 
 	ngOnInit(): void {
-		this.username = this.service.username;
-		this.password = this.service.password;
+		this.username = "";
+		this.password = "";
 	}
 
-	username: string = null;
+	username: string = "";
 
-	password: string = null;
+	password: string = "";
 
 	/**
-	 * Whether these credentials have been explicitly rejected by the server.
-     * This will be false if the credentials have not *yet* been checked by the server.
+	 * Whether this user have been explicitly rejected by the server.
+     * This will be false if the user have not *yet* been submitted to the server.
 	 */
 	rejected: boolean = false;
 
 	/**
      * @description
      * Attempts to add a user using the #username and #password,
-     * through the SelfService associated with this component.
+     * through the UserService associated with this component.
      */
 	add(): void {
-		this.service.authenticate(this.username, this.password).pipe(
-			tap((success) => {
-				this.rejected = !success;
-				if (success) {
-					this.router.navigateByUrl('/')
-				}
-			})
-		).subscribe();
+		const user: User = { username: 'FIXME', password: 'FIXME', authorities: [] };//FIXME
+		this.service.add(user).pipe(
+			tap(
+				ok => {
+					this.rejected = !ok;
+					if (ok) {
+						this.router.navigateByUrl('/user')
+					}
+				}));
 	}
 }
