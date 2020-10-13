@@ -39,14 +39,14 @@ export class AddUserComponent implements OnInit {
      * through the UserService associated with this component.
      */
 	add(): void {
-		const user: User = { username: 'FIXME', password: 'FIXME', authorities: [] };//FIXME
-		this.service.add(user).pipe(
-			tap(
-				ok => {
-					this.rejected = !ok;
-					if (ok) {
-						this.router.navigateByUrl('/user')
-					}
-				}));
+		const user: User = { username: this.username, password: 'FIXME', authorities: [] };//FIXME
+		this.service.add(user).subscribe(
+			ok => {
+				this.rejected = !ok;
+				if (ok) {
+					this.router.navigateByUrl('/user')
+				}
+			}
+		);
 	}
 }

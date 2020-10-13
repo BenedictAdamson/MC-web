@@ -1,7 +1,6 @@
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { fakeAsync, tick } from 'zone.js/dist/zone-testing';
+import { ComponentFixture, TestBed, waitForAsync, fakeAsync, tick } from '@angular/core/testing';
 
 import { AddUserComponent } from './add-user.component';
 import { UserService } from '../user.service';
