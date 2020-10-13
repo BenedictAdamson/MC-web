@@ -7,10 +7,10 @@ import { SelfService } from '../self.service';
 
 @Component({
 	selector: 'app-login',
-	templateUrl: './login.component.html',
-	styleUrls: ['./login.component.css']
+	templateUrl: './add-user.component.html',
+	styleUrls: ['./add-user.component.css']
 })
-export class LoginComponent implements OnInit {
+export class AddUserComponent implements OnInit {
 
 	constructor(
 		private readonly router: Router,

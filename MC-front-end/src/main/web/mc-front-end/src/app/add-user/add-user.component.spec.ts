@@ -3,11 +3,11 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 
-import { LoginComponent } from './login.component';
+import { AddUserComponent } from './add-user.component';
 import { SelfService } from '../self.service';
 import { User } from '../user';
 
-describe('LoginComponent', () => {
+describe('AddUserComponent', () => {
 	const USER_A: User = { username: 'Administrator', password: 'letmein', authorities: ['ROLE_ADMIN'] };
 	const USER_B: User = { username: 'Benedict', password: 'pasword123', authorities: [] };
 
@@ -15,8 +15,8 @@ describe('LoginComponent', () => {
 	let httpClient: HttpClient;
 	let httpTestingController: HttpTestingController;
 	let selfService: SelfService;
-	let fixture: ComponentFixture<LoginComponent>;
-	let component: LoginComponent;
+	let fixture: ComponentFixture<AddUserComponent>;
+	let component: AddUserComponent;
 
 	beforeEach(waitForAsync(() => {
 		routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
@@ -27,7 +27,7 @@ describe('LoginComponent', () => {
 				{ provide: Router, useValue: routerSpy },
 				{ provide: SelfService, useClass: SelfService }
 			],
-			declarations: [LoginComponent]
+			declarations: [AddUserComponent]
 		})
 			.compileComponents();
 	}));
@@ -39,7 +39,7 @@ describe('LoginComponent', () => {
 		httpClient = TestBed.get(HttpClient);
 		httpTestingController = TestBed.get(HttpTestingController);
 		selfService = TestBed.get(SelfService);
-		fixture = TestBed.createComponent(LoginComponent);
+		fixture = TestBed.createComponent(AddUserComponent);
 		component = fixture.componentInstance;
 		fixture.detectChanges();
 	});
