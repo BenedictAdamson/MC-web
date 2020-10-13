@@ -207,7 +207,7 @@ public class UserSteps {
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() {
       try {
-         awaitSuccessOrErrorMessage("/users");
+         awaitSuccessOrErrorMessage("/user");
       } catch (IllegalStateException e) {
          throw new AssertionFailedError(e.getMessage(), e);
       }
