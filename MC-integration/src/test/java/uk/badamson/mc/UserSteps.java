@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -108,17 +109,20 @@ public class UserSteps {
                .collect(toUnmodifiableList()), is(empty()));
    }
 
-   private void awaitSuccessOrErrorMessage(
-            final String expectedSuccessUrlPath) {
+   private void awaitSuccessOrErrorMessage(final String expectedSuccessUrlPath)
+            throws IllegalStateException {
+      var currentPath = new AtomicReference<String>();
       try {
          new WebDriverWait(worldCore.getWebDriver(), 17).until(driver -> {
-            return expectedSuccessUrlPath
-                     .equals(WorldCore.getPathOfUrl(driver.getCurrentUrl()))
+            currentPath.set(WorldCore.getPathOfUrl(driver.getCurrentUrl()));
+            return expectedSuccessUrlPath.equals(currentPath.get())
                      || !driver.findElements(By.className("error")).isEmpty();
          });
       } catch (final Exception e) {// give better diagnostics
          throw new IllegalStateException(
-                  "No indication of success or failure", e);
+                  "No indication of success or failure (at " + currentPath.get()
+                           + ")",
+                  e);
       }
    }
 
@@ -202,7 +206,11 @@ public class UserSteps {
 
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() {
-      awaitSuccessOrErrorMessage("/users");
+      try {
+         awaitSuccessOrErrorMessage("/users");
+      } catch (IllegalStateException e) {
+         throw new AssertionFailedError(e.getMessage(), e);
+      }
    }
 
    @Then("MC rejects the login")
