@@ -243,7 +243,7 @@ public class UserSteps {
 
    private void tryToGetUsersPage() {
       final var webDriver = worldCore.getWebDriver();
-      webDriver.findElement(By.xpath("//a[@href='user']")).click();
+      webDriver.findElement(By.id("users")).click();
    }
 
    private void tryToLogin() {

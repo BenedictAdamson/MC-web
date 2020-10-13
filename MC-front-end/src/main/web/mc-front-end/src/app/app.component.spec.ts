@@ -48,4 +48,13 @@ describe('AppComponent', () => {
 		const compiled = fixture.debugElement.nativeElement;
 		expect(compiled.querySelector('h1').textContent).toContain('Mission Command');
 	});
+
+	it('has a Users link', () => {
+		const fixture = TestBed.createComponent(AppComponent);
+		fixture.detectChanges();
+		const html = fixture.debugElement.nativeElement;
+		const link = html.querySelector('a[id="users"]');
+		expect(link).withContext('link element').not.toBeNull();
+		expect(link.textContent).withContext('link text').toContain('Users');
+	});
 });
