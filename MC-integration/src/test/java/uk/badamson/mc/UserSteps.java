@@ -118,7 +118,7 @@ public class UserSteps {
          });
       } catch (final Exception e) {// give better diagnostics
          throw new IllegalStateException(
-                  "No indication of login success or failure", e);
+                  "No indication of success or failure", e);
       }
    }
 
