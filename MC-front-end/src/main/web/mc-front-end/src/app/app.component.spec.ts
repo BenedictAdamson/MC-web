@@ -50,4 +50,13 @@ describe('AppComponent', () => {
 		expect(link).withContext('link element').not.toBeNull();
 		expect(link.textContent).withContext('link text').toContain('Users');
 	});
+
+	it('has a Scenarios link', () => {
+		const fixture = TestBed.createComponent(AppComponent);
+		fixture.detectChanges();
+		const html = fixture.debugElement.nativeElement;
+		const link = html.querySelector('a[id="scenarios"]');
+		expect(link).withContext('link element').not.toBeNull();
+		expect(link.textContent).withContext('link text').toContain('Scenarios');
+	});
 });
