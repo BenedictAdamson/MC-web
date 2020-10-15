@@ -25,6 +25,7 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -34,10 +35,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.opentest4j.AssertionFailedError;
 import org.testcontainers.lifecycle.TestDescription;
 
 import io.cucumber.java.After;
@@ -138,6 +142,25 @@ public final class WorldCore implements AutoCloseable {
       containers.addUser(user);// records the user in the DB, through the BE
       users.put(user.getUsername(), user);
 
+   }
+
+   /**
+    * Require that the current page has an element with a given tag.
+    *
+    * @param tag
+    *           The HTML tag of the required element
+    * @throws NullPointerException
+    *            if {@code tag} is null
+    * @throws AssertionFailedError
+    *            if no such element is present.
+    */
+   public WebElement assertHasElementWithTag(final String tag) {
+      Objects.requireNonNull(tag, "tag");
+      try {
+         return webDriver.findElement(By.tagName(tag));
+      } catch (final NoSuchElementException e) {
+         throw new AssertionFailedError("Has element with tag " + tag, e);
+      }
    }
 
    /**
@@ -302,6 +325,23 @@ public final class WorldCore implements AutoCloseable {
          throw new IllegalStateException(e);
       }
       webDriver.get(privateNetworkUrl.toASCIIString());
+   }
+
+   /**
+    * <p>
+    * GET the URL that has a given path component.
+    * </p>
+    *
+    * @param path
+    *           The path component
+    * @throws NullPointerException
+    *            If {@code path} is null.
+    * @throws IllegalArgumentException
+    *            If {@code path} violates RFC 2396
+    */
+   public void getUrlUsingBrowser(final String path) {
+      setUrlPath(path);
+      getUrlUsingBrowser();
    }
 
    public User getUserWithoutRole(final Authority role) {

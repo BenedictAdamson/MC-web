@@ -21,12 +21,7 @@ package uk.badamson.mc;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 
-import java.util.NoSuchElementException;
-import java.util.Objects;
-
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.en.Then;
@@ -45,39 +40,19 @@ public class ScenarioSteps {
    private WebElement element;
 
    private void assertIsScenariosPage() {
-      findElementWithTag("h2");
+      element = worldCore.assertHasElementWithTag("h2");
       assertThat("Has a header saying \"Scenarios\"", element.getText(),
                containsString("Scenarios"));
    }
 
-   /*
-    * Sets {@code this.element} to the found element.
-    *
-    * @throws AssertionFailedError if no such element is present.
-    */
-   private void findElementWithTag(final String tag) {
-      Objects.requireNonNull(tag, "tag");
-      try {
-         element = worldCore.getWebDriver().findElement(By.tagName(tag));
-      } catch (final NoSuchElementException e) {
-         element = null;
-         throw new AssertionFailedError("has element with tag " + tag, e);
-      }
-   }
-
    private void getScenarios() throws Exception {
-      getUrlUsingBrowser("/scenario");
+      worldCore.getUrlUsingBrowser("/scenario");
       assertIsScenariosPage();
    }
 
    @When("getting the scenarios")
    public void getting_scenarios() throws Exception {
       getScenarios();
-   }
-
-   private void getUrlUsingBrowser(final String path) {
-      worldCore.setUrlPath(path);
-      worldCore.getUrlUsingBrowser();
    }
 
    @Then("MC serves the scenarios page")
@@ -87,6 +62,6 @@ public class ScenarioSteps {
 
    @Then("the response is a list of scenarios")
    public void response_is_list_of_scenarios() {
-      findElementWithTag("ul");
+      element = worldCore.assertHasElementWithTag("ul");
    }
 }

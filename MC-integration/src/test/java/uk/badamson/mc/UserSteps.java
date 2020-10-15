@@ -26,7 +26,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -96,7 +95,7 @@ public class UserSteps {
    }
 
    private void assertIsUsersPage() {
-      findElementWithTag("h2");
+      element = worldCore.assertHasElementWithTag("h2");
       assertThat("Has a header saying \"Users\"", element.getText(),
                containsString("Users"));
    }
@@ -111,7 +110,7 @@ public class UserSteps {
 
    private void awaitSuccessOrErrorMessage(final String expectedSuccessUrlPath)
             throws IllegalStateException {
-      var currentPath = new AtomicReference<String>();
+      final var currentPath = new AtomicReference<String>();
       try {
          new WebDriverWait(worldCore.getWebDriver(), 17).until(driver -> {
             currentPath.set(WorldCore.getPathOfUrl(driver.getCurrentUrl()));
@@ -128,31 +127,16 @@ public class UserSteps {
 
    @Then("can get the list of users")
    public void can_get_list_of_users() {
-      getUrlUsingBrowser("/user");
+      worldCore.getUrlUsingBrowser("/user");
       assertIsUsersPage();
    }
 
    @Then("MC does not present adding a user as an option")
    public void does_not_present_adding_user_option() {
-      getUrlUsingBrowser("/user");
+      worldCore.getUrlUsingBrowser("/user");
       assertThat("No add-user link",
                worldCore.getWebDriver().findElements(ADD_USER_LINK_LOCATOR),
                empty());
-   }
-
-   /*
-    * Sets {@code this.element} to the found element.
-    *
-    * @throws AssertionFailedError if no such element is present.
-    */
-   private void findElementWithTag(final String tag) {
-      Objects.requireNonNull(tag, "tag");
-      try {
-         element = worldCore.getWebDriver().findElement(By.tagName(tag));
-      } catch (final NoSuchElementException e) {
-         element = null;
-         throw new AssertionFailedError("has element with tag " + tag, e);
-      }
    }
 
    private String getBodyText() {
@@ -160,7 +144,7 @@ public class UserSteps {
    }
 
    private void getHomePage() {
-      getUrlUsingBrowser("/");
+      worldCore.getUrlUsingBrowser("/");
    }
 
    @When("getting the users")
@@ -169,14 +153,9 @@ public class UserSteps {
       awaitSuccessOrErrorMessage("/user");
    }
 
-   private void getUrlUsingBrowser(final String path) {
-      worldCore.setUrlPath(path);
-      worldCore.getUrlUsingBrowser();
-   }
-
    @Then("the list of users includes a user named {string}")
    public void list_of_users_includes(final String name) {
-      findElementWithTag("ul");
+      element = worldCore.assertHasElementWithTag("ul");
       assertThat(element.getText(), containsString(name));
    }
 
@@ -208,7 +187,7 @@ public class UserSteps {
    public void mc_accepts_the_addition() {
       try {
          awaitSuccessOrErrorMessage("/user");
-      } catch (IllegalStateException e) {
+      } catch (final IllegalStateException e) {
          throw new AssertionFailedError(e.getMessage(), e);
       }
    }
@@ -231,7 +210,7 @@ public class UserSteps {
 
    @Then("the response is a list of users")
    public void response_is_list_of_users() {
-      findElementWithTag("ul");
+      element = worldCore.assertHasElementWithTag("ul");
    }
 
    private void submitLogin(final String name, final String password) {
