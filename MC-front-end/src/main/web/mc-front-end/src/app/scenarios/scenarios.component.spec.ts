@@ -39,6 +39,10 @@ describe('ScenariosComponent', () => {
 
 		expect(component).toBeTruthy();
 		expect(component.scenarios).toBe(testScenarios);
+		const element: HTMLElement = fixture.nativeElement;
+		const heading = element.querySelector('h2');
+		expect(heading).withContext('has heading').not.toBeNull();
+		expect(heading.textContent).withContext('heading text').toContain('Scenarios');
 	};
 
 	it('can create [1]', () => {
