@@ -9,6 +9,7 @@ import { AddUserComponent } from './add-user/add-user.component';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { LoginComponent } from './login/login.component';
+import { ScenariosComponent } from './scenarios/scenarios.component';
 import { UserComponent } from './user/user.component';
 import { UsersComponent } from './users/users.component';
 import { WINDOW_PROVIDER } from './window.provider';
@@ -29,6 +30,7 @@ import { SelfComponent } from './self/self.component';
 		AppComponent,
 		HomeComponent,
 		LoginComponent,
+		ScenariosComponent,
 		SelfComponent,
 		UsersComponent,
 		UserComponent
