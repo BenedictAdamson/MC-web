@@ -163,6 +163,23 @@ public final class WorldCore implements AutoCloseable {
       }
    }
 
+   public void awaitSuccessOrErrorMessage(final String expectedSuccessUrlPath)
+            throws IllegalStateException {
+      final var currentPath = new AtomicReference<String>();
+      try {
+         new WebDriverWait(webDriver, 17).until(driver -> {
+            currentPath.set(WorldCore.getPathOfUrl(driver.getCurrentUrl()));
+            return expectedSuccessUrlPath.equals(currentPath.get())
+                     || !driver.findElements(By.className("error")).isEmpty();
+         });
+      } catch (final Exception e) {// give better diagnostics
+         throw new IllegalStateException(
+                  "No indication of success or failure (at " + currentPath.get()
+                           + ")",
+                  e);
+      }
+   }
+
    /**
     * <p>
     * Prepare the SUT and this interface for execution of a Cucumber scenario.
@@ -439,5 +456,4 @@ public final class WorldCore implements AutoCloseable {
                   + current.get() + ") to become " + path);
       }
    }
-
 }// class

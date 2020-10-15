@@ -28,11 +28,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Objects;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -73,8 +71,8 @@ public class UserSteps {
 
    @When("adding a user named {string} with  password {string}")
    public void adding_a_user(final String user, final String password) {
-      tryToGetUsersPage();
-      awaitSuccessOrErrorMessage("/user");
+      navigateToUsersPage();
+      worldCore.awaitSuccessOrErrorMessage("/user");
       final var webDriver = worldCore.getWebDriver();
       webDriver.findElement(ADD_USER_LINK_LOCATOR).click();
       webDriver.findElement(By.name("username")).sendKeys(user);
@@ -108,32 +106,15 @@ public class UserSteps {
                .collect(toUnmodifiableList()), is(empty()));
    }
 
-   private void awaitSuccessOrErrorMessage(final String expectedSuccessUrlPath)
-            throws IllegalStateException {
-      final var currentPath = new AtomicReference<String>();
-      try {
-         new WebDriverWait(worldCore.getWebDriver(), 17).until(driver -> {
-            currentPath.set(WorldCore.getPathOfUrl(driver.getCurrentUrl()));
-            return expectedSuccessUrlPath.equals(currentPath.get())
-                     || !driver.findElements(By.className("error")).isEmpty();
-         });
-      } catch (final Exception e) {// give better diagnostics
-         throw new IllegalStateException(
-                  "No indication of success or failure (at " + currentPath.get()
-                           + ")",
-                  e);
-      }
-   }
-
    @Then("can get the list of users")
    public void can_get_list_of_users() {
-      worldCore.getUrlUsingBrowser("/user");
+      navigateToUsersPage();
       assertIsUsersPage();
    }
 
    @Then("MC does not present adding a user as an option")
    public void does_not_present_adding_user_option() {
-      worldCore.getUrlUsingBrowser("/user");
+      navigateToUsersPage();
       assertThat("No add-user link",
                worldCore.getWebDriver().findElements(ADD_USER_LINK_LOCATOR),
                empty());
@@ -143,14 +124,10 @@ public class UserSteps {
       return worldCore.getWebDriver().findElement(By.tagName("body")).getText();
    }
 
-   private void getHomePage() {
-      worldCore.getUrlUsingBrowser("/");
-   }
-
    @When("getting the users")
    public void getting_users() {
-      tryToGetUsersPage();
-      awaitSuccessOrErrorMessage("/user");
+      navigateToUsersPage();
+      worldCore.awaitSuccessOrErrorMessage("/user");
    }
 
    @Then("the list of users includes a user named {string}")
@@ -186,7 +163,7 @@ public class UserSteps {
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() {
       try {
-         awaitSuccessOrErrorMessage("/user");
+         worldCore.awaitSuccessOrErrorMessage("/user");
       } catch (final IllegalStateException e) {
          throw new AssertionFailedError(e.getMessage(), e);
       }
@@ -203,6 +180,10 @@ public class UserSteps {
       assertIsUsersPage();
    }
 
+   private void navigateToUsersPage() {
+      worldCore.getWebDriver().findElement(By.id("users")).click();
+   }
+
    @Then("redirected to home-page")
    public void redirected_to_home_page() {
       assertThat("URL path", worldCore.getCurrentUrlPath(), is("/"));
@@ -214,7 +195,7 @@ public class UserSteps {
    }
 
    private void submitLogin(final String name, final String password) {
-      getHomePage();
+      worldCore.getUrlUsingBrowser("/");
       final var webDriver = worldCore.getWebDriver();
       webDriver.findElement(By.id("login")).click();
       webDriver.findElement(By.name("username")).sendKeys(name);
@@ -228,15 +209,10 @@ public class UserSteps {
       tryToLogin();
    }
 
-   private void tryToGetUsersPage() {
-      final var webDriver = worldCore.getWebDriver();
-      webDriver.findElement(By.id("users")).click();
-   }
-
    private void tryToLogin() {
       Objects.requireNonNull(user, "user");
       submitLogin(user.getUsername(), user.getPassword());
-      awaitSuccessOrErrorMessage("/");
+      worldCore.awaitSuccessOrErrorMessage("/");
    }
 
    @Given("unknown user")

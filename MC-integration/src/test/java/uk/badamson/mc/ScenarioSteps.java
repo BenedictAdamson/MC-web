@@ -21,6 +21,7 @@ package uk.badamson.mc;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -45,19 +46,20 @@ public class ScenarioSteps {
                containsString("Scenarios"));
    }
 
-   private void getScenarios() throws Exception {
-      worldCore.getUrlUsingBrowser("/scenario");
-      assertIsScenariosPage();
-   }
-
    @When("getting the scenarios")
    public void getting_scenarios() throws Exception {
-      getScenarios();
+      navigateToScenariosPage();
+      worldCore.awaitSuccessOrErrorMessage("/scenario");
    }
 
    @Then("MC serves the scenarios page")
    public void mc_serves_scenarios_page() throws Exception {
       assertIsScenariosPage();
+   }
+
+   private void navigateToScenariosPage() {
+      worldCore.getUrlUsingBrowser("/");
+      worldCore.getWebDriver().findElement(By.id("scenarios")).click();
    }
 
    @Then("the response is a list of scenarios")

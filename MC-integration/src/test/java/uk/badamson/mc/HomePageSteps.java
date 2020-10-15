@@ -73,7 +73,6 @@ public class HomePageSteps {
 
    @When("the potential user gives the obvious URL http://example.com/ to a web browser")
    public void the_potential_user_gives_the_obvious_URL_to_a_web_browser() {
-      worldCore.setUrlPath("/");
-      worldCore.getUrlUsingBrowser();
+      worldCore.getUrlUsingBrowser("/");
    }
 }
