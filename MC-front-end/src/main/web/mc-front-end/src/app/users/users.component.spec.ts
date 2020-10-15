@@ -1,5 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, ReplaySubject, defer, of, from } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';

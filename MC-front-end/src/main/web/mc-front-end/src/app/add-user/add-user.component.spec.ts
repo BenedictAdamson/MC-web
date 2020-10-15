@@ -33,7 +33,7 @@ describe('AddUserComponent', () => {
 	const USER_A: User = { username: 'Administrator', password: 'letmein', authorities: [] };
 	const USER_B: User = { username: 'Benedict', password: 'pasword123', authorities: [] };
 
-	let routerSpy;
+	let routerSpy: any;
 	let userService: MockUserService;
 	let fixture: ComponentFixture<AddUserComponent>;
 	let component: AddUserComponent;

@@ -1,6 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import { Scenario } from '../scenario';
 import { ScenarioService } from '../scenario.service';

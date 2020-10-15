@@ -1,10 +1,7 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, ReplaySubject, defer, of, from } from 'rxjs';
-
+import { of } from 'rxjs';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { SelfService } from '../self.service';
 import { Scenario } from '../scenario';
 import { ScenariosComponent } from './scenarios.component';
 import { ScenarioService } from '../scenario.service';
@@ -17,7 +14,7 @@ describe('ScenariosComponent', () => {
 	const SCENARIO_A: Scenario = { id: '123456', title: 'Section Attack', description: 'Basic fire-and-movement tactical training.' };
 	const SCENARIO_B: Scenario = { id: '345678', title: 'Beach Assault', description: 'Fast and deadly.' };
 
-	const setUp = (self: Scenario, testScenarios: Scenario[]) => {
+	const setUp = (testScenarios: Scenario[]) => {
 		const scenarioServiceStub = jasmine.createSpyObj('ScenarioService', ['getScenarios']);
 		scenarioServiceStub.getScenarios.and.returnValue(of(testScenarios));
 
@@ -34,8 +31,8 @@ describe('ScenariosComponent', () => {
 		fixture.detectChanges();
 	};
 
-	const canCreate = (self: Scenario, testScenarios: Scenario[]) => {
-		setUp(self, testScenarios);
+	const canCreate = (testScenarios: Scenario[]) => {
+		setUp(testScenarios);
 
 		expect(component).toBeTruthy();
 		expect(component.scenarios).toBe(testScenarios);
@@ -46,10 +43,10 @@ describe('ScenariosComponent', () => {
 	};
 
 	it('can create [1]', () => {
-		canCreate(SCENARIO_A, [SCENARIO_A]);
+		canCreate([SCENARIO_A]);
 	});
 
 	it('can create [2]', () => {
-		canCreate(SCENARIO_B, [SCENARIO_A, SCENARIO_B]);
+		canCreate([SCENARIO_A, SCENARIO_B]);
 	});
 });

@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, ReplaySubject, defer, of, from } from 'rxjs';
+import { Observable, ReplaySubject, defer, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { map, mergeMap, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { User } from './user';
 

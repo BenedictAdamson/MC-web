@@ -1,7 +1,6 @@
+import { tap } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { map, mergeMap, tap } from 'rxjs/operators';
 
 import { SelfService } from '../self.service';
 

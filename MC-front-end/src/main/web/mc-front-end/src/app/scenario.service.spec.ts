@@ -1,13 +1,13 @@
+import { HttpClient } from '@angular/common/http';
+
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
 import { ScenarioService } from './scenario.service';
 import { Scenario } from './scenario';
 
 
 describe('ScenarioService', () => {
-	let httpClient: HttpClient;
 	let httpTestingController: HttpTestingController;
 
 	const SCENARIO_A: Scenario = { id: '123456', title: 'Section Attack', description: 'Basic fire-and-movement tactical training.' };
@@ -21,7 +21,7 @@ describe('ScenarioService', () => {
         /* Inject for each test:
          * HTTP requests will be handled by the mock back-end.
           */
-		httpClient = TestBed.get(HttpClient);
+		TestBed.get(HttpClient);
 		httpTestingController = TestBed.get(HttpTestingController);
 	});
 
