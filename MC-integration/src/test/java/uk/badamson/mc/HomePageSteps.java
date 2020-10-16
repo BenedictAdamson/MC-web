@@ -18,15 +18,15 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import java.util.Objects;
 
-import org.openqa.selenium.By;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import uk.badamson.mc.presentation.HomePage;
 
 /**
  * <p>
@@ -41,26 +41,31 @@ public class HomePageSteps {
    @Autowired
    private WorldCore worldCore;
 
+   private HomePage page;
+
    @SuppressWarnings("unused")
    @Autowired
    private WorldCoreScenarioHook worldCoreScenarioHook;
 
    @Then("the home page header includes the name of the game")
    public void home_page_header_includes_name_of_game() {
-      assertThat(
-               worldCore.getWebDriver().findElement(By.tagName("h1")).getText(),
-               containsString(GAME_NAME));
+      page.assertHeaderIncludesNameOfGame();
    }
 
    @Then("the home page title includes the name of the game")
    public void home_page_title_includes_name_of_game() {
-      assertThat(worldCore.getWebDriver().getTitle(),
-               containsString(GAME_NAME));
+      page.assertTitleIncludesNameOfGame();
    }
 
    @Then("MC serves the home page")
    public void mc_serves_the_home_page() {
       // Do nothing;
+   }
+
+   @Before
+   public void setUp() {
+      Objects.requireNonNull(worldCore, "worldCore");
+      page = new HomePage(worldCore.getWebDriver());
    }
 
    @Given("the DNS name, example.com, of an MC server")
@@ -73,6 +78,6 @@ public class HomePageSteps {
 
    @When("the potential user gives the obvious URL http://example.com/ to a web browser")
    public void the_potential_user_gives_the_obvious_URL_to_a_web_browser() {
-      worldCore.getUrlUsingBrowser("/");
+      page.get();
    }
 }
