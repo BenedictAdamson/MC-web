@@ -25,7 +25,6 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Objects;
-import java.util.concurrent.TimeoutException;
 
 import org.openqa.selenium.By;
 import org.opentest4j.AssertionFailedError;
@@ -94,6 +93,10 @@ public class UserSteps {
       usersPage.assertHasNoAddUserLink();
    }
 
+   private HomePage getHomePage() {
+      return new HomePage(worldCore.getWebDriver());
+   }
+
    @When("getting the users")
    public void getting_users() {
       navigateToUsersPage();
@@ -118,17 +121,16 @@ public class UserSteps {
    @Given("logged in")
    public void logged_in() {
       tryToLogin();
-      assertCurrentUrlPath("/");
    }
 
    @When("log in using correct password")
-   public void login_using_correct_password() throws TimeoutException {
+   public void login_using_correct_password() {
       tryToLogin();
    }
 
    @Then("MC accepts the login")
    public void mc_accepts_login() {
-      final var page = new HomePage(worldCore.getWebDriver());
+      final var page = getHomePage();
       assertAll(() -> page.assertIsCurrentPage(),
                () -> page.assertNoErrorMessages(),
                () -> page.assertReportsThatLoggedIn());
@@ -158,13 +160,13 @@ public class UserSteps {
    }
 
    private UsersPage navigateToUsersPage() {
-      final var homePage = new HomePage(worldCore.getWebDriver());
+      final var homePage = getHomePage();
       return homePage.navigateToUsersPage();
    }
 
    @Then("redirected to home-page")
    public void redirected_to_home_page() {
-      final var homePage = new HomePage(worldCore.getWebDriver());
+      final var homePage = getHomePage();
       homePage.assertIsCurrentPage();
    }
 
@@ -175,16 +177,6 @@ public class UserSteps {
                () -> page.assertHasListOfUsers());
    }
 
-   private void submitLogin(final String name, final String password) {
-      worldCore.getUrlUsingBrowser("/");
-      final var webDriver = worldCore.getWebDriver();
-      webDriver.findElement(By.id("login")).click();
-      webDriver.findElement(By.name("username")).sendKeys(name);
-      webDriver.findElement(By.xpath("//input[@type='password']"))
-               .sendKeys(password);
-      webDriver.findElement(By.xpath("//button[@type='submit']")).submit();
-   }
-
    @When("try to login")
    public void try_to_login() throws Exception {
       tryToLogin();
@@ -192,8 +184,11 @@ public class UserSteps {
 
    private void tryToLogin() {
       Objects.requireNonNull(user, "user");
-      submitLogin(user.getUsername(), user.getPassword());
-      worldCore.awaitSuccessOrErrorMessage("/");
+      final var homePage = getHomePage();
+      homePage.get();
+      homePage.navigateToLoginPage().submitLoginForm(user.getUsername(),
+               user.getPassword());
+      homePage.awaitIsCurrentPageOrErrorMessage();
    }
 
    @Given("unknown user")

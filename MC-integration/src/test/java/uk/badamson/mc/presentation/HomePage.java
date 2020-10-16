@@ -25,6 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.annotation.concurrent.Immutable;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
@@ -33,6 +35,7 @@ import org.openqa.selenium.WebDriver;
  * A <i>page object</i> for the home page.
  * </p>
  */
+@Immutable
 public final class HomePage extends Page {
 
    public static final String GAME_NAME = "Mission Command";
@@ -82,6 +85,14 @@ public final class HomePage extends Page {
    protected boolean isValidPath(final String path) {
       Objects.requireNonNull(path, "path");
       return PATH.equals(path);
+   }
+
+   public LoginPage navigateToLoginPage() {
+      requireIsCurrentPage();
+      findElement(By.id("login")).click();
+      final LoginPage loginPage = new LoginPage(this);
+      loginPage.awaitIsCurrentPageOrErrorMessage();
+      return loginPage;
    }
 
    public UsersPage navigateToUsersPage() {
