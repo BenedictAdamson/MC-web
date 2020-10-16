@@ -18,15 +18,10 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Objects;
 
-import org.openqa.selenium.By;
 import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -34,6 +29,8 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import uk.badamson.mc.presentation.HomePage;
+import uk.badamson.mc.presentation.LoginPage;
+import uk.badamson.mc.presentation.Page;
 import uk.badamson.mc.presentation.UsersPage;
 
 /**
@@ -61,40 +58,32 @@ public class UserSteps {
    @Autowired
    private WorldCoreScenarioHook worldCoreScenarioHook;
 
+   private Page currentPage;
+
    private User user;
 
    @When("adding a user named {string} with  password {string}")
    public void adding_a_user(final String user, final String password) {
-      final UsersPage usersPage = navigateToUsersPage();
-      usersPage.submitAddUserForm(user, password);
-   }
-
-   private void assertCurrentUrlPath(final String expectedPath) {
-      assertThat("Current URL path", worldCore.getCurrentUrlPath(),
-               is(expectedPath));
-   }
-
-   private void assertHaveErrorMessages() {
-      assertThat("Error message(s)",
-               worldCore.getWebDriver().findElements(By.className("error")),
-               not(empty()));
+      navigateToUsersPage().submitAddUserForm(user, password);
    }
 
    @Then("can get the list of users")
    public void can_get_list_of_users() {
-      final var page = new UsersPage(worldCore.getWebDriver());
-      page.assertIsCurrentPage();// guard
-      page.assertInvariants();
+      final var usersPage = (UsersPage) currentPage;
+      usersPage.assertIsCurrentPage();// guard
+      usersPage.assertInvariants();
    }
 
    @Then("MC does not present adding a user as an option")
    public void does_not_present_adding_user_option() {
-      final UsersPage usersPage = navigateToUsersPage();
-      usersPage.assertHasNoAddUserLink();
+      navigateToUsersPage().assertHasNoAddUserLink();
    }
 
    private HomePage getHomePage() {
-      return new HomePage(worldCore.getWebDriver());
+      final var homePage = new HomePage(worldCore.getWebDriver());
+      homePage.get();
+      currentPage = homePage;
+      return homePage;
    }
 
    @When("getting the users")
@@ -106,16 +95,16 @@ public class UserSteps {
    public void list_of_users_includes(final String name) {
       Objects.requireNonNull(name, "name");
 
-      final var page = new UsersPage(worldCore.getWebDriver());
-      page.requireIsCurrentPage();
-      page.assertListOfUsersIncludes(name);
+      final var usersPage = (UsersPage) currentPage;
+      usersPage.requireIsCurrentPage();
+      usersPage.assertListOfUsersIncludes(name);
    }
 
    @Then("the list of users has at least one user")
    public void list_of_users_not_empty() {
-      final var page = new UsersPage(worldCore.getWebDriver());
-      page.assertIsCurrentPage();// guard
-      page.assertListOfUsersNotEmpty();
+      final var usersPage = (UsersPage) currentPage;
+      usersPage.assertIsCurrentPage();// guard
+      usersPage.assertListOfUsersNotEmpty();
    }
 
    @Given("logged in")
@@ -130,17 +119,17 @@ public class UserSteps {
 
    @Then("MC accepts the login")
    public void mc_accepts_login() {
-      final var page = getHomePage();
-      assertAll(() -> page.assertIsCurrentPage(),
-               () -> page.assertNoErrorMessages(),
-               () -> page.assertReportsThatLoggedIn());
+      final var homePage = (HomePage) currentPage;
+      assertAll(() -> homePage.assertIsCurrentPage(),
+               () -> homePage.assertNoErrorMessages(),
+               () -> homePage.assertReportsThatLoggedIn());
    }
 
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() {
-      final var page = new UsersPage(worldCore.getWebDriver());
+      final var usersPage = (UsersPage) currentPage;
       try {
-         page.awaitIsCurrentPageOrErrorMessage();
+         usersPage.awaitIsCurrentPageOrErrorMessage();
       } catch (final IllegalStateException e) {
          throw new AssertionFailedError(e.getMessage(), e);
       }
@@ -148,47 +137,52 @@ public class UserSteps {
 
    @Then("MC rejects the login")
    public void mc_rejects_login() {
-      assertAll(() -> assertCurrentUrlPath("/login"),
-               () -> assertHaveErrorMessages());
+      final var loginPage = (LoginPage) currentPage;
+      loginPage.assertRejectedLogin();
    }
 
    @Then("MC serves the users page")
    public void mc_serves_users_page() {
-      final var page = new UsersPage(worldCore.getWebDriver());
-      page.assertIsCurrentPage();// guard
-      page.assertInvariants();
+      final var usersPage = (UsersPage) currentPage;
+      usersPage.assertIsCurrentPage();// guard
+      usersPage.assertInvariants();
    }
 
    private UsersPage navigateToUsersPage() {
-      final var homePage = getHomePage();
-      return homePage.navigateToUsersPage();
+      final var homePage = (HomePage) currentPage;
+      final var usersPage = homePage.navigateToUsersPage();
+      currentPage = usersPage;
+      return usersPage;
    }
 
    @Then("redirected to home-page")
    public void redirected_to_home_page() {
-      final var homePage = getHomePage();
+      final var homePage = (HomePage) currentPage;
       homePage.assertIsCurrentPage();
    }
 
    @Then("the response is a list of users")
    public void response_is_list_of_users() {
-      final var page = new UsersPage(worldCore.getWebDriver());
-      assertAll(() -> page.assertIsCurrentPage(),
-               () -> page.assertHasListOfUsers());
+      final var usersPage = (UsersPage) currentPage;
+      assertAll(() -> usersPage.assertIsCurrentPage(),
+               () -> usersPage.assertHasListOfUsers());
    }
 
    @When("try to login")
-   public void try_to_login() throws Exception {
+   public void try_to_login() {
       tryToLogin();
    }
 
    private void tryToLogin() {
       Objects.requireNonNull(user, "user");
       final var homePage = getHomePage();
-      homePage.get();
-      homePage.navigateToLoginPage().submitLoginForm(user.getUsername(),
-               user.getPassword());
+      final var loginPage = homePage.navigateToLoginPage();
+      currentPage = loginPage;
+      loginPage.submitLoginForm(user.getUsername(), user.getPassword());
       homePage.awaitIsCurrentPageOrErrorMessage();
+      if (homePage.isCurrentPage()) {
+         currentPage = homePage;
+      }
    }
 
    @Given("unknown user")

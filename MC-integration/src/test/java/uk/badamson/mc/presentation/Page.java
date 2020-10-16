@@ -184,6 +184,10 @@ public abstract class Page {
       return findElement(By.tagName("body")).getText();
    }
 
+   private String getCurrentPath() {
+      return getPathOfUrl(webDriver.getCurrentUrl());
+   }
+
    /**
     * <p>
     * The path component of a valid fixed URI for a page of this type.
@@ -207,6 +211,10 @@ public abstract class Page {
       return webDriver.getTitle();
    }
 
+   public final boolean isCurrentPage() {
+      return isValidPath(getCurrentPath());
+   }
+
    /**
     * <p>
     * Whether a given URI {@linkplain URI#getPath() path component} of a URI is
@@ -222,7 +230,7 @@ public abstract class Page {
    protected abstract boolean isValidPath(String path);
 
    public final void requireIsCurrentPage() throws IllegalStateException {
-      final var currentPath = getPathOfUrl(webDriver.getCurrentUrl());
+      final var currentPath = getCurrentPath();
       if (!isValidPath(currentPath)) {
          throw new IllegalStateException("Current path (" + currentPath + ")");
       }

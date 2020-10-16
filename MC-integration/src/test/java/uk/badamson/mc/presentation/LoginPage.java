@@ -44,7 +44,7 @@ public final class LoginPage extends Page {
     * @throws NullPointerException
     *            If {@code page} is null.
     */
-   public LoginPage(Page page) {
+   public LoginPage(final Page page) {
       super(page);
    }
 
@@ -53,8 +53,13 @@ public final class LoginPage extends Page {
       // Do nothing
    }
 
+   public void assertRejectedLogin() {
+      assertIsCurrentPage();// guard
+      assertHasErrorMessage();
+   }
+
    @Override
-   protected boolean isValidPath(String path) {
+   protected boolean isValidPath(final String path) {
       Objects.requireNonNull(path, "path");
       return PATH.equals(path);
    }
@@ -68,5 +73,4 @@ public final class LoginPage extends Page {
       findElement(By.xpath("//input[@type='password']")).sendKeys(password);
       findElement(By.xpath("//button[@type='submit']")).submit();
    }
-
 }

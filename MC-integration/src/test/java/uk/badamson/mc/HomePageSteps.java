@@ -59,7 +59,8 @@ public class HomePageSteps {
 
    @Then("MC serves the home page")
    public void mc_serves_the_home_page() {
-      // Do nothing;
+      page.assertIsCurrentPage();// guard
+      page.assertInvariants();
    }
 
    @Before
