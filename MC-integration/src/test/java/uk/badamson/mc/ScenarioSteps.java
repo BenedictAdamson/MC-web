@@ -18,15 +18,13 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import uk.badamson.mc.presentation.HomePage;
+import uk.badamson.mc.presentation.Page;
+import uk.badamson.mc.presentation.ScenariosPage;
 
 /**
  * <p>
@@ -38,32 +36,34 @@ public class ScenarioSteps {
    @Autowired
    private WorldCore worldCore;
 
-   private WebElement element;
+   private Page currentPage;
 
-   private void assertIsScenariosPage() {
-      element = worldCore.assertHasElementWithTag("h2");
-      assertThat("Has a header saying \"Scenarios\"", element.getText(),
-               containsString("Scenarios"));
+   private HomePage getHomePage() {
+      final var homePage = new HomePage(worldCore.getWebDriver());
+      homePage.get();
+      currentPage = homePage;
+      return homePage;
    }
 
    @When("getting the scenarios")
-   public void getting_scenarios() throws Exception {
+   public void getting_scenarios() {
       navigateToScenariosPage();
-      worldCore.awaitSuccessOrErrorMessage("/scenario");
    }
 
    @Then("MC serves the scenarios page")
-   public void mc_serves_scenarios_page() throws Exception {
-      assertIsScenariosPage();
+   public void mc_serves_scenarios_page() {
+      final var scenariosPage = (ScenariosPage) currentPage;
+      scenariosPage.assertIsCurrentPage();// guard
+      scenariosPage.assertInvariants();
    }
 
    private void navigateToScenariosPage() {
-      worldCore.getUrlUsingBrowser("/");
-      worldCore.getWebDriver().findElement(By.id("scenarios")).click();
+      currentPage = getHomePage().navigateToScenariosPage();
    }
 
    @Then("the response is a list of scenarios")
    public void response_is_list_of_scenarios() {
-      element = worldCore.assertHasElementWithTag("ul");
+      final var scenariosPage = (ScenariosPage) currentPage;
+      scenariosPage.assertHasListOfScenarios();
    }
 }

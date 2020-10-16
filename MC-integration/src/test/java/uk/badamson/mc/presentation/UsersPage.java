@@ -44,7 +44,7 @@ public final class UsersPage extends Page {
 
    /**
     * <p>
-    * Construct a user page assocaited with a given home page.
+    * Construct a user page associated with a given home page.
     * </p>
     *
     * @param homePage

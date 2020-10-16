@@ -95,6 +95,14 @@ public final class HomePage extends Page {
       return loginPage;
    }
 
+   public ScenariosPage navigateToScenariosPage() {
+      requireIsCurrentPage();
+      findElement(By.id("scenarios")).click();
+      final ScenariosPage scenariosPage = new ScenariosPage(this);
+      scenariosPage.awaitIsCurrentPageOrErrorMessage();
+      return scenariosPage;
+   }
+
    public UsersPage navigateToUsersPage() {
       requireIsCurrentPage();
       findElement(By.id("users")).click();
