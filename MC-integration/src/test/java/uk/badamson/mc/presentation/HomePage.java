@@ -64,6 +64,11 @@ public final class HomePage extends Page {
                () -> assertTitleIncludesNameOfGame());
    }
 
+   public void assertReportsThatLoggedIn() {
+      assertThat("Reports that is logged in", getBodyText(),
+               containsString("Logged in"));
+   }
+
    public void assertTitleIncludesNameOfGame() {
       assertThat(getTitle(), containsString(GAME_NAME));
    }
@@ -86,5 +91,4 @@ public final class HomePage extends Page {
       usersPage.awaitIsCurrentPageOrErrorMessage();
       return usersPage;
    }
-
 }

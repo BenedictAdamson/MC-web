@@ -180,6 +180,10 @@ public abstract class Page {
       webDriver.get(createUrl(path.get()).toASCIIString());
    }
 
+   protected final String getBodyText() {
+      return findElement(By.tagName("body")).getText();
+   }
+
    /**
     * <p>
     * The path component of a valid fixed URI for a page of this type.
@@ -223,5 +227,4 @@ public abstract class Page {
          throw new IllegalStateException("Current path (" + currentPath + ")");
       }
    }
-
 }

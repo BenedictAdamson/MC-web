@@ -18,9 +18,7 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -83,14 +81,6 @@ public class UserSteps {
                not(empty()));
    }
 
-   private void assertNoErrorMessages() {
-      final var elements = worldCore.getWebDriver()
-               .findElements(By.className("error"));
-      // Report the error messages, to provide better diagnostics
-      assertThat("No error messages", elements.stream().map(e -> e.getText())
-               .collect(toUnmodifiableList()), is(empty()));
-   }
-
    @Then("can get the list of users")
    public void can_get_list_of_users() {
       final var page = new UsersPage(worldCore.getWebDriver());
@@ -102,10 +92,6 @@ public class UserSteps {
    public void does_not_present_adding_user_option() {
       final UsersPage usersPage = navigateToUsersPage();
       usersPage.assertHasNoAddUserLink();
-   }
-
-   private String getBodyText() {
-      return worldCore.getWebDriver().findElement(By.tagName("body")).getText();
    }
 
    @When("getting the users")
@@ -142,9 +128,10 @@ public class UserSteps {
 
    @Then("MC accepts the login")
    public void mc_accepts_login() {
-      assertAll(() -> assertCurrentUrlPath("/"), () -> assertNoErrorMessages(),
-               () -> assertThat("Reports that is logged in", getBodyText(),
-                        containsString("Logged in")));
+      final var page = new HomePage(worldCore.getWebDriver());
+      assertAll(() -> page.assertIsCurrentPage(),
+               () -> page.assertNoErrorMessages(),
+               () -> page.assertReportsThatLoggedIn());
    }
 
    @Then("MC accepts the addition")
