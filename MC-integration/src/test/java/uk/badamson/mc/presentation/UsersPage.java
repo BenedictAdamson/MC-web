@@ -44,6 +44,20 @@ public final class UsersPage extends Page {
 
    /**
     * <p>
+    * Construct a user page assocaited with a given home page.
+    * </p>
+    *
+    * @param homePage
+    *           The web home page.
+    * @throws NullPointerException
+    *            If {@code homePage} is null.
+    */
+   public UsersPage(final HomePage homePage) {
+      super(homePage);
+   }
+
+   /**
+    * <p>
     * Construct a page object using a given web driver interface.
     * </p>
     *
@@ -56,24 +70,22 @@ public final class UsersPage extends Page {
       super(webDriver);
    }
 
-
    public void assertHasListOfUsers() {
       assertHasElementWithTag("ul");
    }
 
    public void assertHasNoAddUserLink() {
-      assertThat("No add-user link",
-               findElements(ADD_USER_LINK_LOCATOR), empty());
+      assertThat("No add-user link", findElements(ADD_USER_LINK_LOCATOR),
+               empty());
    }
 
-@Override
+   @Override
    public void assertInvariants() {
       final var element = assertHasElementWithTag("h2");
       assertThat("Has a header saying \"Users\"", element.getText(),
                containsString("Users"));
       assertHasListOfUsers();
    }
-
 
    public void assertListOfUsersIncludes(final String name) {
       Objects.requireNonNull(name, "name");
@@ -86,6 +98,12 @@ public final class UsersPage extends Page {
       assertThat(list.findElements(By.tagName("li")), not(empty()));
    }
 
+   @Override
+   protected boolean isValidPath(final String path) {
+      Objects.requireNonNull(path, "path");
+      return PATH.equals(path);
+   }
+
    public void submitAddUserForm(final String user, final String password) {
       Objects.requireNonNull(user, "user");
       Objects.requireNonNull(password, "password");
@@ -93,15 +111,8 @@ public final class UsersPage extends Page {
 
       findElement(ADD_USER_LINK_LOCATOR).click();
       findElement(By.name("username")).sendKeys(user);
-      findElement(By.xpath("//input[@type='password']"))
-               .sendKeys(password);
+      findElement(By.xpath("//input[@type='password']")).sendKeys(password);
       findElement(By.xpath("//button[@type='submit']")).submit();
-   }
-
-   @Override
-   protected boolean isValidPath(String path) {
-      Objects.requireNonNull(path, "path");
-      return PATH.equals(path);
    }
 
 }

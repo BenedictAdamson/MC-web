@@ -28,6 +28,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.openqa.selenium.By;
@@ -35,6 +36,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.opentest4j.AssertionFailedError;
+
+import uk.badamson.mc.McContainers;
 
 /**
  * <p>
@@ -53,11 +56,29 @@ public abstract class Page {
     */
    public static final By ERROR_LOCATOR = By.className("error");
 
+   private static URI createUrl(final String path) {
+      return McContainers.createIngressPrivateNetworkUriFromPath(path);
+   }
+
    private static String getPathOfUrl(final String url) {
       return URI.create(url).getPath();
    }
 
    private final WebDriver webDriver;
+
+   /**
+    * <p>
+    * Construct a page object associated with an existing page.
+    * </p>
+    *
+    * @param page
+    *           The existing page.
+    * @throws NullPointerException
+    *            If {@code page} is null.
+    */
+   protected Page(final Page page) {
+      this.webDriver = Objects.requireNonNull(page, "page").webDriver;
+   }
 
    /**
     * <p>
@@ -67,18 +88,10 @@ public abstract class Page {
     * @param webDriver
     *           The web driver interface to use for accessing the page.
     * @throws NullPointerException
-    *            If {@codewebDriver} is null.
+    *            If {@code webDriver} is null.
     */
    protected Page(final WebDriver webDriver) {
       this.webDriver = Objects.requireNonNull(webDriver, "webDriver");
-   }
-
-   protected final WebElement findElement(By locator) {
-      return webDriver.findElement(locator);
-   }
-
-   protected final List<WebElement> findElements(By locator) {
-      return webDriver.findElements(locator);
    }
 
    /**
@@ -139,12 +152,63 @@ public abstract class Page {
       }
    }
 
+   protected final WebElement findElement(final By locator) {
+      return webDriver.findElement(locator);
+   }
+
+   protected final List<WebElement> findElements(final By locator) {
+      return webDriver.findElements(locator);
+   }
+
+   /**
+    * <p>
+    * Directly load this page, using an HTTP GET operation.
+    * </p>
+    * <p>
+    * The method blocks until the load completes. It follows redirects.
+    * </p>
+    *
+    * @throws UnsupportedOperationException
+    *            If direct loading is impossible because the page does not have
+    *            a {@linkplain #getPath() fixed path}.
+    */
+   public final void get() throws UnsupportedOperationException {
+      final Optional<String> path = getPath();
+      if (path.isEmpty()) {
+         throw new UnsupportedOperationException("No path to get");
+      }
+      webDriver.get(createUrl(path.get()).toASCIIString());
+   }
+
+   /**
+    * <p>
+    * The path component of a valid fixed URI for a page of this type.
+    * </p>
+    * <p>
+    * All pages have a URI, but not all have a fixed (constant) URI, so the
+    * value is {@link Optional} to allow for cases that there is not a fixed
+    * URI.
+    * </p>
+    * <p>
+    * The provided implementation {@linkplain Optional#isEmpty() is empty}.
+    * </p>
+    *
+    * @return the optional path; not null.
+    */
+   protected Optional<String> getPath() {
+      return Optional.empty();
+   }
+
+   protected final String getTitle() {
+      return webDriver.getTitle();
+   }
+
    /**
     * <p>
     * Whether a given URI {@linkplain URI#getPath() path component} of a URI is
     * a valid value for this type of page.
     * </p>
-    * 
+    *
     * @param path
     *           the path component to examine
     * @return whether {@code path} is valid

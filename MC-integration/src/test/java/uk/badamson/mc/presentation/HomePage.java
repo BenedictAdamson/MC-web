@@ -22,37 +22,22 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.net.URI;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.opentest4j.AssertionFailedError;
-
-import uk.badamson.mc.McContainers;
 
 /**
  * <p>
  * A <i>page object</i> for the home page.
  * </p>
  */
-public class HomePage {
+public final class HomePage extends Page {
 
    public static final String GAME_NAME = "Mission Command";
 
    private static final String PATH = "/";
-
-   private static final By HEADER = By.tagName("h1");
-
-   private static URI createUrl(final String path) {
-      return McContainers.createIngressPrivateNetworkUriFromPath(path);
-   }
-
-   protected static String getPathOfUrl(final String url) {
-      return URI.create(url).getPath();
-   }
-
-   private final WebDriver webDriver;
 
    /**
     * <p>
@@ -65,71 +50,41 @@ public class HomePage {
     *            If {@codewebDriver} is null.
     */
    public HomePage(final WebDriver webDriver) {
-      this.webDriver = Objects.requireNonNull(webDriver, "webDriver");
+      super(webDriver);
    }
 
    public void assertHeaderIncludesNameOfGame() {
-      assertThat(webDriver.findElement(HEADER).getText(),
-               containsString(GAME_NAME));
+      final var header = assertHasElementWithTag("h1");// guard
+      assertThat(header.getText(), containsString(GAME_NAME));
    }
 
+   @Override
    public void assertInvariants() {
-      assertAll("Home page invariant", () -> assertHeaderIncludesNameOfGame(),
+      assertAll(() -> assertHeaderIncludesNameOfGame(),
                () -> assertTitleIncludesNameOfGame());
    }
 
-   public void assertIsCurrentPage() {
-      try {
-         requireIsCurrentPage();
-      } catch (final IllegalStateException e) {
-         throw new AssertionFailedError(e.getMessage(), e);
-      }
-   }
-
    public void assertTitleIncludesNameOfGame() {
-      assertThat(webDriver.getTitle(), containsString(GAME_NAME));
+      assertThat(getTitle(), containsString(GAME_NAME));
    }
 
-   public void get() {
-      webDriver.get(createUrl(PATH).toASCIIString());
+   @Override
+   protected Optional<String> getPath() {
+      return Optional.of(PATH);
    }
 
-   /**
-    * <p>
-    * The {@linkplain URI#getPath() path} component of the
-    * {@linkplain WebDriver#getCurrentUrl() current URL} of the browser.
-    * </p>
-    * <p>
-    * Tests should use value, rather than the current URL of the browser,
-    * because the current URL includes the server host-name, which is a test
-    * implementation detail.
-    * </p>
-    *
-    * @return the path; not null.
-    */
-   protected String getCurrentUrlPath() {
-      return getPathOfUrl(webDriver.getCurrentUrl());
+   @Override
+   protected boolean isValidPath(final String path) {
+      Objects.requireNonNull(path, "path");
+      return PATH.equals(path);
    }
 
    public UsersPage navigateToUsersPage() {
       requireIsCurrentPage();
-      webDriver.findElement(By.id("users")).click();
-      final UsersPage usersPage = new UsersPage(webDriver);
+      findElement(By.id("users")).click();
+      final UsersPage usersPage = new UsersPage(this);
       usersPage.awaitIsCurrentPageOrErrorMessage();
       return usersPage;
    }
 
-   protected void requireCurrentUrlPath(final String path)
-            throws IllegalStateException {
-      Objects.requireNonNull(path, "path");
-      final var currentPath = getCurrentUrlPath();
-      if (!currentPath.equals(path)) {
-         throw new IllegalStateException(
-                  "Current page (" + currentPath + ") is not " + path);
-      }
-   }
-
-   public void requireIsCurrentPage() throws IllegalStateException {
-      requireCurrentUrlPath(PATH);
-   }
 }
