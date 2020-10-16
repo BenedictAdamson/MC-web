@@ -30,13 +30,14 @@ import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import uk.badamson.mc.presentation.HomePage;
+import uk.badamson.mc.presentation.UsersPage;
 
 /**
  * <p>
@@ -45,8 +46,6 @@ import io.cucumber.java.en.When;
  * </p>
  */
 public class UserSteps {
-
-   private static final By ADD_USER_LINK_LOCATOR = By.id("add-user");
 
    private static Authority parseRoleName(final String roleName) {
       final Authority role;
@@ -67,18 +66,10 @@ public class UserSteps {
 
    private User user;
 
-   private WebElement element;
-
    @When("adding a user named {string} with  password {string}")
    public void adding_a_user(final String user, final String password) {
-      navigateToUsersPage();
-      worldCore.awaitSuccessOrErrorMessage("/user");
-      final var webDriver = worldCore.getWebDriver();
-      webDriver.findElement(ADD_USER_LINK_LOCATOR).click();
-      webDriver.findElement(By.name("username")).sendKeys(user);
-      webDriver.findElement(By.xpath("//input[@type='password']"))
-               .sendKeys(password);
-      webDriver.findElement(By.xpath("//button[@type='submit']")).submit();
+      final UsersPage usersPage = navigateToUsersPage();
+      usersPage.submitAddUserForm(user, password);
    }
 
    private void assertCurrentUrlPath(final String expectedPath) {
@@ -86,16 +77,10 @@ public class UserSteps {
                is(expectedPath));
    }
 
-   public void assertHaveErrorMessages() {
+   private void assertHaveErrorMessages() {
       assertThat("Error message(s)",
                worldCore.getWebDriver().findElements(By.className("error")),
                not(empty()));
-   }
-
-   private void assertIsUsersPage() {
-      element = worldCore.assertHasElementWithTag("h2");
-      assertThat("Has a header saying \"Users\"", element.getText(),
-               containsString("Users"));
    }
 
    private void assertNoErrorMessages() {
@@ -108,16 +93,15 @@ public class UserSteps {
 
    @Then("can get the list of users")
    public void can_get_list_of_users() {
-      navigateToUsersPage();
-      assertIsUsersPage();
+      final var page = new UsersPage(worldCore.getWebDriver());
+      page.assertIsCurrentPage();// guard
+      page.assertInvariants();
    }
 
    @Then("MC does not present adding a user as an option")
    public void does_not_present_adding_user_option() {
-      navigateToUsersPage();
-      assertThat("No add-user link",
-               worldCore.getWebDriver().findElements(ADD_USER_LINK_LOCATOR),
-               empty());
+      final UsersPage usersPage = navigateToUsersPage();
+      usersPage.assertHasNoAddUserLink();
    }
 
    private String getBodyText() {
@@ -127,19 +111,22 @@ public class UserSteps {
    @When("getting the users")
    public void getting_users() {
       navigateToUsersPage();
-      worldCore.awaitSuccessOrErrorMessage("/user");
    }
 
    @Then("the list of users includes a user named {string}")
    public void list_of_users_includes(final String name) {
-      element = worldCore.assertHasElementWithTag("ul");
-      assertThat(element.getText(), containsString(name));
+      Objects.requireNonNull(name, "name");
+
+      final var page = new UsersPage(worldCore.getWebDriver());
+      page.requireIsCurrentPage();
+      page.assertListOfUsersIncludes(name);
    }
 
    @Then("the list of users has at least one user")
    public void list_of_users_not_empty() {
-      Objects.requireNonNull(element);
-      assertThat(element.findElements(By.tagName("li")), not(empty()));
+      final var page = new UsersPage(worldCore.getWebDriver());
+      page.assertIsCurrentPage();// guard
+      page.assertListOfUsersNotEmpty();
    }
 
    @Given("logged in")
@@ -162,8 +149,9 @@ public class UserSteps {
 
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() {
+      final var page = new UsersPage(worldCore.getWebDriver());
       try {
-         worldCore.awaitSuccessOrErrorMessage("/user");
+         page.awaitIsCurrentPageOrErrorMessage();
       } catch (final IllegalStateException e) {
          throw new AssertionFailedError(e.getMessage(), e);
       }
@@ -177,21 +165,27 @@ public class UserSteps {
 
    @Then("MC serves the users page")
    public void mc_serves_users_page() {
-      assertIsUsersPage();
+      final var page = new UsersPage(worldCore.getWebDriver());
+      page.assertIsCurrentPage();// guard
+      page.assertInvariants();
    }
 
-   private void navigateToUsersPage() {
-      worldCore.getWebDriver().findElement(By.id("users")).click();
+   private UsersPage navigateToUsersPage() {
+      final var homePage = new HomePage(worldCore.getWebDriver());
+      return homePage.navigateToUsersPage();
    }
 
    @Then("redirected to home-page")
    public void redirected_to_home_page() {
-      assertThat("URL path", worldCore.getCurrentUrlPath(), is("/"));
+      final var homePage = new HomePage(worldCore.getWebDriver());
+      homePage.assertIsCurrentPage();
    }
 
    @Then("the response is a list of users")
    public void response_is_list_of_users() {
-      element = worldCore.assertHasElementWithTag("ul");
+      final var page = new UsersPage(worldCore.getWebDriver());
+      assertAll(() -> page.assertIsCurrentPage(),
+               () -> page.assertHasListOfUsers());
    }
 
    private void submitLogin(final String name, final String password) {
