@@ -1,7 +1,7 @@
 import { Router } from '@angular/router';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { LoginComponent } from './login.component';
 import { SelfService } from '../self.service';
@@ -11,8 +11,7 @@ describe('LoginComponent', () => {
 	const USER_A: User = { username: 'Administrator', password: 'letmein', authorities: ['ROLE_ADMIN'] };
 	const USER_B: User = { username: 'Benedict', password: 'pasword123', authorities: [] };
 
-	let routerSpy;
-	let httpClient: HttpClient;
+	let routerSpy: any;
 	let httpTestingController: HttpTestingController;
 	let selfService: SelfService;
 	let fixture: ComponentFixture<LoginComponent>;
@@ -36,7 +35,7 @@ describe('LoginComponent', () => {
         /* Inject for each test:
          * HTTP requests will be handled by the mock back-end.
           */
-		httpClient = TestBed.get(HttpClient);
+		TestBed.get(HttpClient);
 		httpTestingController = TestBed.get(HttpTestingController);
 		selfService = TestBed.get(SelfService);
 		fixture = TestBed.createComponent(LoginComponent);
@@ -78,7 +77,7 @@ describe('LoginComponent', () => {
 		httpTestingController.verify();
 	}
 
-	const testNgOnInitAlreadyLoggedIn = function(done, userDetails: User) {
+	const testNgOnInitAlreadyLoggedIn = function(done: any, userDetails: User) {
 		selfService.authenticate(userDetails.username, userDetails.password).subscribe({
 			next: () => { },
 			error: (err) => { fail(err); done() },
@@ -126,7 +125,7 @@ describe('LoginComponent', () => {
 	};
 
 
-	const testLoginFailure = function(done, userDetails: User) {
+	const testLoginFailure = function(done: any, userDetails: User) {
 		component.username = userDetails.username;
 		component.password = userDetails.password;
 		component.login();
@@ -147,7 +146,7 @@ describe('LoginComponent', () => {
 	});
 
 
-	const testLoginSuccess = function(done, userDetails: User) {
+	const testLoginSuccess = function(done: any, userDetails: User) {
 		component.username = userDetails.username;
 		component.password = userDetails.password;
 		component.login();

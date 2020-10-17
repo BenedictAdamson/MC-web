@@ -1,8 +1,7 @@
-import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { Subject } from 'rxjs';
 
 import { SelfService } from './self.service';
 import { User } from './user';
@@ -90,7 +89,7 @@ describe('SelfService', () => {
 	});
 
 
-	let testAuthenticationFailure = (done, username: string, password: string) => {
+	let testAuthenticationFailure = (done: any, username: string, password: string) => {
 		service.authenticate(username, password).subscribe({
 			next: (success) => {
 				expect(success).withContext('success').toBeFalse();
@@ -135,7 +134,7 @@ describe('SelfService', () => {
 
 
 
-	let testAuthenticationSuccess = (done, userDetails: User) => {
+	let testAuthenticationSuccess = (done: any, userDetails: User) => {
 		service.authenticate(userDetails.username, userDetails.password).subscribe({
 			next: (success) => {
 				expect(success).withContext('success').toBeTrue();

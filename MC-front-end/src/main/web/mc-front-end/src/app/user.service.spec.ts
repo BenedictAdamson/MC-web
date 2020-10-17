@@ -1,13 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
 import { UserService } from './user.service';
 import { User } from './user';
 
 
 describe('UserService', () => {
-	let httpClient: HttpClient;
 	let httpTestingController: HttpTestingController;
 
 	const USER_A: User = { username: 'Benedict', password: 'letmein', authorities: [] };
@@ -21,7 +20,7 @@ describe('UserService', () => {
         /* Inject for each test:
          * HTTP requests will be handled by the mock back-end.
           */
-		httpClient = TestBed.get(HttpClient);
+		TestBed.get(HttpClient);
 		httpTestingController = TestBed.get(HttpTestingController);
 	});
 

@@ -1,14 +1,12 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
 import { SelfComponent } from './self.component';
 import { SelfService } from '../self.service';
 
 
 describe('SelfComponent', () => {
-	let httpClient: HttpClient;
-	let httpTestingController: HttpTestingController;
 	let fixture: ComponentFixture<SelfComponent>;
 	let component: SelfComponent;
 
@@ -37,8 +35,8 @@ describe('SelfComponent', () => {
         /* Inject for each test:
          * HTTP requests will be handled by the mock back-end.
           */
-		httpClient = TestBed.get(HttpClient);
-		httpTestingController = TestBed.get(HttpTestingController);
+		TestBed.get(HttpClient);
+		TestBed.get(HttpTestingController);
 		fixture = TestBed.createComponent(SelfComponent);
 		component = fixture.componentInstance;
 	});

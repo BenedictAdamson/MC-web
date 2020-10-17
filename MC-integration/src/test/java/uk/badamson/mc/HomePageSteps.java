@@ -18,49 +18,57 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import java.util.Objects;
 
-import org.openqa.selenium.By;
+import javax.annotation.Nonnull;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
+import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import uk.badamson.mc.presentation.HomePage;
 
 /**
  * <p>
  * Definitions of BDD steps for the Cucumber-JVM BDD testing tool for steps
- * pertaining to the home-page.
+ * pertaining to the home-((HomePage)currentPage).
  * </p>
  */
-public class HomePageSteps {
+public class HomePageSteps extends Steps {
 
    public static final String GAME_NAME = "Mission Command";
 
    @Autowired
-   private WorldCore worldCore;
+   public HomePageSteps(@Nonnull final WorldCore worldCore) {
+      super(worldCore);
+   }
 
-   @SuppressWarnings("unused")
-   @Autowired
-   private WorldCoreScenarioHook worldCoreScenarioHook;
+   private HomePage getHomePage() {
+      Objects.requireNonNull(currentPage, "currentPage");
+      return (HomePage) currentPage;
+   }
 
    @Then("the home page header includes the name of the game")
    public void home_page_header_includes_name_of_game() {
-      assertThat(
-               worldCore.getWebDriver().findElement(By.tagName("h1")).getText(),
-               containsString(GAME_NAME));
+      getHomePage().assertHeaderIncludesNameOfGame();
    }
 
    @Then("the home page title includes the name of the game")
    public void home_page_title_includes_name_of_game() {
-      assertThat(worldCore.getWebDriver().getTitle(),
-               containsString(GAME_NAME));
+      getHomePage().assertTitleIncludesNameOfGame();
    }
 
    @Then("MC serves the home page")
    public void mc_serves_the_home_page() {
-      // Do nothing;
+      getHomePage().assertIsCurrentPage();// guard
+      getHomePage().assertInvariants();
+   }
+
+   @Before
+   public void setUp() {
+      currentPage = new HomePage(worldCore.getWebDriver());
    }
 
    @Given("the DNS name, example.com, of an MC server")
@@ -73,7 +81,6 @@ public class HomePageSteps {
 
    @When("the potential user gives the obvious URL http://example.com/ to a web browser")
    public void the_potential_user_gives_the_obvious_URL_to_a_web_browser() {
-      worldCore.setUrlPath("/");
-      worldCore.getUrlUsingBrowser();
+      getHomePage().get();
    }
 }

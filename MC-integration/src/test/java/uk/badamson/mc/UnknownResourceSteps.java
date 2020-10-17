@@ -25,6 +25,8 @@ import static org.hamcrest.Matchers.is;
 import java.net.HttpURLConnection;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.en.Then;
@@ -36,16 +38,14 @@ import io.cucumber.java.en.When;
  * pertaining to unknown resources.
  * </p>
  */
-public class UnknownResourceSteps {
-
-   @Autowired
-   private WorldCore worldCore;
-
-   @SuppressWarnings("unused")
-   @Autowired
-   private WorldCoreScenarioHook worldCoreScenarioHook;
+public class UnknownResourceSteps extends Steps {
 
    private int httpResponseCode;
+
+   @Autowired
+   public UnknownResourceSteps(@Nonnull final WorldCore worldCore) {
+      super(worldCore);
+   }
 
    private void doHttpRequest(final String method, final String path) {
       worldCore.setUrlPath(path);

@@ -1,17 +1,10 @@
-import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
 import { TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-
-import { Spy } from 'jasmine-core';
-import { Subject } from 'rxjs';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { SelfComponent } from './self/self.component';
-import { SelfService } from './self.service';
 
 describe('AppComponent', () => {
 
@@ -56,5 +49,14 @@ describe('AppComponent', () => {
 		const link = html.querySelector('a[id="users"]');
 		expect(link).withContext('link element').not.toBeNull();
 		expect(link.textContent).withContext('link text').toContain('Users');
+	});
+
+	it('has a Scenarios link', () => {
+		const fixture = TestBed.createComponent(AppComponent);
+		fixture.detectChanges();
+		const html = fixture.debugElement.nativeElement;
+		const link = html.querySelector('a[id="scenarios"]');
+		expect(link).withContext('link element').not.toBeNull();
+		expect(link.textContent).withContext('link text').toContain('Scenarios');
 	});
 });

@@ -18,28 +18,21 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import static java.util.stream.Collectors.toUnmodifiableList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicReference;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import javax.annotation.Nonnull;
+
 import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import uk.badamson.mc.presentation.HomePage;
+import uk.badamson.mc.presentation.LoginPage;
+import uk.badamson.mc.presentation.UsersPage;
 
 /**
  * <p>
@@ -47,9 +40,7 @@ import io.cucumber.java.en.When;
  * pertaining to users.
  * </p>
  */
-public class UserSteps {
-
-   private static final By ADD_USER_LINK_LOCATOR = By.id("add-user");
+public class UserSteps extends Steps {
 
    private static Authority parseRoleName(final String roleName) {
       final Authority role;
@@ -61,203 +52,134 @@ public class UserSteps {
       return role;
    }
 
-   @Autowired
-   private WorldCore worldCore;
-
-   @SuppressWarnings("unused")
-   @Autowired
-   private WorldCoreScenarioHook worldCoreScenarioHook;
-
    private User user;
 
-   private WebElement element;
+   @Autowired
+   public UserSteps(@Nonnull final WorldCore worldCore) {
+      super(worldCore);
+   }
 
    @When("adding a user named {string} with  password {string}")
    public void adding_a_user(final String user, final String password) {
-      tryToGetUsersPage();
-      awaitSuccessOrErrorMessage("/user");
-      final var webDriver = worldCore.getWebDriver();
-      webDriver.findElement(ADD_USER_LINK_LOCATOR).click();
-      webDriver.findElement(By.name("username")).sendKeys(user);
-      webDriver.findElement(By.xpath("//input[@type='password']"))
-               .sendKeys(password);
-      webDriver.findElement(By.xpath("//button[@type='submit']")).submit();
-   }
-
-   private void assertCurrentUrlPath(final String expectedPath) {
-      assertThat("Current URL path", worldCore.getCurrentUrlPath(),
-               is(expectedPath));
-   }
-
-   public void assertHaveErrorMessages() {
-      assertThat("Error message(s)",
-               worldCore.getWebDriver().findElements(By.className("error")),
-               not(empty()));
-   }
-
-   private void assertIsUsersPage() {
-      findElementWithTag("h2");
-      assertThat("Has a header saying \"Users\"", element.getText(),
-               containsString("Users"));
-   }
-
-   private void assertNoErrorMessages() {
-      final var elements = worldCore.getWebDriver()
-               .findElements(By.className("error"));
-      // Report the error messages, to provide better diagnostics
-      assertThat("No error messages", elements.stream().map(e -> e.getText())
-               .collect(toUnmodifiableList()), is(empty()));
-   }
-
-   private void awaitSuccessOrErrorMessage(final String expectedSuccessUrlPath)
-            throws IllegalStateException {
-      var currentPath = new AtomicReference<String>();
-      try {
-         new WebDriverWait(worldCore.getWebDriver(), 17).until(driver -> {
-            currentPath.set(WorldCore.getPathOfUrl(driver.getCurrentUrl()));
-            return expectedSuccessUrlPath.equals(currentPath.get())
-                     || !driver.findElements(By.className("error")).isEmpty();
-         });
-      } catch (final Exception e) {// give better diagnostics
-         throw new IllegalStateException(
-                  "No indication of success or failure (at " + currentPath.get()
-                           + ")",
-                  e);
-      }
+      navigateToUsersPage().submitAddUserForm(user, password);
    }
 
    @Then("can get the list of users")
    public void can_get_list_of_users() {
-      getUrlUsingBrowser("/user");
-      assertIsUsersPage();
+      final var usersPage = (UsersPage) currentPage;
+      usersPage.assertIsCurrentPage();// guard
+      usersPage.assertInvariants();
    }
 
    @Then("MC does not present adding a user as an option")
    public void does_not_present_adding_user_option() {
-      getUrlUsingBrowser("/user");
-      assertThat("No add-user link",
-               worldCore.getWebDriver().findElements(ADD_USER_LINK_LOCATOR),
-               empty());
+      navigateToUsersPage().assertHasNoAddUserLink();
    }
 
-   /*
-    * Sets {@code this.element} to the found element.
-    *
-    * @throws AssertionFailedError if no such element is present.
-    */
-   private void findElementWithTag(final String tag) {
-      Objects.requireNonNull(tag, "tag");
-      try {
-         element = worldCore.getWebDriver().findElement(By.tagName(tag));
-      } catch (final NoSuchElementException e) {
-         element = null;
-         throw new AssertionFailedError("has element with tag " + tag, e);
-      }
-   }
-
-   private String getBodyText() {
-      return worldCore.getWebDriver().findElement(By.tagName("body")).getText();
-   }
-
-   private void getHomePage() {
-      getUrlUsingBrowser("/");
+   private HomePage getHomePage() {
+      final var homePage = new HomePage(worldCore.getWebDriver());
+      homePage.get();
+      currentPage = homePage;
+      return homePage;
    }
 
    @When("getting the users")
    public void getting_users() {
-      tryToGetUsersPage();
-      awaitSuccessOrErrorMessage("/user");
-   }
-
-   private void getUrlUsingBrowser(final String path) {
-      worldCore.setUrlPath(path);
-      worldCore.getUrlUsingBrowser();
+      navigateToUsersPage();
    }
 
    @Then("the list of users includes a user named {string}")
    public void list_of_users_includes(final String name) {
-      findElementWithTag("ul");
-      assertThat(element.getText(), containsString(name));
+      Objects.requireNonNull(name, "name");
+
+      final var usersPage = (UsersPage) currentPage;
+      usersPage.requireIsCurrentPage();
+      usersPage.assertListOfUsersIncludes(name);
    }
 
    @Then("the list of users has at least one user")
    public void list_of_users_not_empty() {
-      Objects.requireNonNull(element);
-      assertThat(element.findElements(By.tagName("li")), not(empty()));
+      final var usersPage = (UsersPage) currentPage;
+      usersPage.assertIsCurrentPage();// guard
+      usersPage.assertListOfUsersNotEmpty();
    }
 
    @Given("logged in")
    public void logged_in() {
       tryToLogin();
-      assertCurrentUrlPath("/");
    }
 
    @When("log in using correct password")
-   public void login_using_correct_password() throws TimeoutException {
+   public void login_using_correct_password() {
       tryToLogin();
    }
 
    @Then("MC accepts the login")
    public void mc_accepts_login() {
-      assertAll(() -> assertCurrentUrlPath("/"), () -> assertNoErrorMessages(),
-               () -> assertThat("Reports that is logged in", getBodyText(),
-                        containsString("Logged in")));
+      final var homePage = (HomePage) currentPage;
+      assertAll(() -> homePage.assertIsCurrentPage(),
+               () -> homePage.assertNoErrorMessages(),
+               () -> homePage.assertReportsThatLoggedIn());
    }
 
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() {
+      final var usersPage = (UsersPage) currentPage;
       try {
-         awaitSuccessOrErrorMessage("/user");
-      } catch (IllegalStateException e) {
+         usersPage.awaitIsCurrentPageOrErrorMessage();
+      } catch (final IllegalStateException e) {
          throw new AssertionFailedError(e.getMessage(), e);
       }
    }
 
    @Then("MC rejects the login")
    public void mc_rejects_login() {
-      assertAll(() -> assertCurrentUrlPath("/login"),
-               () -> assertHaveErrorMessages());
+      final var loginPage = (LoginPage) currentPage;
+      loginPage.assertRejectedLogin();
    }
 
    @Then("MC serves the users page")
    public void mc_serves_users_page() {
-      assertIsUsersPage();
+      final var usersPage = (UsersPage) currentPage;
+      usersPage.assertIsCurrentPage();// guard
+      usersPage.assertInvariants();
+   }
+
+   private UsersPage navigateToUsersPage() {
+      final var homePage = (HomePage) currentPage;
+      final var usersPage = homePage.navigateToUsersPage();
+      currentPage = usersPage;
+      return usersPage;
    }
 
    @Then("redirected to home-page")
    public void redirected_to_home_page() {
-      assertThat("URL path", worldCore.getCurrentUrlPath(), is("/"));
+      final var homePage = (HomePage) currentPage;
+      homePage.assertIsCurrentPage();
    }
 
    @Then("the response is a list of users")
    public void response_is_list_of_users() {
-      findElementWithTag("ul");
-   }
-
-   private void submitLogin(final String name, final String password) {
-      getHomePage();
-      final var webDriver = worldCore.getWebDriver();
-      webDriver.findElement(By.id("login")).click();
-      webDriver.findElement(By.name("username")).sendKeys(name);
-      webDriver.findElement(By.xpath("//input[@type='password']"))
-               .sendKeys(password);
-      webDriver.findElement(By.xpath("//button[@type='submit']")).submit();
+      final var usersPage = (UsersPage) currentPage;
+      assertAll(() -> usersPage.assertIsCurrentPage(),
+               () -> usersPage.assertHasListOfUsers());
    }
 
    @When("try to login")
-   public void try_to_login() throws Exception {
+   public void try_to_login() {
       tryToLogin();
-   }
-
-   private void tryToGetUsersPage() {
-      final var webDriver = worldCore.getWebDriver();
-      webDriver.findElement(By.id("users")).click();
    }
 
    private void tryToLogin() {
       Objects.requireNonNull(user, "user");
-      submitLogin(user.getUsername(), user.getPassword());
-      awaitSuccessOrErrorMessage("/");
+      final var homePage = getHomePage();
+      final var loginPage = homePage.navigateToLoginPage();
+      currentPage = loginPage;
+      loginPage.submitLoginForm(user.getUsername(), user.getPassword());
+      homePage.awaitIsCurrentPageOrErrorMessage();
+      if (homePage.isCurrentPage()) {
+         currentPage = homePage;
+      }
    }
 
    @Given("unknown user")
