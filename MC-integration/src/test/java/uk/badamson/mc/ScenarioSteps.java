@@ -18,6 +18,10 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import java.util.Objects;
+
+import javax.annotation.Nonnull;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.en.Then;
@@ -33,11 +37,15 @@ import uk.badamson.mc.presentation.ScenariosPage;
  */
 public class ScenarioSteps {
 
-   @Autowired
-   private WorldCore worldCore;
+   @Nonnull
+   private final WorldCore worldCore;
 
    private Page currentPage;
 
+   @Autowired
+   public ScenarioSteps(@Nonnull WorldCore worldCore) {
+      this.worldCore = Objects.requireNonNull(worldCore, "worldCore");
+   }
    private HomePage getHomePage() {
       final var homePage = new HomePage(worldCore.getWebDriver());
       homePage.get();

@@ -23,7 +23,10 @@ import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
 
 import java.net.HttpURLConnection;
+import java.util.Objects;
 import java.util.Set;
+
+import javax.annotation.Nonnull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -38,14 +41,15 @@ import io.cucumber.java.en.When;
  */
 public class UnknownResourceSteps {
 
-   @Autowired
-   private WorldCore worldCore;
-
-   @SuppressWarnings("unused")
-   @Autowired
-   private WorldCoreScenarioHook worldCoreScenarioHook;
+   @Nonnull
+   private final WorldCore worldCore;
 
    private int httpResponseCode;
+
+   @Autowired
+   public UnknownResourceSteps(@Nonnull final WorldCore worldCore) {
+      this.worldCore = Objects.requireNonNull(worldCore, "worldCore");
+   }
 
    private void doHttpRequest(final String method, final String path) {
       worldCore.setUrlPath(path);

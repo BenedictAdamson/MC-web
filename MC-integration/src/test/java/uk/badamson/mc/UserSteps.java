@@ -22,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Objects;
 
+import javax.annotation.Nonnull;
+
 import org.opentest4j.AssertionFailedError;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -51,16 +53,17 @@ public class UserSteps {
       return role;
    }
 
-   @Autowired
-   private WorldCore worldCore;
-
-   @SuppressWarnings("unused")
-   @Autowired
-   private WorldCoreScenarioHook worldCoreScenarioHook;
+   @Nonnull
+   private final WorldCore worldCore;
 
    private Page currentPage;
 
    private User user;
+
+   @Autowired
+   public UserSteps(@Nonnull final WorldCore worldCore) {
+      this.worldCore = Objects.requireNonNull(worldCore, "worldCore");
+   }
 
    @When("adding a user named {string} with  password {string}")
    public void adding_a_user(final String user, final String password) {

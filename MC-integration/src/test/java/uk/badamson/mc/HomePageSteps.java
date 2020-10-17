@@ -20,6 +20,8 @@ package uk.badamson.mc;
 
 import java.util.Objects;
 
+import javax.annotation.Nonnull;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.Before;
@@ -38,14 +40,14 @@ public class HomePageSteps {
 
    public static final String GAME_NAME = "Mission Command";
 
-   @Autowired
-   private WorldCore worldCore;
+   private final WorldCore worldCore;
 
    private HomePage page;
 
-   @SuppressWarnings("unused")
    @Autowired
-   private WorldCoreScenarioHook worldCoreScenarioHook;
+   public HomePageSteps(@Nonnull final WorldCore worldCore) {
+      this.worldCore = Objects.requireNonNull(worldCore, "worldCore");
+   }
 
    @Then("the home page header includes the name of the game")
    public void home_page_header_includes_name_of_game() {
