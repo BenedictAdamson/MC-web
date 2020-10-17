@@ -32,7 +32,6 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import uk.badamson.mc.presentation.HomePage;
 import uk.badamson.mc.presentation.LoginPage;
-import uk.badamson.mc.presentation.Page;
 import uk.badamson.mc.presentation.UsersPage;
 
 /**
@@ -41,7 +40,7 @@ import uk.badamson.mc.presentation.UsersPage;
  * pertaining to users.
  * </p>
  */
-public class UserSteps {
+public class UserSteps extends Steps {
 
    private static Authority parseRoleName(final String roleName) {
       final Authority role;
@@ -53,16 +52,11 @@ public class UserSteps {
       return role;
    }
 
-   @Nonnull
-   private final WorldCore worldCore;
-
-   private Page currentPage;
-
    private User user;
 
    @Autowired
    public UserSteps(@Nonnull final WorldCore worldCore) {
-      this.worldCore = Objects.requireNonNull(worldCore, "worldCore");
+      super(worldCore);
    }
 
    @When("adding a user named {string} with  password {string}")

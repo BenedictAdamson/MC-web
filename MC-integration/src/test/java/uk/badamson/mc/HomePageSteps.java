@@ -33,42 +33,42 @@ import uk.badamson.mc.presentation.HomePage;
 /**
  * <p>
  * Definitions of BDD steps for the Cucumber-JVM BDD testing tool for steps
- * pertaining to the home-page.
+ * pertaining to the home-((HomePage)currentPage).
  * </p>
  */
-public class HomePageSteps {
+public class HomePageSteps extends Steps {
 
    public static final String GAME_NAME = "Mission Command";
 
-   private final WorldCore worldCore;
-
-   private HomePage page;
-
    @Autowired
    public HomePageSteps(@Nonnull final WorldCore worldCore) {
-      this.worldCore = Objects.requireNonNull(worldCore, "worldCore");
+      super(worldCore);
+   }
+
+   private HomePage getHomePage() {
+      Objects.requireNonNull(currentPage, "currentPage");
+      return (HomePage) currentPage;
    }
 
    @Then("the home page header includes the name of the game")
    public void home_page_header_includes_name_of_game() {
-      page.assertHeaderIncludesNameOfGame();
+      getHomePage().assertHeaderIncludesNameOfGame();
    }
 
    @Then("the home page title includes the name of the game")
    public void home_page_title_includes_name_of_game() {
-      page.assertTitleIncludesNameOfGame();
+      getHomePage().assertTitleIncludesNameOfGame();
    }
 
    @Then("MC serves the home page")
    public void mc_serves_the_home_page() {
-      page.assertIsCurrentPage();// guard
-      page.assertInvariants();
+      getHomePage().assertIsCurrentPage();// guard
+      getHomePage().assertInvariants();
    }
 
    @Before
    public void setUp() {
-      Objects.requireNonNull(worldCore, "worldCore");
-      page = new HomePage(worldCore.getWebDriver());
+      currentPage = new HomePage(worldCore.getWebDriver());
    }
 
    @Given("the DNS name, example.com, of an MC server")
@@ -81,6 +81,6 @@ public class HomePageSteps {
 
    @When("the potential user gives the obvious URL http://example.com/ to a web browser")
    public void the_potential_user_gives_the_obvious_URL_to_a_web_browser() {
-      page.get();
+      getHomePage().get();
    }
 }

@@ -23,7 +23,6 @@ import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
 
 import java.net.HttpURLConnection;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -39,16 +38,13 @@ import io.cucumber.java.en.When;
  * pertaining to unknown resources.
  * </p>
  */
-public class UnknownResourceSteps {
-
-   @Nonnull
-   private final WorldCore worldCore;
+public class UnknownResourceSteps extends Steps {
 
    private int httpResponseCode;
 
    @Autowired
    public UnknownResourceSteps(@Nonnull final WorldCore worldCore) {
-      this.worldCore = Objects.requireNonNull(worldCore, "worldCore");
+      super(worldCore);
    }
 
    private void doHttpRequest(final String method, final String path) {

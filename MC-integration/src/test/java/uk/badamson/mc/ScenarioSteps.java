@@ -18,8 +18,6 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.util.Objects;
-
 import javax.annotation.Nonnull;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import uk.badamson.mc.presentation.HomePage;
-import uk.badamson.mc.presentation.Page;
 import uk.badamson.mc.presentation.ScenariosPage;
 
 /**
@@ -35,17 +32,13 @@ import uk.badamson.mc.presentation.ScenariosPage;
  * Definitions of BDD steps, for features about game scenarios.
  * </p>
  */
-public class ScenarioSteps {
-
-   @Nonnull
-   private final WorldCore worldCore;
-
-   private Page currentPage;
+public class ScenarioSteps extends Steps {
 
    @Autowired
-   public ScenarioSteps(@Nonnull WorldCore worldCore) {
-      this.worldCore = Objects.requireNonNull(worldCore, "worldCore");
+   public ScenarioSteps(@Nonnull final WorldCore worldCore) {
+      super(worldCore);
    }
+
    private HomePage getHomePage() {
       final var homePage = new HomePage(worldCore.getWebDriver());
       homePage.get();
