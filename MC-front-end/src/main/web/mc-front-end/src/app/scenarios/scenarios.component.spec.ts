@@ -2,7 +2,7 @@ import { of } from 'rxjs';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { Scenario } from '../scenario';
+import { ScenarioIdentifier } from '../scenario-identifier';
 import { ScenariosComponent } from './scenarios.component';
 import { ScenarioService } from '../scenario.service';
 
@@ -11,12 +11,12 @@ describe('ScenariosComponent', () => {
 	let component: ScenariosComponent;
 	let fixture: ComponentFixture<ScenariosComponent>;
 
-	const SCENARIO_A: Scenario = { id: '123456', title: 'Section Attack', description: 'Basic fire-and-movement tactical training.' };
-	const SCENARIO_B: Scenario = { id: '345678', title: 'Beach Assault', description: 'Fast and deadly.' };
+	const IDENTIFIER_A: ScenarioIdentifier = { id: '123456', title: 'Section Attack' };
+	const IDENTIFIER_B: ScenarioIdentifier = { id: '345678', title: 'Beach Assault' };
 
-	const setUp = (testScenarios: Scenario[]) => {
-		const scenarioServiceStub = jasmine.createSpyObj('ScenarioService', ['getScenarios']);
-		scenarioServiceStub.getScenarios.and.returnValue(of(testScenarios));
+	const setUp = (identifiers: ScenarioIdentifier[]) => {
+		const scenarioServiceStub = jasmine.createSpyObj('ScenarioService', ['getScenarioIdentifiers']);
+		scenarioServiceStub.getScenarioIdentifiers.and.returnValue(of(identifiers));
 
 		TestBed.configureTestingModule({
 			declarations: [ScenariosComponent],
@@ -31,11 +31,11 @@ describe('ScenariosComponent', () => {
 		fixture.detectChanges();
 	};
 
-	const canCreate = (testScenarios: Scenario[]) => {
-		setUp(testScenarios);
+	const canCreate = (identifiers: ScenarioIdentifier[]) => {
+		setUp(identifiers);
 
 		expect(component).toBeTruthy();
-		expect(component.scenarios).toBe(testScenarios);
+		expect(component.scenarios).toBe(identifiers);
 		const element: HTMLElement = fixture.nativeElement;
 		const heading = element.querySelector('h2');
 		expect(heading).withContext('has heading').not.toBeNull();
@@ -43,10 +43,10 @@ describe('ScenariosComponent', () => {
 	};
 
 	it('can create [1]', () => {
-		canCreate([SCENARIO_A]);
+		canCreate([IDENTIFIER_A]);
 	});
 
 	it('can create [2]', () => {
-		canCreate([SCENARIO_A, SCENARIO_B]);
+		canCreate([IDENTIFIER_A, IDENTIFIER_B]);
 	});
 });
