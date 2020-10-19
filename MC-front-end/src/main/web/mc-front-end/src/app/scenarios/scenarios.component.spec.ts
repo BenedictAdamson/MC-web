@@ -36,10 +36,21 @@ describe('ScenariosComponent', () => {
 
 		expect(component).toBeTruthy();
 		expect(component.scenarios).toBe(identifiers);
-		const element: HTMLElement = fixture.nativeElement;
-		const heading = element.querySelector('h2');
+		const rootElement: HTMLElement = fixture.nativeElement;
+		const heading: HTMLHeadingElement = rootElement.querySelector('h2');
 		expect(heading).withContext('has heading').not.toBeNull();
 		expect(heading.textContent).withContext('heading text').toContain('Scenarios');
+		const list: HTMLUListElement = rootElement.querySelector('ul');
+		expect(list).withContext('has list').not.toBeNull();
+		const listEntries: NodeListOf<HTMLLIElement> = list.querySelectorAll("li");
+		expect(listEntries.length).withContext('list length').toEqual(identifiers.length);
+		for (let i = 0; i < listEntries.length; i++) {
+			const expected: ScenarioIdentifier = identifiers[i];
+			const entry: HTMLLIElement = listEntries.item(i);
+			const link: HTMLAnchorElement = entry.querySelector('a');
+			expect(link).withContext('entry has link').not.toBeNull();
+			expect(link.textContent).withContext('entry link text contains title').toContain(expected.title);
+		}
 	};
 
 	it('can create [1]', () => {
