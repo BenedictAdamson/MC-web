@@ -51,11 +51,21 @@ public class ScenarioSteps extends Steps {
       navigateToScenariosPage();
    }
 
+   @When("MC serves the scenario page")
+   public void mc_serves_scenario_page() {
+      throw new UnsupportedOperationException();
+   }
+
    @Then("MC serves the scenarios page")
    public void mc_serves_scenarios_page() {
       final var scenariosPage = (ScenariosPage) currentPage;
       scenariosPage.assertIsCurrentPage();// guard
       scenariosPage.assertInvariants();
+   }
+
+   @When("Navigate to one scenario")
+   public void navigate_to_one_scenario() throws Exception {
+      throw new UnsupportedOperationException();
    }
 
    private void navigateToScenariosPage() {
@@ -66,5 +76,10 @@ public class ScenarioSteps extends Steps {
    public void response_is_list_of_scenarios() {
       final var scenariosPage = (ScenariosPage) currentPage;
       scenariosPage.assertHasListOfScenarios();
+   }
+
+   @When("Viewing the scenarios")
+   public void viewing_scenarios() {
+      throw new UnsupportedOperationException();
    }
 }
