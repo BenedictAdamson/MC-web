@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import uk.badamson.mc.presentation.HomePage;
+import uk.badamson.mc.presentation.ScenarioPage;
 import uk.badamson.mc.presentation.ScenariosPage;
 
 /**
@@ -53,7 +54,9 @@ public class ScenarioSteps extends Steps {
 
    @When("MC serves the scenario page")
    public void mc_serves_scenario_page() {
-      throw new UnsupportedOperationException();
+      final var scenarioPage = (ScenarioPage) currentPage;
+      scenarioPage.assertIsCurrentPage();
+      scenarioPage.assertInvariants();
    }
 
    @Then("MC serves the scenarios page")
@@ -64,8 +67,10 @@ public class ScenarioSteps extends Steps {
    }
 
    @When("Navigate to one scenario")
-   public void navigate_to_one_scenario() throws Exception {
-      throw new UnsupportedOperationException();
+   public void navigate_to_one_scenario() {
+      final var scenariosPage = (ScenariosPage) currentPage;
+      final var index = 0;
+      currentPage = scenariosPage.navigateToScenario(index);
    }
 
    private void navigateToScenariosPage() {
@@ -80,6 +85,6 @@ public class ScenarioSteps extends Steps {
 
    @When("Viewing the scenarios")
    public void viewing_scenarios() {
-      throw new UnsupportedOperationException();
+      navigateToScenariosPage();
    }
 }
