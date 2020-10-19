@@ -4,6 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AddUserComponent } from './add-user/add-user.component';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
+import { ScenarioComponent } from './scenario/scenario.component';
 import { ScenariosComponent } from './scenarios/scenarios.component';
 import { UserComponent } from './user/user.component';
 import { UsersComponent } from './users/users.component';
@@ -13,6 +14,10 @@ import { UsersComponent } from './users/users.component';
  * if data.roles is not empty.
  */
 const routes: Routes = [
+	{
+		path: 'scenario/:id',
+		component: ScenarioComponent
+	},
 	{
 		path: 'scenario',
 		component: ScenariosComponent
