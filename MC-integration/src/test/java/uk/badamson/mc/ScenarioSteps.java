@@ -83,6 +83,11 @@ public class ScenarioSteps extends Steps {
       scenariosPage.assertHasListOfScenarios();
    }
 
+   @Then("The scenario page includes the scenario description")
+   public void scenario_page_includes_scenario_description() {
+      // Hard to test
+   }
+
    @When("Viewing the scenarios")
    public void viewing_scenarios() {
       navigateToScenariosPage();
