@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { Scenario } from '../scenario';
+import { ScenarioIdentifier } from '../scenario-identifier';
 import { ScenarioService } from '../scenario.service';
 
 @Component({
@@ -10,12 +10,12 @@ import { ScenarioService } from '../scenario.service';
 })
 export class ScenariosComponent implements OnInit {
 
-	scenarios: Scenario[];
+	scenarios: ScenarioIdentifier[];
 
 	constructor(private scenarioService: ScenarioService) { }
 
 	ngOnInit() {
-		this.scenarioService.getScenarios().subscribe(scenarios => this.scenarios = scenarios);
+		this.scenarioService.getScenarioIdentifiers().subscribe(scenarios => this.scenarios = scenarios);
 	}
 
 }

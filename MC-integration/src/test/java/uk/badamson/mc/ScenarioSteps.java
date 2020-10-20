@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import uk.badamson.mc.presentation.HomePage;
+import uk.badamson.mc.presentation.ScenarioPage;
 import uk.badamson.mc.presentation.ScenariosPage;
 
 /**
@@ -42,7 +43,7 @@ public class ScenarioSteps extends Steps {
    private HomePage getHomePage() {
       final var homePage = new HomePage(worldCore.getWebDriver());
       homePage.get();
-      currentPage = homePage;
+      expectedPage = homePage;
       return homePage;
    }
 
@@ -51,20 +52,42 @@ public class ScenarioSteps extends Steps {
       navigateToScenariosPage();
    }
 
+   @When("MC serves the scenario page")
+   public void mc_serves_scenario_page() {
+      final var scenarioPage = (ScenarioPage) expectedPage;
+      scenarioPage.assertInvariants();
+   }
+
    @Then("MC serves the scenarios page")
    public void mc_serves_scenarios_page() {
-      final var scenariosPage = (ScenariosPage) currentPage;
-      scenariosPage.assertIsCurrentPage();// guard
+      final var scenariosPage = (ScenariosPage) expectedPage;
       scenariosPage.assertInvariants();
    }
 
+   @When("Navigate to one scenario")
+   public void navigate_to_one_scenario() {
+      final var scenariosPage = (ScenariosPage) expectedPage;
+      final var index = 0;
+      expectedPage = scenariosPage.navigateToScenario(index);
+   }
+
    private void navigateToScenariosPage() {
-      currentPage = getHomePage().navigateToScenariosPage();
+      expectedPage = getHomePage().navigateToScenariosPage();
    }
 
    @Then("the response is a list of scenarios")
    public void response_is_list_of_scenarios() {
-      final var scenariosPage = (ScenariosPage) currentPage;
+      final var scenariosPage = (ScenariosPage) expectedPage;
       scenariosPage.assertHasListOfScenarios();
+   }
+
+   @Then("The scenario page includes the scenario description")
+   public void scenario_page_includes_scenario_description() {
+      // Hard to test
+   }
+
+   @When("Viewing the scenarios")
+   public void viewing_scenarios() {
+      navigateToScenariosPage();
    }
 }

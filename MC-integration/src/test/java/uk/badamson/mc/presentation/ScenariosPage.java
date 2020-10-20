@@ -22,9 +22,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import javax.annotation.concurrent.Immutable;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 /**
  * <p>
@@ -56,11 +61,24 @@ public final class ScenariosPage extends Page {
 
    @Override
    public void assertInvariants() {
-      assertAll(
+      assertAll(() -> super.assertInvariants(),
                () -> assertThat("Has a header saying \"Scenarios\"",
                         assertHasElementWithTag("h2").getText(),
                         containsString("Scenarios")),
                () -> assertHasListOfScenarios());
+   }
+
+   private List<WebElement> findScenarioElements() {
+      return findElement(By.tagName("ul")).findElements(By.tagName("li"));
+   }
+
+   public List<String> getScenarioTitles() {
+      final var listEntries = findScenarioElements();
+      final List<String> result = new ArrayList<>(listEntries.size());
+      for (final var listEntry : listEntries) {
+         result.add(listEntry.getText());
+      }
+      return result;
    }
 
    @Override
@@ -69,4 +87,13 @@ public final class ScenariosPage extends Page {
       return PATH.equals(path);
    }
 
+   public ScenarioPage navigateToScenario(final int i) {
+      final var entry = findScenarioElements().get(i);
+      final var title = entry.getText();
+      final var link = entry.findElement(By.tagName("a"));
+      link.click();
+      final var scenarioPage = new ScenarioPage(this, title);
+      scenarioPage.awaitIsCurrentPageOrErrorMessage();
+      return scenarioPage;
+   }
 }

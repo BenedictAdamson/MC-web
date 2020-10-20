@@ -18,59 +18,55 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 import java.util.Objects;
 
 import javax.annotation.concurrent.Immutable;
 
-import org.openqa.selenium.By;
-
 /**
  * <p>
- * A <i>page object</i> for the login page.
+ * A <i>page object</i> for a scenario page.
  * </p>
  */
 @Immutable
-public final class LoginPage extends Page {
+public final class ScenarioPage extends Page {
 
-   private static final String PATH = "/login";
+   private static final String BASE = "/scenario/";
+
+   private final String title;
 
    /**
     * <p>
-    * Construct a login page object associated with an existing page.
+    * Construct a scenario page associated with a given scenarios page and
+    * having a given (expected) title.
     * </p>
     *
-    * @param page
-    *           The existing page.
+    * @param scenariosPage
+    *           The scenarios page.
+    * @param title
+    *           The expected title.
     * @throws NullPointerException
-    *            If {@code page} is null.
+    *            If {@code scenariosPage} is null. If {@code title} is null.
     */
-   public LoginPage(final Page page) {
-      super(page);
+   public ScenarioPage(final ScenariosPage scenariosPage, final String title) {
+      super(scenariosPage);
+      this.title = Objects.requireNonNull(title, "title");
    }
 
    @Override
    public void assertInvariants() {
-      super.assertInvariants();
-   }
-
-   public void assertRejectedLogin() {
-      assertInvariants();// guard
-      assertHasErrorMessage();
+      assertAll(() -> super.assertInvariants(),
+               () -> assertThat("displays the scenario title", getBodyText(),
+                        containsString(title)));
    }
 
    @Override
    protected boolean isValidPath(final String path) {
       Objects.requireNonNull(path, "path");
-      return PATH.equals(path);
+      return path.startsWith(BASE);
    }
 
-   public void submitLoginForm(final String user, final String password) {
-      Objects.requireNonNull(user, "user");
-      Objects.requireNonNull(password, "password");
-      requireIsCurrentPath();
-
-      findElement(By.name("username")).sendKeys(user);
-      findElement(By.xpath("//input[@type='password']")).sendKeys(password);
-      findElement(By.xpath("//button[@type='submit']")).submit();
-   }
 }

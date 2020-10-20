@@ -107,7 +107,7 @@ public final class UsersPage extends Page {
    public void submitAddUserForm(final String user, final String password) {
       Objects.requireNonNull(user, "user");
       Objects.requireNonNull(password, "password");
-      requireIsCurrentPage();
+      requireIsCurrentPath();
 
       findElement(ADD_USER_LINK_LOCATOR).click();
       findElement(By.name("username")).sendKeys(user);

@@ -1,9 +1,10 @@
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
 import { Scenario } from './scenario';
+import { ScenarioIdentifier } from './scenario-identifier';
 
 @Injectable({
 	providedIn: 'root'
@@ -15,10 +16,10 @@ export class ScenarioService {
 	constructor(
 		private http: HttpClient) { }
 
-	getScenarios(): Observable<Scenario[]> {
-		return this.http.get<Scenario[]>(this.scenarioUrl)
+	getScenarioIdentifiers(): Observable<ScenarioIdentifier[]> {
+		return this.http.get<ScenarioIdentifier[]>(this.scenarioUrl)
 			.pipe(
-				catchError(this.handleError<Scenario[]>('getScenarios', []))
+				catchError(this.handleError<ScenarioIdentifier[]>('getScenarioIdentifiers', []))
 			);
 	}
 

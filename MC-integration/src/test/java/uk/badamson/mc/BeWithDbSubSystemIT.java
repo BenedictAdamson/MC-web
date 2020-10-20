@@ -40,7 +40,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.opentest4j.AssertionFailedError;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient.RequestHeadersSpec;
-import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -87,7 +86,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    @Test
    @Order(2)
    public void addUser() {
-      final ResponseSpec response = be.addUser(USER_A);
+      final var response = be.addUser(USER_A);
 
       response.expectStatus().isCreated();
       final List<User> users;
@@ -141,9 +140,9 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       final var response = request.exchange();
 
       response.expectStatus().isOk();
-      final String responseJson = response.returnResult(String.class)
+      final var responseJson = response.returnResult(String.class)
                .getResponseBody().blockFirst(Duration.ofSeconds(9));
-      final User responseUser = new ObjectMapper().readValue(responseJson,
+      final var responseUser = new ObjectMapper().readValue(responseJson,
                User.class);
       assertAll("responded with user details",
                () -> assertThat("username", responseUser.getUsername(),
@@ -178,7 +177,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    }
 
    private List<User> getUsers1() throws IOException {
-      final String usersAsJson = be.getJsonAsAdministrator("/api/user")
+      final var usersAsJson = be.getJsonAsAdministrator("/api/user")
                .returnResult(String.class).getResponseBody()
                .blockFirst(Duration.ofSeconds(9));
       final var mapper = new ObjectMapper();

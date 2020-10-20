@@ -20,7 +20,6 @@ package uk.badamson.mc;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 /**
@@ -36,13 +35,13 @@ public final class Version {
             + VERSION;
 
    private static Properties getApplicationProperties() throws IOException {
-      final InputStream stream = Thread.currentThread().getContextClassLoader()
+      final var stream = Thread.currentThread().getContextClassLoader()
                .getResourceAsStream("application.properties");
       if (stream == null) {
          throw new FileNotFoundException(
                   "resource application.properties not found");
       }
-      final Properties properties = new Properties();
+      final var properties = new Properties();
       properties.load(stream);
       return properties;
    }

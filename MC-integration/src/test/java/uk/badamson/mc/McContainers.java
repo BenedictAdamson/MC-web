@@ -55,7 +55,7 @@ import uk.badamson.mc.repository.McDatabaseContainer;
 public class McContainers
          implements Startable, AutoCloseable, TestLifecycleAware {
 
-   public static enum HttpServer {
+   public enum HttpServer {
       BACK_END, FRONT_END, INGRESS
    }// enum
 
@@ -89,9 +89,9 @@ public class McContainers
    private static void retainLogFile(final Path directory, final String prefix,
             final String timestamp, final String host,
             final GenericContainer<?> container) {
-      final String leafName = String.format(LOGFILE_FILENAME_FORMAT, prefix,
+      final var leafName = String.format(LOGFILE_FILENAME_FORMAT, prefix,
                timestamp, host);
-      final Path path = directory.resolve(leafName);
+      final var path = directory.resolve(leafName);
       try {
          Files.writeString(path, container.getLogs(), StandardCharsets.UTF_8);
       } catch (final IOException e) {
@@ -238,11 +238,11 @@ public class McContainers
    }
 
    private void retainScreenshot(final String prefix, final String timestamp) {
-      final String leafName = String.format(SCREENSHOT_FILENAME_FORMAT, prefix,
+      final var leafName = String.format(SCREENSHOT_FILENAME_FORMAT, prefix,
                timestamp);
-      final Path path = failureRecordingDirectory.resolve(leafName);
+      final var path = failureRecordingDirectory.resolve(leafName);
       try {
-         final byte[] bytes = getWebDriver().getScreenshotAs(OutputType.BYTES);
+         final var bytes = getWebDriver().getScreenshotAs(OutputType.BYTES);
          Files.write(path, bytes);
       } catch (final Exception e) {
          throw new RuntimeException(e);

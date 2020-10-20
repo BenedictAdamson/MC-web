@@ -62,7 +62,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    private static String encodeAsJson(final Object obj) {
       try {
-         final ObjectMapper mapper = new ObjectMapper();
+         final var mapper = new ObjectMapper();
          return mapper.writeValueAsString(obj);
       } catch (final Exception e) {
          throw new IllegalArgumentException("can not encode Object as JSON", e);
@@ -97,8 +97,8 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
    }
 
    void awaitHealthCheckOk() throws TimeoutException, InterruptedException {
-      int tries = 0;
-      int sleep = 50;
+      var tries = 0;
+      var sleep = 50;
       while (true) {
          tries++;
          try {
@@ -127,7 +127,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       final String userInfo = null;
       final String query = null;
       final String fragment = null;
-      final String host = getContainerIpAddress();
+      final var host = getContainerIpAddress();
       final int port = getMappedPort(PORT);
       final URI uri;
       try {
