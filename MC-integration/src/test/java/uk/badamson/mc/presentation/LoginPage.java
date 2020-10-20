@@ -50,11 +50,11 @@ public final class LoginPage extends Page {
 
    @Override
    public void assertInvariants() {
-      // Do nothing
+      super.assertInvariants();
    }
 
    public void assertRejectedLogin() {
-      assertIsCurrentPage();// guard
+      assertInvariants();// guard
       assertHasErrorMessage();
    }
 
@@ -67,7 +67,7 @@ public final class LoginPage extends Page {
    public void submitLoginForm(final String user, final String password) {
       Objects.requireNonNull(user, "user");
       Objects.requireNonNull(password, "password");
-      requireIsCurrentPage();
+      requireIsCurrentPath();
 
       findElement(By.name("username")).sendKeys(user);
       findElement(By.xpath("//input[@type='password']")).sendKeys(password);

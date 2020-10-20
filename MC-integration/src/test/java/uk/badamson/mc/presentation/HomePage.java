@@ -63,7 +63,8 @@ public final class HomePage extends Page {
 
    @Override
    public void assertInvariants() {
-      assertAll(() -> assertHeaderIncludesNameOfGame(),
+      assertAll(() -> super.assertInvariants(),
+               () -> assertHeaderIncludesNameOfGame(),
                () -> assertTitleIncludesNameOfGame());
    }
 
@@ -88,25 +89,25 @@ public final class HomePage extends Page {
    }
 
    public LoginPage navigateToLoginPage() {
-      requireIsCurrentPage();
+      requireIsCurrentPath();
       findElement(By.id("login")).click();
-      final LoginPage loginPage = new LoginPage(this);
+      final var loginPage = new LoginPage(this);
       loginPage.awaitIsCurrentPageOrErrorMessage();
       return loginPage;
    }
 
    public ScenariosPage navigateToScenariosPage() {
-      requireIsCurrentPage();
+      requireIsCurrentPath();
       findElement(By.id("scenarios")).click();
-      final ScenariosPage scenariosPage = new ScenariosPage(this);
+      final var scenariosPage = new ScenariosPage(this);
       scenariosPage.awaitIsCurrentPageOrErrorMessage();
       return scenariosPage;
    }
 
    public UsersPage navigateToUsersPage() {
-      requireIsCurrentPage();
+      requireIsCurrentPath();
       findElement(By.id("users")).click();
-      final UsersPage usersPage = new UsersPage(this);
+      final var usersPage = new UsersPage(this);
       usersPage.awaitIsCurrentPageOrErrorMessage();
       return usersPage;
    }

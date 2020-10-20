@@ -117,11 +117,27 @@ public abstract class Page {
       assertThat("Error message(s)", findElements(ERROR_LOCATOR), not(empty()));
    }
 
-   public abstract void assertInvariants();
+   /**
+    * <p>
+    * Check that the current page conforms to all the invariants (general
+    * expectations) of this type of page.
+    * </p>
+    * <p>
+    * The provided implementation asserts that the current URL path
+    * {@linkplain #isValidPath(String) is valid}.
+    * </p>
+    * <p>
+    * Implementations of this method in derived classes should delegate to the
+    * implementation in their super class.
+    * </p>
+    */
+   public void assertInvariants() {
+      assertIsCurrentPath();
+   }
 
-   public final void assertIsCurrentPage() {
+   private void assertIsCurrentPath() {
       try {
-         requireIsCurrentPage();
+         requireIsCurrentPath();
       } catch (final IllegalStateException e) {
          throw new AssertionFailedError(e.getMessage(), e);
       }
@@ -173,7 +189,7 @@ public abstract class Page {
     *            a {@linkplain #getPath() fixed path}.
     */
    public final void get() throws UnsupportedOperationException {
-      final Optional<String> path = getPath();
+      final var path = getPath();
       if (path.isEmpty()) {
          throw new UnsupportedOperationException("No path to get");
       }
@@ -229,7 +245,7 @@ public abstract class Page {
     */
    protected abstract boolean isValidPath(String path);
 
-   public final void requireIsCurrentPage() throws IllegalStateException {
+   public final void requireIsCurrentPath() throws IllegalStateException {
       final var currentPath = getCurrentPath();
       if (!isValidPath(currentPath)) {
          throw new IllegalStateException("Current path (" + currentPath + ")");

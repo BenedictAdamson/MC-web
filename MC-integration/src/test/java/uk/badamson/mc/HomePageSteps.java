@@ -46,8 +46,8 @@ public class HomePageSteps extends Steps {
    }
 
    private HomePage getHomePage() {
-      Objects.requireNonNull(currentPage, "currentPage");
-      return (HomePage) currentPage;
+      Objects.requireNonNull(expectedPage, "currentPage");
+      return (HomePage) expectedPage;
    }
 
    @Then("the home page header includes the name of the game")
@@ -62,13 +62,12 @@ public class HomePageSteps extends Steps {
 
    @Then("MC serves the home page")
    public void mc_serves_the_home_page() {
-      getHomePage().assertIsCurrentPage();// guard
       getHomePage().assertInvariants();
    }
 
    @Before
    public void setUp() {
-      currentPage = new HomePage(worldCore.getWebDriver());
+      expectedPage = new HomePage(worldCore.getWebDriver());
    }
 
    @Given("the DNS name, example.com, of an MC server")

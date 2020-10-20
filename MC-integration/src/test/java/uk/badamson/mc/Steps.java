@@ -34,7 +34,7 @@ abstract class Steps {
    @Nonnull
    protected final WorldCore worldCore;
 
-   protected Page currentPage;
+   protected Page expectedPage;
 
    protected Steps(@Nonnull final WorldCore worldCore) {
       this.worldCore = Objects.requireNonNull(worldCore, "worldCore");

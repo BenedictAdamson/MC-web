@@ -20,6 +20,7 @@ package uk.badamson.mc.presentation;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Objects;
 
@@ -57,8 +58,9 @@ public final class ScenarioPage extends Page {
 
    @Override
    public void assertInvariants() {
-      assertThat("displays the scenario title", getBodyText(),
-               containsString(title));
+      assertAll(() -> super.assertInvariants(),
+               () -> assertThat("displays the scenario title", getBodyText(),
+                        containsString(title)));
    }
 
    @Override

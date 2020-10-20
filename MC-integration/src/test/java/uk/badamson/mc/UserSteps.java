@@ -66,8 +66,7 @@ public class UserSteps extends Steps {
 
    @Then("can get the list of users")
    public void can_get_list_of_users() {
-      final var usersPage = (UsersPage) currentPage;
-      usersPage.assertIsCurrentPage();// guard
+      final var usersPage = (UsersPage) expectedPage;
       usersPage.assertInvariants();
    }
 
@@ -79,7 +78,7 @@ public class UserSteps extends Steps {
    private HomePage getHomePage() {
       final var homePage = new HomePage(worldCore.getWebDriver());
       homePage.get();
-      currentPage = homePage;
+      expectedPage = homePage;
       return homePage;
    }
 
@@ -92,15 +91,14 @@ public class UserSteps extends Steps {
    public void list_of_users_includes(final String name) {
       Objects.requireNonNull(name, "name");
 
-      final var usersPage = (UsersPage) currentPage;
-      usersPage.requireIsCurrentPage();
+      final var usersPage = (UsersPage) expectedPage;
+      usersPage.requireIsCurrentPath();
       usersPage.assertListOfUsersIncludes(name);
    }
 
    @Then("the list of users has at least one user")
    public void list_of_users_not_empty() {
-      final var usersPage = (UsersPage) currentPage;
-      usersPage.assertIsCurrentPage();// guard
+      final var usersPage = (UsersPage) expectedPage;
       usersPage.assertListOfUsersNotEmpty();
    }
 
@@ -116,15 +114,15 @@ public class UserSteps extends Steps {
 
    @Then("MC accepts the login")
    public void mc_accepts_login() {
-      final var homePage = (HomePage) currentPage;
-      assertAll(() -> homePage.assertIsCurrentPage(),
+      final var homePage = (HomePage) expectedPage;
+      assertAll(() -> homePage.assertInvariants(),
                () -> homePage.assertNoErrorMessages(),
                () -> homePage.assertReportsThatLoggedIn());
    }
 
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() {
-      final var usersPage = (UsersPage) currentPage;
+      final var usersPage = (UsersPage) expectedPage;
       try {
          usersPage.awaitIsCurrentPageOrErrorMessage();
       } catch (final IllegalStateException e) {
@@ -134,34 +132,33 @@ public class UserSteps extends Steps {
 
    @Then("MC rejects the login")
    public void mc_rejects_login() {
-      final var loginPage = (LoginPage) currentPage;
+      final var loginPage = (LoginPage) expectedPage;
       loginPage.assertRejectedLogin();
    }
 
    @Then("MC serves the users page")
    public void mc_serves_users_page() {
-      final var usersPage = (UsersPage) currentPage;
-      usersPage.assertIsCurrentPage();// guard
+      final var usersPage = (UsersPage) expectedPage;
       usersPage.assertInvariants();
    }
 
    private UsersPage navigateToUsersPage() {
-      final var homePage = (HomePage) currentPage;
+      final var homePage = (HomePage) expectedPage;
       final var usersPage = homePage.navigateToUsersPage();
-      currentPage = usersPage;
+      expectedPage = usersPage;
       return usersPage;
    }
 
    @Then("redirected to home-page")
    public void redirected_to_home_page() {
-      final var homePage = (HomePage) currentPage;
-      homePage.assertIsCurrentPage();
+      final var homePage = (HomePage) expectedPage;
+      homePage.assertInvariants();
    }
 
    @Then("the response is a list of users")
    public void response_is_list_of_users() {
-      final var usersPage = (UsersPage) currentPage;
-      assertAll(() -> usersPage.assertIsCurrentPage(),
+      final var usersPage = (UsersPage) expectedPage;
+      assertAll(() -> usersPage.assertInvariants(),
                () -> usersPage.assertHasListOfUsers());
    }
 
@@ -174,11 +171,11 @@ public class UserSteps extends Steps {
       Objects.requireNonNull(user, "user");
       final var homePage = getHomePage();
       final var loginPage = homePage.navigateToLoginPage();
-      currentPage = loginPage;
+      expectedPage = loginPage;
       loginPage.submitLoginForm(user.getUsername(), user.getPassword());
       homePage.awaitIsCurrentPageOrErrorMessage();
       if (homePage.isCurrentPage()) {
-         currentPage = homePage;
+         expectedPage = homePage;
       }
    }
 

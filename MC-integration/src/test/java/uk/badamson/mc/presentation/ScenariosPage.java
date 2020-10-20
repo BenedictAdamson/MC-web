@@ -61,7 +61,7 @@ public final class ScenariosPage extends Page {
 
    @Override
    public void assertInvariants() {
-      assertAll(
+      assertAll(() -> super.assertInvariants(),
                () -> assertThat("Has a header saying \"Scenarios\"",
                         assertHasElementWithTag("h2").getText(),
                         containsString("Scenarios")),

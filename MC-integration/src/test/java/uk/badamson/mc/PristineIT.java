@@ -96,8 +96,8 @@ public class PristineIT implements AutoCloseable {
             final String path) {
       try {
          final var localUrl = containers.createUriFromPath(server, path);
-         final HttpURLConnection connection = (HttpURLConnection) localUrl
-                  .toURL().openConnection();
+         final var connection = (HttpURLConnection) localUrl.toURL()
+                  .openConnection();
          connection.setRequestMethod(method);
          connection.connect();
          return connection.getResponseCode();

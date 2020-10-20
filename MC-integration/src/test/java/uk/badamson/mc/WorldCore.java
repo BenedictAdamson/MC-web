@@ -298,8 +298,8 @@ public final class WorldCore implements AutoCloseable {
    public int getHttpResponseCode(final String method) {
       try {
          Objects.requireNonNull(localUrl, "urlPath not set");
-         final HttpURLConnection connection = (HttpURLConnection) localUrl
-                  .toURL().openConnection();
+         final var connection = (HttpURLConnection) localUrl.toURL()
+                  .openConnection();
          connection.setRequestMethod(method);
          connection.connect();
          return connection.getResponseCode();
@@ -422,7 +422,7 @@ public final class WorldCore implements AutoCloseable {
 
    private void tellContainersTestOutcome(final Scenario scenario) {
       final var testDescription = createTestDescription(scenario);
-      final Optional<Throwable> exception = createOutcomeException(scenario);
+      final var exception = createOutcomeException(scenario);
       containers.afterTest(testDescription, exception);
    }
 
