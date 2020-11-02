@@ -1,12 +1,12 @@
 /**
  * <p>
- * An identifier for a scenario of the Mission Command game.
+ * A UUID associated with a human-readable title or name.
  * </p>
  * <p>
- * This front-end class corresponds to the back-end class uk.badamson.mc.Scenario.Identifier.
+ * This front-end class corresponds to the back-end class uk.badamson.mc.NamedUUID.
  * </p>
  */
-export class ScenarioIdentifier {
-	id: string; // Unique. Probably a UUID, but not required to be
+export class NamedUUID {
+	id: string;
 	title: string;
 }

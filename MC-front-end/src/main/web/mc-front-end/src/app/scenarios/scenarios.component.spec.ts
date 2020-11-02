@@ -2,7 +2,7 @@ import { of } from 'rxjs';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { ScenarioIdentifier } from '../scenario-identifier';
+import { NamedUUID } from '../named-uuid';
 import { ScenariosComponent } from './scenarios.component';
 import { ScenarioService } from '../scenario.service';
 
@@ -11,10 +11,10 @@ describe('ScenariosComponent', () => {
 	let component: ScenariosComponent;
 	let fixture: ComponentFixture<ScenariosComponent>;
 
-	const IDENTIFIER_A: ScenarioIdentifier = { id: '123456', title: 'Section Attack' };
-	const IDENTIFIER_B: ScenarioIdentifier = { id: '345678', title: 'Beach Assault' };
+	const IDENTIFIER_A: NamedUUID = { id: '123456', title: 'Section Attack' };
+	const IDENTIFIER_B: NamedUUID = { id: '345678', title: 'Beach Assault' };
 
-	const setUp = (identifiers: ScenarioIdentifier[]) => {
+	const setUp = (identifiers: NamedUUID[]) => {
 		const scenarioServiceStub = jasmine.createSpyObj('ScenarioService', ['getScenarioIdentifiers']);
 		scenarioServiceStub.getScenarioIdentifiers.and.returnValue(of(identifiers));
 
@@ -31,7 +31,7 @@ describe('ScenariosComponent', () => {
 		fixture.detectChanges();
 	};
 
-	const canCreate = (identifiers: ScenarioIdentifier[]) => {
+	const canCreate = (identifiers: NamedUUID[]) => {
 		setUp(identifiers);
 
 		expect(component).toBeTruthy();
@@ -45,7 +45,7 @@ describe('ScenariosComponent', () => {
 		const listEntries: NodeListOf<HTMLLIElement> = list.querySelectorAll("li");
 		expect(listEntries.length).withContext('list length').toEqual(identifiers.length);
 		for (let i = 0; i < listEntries.length; i++) {
-			const expected: ScenarioIdentifier = identifiers[i];
+			const expected: NamedUUID = identifiers[i];
 			const entry: HTMLLIElement = listEntries.item(i);
 			const link: HTMLAnchorElement = entry.querySelector('a');
 			expect(link).withContext('entry has link').not.toBeNull();

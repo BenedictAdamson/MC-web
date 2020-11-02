@@ -3,16 +3,16 @@ import { HttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
+import { NamedUUID } from './named-uuid';
 import { ScenarioService } from './scenario.service';
 import { Scenario } from './scenario';
-import { ScenarioIdentifier } from './scenario-identifier';
 
 
 describe('ScenarioService', () => {
 	let httpTestingController: HttpTestingController;
 
-	const IDENTIFIER_A: ScenarioIdentifier = { id: '123456', title: 'Section Attack'};
-	const IDENTIFIER_B: ScenarioIdentifier = { id: '345678', title: 'Beach Assault'};
+	const IDENTIFIER_A: NamedUUID = { id: '123456', title: 'Section Attack'};
+	const IDENTIFIER_B: NamedUUID = { id: '345678', title: 'Beach Assault'};
 	const SCENARIO_A: Scenario = { identifier: IDENTIFIER_A, description: 'Basic fire-and-movement tactical training.' };
 	const SCENARIO_B: Scenario = { identifier: IDENTIFIER_B, description: 'Fast and deadly.' };
 
@@ -35,7 +35,7 @@ describe('ScenarioService', () => {
 
 	it('can get scenario identifiers', () => {
 		const scenarios: Scenario[] = [SCENARIO_A, SCENARIO_B];
-		const identifiers: ScenarioIdentifier[] = scenarios.map(s => s.identifier);
+		const identifiers: NamedUUID[] = scenarios.map(s => s.identifier);
 		const service: ScenarioService = TestBed.get(ScenarioService);
 
 		service.getScenarioIdentifiers().subscribe(ids => expect(ids).toEqual(identifiers));

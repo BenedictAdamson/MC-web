@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { ScenarioIdentifier } from '../scenario-identifier';
+import { NamedUUID } from '../named-uuid';
 import { ScenarioService } from '../scenario.service';
 
 @Component({
@@ -10,7 +10,7 @@ import { ScenarioService } from '../scenario.service';
 })
 export class ScenariosComponent implements OnInit {
 
-	scenarios: ScenarioIdentifier[];
+	scenarios: NamedUUID[];
 
 	constructor(private scenarioService: ScenarioService) { }
 
