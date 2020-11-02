@@ -1,4 +1,6 @@
 import { of } from 'rxjs';
+import { v4 as uuid } from 'uuid';
+
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
@@ -11,8 +13,8 @@ describe('ScenariosComponent', () => {
 	let component: ScenariosComponent;
 	let fixture: ComponentFixture<ScenariosComponent>;
 
-	const IDENTIFIER_A: NamedUUID = { id: '123456', title: 'Section Attack' };
-	const IDENTIFIER_B: NamedUUID = { id: '345678', title: 'Beach Assault' };
+	const IDENTIFIER_A: NamedUUID = { id: uuid(), title: 'Section Attack' };
+	const IDENTIFIER_B: NamedUUID = { id: uuid(), title: 'Beach Assault' };
 
 	const setUp = (identifiers: NamedUUID[]) => {
 		const scenarioServiceStub = jasmine.createSpyObj('ScenarioService', ['getScenarioIdentifiers']);

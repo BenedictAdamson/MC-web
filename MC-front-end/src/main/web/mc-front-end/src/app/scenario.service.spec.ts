@@ -1,4 +1,6 @@
 import { HttpClient } from '@angular/common/http';
+import { v4 as uuid } from 'uuid';
+
 
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
@@ -11,8 +13,8 @@ import { Scenario } from './scenario';
 describe('ScenarioService', () => {
 	let httpTestingController: HttpTestingController;
 
-	const IDENTIFIER_A: NamedUUID = { id: '123456', title: 'Section Attack'};
-	const IDENTIFIER_B: NamedUUID = { id: '345678', title: 'Beach Assault'};
+	const IDENTIFIER_A: NamedUUID = { id: uuid(), title: 'Section Attack'};
+	const IDENTIFIER_B: NamedUUID = { id: uuid(), title: 'Beach Assault'};
 	const SCENARIO_A: Scenario = { identifier: IDENTIFIER_A, description: 'Basic fire-and-movement tactical training.' };
 	const SCENARIO_B: Scenario = { identifier: IDENTIFIER_B, description: 'Fast and deadly.' };
 
