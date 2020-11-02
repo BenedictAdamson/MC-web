@@ -45,6 +45,7 @@ describe('ScenarioComponent', () => {
 		expect(component).toBeTruthy();
 		expect(component.scenario).toBe(testScenario);
 		const displayText: string = fixture.nativeElement.innerText;
+		expect(displayText.includes(testScenario.title)).withContext("displayed text includes title").toBeTrue();
 		expect(displayText.includes(testScenario.description)).withContext("displayed text includes description").toBeTrue();
 	};
 	it('can create [a]', () => {
