@@ -30,6 +30,8 @@ import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -207,6 +209,10 @@ public class McContainers
       network.close();
    }
 
+   public Game.Identifier createGame(final UUID scenario) {
+      return be.createGame(scenario);
+   }
+
    public URI createUriFromPath(final HttpServer server, final String path) {
       GenericContainer<?> container = null;
       switch (server) {
@@ -223,6 +229,10 @@ public class McContainers
       final var base = URI.create("http://" + container.getHost() + ":"
                + container.getFirstMappedPort());
       return base.resolve(path);
+   }
+
+   public Stream<NamedUUID> getScenarios() {
+      return be.getScenarios();
    }
 
    public RemoteWebDriver getWebDriver() {

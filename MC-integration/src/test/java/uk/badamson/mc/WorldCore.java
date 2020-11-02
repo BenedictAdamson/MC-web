@@ -29,8 +29,10 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -221,6 +223,10 @@ public final class WorldCore implements AutoCloseable {
       containers.close();
    }
 
+   public Game.Identifier createGame(final UUID scenario) {
+      return containers.createGame(scenario);
+   }
+
    private void createUsers() {
       users.put(User.ADMINISTRATOR_USERNAME,
                new User(User.ADMINISTRATOR_USERNAME,
@@ -308,6 +314,10 @@ public final class WorldCore implements AutoCloseable {
       } catch (IOException | NullPointerException e) {
          throw new IllegalStateException(e);
       }
+   }
+
+   public Stream<NamedUUID> getScenarios() {
+      return containers.getScenarios();
    }
 
    public User getUnknownUser() {

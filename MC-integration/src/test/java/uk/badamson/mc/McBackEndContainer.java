@@ -21,13 +21,17 @@ package uk.badamson.mc;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
+import org.springframework.web.util.UriTemplate;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.WaitingConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -59,6 +63,9 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
             .withStrategy(Wait.forLogMessage(".*" + STARTED_MESSAGE + ".*", 1));
 
    public static final String CONNECTION_MESSAGE = "successfully connected to server";
+
+   private static final UriTemplate GAME_URI_TEMPLATE = new UriTemplate(
+            "/api/scenario/{scenario}/game/{game}");
 
    private static String encodeAsJson(final Object obj) {
       try {
@@ -138,6 +145,19 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       return WebTestClient.bindToServer().baseUrl(uri.toString()).build();
    }
 
+   public Game.Identifier createGame(final UUID scenario) {
+      Objects.requireNonNull(scenario, "scenario");
+      final var path = "/api/scenario/" + scenario;
+      final var response = connectWebTestClient(path).post()
+               .accept(MediaType.APPLICATION_JSON).exchange();
+      response.expectStatus().isFound();
+      final var location = response.returnResult(String.class)
+               .getResponseHeaders().getLocation();
+      final var uriComponents = GAME_URI_TEMPLATE.match(location.getPath());
+      final var created = Instant.parse(uriComponents.get("game"));
+      return new Game.Identifier(scenario, created);
+   }
+
    private WebTestClient.ResponseSpec getJson(final String path) {
       return connectWebTestClient(path).get().accept(MediaType.APPLICATION_JSON)
                .exchange();
@@ -148,5 +168,10 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
                .headers(headers -> headers.setBasicAuth(
                         User.ADMINISTRATOR_USERNAME, administratorPassword))
                .exchange();
+   }
+
+   public Stream<NamedUUID> getScenarios() {
+      return getJson("/api/scenario").returnResult(NamedUUID.class)
+               .getResponseBody().toStream();
    }
 }
