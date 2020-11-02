@@ -13,10 +13,10 @@ import { Scenario } from './scenario';
 describe('ScenarioService', () => {
 	let httpTestingController: HttpTestingController;
 
-	const IDENTIFIER_A: NamedUUID = { id: uuid(), title: 'Section Attack'};
-	const IDENTIFIER_B: NamedUUID = { id: uuid(), title: 'Beach Assault'};
-	const SCENARIO_A: Scenario = { identifier: IDENTIFIER_A, description: 'Basic fire-and-movement tactical training.' };
-	const SCENARIO_B: Scenario = { identifier: IDENTIFIER_B, description: 'Fast and deadly.' };
+	const IDENTIFIER_A: uuid = uuid();
+	const IDENTIFIER_B: uuid = uuid();
+	const SCENARIO_A: Scenario = { identifier: IDENTIFIER_A, title: 'Section Attack', description: 'Basic fire-and-movement tactical training.' };
+	const SCENARIO_B: Scenario = { identifier: IDENTIFIER_B, title: 'Beach Assault', description: 'Fast and deadly.' };
 
 	beforeEach(() => {
 		TestBed.configureTestingModule({

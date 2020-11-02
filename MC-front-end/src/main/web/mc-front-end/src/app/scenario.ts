@@ -1,4 +1,4 @@
-import { NamedUUID } from './named-uuid';
+import { v4 as uuid } from 'uuid';
 
 /**
  * <p>
@@ -9,6 +9,7 @@ import { NamedUUID } from './named-uuid';
  * </p>
  */
 export class Scenario {
-	identifier: NamedUUID;
+	identifier: uuid;
+	title: string;
 	description: string;
 }
