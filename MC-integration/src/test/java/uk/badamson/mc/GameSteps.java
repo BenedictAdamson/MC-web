@@ -23,6 +23,7 @@ import javax.annotation.Nonnull;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.en.When;
+import uk.badamson.mc.presentation.ScenarioPage;
 
 /**
  * <p>
@@ -33,11 +34,20 @@ public class GameSteps extends Steps {
 
    private int scenarioIndex;
 
+   private int gameIndex;
+
    private Game.Identifier identifier;
 
    @Autowired
    public GameSteps(@Nonnull final WorldCore worldCore) {
       super(worldCore);
+   }
+
+   @When("Navigate to one game of the scenario")
+   public void navigate_to_game_of_scenario() {
+      final var scenarioPage = (ScenarioPage) expectedPage;
+      gameIndex = 0;
+      expectedPage = scenarioPage.navigateToGamePage(gameIndex);
    }
 
    private void navigateToScenario() {
