@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import uk.badamson.mc.presentation.HomePage;
 import uk.badamson.mc.presentation.ScenarioPage;
 import uk.badamson.mc.presentation.ScenariosPage;
 
@@ -38,13 +37,6 @@ public class ScenarioSteps extends Steps {
    @Autowired
    public ScenarioSteps(@Nonnull final WorldCore worldCore) {
       super(worldCore);
-   }
-
-   private HomePage getHomePage() {
-      final var homePage = new HomePage(worldCore.getWebDriver());
-      homePage.get();
-      expectedPage = homePage;
-      return homePage;
    }
 
    @When("getting the scenarios")

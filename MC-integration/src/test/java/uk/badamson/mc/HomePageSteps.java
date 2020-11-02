@@ -24,7 +24,6 @@ import javax.annotation.Nonnull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -45,29 +44,24 @@ public class HomePageSteps extends Steps {
       super(worldCore);
    }
 
-   private HomePage getHomePage() {
-      Objects.requireNonNull(expectedPage, "currentPage");
+   private HomePage getExpectedPageAsHomePage() {
+      Objects.requireNonNull(expectedPage, "expectedPage");
       return (HomePage) expectedPage;
    }
 
    @Then("the home page header includes the name of the game")
    public void home_page_header_includes_name_of_game() {
-      getHomePage().assertHeaderIncludesNameOfGame();
+      getExpectedPageAsHomePage().assertHeaderIncludesNameOfGame();
    }
 
    @Then("the home page title includes the name of the game")
    public void home_page_title_includes_name_of_game() {
-      getHomePage().assertTitleIncludesNameOfGame();
+      getExpectedPageAsHomePage().assertTitleIncludesNameOfGame();
    }
 
    @Then("MC serves the home page")
    public void mc_serves_the_home_page() {
-      getHomePage().assertInvariants();
-   }
-
-   @Before
-   public void setUp() {
-      expectedPage = new HomePage(worldCore.getWebDriver());
+      getExpectedPageAsHomePage().assertInvariants();
    }
 
    @Given("the DNS name, example.com, of an MC server")
@@ -80,6 +74,6 @@ public class HomePageSteps extends Steps {
 
    @When("the potential user gives the obvious URL http://example.com/ to a web browser")
    public void the_potential_user_gives_the_obvious_URL_to_a_web_browser() {
-      getHomePage().get();
+      getHomePage();
    }
 }

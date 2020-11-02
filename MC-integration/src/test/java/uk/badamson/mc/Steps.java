@@ -22,6 +22,7 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
+import uk.badamson.mc.presentation.HomePage;
 import uk.badamson.mc.presentation.Page;
 
 /**
@@ -40,4 +41,10 @@ abstract class Steps {
       this.worldCore = Objects.requireNonNull(worldCore, "worldCore");
    }
 
+   protected final HomePage getHomePage() {
+      final var homePage = new HomePage(worldCore.getWebDriver());
+      homePage.get();
+      expectedPage = homePage;
+      return homePage;
+   }
 }

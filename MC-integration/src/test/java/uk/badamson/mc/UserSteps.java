@@ -75,13 +75,6 @@ public class UserSteps extends Steps {
       navigateToUsersPage().assertHasNoAddUserLink();
    }
 
-   private HomePage getHomePage() {
-      final var homePage = new HomePage(worldCore.getWebDriver());
-      homePage.get();
-      expectedPage = homePage;
-      return homePage;
-   }
-
    @When("getting the users")
    public void getting_users() {
       navigateToUsersPage();

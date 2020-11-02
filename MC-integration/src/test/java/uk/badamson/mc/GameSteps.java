@@ -31,6 +31,8 @@ import io.cucumber.java.en.When;
  */
 public class GameSteps extends Steps {
 
+   private int scenarioIndex;
+
    private Game.Identifier identifier;
 
    @Autowired
@@ -38,9 +40,21 @@ public class GameSteps extends Steps {
       super(worldCore);
    }
 
+   private void navigateToScenario() {
+      final var scenariosPage = getHomePage().navigateToScenariosPage();
+      expectedPage = scenariosPage.navigateToScenario(scenarioIndex);
+   }
+
    @When("A scenario has games")
    public void scenario_has_games() {
-      final var scenario = worldCore.getScenarios().findAny().get().getId();
+      final var scenario = worldCore.getScenarios().findFirst().get().getId();
+      scenarioIndex = 0;
       identifier = worldCore.createGame(scenario);
+   }
+
+   @When("Viewing the games of the scenario")
+   public void viewing_games_of_scenario() {
+      navigateToScenario();
+      expectedPage.requireIsCurrentPath();
    }
 }
