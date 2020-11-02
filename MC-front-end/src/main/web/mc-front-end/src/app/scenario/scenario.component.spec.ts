@@ -2,7 +2,6 @@ import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { of } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
-import { NamedUUID } from '../named-uuid';
 import { Scenario } from '../scenario';
 import { ScenarioComponent } from './scenario.component';
 import { ScenarioService } from '../scenario.service';
@@ -27,9 +26,9 @@ describe('ScenarioComponent', () => {
 			providers: [{
 				provide: ActivatedRoute,
 				useValue: {
-					params: of({ id: testScenario.identifier.id }),
+					params: of({ id: testScenario.identifier }),
 					snapshot: {
-						paramMap: convertToParamMap({ id: testScenario.identifier.id })
+						paramMap: convertToParamMap({ id: testScenario.identifier })
 					}
 				}
 			},

@@ -50,7 +50,7 @@ describe('ScenarioService', () => {
 
 	let canGetScenario: CallableFunction;
 	canGetScenario = (testScenario: Scenario) => {
-		const id = testScenario.identifier.id;
+		const id: uuid = testScenario.identifier;
 		const service: ScenarioService = TestBed.get(ScenarioService);
 
 		service.getScenario(id).subscribe(scenario => expect(scenario).toEqual(testScenario));
