@@ -1,4 +1,9 @@
 <h2>{{scenario.title}}</h2>
 <p>{{scenario.description}}</p>
 <ul id="games">
+    <li *ngFor="let game of games">
+        <a routerLink="/scenario/{{scenario.identifier}}/game/{{game}}">
+            {{game}}
+        </a>
+    </li>
 </ul>

@@ -13,6 +13,7 @@ import { ScenarioService } from '../scenario.service';
 export class ScenarioComponent implements OnInit {
 
 	scenario: Scenario;
+	games: string[];
 
 	constructor(
 		private route: ActivatedRoute,
@@ -21,13 +22,19 @@ export class ScenarioComponent implements OnInit {
 	) { }
 
 	ngOnInit() {
-		this.getScenario();
+		const id: string = this.route.snapshot.paramMap.get('id');
+		this.getScenario(id);
+		this.getGames(id);
 	}
 
 
-	getScenario(): void {
-		const id: string = this.route.snapshot.paramMap.get('id');
+	private getScenario(id: string): void {
 		this.scenarioService.getScenario(id)
 			.subscribe(scenario => this.scenario = scenario);
+	}
+
+	private getGames(id: string): void {
+		this.gameService.getGamesOfScenario(id)
+			.subscribe(games => this.games = games);
 	}
 }
