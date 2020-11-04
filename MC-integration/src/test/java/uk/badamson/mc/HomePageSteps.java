@@ -18,8 +18,6 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.util.Objects;
-
 import javax.annotation.Nonnull;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,24 +42,19 @@ public class HomePageSteps extends Steps {
       super(world);
    }
 
-   private HomePage getExpectedPageAsHomePage() {
-      Objects.requireNonNull(world.expectedPage, "expectedPage");
-      return (HomePage) world.expectedPage;
-   }
-
    @Then("the home page header includes the name of the game")
    public void home_page_header_includes_name_of_game() {
-      getExpectedPageAsHomePage().assertHeaderIncludesNameOfGame();
+      world.getExpectedPage(HomePage.class).assertHeaderIncludesNameOfGame();
    }
 
    @Then("the home page title includes the name of the game")
    public void home_page_title_includes_name_of_game() {
-      getExpectedPageAsHomePage().assertTitleIncludesNameOfGame();
+      world.getExpectedPage(HomePage.class).assertTitleIncludesNameOfGame();
    }
 
    @Then("MC serves the home page")
    public void mc_serves_the_home_page() {
-      getExpectedPageAsHomePage().assertInvariants();
+      world.getExpectedPage(HomePage.class).assertInvariants();
    }
 
    @Given("the DNS name, example.com, of an MC server")

@@ -45,14 +45,14 @@ public class GameSteps extends Steps {
 
    @When("Navigate to one game of the scenario")
    public void navigate_to_game_of_scenario() {
-      final var scenarioPage = (ScenarioPage) world.expectedPage;
+      final var scenarioPage = world.getExpectedPage(ScenarioPage.class);
       gameIndex = 0;
-      world.expectedPage = scenarioPage.navigateToGamePage(gameIndex);
+      world.setExpectedPage(scenarioPage.navigateToGamePage(gameIndex));
    }
 
    private void navigateToScenario() {
       final var scenariosPage = world.getHomePage().navigateToScenariosPage();
-      world.expectedPage = scenariosPage.navigateToScenario(scenarioIndex);
+      world.setExpectedPage(scenariosPage.navigateToScenario(scenarioIndex));
    }
 
    @When("A scenario has games")
@@ -65,6 +65,6 @@ public class GameSteps extends Steps {
    @When("Viewing the games of the scenario")
    public void viewing_games_of_scenario() {
       navigateToScenario();
-      world.expectedPage.requireIsCurrentPath();
+      world.getExpectedPage(ScenarioPage.class).requireIsCurrentPath();
    }
 }

@@ -66,8 +66,7 @@ public class UserSteps extends Steps {
 
    @Then("can get the list of users")
    public void can_get_list_of_users() {
-      final var usersPage = (UsersPage) world.expectedPage;
-      usersPage.assertInvariants();
+      world.getExpectedPage(UsersPage.class).assertInvariants();
    }
 
    @Then("MC does not present adding a user as an option")
@@ -84,15 +83,14 @@ public class UserSteps extends Steps {
    public void list_of_users_includes(final String name) {
       Objects.requireNonNull(name, "name");
 
-      final var usersPage = (UsersPage) world.expectedPage;
+      final var usersPage = world.getExpectedPage(UsersPage.class);
       usersPage.requireIsCurrentPath();
       usersPage.assertListOfUsersIncludes(name);
    }
 
    @Then("the list of users has at least one user")
    public void list_of_users_not_empty() {
-      final var usersPage = (UsersPage) world.expectedPage;
-      usersPage.assertListOfUsersNotEmpty();
+      world.getExpectedPage(UsersPage.class).assertListOfUsersNotEmpty();
    }
 
    @Given("logged in")
@@ -107,7 +105,7 @@ public class UserSteps extends Steps {
 
    @Then("MC accepts the login")
    public void mc_accepts_login() {
-      final var homePage = (HomePage) world.expectedPage;
+      final var homePage = world.getExpectedPage(HomePage.class);
       assertAll(() -> homePage.assertInvariants(),
                () -> homePage.assertNoErrorMessages(),
                () -> homePage.assertReportsThatLoggedIn());
@@ -115,9 +113,9 @@ public class UserSteps extends Steps {
 
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() {
-      final var usersPage = (UsersPage) world.expectedPage;
       try {
-         usersPage.awaitIsCurrentPageOrErrorMessage();
+         world.getExpectedPage(UsersPage.class)
+                  .awaitIsCurrentPageOrErrorMessage();
       } catch (final IllegalStateException e) {
          throw new AssertionFailedError(e.getMessage(), e);
       }
@@ -125,32 +123,29 @@ public class UserSteps extends Steps {
 
    @Then("MC rejects the login")
    public void mc_rejects_login() {
-      final var loginPage = (LoginPage) world.expectedPage;
-      loginPage.assertRejectedLogin();
+      world.getExpectedPage(LoginPage.class).assertRejectedLogin();
    }
 
    @Then("MC serves the users page")
    public void mc_serves_users_page() {
-      final var usersPage = (UsersPage) world.expectedPage;
-      usersPage.assertInvariants();
+      world.getExpectedPage(UsersPage.class).assertInvariants();
    }
 
    private UsersPage navigateToUsersPage() {
-      final var homePage = (HomePage) world.expectedPage;
+      final var homePage = world.getExpectedPage(HomePage.class);
       final var usersPage = homePage.navigateToUsersPage();
-      world.expectedPage = usersPage;
+      world.setExpectedPage(usersPage);
       return usersPage;
    }
 
    @Then("redirected to home-page")
    public void redirected_to_home_page() {
-      final var homePage = (HomePage) world.expectedPage;
-      homePage.assertInvariants();
+      world.getExpectedPage(HomePage.class).assertInvariants();
    }
 
    @Then("the response is a list of users")
    public void response_is_list_of_users() {
-      final var usersPage = (UsersPage) world.expectedPage;
+      final var usersPage = world.getExpectedPage(UsersPage.class);
       assertAll(() -> usersPage.assertInvariants(),
                () -> usersPage.assertHasListOfUsers());
    }
@@ -162,13 +157,13 @@ public class UserSteps extends Steps {
 
    private void tryToLogin() {
       Objects.requireNonNull(user, "user");
-      final var homePage = world.getHomePage();
+      final var homePage = world.getExpectedPage(HomePage.class);
       final var loginPage = homePage.navigateToLoginPage();
-      world.expectedPage = loginPage;
+      world.setExpectedPage(loginPage);
       loginPage.submitLoginForm(user.getUsername(), user.getPassword());
       homePage.awaitIsCurrentPageOrErrorMessage();
       if (homePage.isCurrentPage()) {
-         world.expectedPage = homePage;
+         world.setExpectedPage(homePage);
       }
    }
 

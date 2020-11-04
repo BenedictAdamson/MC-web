@@ -34,6 +34,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
@@ -128,7 +129,7 @@ public final class World implements AutoCloseable {
 
    private URI localUrl;
 
-   protected Page expectedPage;
+   private Page expectedPage;
 
    /**
     * @param failureRecordingDirectory
@@ -283,6 +284,39 @@ public final class World implements AutoCloseable {
       return getPathOfUrl(webDriver.getCurrentUrl());
    }
 
+   /**
+    * <p>
+    * Get the current expected page, which is expected to be of a given class.
+    * </p>
+    * <ul>
+    * <li>Not null</li>
+    * </ul>
+    *
+    * @param <PAGE>
+    *           The class of the expected page.
+    * @param clazz
+    *           The {@link Class} object of the class of the expected page.
+    * @return The current expected page.
+    * @throws NullPointerException
+    *            If {@code clazz} is null
+    * @throws IllegalStateException
+    *            <ul>
+    *            <li>If there is no current expected page.</li>
+    *            <li>If the class of the current expected page is not the given
+    *            {@code clazz} class.</li>
+    *            </ul>
+    */
+   @Nonnull
+   public <PAGE extends Page> PAGE getExpectedPage(
+            @Nonnull final Class<PAGE> clazz) {
+      Objects.requireNonNull(clazz, "clazz");
+      try {
+         return clazz.cast(expectedPage);
+      } catch (final ClassCastException e) {
+         throw new IllegalStateException("Wrong current page", e);
+      }
+   }
+
    public HomePage getHomePage() {
       final var homePage = new HomePage(webDriver);
       homePage.get();
@@ -420,6 +454,20 @@ public final class World implements AutoCloseable {
          close();
          throw e;
       }
+   }
+
+   /**
+    * <p>
+    * Change the current {@linkplain #getExpectedPage(Class) expected page}
+    * </p>
+    *
+    * @param expectedPage
+    *           The new expected page.
+    * @throws NullPointerException
+    *            If {@code expectedPage} is null
+    */
+   public void setExpectedPage(@Nonnull final Page expectedPage) {
+      this.expectedPage = Objects.requireNonNull(expectedPage, "expectedPage");
    }
 
    /**
