@@ -164,7 +164,7 @@ public abstract class Page {
          });
       } catch (final Exception e) {// give better diagnostics
          throw new IllegalStateException(
-                  "No indication of success or failure (awaiting"
+                  "No indication of success or failure (awaiting "
                            + getClass().getTypeName() + ", at "
                            + currentPath.get() + ")",
                   e);
