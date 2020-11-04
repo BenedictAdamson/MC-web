@@ -37,7 +37,7 @@ import org.springframework.web.util.UriTemplate;
 public final class GamePage extends Page {
 
    private static final UriTemplate URI_TEMPLATE = new UriTemplate(
-            "/api/scenario/{scenario}/game/{game}");
+            "/api/scenario/{scenario}/game/{created:.+}");
 
    private final String scenarioTitle;
    private final String gameTitle;

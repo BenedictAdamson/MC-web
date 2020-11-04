@@ -153,6 +153,21 @@ public abstract class Page {
       assertThat("No error messages", errorMessages, is(empty()));
    }
 
+   public final void awaitIsCurrentPage() throws IllegalStateException {
+      final var currentPath = new AtomicReference<String>();
+      try {
+         new WebDriverWait(webDriver, 17).until(driver -> {
+            currentPath.set(getPathOfUrl(driver.getCurrentUrl()));
+            return isValidPath(currentPath.get());
+         });
+      } catch (final Exception e) {// give better diagnostics
+         throw new IllegalStateException(
+                  "Not the current page (awaiting " + getClass().getTypeName()
+                           + ", at " + currentPath.get() + ")",
+                  e);
+      }
+   }
+
    public final void awaitIsCurrentPageOrErrorMessage()
             throws IllegalStateException {
       final var currentPath = new AtomicReference<String>();

@@ -92,7 +92,7 @@ public final class HomePage extends Page {
       requireIsCurrentPath();
       findElement(By.id("login")).click();
       final var loginPage = new LoginPage(this);
-      loginPage.awaitIsCurrentPageOrErrorMessage();
+      loginPage.awaitIsCurrentPage();
       return loginPage;
    }
 
@@ -100,7 +100,7 @@ public final class HomePage extends Page {
       requireIsCurrentPath();
       findElement(By.id("scenarios")).click();
       final var scenariosPage = new ScenariosPage(this);
-      scenariosPage.awaitIsCurrentPageOrErrorMessage();
+      scenariosPage.awaitIsCurrentPage();
       return scenariosPage;
    }
 
@@ -108,7 +108,7 @@ public final class HomePage extends Page {
       requireIsCurrentPath();
       findElement(By.id("users")).click();
       final var usersPage = new UsersPage(this);
-      usersPage.awaitIsCurrentPageOrErrorMessage();
+      usersPage.awaitIsCurrentPage();
       return usersPage;
    }
 }

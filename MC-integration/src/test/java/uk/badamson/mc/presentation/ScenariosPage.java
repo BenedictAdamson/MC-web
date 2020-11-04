@@ -93,7 +93,7 @@ public final class ScenariosPage extends Page {
       final var link = entry.findElement(By.tagName("a"));
       link.click();
       final var scenarioPage = new ScenarioPage(this, title);
-      scenarioPage.awaitIsCurrentPageOrErrorMessage();
+      scenarioPage.awaitIsCurrentPage();
       return scenarioPage;
    }
 }
