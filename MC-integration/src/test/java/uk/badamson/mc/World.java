@@ -76,7 +76,7 @@ import uk.badamson.mc.presentation.Page;
  * too expensive.
  * </p>
  *
- * @see WorldCoreScenarioHook
+ * @see WorldScenarioHook
  */
 public final class World implements AutoCloseable {
 

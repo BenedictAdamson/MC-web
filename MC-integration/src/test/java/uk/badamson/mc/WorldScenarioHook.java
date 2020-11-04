@@ -30,11 +30,11 @@ import io.cucumber.java.Scenario;
  * to a {@link World} bean.
  * </p>
  */
-public final class WorldCoreScenarioHook {
+public final class WorldScenarioHook {
    private final World world;
 
    @Autowired
-   public WorldCoreScenarioHook(final World world) {
+   public WorldScenarioHook(final World world) {
       this.world = world;
    }
 
