@@ -5,7 +5,6 @@ import { v4 as uuid } from 'uuid';
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
-import { NamedUUID } from './named-uuid';
 import { GameService } from './game.service';
 
 
@@ -14,9 +13,11 @@ describe('GameService', () => {
 
 	const SCENARIO_A: uuid = uuid();
 	const SCENARIO_B: uuid = uuid();
-	const IDS_0: string[] = [];
-	const IDS_1: string[] = ['1970-01-01T00:00:00.000Z'];
-	const IDS_2: string[] = ['1970-01-01T00:00:00.000Z', '2020-12-31T23:59:59.999Z'];
+	const CREATED_A: string = '1970-01-01T00:00:00.000Z';
+	const CREATED_B: string = '2020-12-31T23:59:59.999Z';
+	const CREATEDS_0: string[] = [];
+	const CREATEDS_1: string[] = [CREATED_A];
+	const CREATEDS_2: string[] = [CREATED_A, CREATED_B];
 
 	beforeEach(() => {
 		TestBed.configureTestingModule({
@@ -46,15 +47,15 @@ describe('GameService', () => {
 		httpTestingController.verify();
 	};
 
-	it('can get game identifiers [0]', () => {
-		testGetGamesOfScenario(SCENARIO_A, IDS_0);
+	it('can get game identifiers for scenario [0]', () => {
+		testGetGamesOfScenario(SCENARIO_A, CREATEDS_0);
 	});
 
-	it('can get game identifiers [1]', () => {
-		testGetGamesOfScenario(SCENARIO_B, IDS_1);
+	it('can get game identifiers for scenario  [1]', () => {
+		testGetGamesOfScenario(SCENARIO_B, CREATEDS_1);
 	});
 
-	it('can get game identifiers [2]', () => {
-		testGetGamesOfScenario(SCENARIO_A, IDS_2);
+	it('can get game identifiers for scenario  [2]', () => {
+		testGetGamesOfScenario(SCENARIO_A, CREATEDS_2);
 	});
 });
