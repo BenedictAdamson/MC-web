@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { AddUserComponent } from './add-user/add-user.component';
+import { GameComponent } from './game/game.component';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 import { ScenarioComponent } from './scenario/scenario.component';
@@ -14,6 +15,10 @@ import { UsersComponent } from './users/users.component';
  * if data.roles is not empty.
  */
 const routes: Routes = [
+	{
+		path: 'scenario/:scenario/game/:created',
+		component: GameComponent
+	},
 	{
 		path: 'scenario/:id',
 		component: ScenarioComponent
