@@ -5,6 +5,10 @@ import { v4 as uuid } from 'uuid';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
+import { Game } from './game'
+import { GameIdentifier } from './game-identifier'
+
+
 @Injectable({
 	providedIn: 'root'
 })
@@ -17,10 +21,27 @@ export class GameService {
 		return '/api/scenario/' + scenario + '/game/';
 	}
 
+	static getGamePath(id: GameIdentifier): string {
+		return GameService.getGamesPath(id.scenario) + id.created;
+	}
+
+    /**
+     * Get the creation times (instance IDs) of the games of a scenario.
+     */
 	getGamesOfScenario(scenario: uuid): Observable<string[]> {
 		return this.http.get<string[]>(GameService.getGamesPath(scenario))
 			.pipe(
 				catchError(this.handleError<string[]>('getGamesOfScenario', []))
+			);
+	}
+
+    /**
+     * Get the game that has a given ID.
+     */
+	getGame(id: GameIdentifier): Observable<Game> {
+		return this.http.get<Game>(GameService.getGamePath(id))
+			.pipe(
+				catchError(this.handleError<Game>('getGame', null))
 			);
 	}
 

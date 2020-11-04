@@ -1,10 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { v4 as uuid } from 'uuid';
 
-
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
+import { Game } from './game'
+import { GameIdentifier } from './game-identifier'
 import { GameService } from './game.service';
 
 
@@ -18,6 +19,10 @@ describe('GameService', () => {
 	const CREATEDS_0: string[] = [];
 	const CREATEDS_1: string[] = [CREATED_A];
 	const CREATEDS_2: string[] = [CREATED_A, CREATED_B];
+	const GAME_IDENTIFIER_A: GameIdentifier = {scenario: SCENARIO_A, created: CREATED_A};
+	const GAME_IDENTIFIER_B: GameIdentifier = {scenario: SCENARIO_B, created: CREATED_B};
+	const GAME_A: Game = {identifier: GAME_IDENTIFIER_A};
+	const GAME_B: Game = {identifier: GAME_IDENTIFIER_B};
 
 	beforeEach(() => {
 		TestBed.configureTestingModule({
@@ -58,4 +63,23 @@ describe('GameService', () => {
 	it('can get game identifiers for scenario  [2]', () => {
 		testGetGamesOfScenario(SCENARIO_A, CREATEDS_2);
 	});
+
+	let testGetGame = function(game: Game) {
+		const service: GameService = TestBed.get(GameService);
+
+		service.getGame(game.identifier).subscribe(g => expect(g).toEqual(game));
+
+		const request = httpTestingController.expectOne(GameService.getGamePath(game.identifier));
+		expect(request.request.method).toEqual('GET');
+		request.flush(game);
+		httpTestingController.verify();
+	};
+	
+	it('can get game [A]', () => {
+		testGetGame(GAME_A);
+	})
+	
+	it('can get game [B]', () => {
+		testGetGame(GAME_B);
+	})
 });
