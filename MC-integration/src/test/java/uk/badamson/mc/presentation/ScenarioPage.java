@@ -23,12 +23,14 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 import javax.annotation.concurrent.Immutable;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.opentest4j.AssertionFailedError;
 
 /**
  * <p>
@@ -65,11 +67,20 @@ public final class ScenarioPage extends Page {
                "scenarioTitle");
    }
 
+   public void assertHasListOfGames() {
+      try {
+         findElement(GAMES_LIST_LOCATOR);
+      } catch (final NoSuchElementException e) {
+         throw new AssertionFailedError("Has list of games", e);
+      }
+   }
+
    @Override
    public void assertInvariants() {
       assertAll(() -> super.assertInvariants(),
                () -> assertThat("displays the scenario title", getBodyText(),
-                        containsString(scenarioTitle)));
+                        containsString(scenarioTitle)),
+               () -> assertHasListOfGames());
    }
 
    public List<WebElement> findGameElements() {

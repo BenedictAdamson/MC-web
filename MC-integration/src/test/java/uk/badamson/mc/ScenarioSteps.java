@@ -71,6 +71,11 @@ public class ScenarioSteps extends Steps {
                .assertHasListOfScenarios();
    }
 
+   @Then("The scenario page includes the list of games of that scenario")
+   public void scenario_page_includes_list_of_games_of_scenario() {
+      world.getAndAssertExpectedPage(ScenarioPage.class).assertHasListOfGames();
+   }
+
    @Then("The scenario page includes the scenario description")
    public void scenario_page_includes_scenario_description() {
       // Hard to test

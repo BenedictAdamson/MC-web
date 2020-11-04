@@ -31,6 +31,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.annotation.Nonnull;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -168,10 +170,13 @@ public abstract class Page {
       }
    }
 
-   protected final WebElement findElement(final By locator) {
+   @Nonnull
+   protected final WebElement findElement(final By locator)
+            throws NoSuchElementException {
       return webDriver.findElement(locator);
    }
 
+   @Nonnull
    protected final List<WebElement> findElements(final By locator) {
       return webDriver.findElements(locator);
    }
