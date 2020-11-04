@@ -40,7 +40,7 @@ public final class GamePage extends Page {
             "/scenario/{scenario}/game/{created}");
 
    private final String scenarioTitle;
-   private final String gameTitle;
+   private final String creationTime;
 
    /**
     * <p>
@@ -50,23 +50,41 @@ public final class GamePage extends Page {
     *
     * @param scenarioPage
     *           The scenarios page.
-    * @param gameTitle
-    *           The expected title.
+    * @param creationTime
+    *           The expected creation time.
     * @throws NullPointerException
     *            If {@code scenariosPage} is null. If {@code title} is null.
     */
-   public GamePage(final ScenarioPage scenarioPage, final String gameTitle) {
+   public GamePage(final ScenarioPage scenarioPage, final String creationTime) {
       super(scenarioPage);
       this.scenarioTitle = scenarioPage.getScenarioTitle();
-      this.gameTitle = Objects.requireNonNull(gameTitle, "title");
+      this.creationTime = Objects.requireNonNull(creationTime, "creationTime");
+   }
+
+   public void assertIncludesCreationTime() {
+      assertIncludesCreationTime(getBodyText());
+   }
+
+   private void assertIncludesCreationTime(final String bodyText) {
+      assertThat("includes creation time", bodyText,
+               containsString(creationTime));
+   }
+
+   public void assertIncludesScenarioTitle() {
+      assertIncludesScenarioTitle(getBodyText());
+   }
+
+   private void assertIncludesScenarioTitle(final String bodyText) {
+      assertThat("includes scenario title", bodyText,
+               containsString(scenarioTitle));
    }
 
    @Override
    public void assertInvariants() {
       final var bodyText = getBodyText();
       assertAll(() -> super.assertInvariants(),
-               () -> assertThat("displays the game title", bodyText,
-                        containsString(gameTitle)));
+               () -> assertIncludesCreationTime(bodyText),
+               () -> assertIncludesScenarioTitle(bodyText));
    }
 
    @Override
@@ -74,5 +92,4 @@ public final class GamePage extends Page {
       Objects.requireNonNull(path, "path");
       return URI_TEMPLATE.matches(path);
    }
-
 }

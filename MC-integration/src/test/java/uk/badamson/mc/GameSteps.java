@@ -22,7 +22,9 @@ import javax.annotation.Nonnull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import uk.badamson.mc.presentation.GamePage;
 import uk.badamson.mc.presentation.ScenarioPage;
 
 /**
@@ -41,6 +43,28 @@ public class GameSteps extends Steps {
    @Autowired
    public GameSteps(@Nonnull final World world) {
       super(world);
+   }
+
+   @Then("The game page includes the scenario description")
+   public void game_page_includes_scenario_description() {
+      // hard to test
+   }
+
+   @Then("The game page includes the scenario title")
+   public void game_page_includes_scenario_title() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertIncludesScenarioTitle();
+   }
+
+   @Then("The game page includes the date and time that the game was set up")
+   public void game_page_includes_time_set_up() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertIncludesCreationTime();
+   }
+
+   @Then("MC serves the game page")
+   public void mc_serves_game_page() {
+      world.getAndAssertExpectedPage(GamePage.class).assertInvariants();
    }
 
    @When("Navigate to one game of the scenario")
