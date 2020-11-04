@@ -35,7 +35,7 @@ import uk.badamson.mc.presentation.ScenariosPage;
 public class ScenarioSteps extends Steps {
 
    @Autowired
-   public ScenarioSteps(@Nonnull final WorldCore worldCore) {
+   public ScenarioSteps(@Nonnull final World worldCore) {
       super(worldCore);
    }
 

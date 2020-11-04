@@ -39,7 +39,7 @@ public class GameSteps extends Steps {
    private Game.Identifier identifier;
 
    @Autowired
-   public GameSteps(@Nonnull final WorldCore worldCore) {
+   public GameSteps(@Nonnull final World worldCore) {
       super(worldCore);
    }
 

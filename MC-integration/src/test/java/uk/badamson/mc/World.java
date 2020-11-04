@@ -58,8 +58,8 @@ import uk.badamson.mc.presentation.Page;
  * Encapsulate access to an instance of MC, for Cucumber (BDD) testing.
  * </p>
  * <p>
- * Instances of this class are intended to be used as the lowest-level (core
- * part) of the <i>world</i> used for a BDD test scenario.
+ * Instances of this class are intended to be used as the <i>world</i> used for
+ * a BDD test scenario.
  * </p>
  * <p>
  * Construction of an instance of this class creates, but does not start, a
@@ -78,7 +78,7 @@ import uk.badamson.mc.presentation.Page;
  *
  * @see WorldCoreScenarioHook
  */
-public final class WorldCore implements AutoCloseable {
+public final class World implements AutoCloseable {
 
    private static Optional<Throwable> createOutcomeException(
             final Scenario scenario) {
@@ -136,7 +136,7 @@ public final class WorldCore implements AutoCloseable {
     *           verbose information about failed test cases. Or {@code null} if
     *           no such records are to be made.
     */
-   public WorldCore(final Path failureRecordingDirectory) {
+   public World(final Path failureRecordingDirectory) {
       containers = new McContainers(failureRecordingDirectory);
    }
 
@@ -174,7 +174,7 @@ public final class WorldCore implements AutoCloseable {
       final var currentPath = new AtomicReference<String>();
       try {
          new WebDriverWait(webDriver, 17).until(driver -> {
-            currentPath.set(WorldCore.getPathOfUrl(driver.getCurrentUrl()));
+            currentPath.set(getPathOfUrl(driver.getCurrentUrl()));
             return expectedSuccessUrlPath.equals(currentPath.get())
                      || !driver.findElements(By.className("error")).isEmpty();
          });

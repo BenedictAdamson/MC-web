@@ -40,7 +40,7 @@ public class HomePageSteps extends Steps {
    public static final String GAME_NAME = "Mission Command";
 
    @Autowired
-   public HomePageSteps(@Nonnull final WorldCore worldCore) {
+   public HomePageSteps(@Nonnull final World worldCore) {
       super(worldCore);
    }
 

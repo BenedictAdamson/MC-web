@@ -28,8 +28,8 @@ import org.springframework.context.annotation.Configuration;
 public class CucumberBeansConfiguration {
 
    @Bean
-   public WorldCore getWorldCore(
+   public World getWorld(
             @Value("${failure.recording.directory:target}") final Path failureRecordingDirectory) {
-      return new WorldCore(failureRecordingDirectory);
+      return new World(failureRecordingDirectory);
    }
 }

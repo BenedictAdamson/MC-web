@@ -27,14 +27,14 @@ import io.cucumber.java.Scenario;
 /**
  * <p>
  * Enable automatic reporting of the beginning and ending of Cucumber scenarios
- * to a {@link WorldCore} bean.
+ * to a {@link World} bean.
  * </p>
  */
 public final class WorldCoreScenarioHook {
-   private final WorldCore worldCore;
+   private final World worldCore;
 
    @Autowired
-   public WorldCoreScenarioHook(final WorldCore worldCore) {
+   public WorldCoreScenarioHook(final World worldCore) {
       this.worldCore = worldCore;
    }
 

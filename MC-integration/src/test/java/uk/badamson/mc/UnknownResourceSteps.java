@@ -43,7 +43,7 @@ public class UnknownResourceSteps extends Steps {
    private int httpResponseCode;
 
    @Autowired
-   public UnknownResourceSteps(@Nonnull final WorldCore worldCore) {
+   public UnknownResourceSteps(@Nonnull final World worldCore) {
       super(worldCore);
    }
 

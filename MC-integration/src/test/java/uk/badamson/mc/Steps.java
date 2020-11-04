@@ -30,9 +30,9 @@ import javax.annotation.Nonnull;
 abstract class Steps {
 
    @Nonnull
-   protected final WorldCore worldCore;
+   protected final World worldCore;
 
-   protected Steps(@Nonnull final WorldCore worldCore) {
+   protected Steps(@Nonnull final World worldCore) {
       this.worldCore = Objects.requireNonNull(worldCore, "worldCore");
    }
 }

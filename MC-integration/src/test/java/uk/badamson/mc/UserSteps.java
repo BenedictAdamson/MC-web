@@ -55,7 +55,7 @@ public class UserSteps extends Steps {
    private User user;
 
    @Autowired
-   public UserSteps(@Nonnull final WorldCore worldCore) {
+   public UserSteps(@Nonnull final World worldCore) {
       super(worldCore);
    }
 
