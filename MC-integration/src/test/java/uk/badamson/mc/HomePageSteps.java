@@ -44,17 +44,19 @@ public class HomePageSteps extends Steps {
 
    @Then("the home page header includes the name of the game")
    public void home_page_header_includes_name_of_game() {
-      world.getExpectedPage(HomePage.class).assertHeaderIncludesNameOfGame();
+      world.getAndAssertExpectedPage(HomePage.class)
+               .assertHeaderIncludesNameOfGame();
    }
 
    @Then("the home page title includes the name of the game")
    public void home_page_title_includes_name_of_game() {
-      world.getExpectedPage(HomePage.class).assertTitleIncludesNameOfGame();
+      world.getAndAssertExpectedPage(HomePage.class)
+               .assertTitleIncludesNameOfGame();
    }
 
    @Then("MC serves the home page")
    public void mc_serves_the_home_page() {
-      world.getExpectedPage(HomePage.class).assertInvariants();
+      world.getAndAssertExpectedPage(HomePage.class).assertInvariants();
    }
 
    @Given("the DNS name, example.com, of an MC server")

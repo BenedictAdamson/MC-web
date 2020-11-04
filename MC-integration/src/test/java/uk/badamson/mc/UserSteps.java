@@ -66,7 +66,7 @@ public class UserSteps extends Steps {
 
    @Then("can get the list of users")
    public void can_get_list_of_users() {
-      world.getExpectedPage(UsersPage.class).assertInvariants();
+      world.getAndAssertExpectedPage(UsersPage.class).assertInvariants();
    }
 
    @Then("MC does not present adding a user as an option")
@@ -83,14 +83,15 @@ public class UserSteps extends Steps {
    public void list_of_users_includes(final String name) {
       Objects.requireNonNull(name, "name");
 
-      final var usersPage = world.getExpectedPage(UsersPage.class);
-      usersPage.requireIsCurrentPath();
+      final var usersPage = world.getAndAssertExpectedPage(UsersPage.class);
+      usersPage.assertInvariants();
       usersPage.assertListOfUsersIncludes(name);
    }
 
    @Then("the list of users has at least one user")
    public void list_of_users_not_empty() {
-      world.getExpectedPage(UsersPage.class).assertListOfUsersNotEmpty();
+      world.getAndAssertExpectedPage(UsersPage.class)
+               .assertListOfUsersNotEmpty();
    }
 
    @Given("logged in")
@@ -105,7 +106,7 @@ public class UserSteps extends Steps {
 
    @Then("MC accepts the login")
    public void mc_accepts_login() {
-      final var homePage = world.getExpectedPage(HomePage.class);
+      final var homePage = world.getAndAssertExpectedPage(HomePage.class);
       assertAll(() -> homePage.assertInvariants(),
                () -> homePage.assertNoErrorMessages(),
                () -> homePage.assertReportsThatLoggedIn());
@@ -114,7 +115,7 @@ public class UserSteps extends Steps {
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() {
       try {
-         world.getExpectedPage(UsersPage.class)
+         world.getAndAssertExpectedPage(UsersPage.class)
                   .awaitIsCurrentPageOrErrorMessage();
       } catch (final IllegalStateException e) {
          throw new AssertionFailedError(e.getMessage(), e);
@@ -123,12 +124,12 @@ public class UserSteps extends Steps {
 
    @Then("MC rejects the login")
    public void mc_rejects_login() {
-      world.getExpectedPage(LoginPage.class).assertRejectedLogin();
+      world.getAndAssertExpectedPage(LoginPage.class).assertRejectedLogin();
    }
 
    @Then("MC serves the users page")
    public void mc_serves_users_page() {
-      world.getExpectedPage(UsersPage.class).assertInvariants();
+      world.getAndAssertExpectedPage(UsersPage.class).assertInvariants();
    }
 
    private UsersPage navigateToUsersPage() {
@@ -140,12 +141,12 @@ public class UserSteps extends Steps {
 
    @Then("redirected to home-page")
    public void redirected_to_home_page() {
-      world.getExpectedPage(HomePage.class).assertInvariants();
+      world.getAndAssertExpectedPage(HomePage.class).assertInvariants();
    }
 
    @Then("the response is a list of users")
    public void response_is_list_of_users() {
-      final var usersPage = world.getExpectedPage(UsersPage.class);
+      final var usersPage = world.getAndAssertExpectedPage(UsersPage.class);
       assertAll(() -> usersPage.assertInvariants(),
                () -> usersPage.assertHasListOfUsers());
    }

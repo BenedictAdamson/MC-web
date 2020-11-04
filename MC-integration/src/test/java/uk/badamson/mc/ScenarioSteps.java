@@ -51,7 +51,7 @@ public class ScenarioSteps extends Steps {
 
    @Then("MC serves the scenarios page")
    public void mc_serves_scenarios_page() {
-      world.getExpectedPage(ScenariosPage.class).assertInvariants();
+      world.getAndAssertExpectedPage(ScenariosPage.class).assertInvariants();
    }
 
    @When("Navigate to one scenario")
@@ -67,7 +67,8 @@ public class ScenarioSteps extends Steps {
 
    @Then("the response is a list of scenarios")
    public void response_is_list_of_scenarios() {
-      world.getExpectedPage(ScenariosPage.class).assertHasListOfScenarios();
+      world.getAndAssertExpectedPage(ScenariosPage.class)
+               .assertHasListOfScenarios();
    }
 
    @Then("The scenario page includes the scenario description")

@@ -269,6 +269,41 @@ public final class World implements AutoCloseable {
 
    /**
     * <p>
+    * Get the current expected page, which is expected to be of a given class,
+    * with failure of that expectation being interpreted as a test failure.
+    * </p>
+    * <ul>
+    * <li>Not null</li>
+    * </ul>
+    *
+    * @param <PAGE>
+    *           The class of the expected page.
+    * @param clazz
+    *           The {@link Class} object of the class of the expected page.
+    * @return The current expected page.
+    * @throws NullPointerException
+    *            If {@code clazz} is null
+    * @throws AssertionFailedError
+    *            <ul>
+    *            <li>If there is no current expected page.</li>
+    *            <li>If the class of the current expected page is not the given
+    *            {@code clazz} class.</li>
+    *            </ul>
+    * @see #getExpectedPage(Class)
+    */
+   @Nonnull
+   public <PAGE extends Page> PAGE getAndAssertExpectedPage(
+            @Nonnull final Class<PAGE> clazz) {
+      try {
+         return getExpectedPage(clazz);
+      } catch (final IllegalStateException e) {
+         throw new AssertionFailedError(
+                  "Current expected page is a " + clazz.getTypeName(), e);
+      }
+   }
+
+   /**
+    * <p>
     * The {@linkplain URI#getPath() path} component of the
     * {@linkplain WebDriver#getCurrentUrl() current URL} of the browser.
     * </p>
@@ -305,6 +340,7 @@ public final class World implements AutoCloseable {
     *            <li>If the class of the current expected page is not the given
     *            {@code clazz} class.</li>
     *            </ul>
+    * @see #getAndAssertExpectedPage(Class)
     */
    @Nonnull
    public <PAGE extends Page> PAGE getExpectedPage(
@@ -313,7 +349,8 @@ public final class World implements AutoCloseable {
       try {
          return clazz.cast(expectedPage);
       } catch (final ClassCastException e) {
-         throw new IllegalStateException("Wrong current page", e);
+         throw new IllegalStateException(
+                  "Current expected page is not a " + clazz.getTypeName(), e);
       }
    }
 
