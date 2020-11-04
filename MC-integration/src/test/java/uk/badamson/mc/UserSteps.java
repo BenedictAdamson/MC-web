@@ -96,11 +96,13 @@ public class UserSteps extends Steps {
 
    @Given("logged in")
    public void logged_in() {
+      world.getHomePage();
       tryToLogin();
    }
 
    @When("log in using correct password")
    public void login_using_correct_password() {
+      world.getHomePage();
       tryToLogin();
    }
 
@@ -153,6 +155,7 @@ public class UserSteps extends Steps {
 
    @When("try to login")
    public void try_to_login() {
+      world.getHomePage();
       tryToLogin();
    }
 
