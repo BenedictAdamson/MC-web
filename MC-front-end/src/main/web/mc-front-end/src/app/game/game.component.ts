@@ -1,4 +1,4 @@
-import { uuid } from 'uuid';
+import { v4 as uuid, parse as parseUuid } from 'uuid';
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -26,7 +26,7 @@ export class GameComponent implements OnInit {
 	) { }
 
 	ngOnInit(): void {
-		const scenario: uuid = uuid.parse(this.route.snapshot.paramMap.get('scenario'));
+		const scenario: uuid = parseUuid(this.route.snapshot.paramMap.get('scenario'));
 		const created: string = this.route.snapshot.paramMap.get('created');
 		const gameId: GameIdentifier = { scenario: scenario, created: created };
 		this.getGame(gameId);
