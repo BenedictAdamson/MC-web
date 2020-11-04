@@ -39,33 +39,32 @@ public class GameSteps extends Steps {
    private Game.Identifier identifier;
 
    @Autowired
-   public GameSteps(@Nonnull final World worldCore) {
-      super(worldCore);
+   public GameSteps(@Nonnull final World world) {
+      super(world);
    }
 
    @When("Navigate to one game of the scenario")
    public void navigate_to_game_of_scenario() {
-      final var scenarioPage = (ScenarioPage) worldCore.expectedPage;
+      final var scenarioPage = (ScenarioPage) world.expectedPage;
       gameIndex = 0;
-      worldCore.expectedPage = scenarioPage.navigateToGamePage(gameIndex);
+      world.expectedPage = scenarioPage.navigateToGamePage(gameIndex);
    }
 
    private void navigateToScenario() {
-      final var scenariosPage = worldCore.getHomePage()
-               .navigateToScenariosPage();
-      worldCore.expectedPage = scenariosPage.navigateToScenario(scenarioIndex);
+      final var scenariosPage = world.getHomePage().navigateToScenariosPage();
+      world.expectedPage = scenariosPage.navigateToScenario(scenarioIndex);
    }
 
    @When("A scenario has games")
    public void scenario_has_games() {
-      final var scenario = worldCore.getScenarios().findFirst().get().getId();
+      final var scenario = world.getScenarios().findFirst().get().getId();
       scenarioIndex = 0;
-      identifier = worldCore.createGame(scenario);
+      identifier = world.createGame(scenario);
    }
 
    @When("Viewing the games of the scenario")
    public void viewing_games_of_scenario() {
       navigateToScenario();
-      worldCore.expectedPage.requireIsCurrentPath();
+      world.expectedPage.requireIsCurrentPath();
    }
 }

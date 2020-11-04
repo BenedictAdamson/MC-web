@@ -31,21 +31,21 @@ import io.cucumber.java.Scenario;
  * </p>
  */
 public final class WorldCoreScenarioHook {
-   private final World worldCore;
+   private final World world;
 
    @Autowired
-   public WorldCoreScenarioHook(final World worldCore) {
-      this.worldCore = worldCore;
+   public WorldCoreScenarioHook(final World world) {
+      this.world = world;
    }
 
    @Before
    public void beginScenario(final Scenario scenario) {
-      worldCore.beginScenario(scenario);
+      world.beginScenario(scenario);
    }
 
    @After
    public void endScenario(final Scenario scenario) {
-      worldCore.endScenario(scenario);
+      world.endScenario(scenario);
    }
 
 }

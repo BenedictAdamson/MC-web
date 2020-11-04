@@ -55,8 +55,8 @@ public class UserSteps extends Steps {
    private User user;
 
    @Autowired
-   public UserSteps(@Nonnull final World worldCore) {
-      super(worldCore);
+   public UserSteps(@Nonnull final World world) {
+      super(world);
    }
 
    @When("adding a user named {string} with  password {string}")
@@ -66,7 +66,7 @@ public class UserSteps extends Steps {
 
    @Then("can get the list of users")
    public void can_get_list_of_users() {
-      final var usersPage = (UsersPage) worldCore.expectedPage;
+      final var usersPage = (UsersPage) world.expectedPage;
       usersPage.assertInvariants();
    }
 
@@ -84,14 +84,14 @@ public class UserSteps extends Steps {
    public void list_of_users_includes(final String name) {
       Objects.requireNonNull(name, "name");
 
-      final var usersPage = (UsersPage) worldCore.expectedPage;
+      final var usersPage = (UsersPage) world.expectedPage;
       usersPage.requireIsCurrentPath();
       usersPage.assertListOfUsersIncludes(name);
    }
 
    @Then("the list of users has at least one user")
    public void list_of_users_not_empty() {
-      final var usersPage = (UsersPage) worldCore.expectedPage;
+      final var usersPage = (UsersPage) world.expectedPage;
       usersPage.assertListOfUsersNotEmpty();
    }
 
@@ -107,7 +107,7 @@ public class UserSteps extends Steps {
 
    @Then("MC accepts the login")
    public void mc_accepts_login() {
-      final var homePage = (HomePage) worldCore.expectedPage;
+      final var homePage = (HomePage) world.expectedPage;
       assertAll(() -> homePage.assertInvariants(),
                () -> homePage.assertNoErrorMessages(),
                () -> homePage.assertReportsThatLoggedIn());
@@ -115,7 +115,7 @@ public class UserSteps extends Steps {
 
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() {
-      final var usersPage = (UsersPage) worldCore.expectedPage;
+      final var usersPage = (UsersPage) world.expectedPage;
       try {
          usersPage.awaitIsCurrentPageOrErrorMessage();
       } catch (final IllegalStateException e) {
@@ -125,32 +125,32 @@ public class UserSteps extends Steps {
 
    @Then("MC rejects the login")
    public void mc_rejects_login() {
-      final var loginPage = (LoginPage) worldCore.expectedPage;
+      final var loginPage = (LoginPage) world.expectedPage;
       loginPage.assertRejectedLogin();
    }
 
    @Then("MC serves the users page")
    public void mc_serves_users_page() {
-      final var usersPage = (UsersPage) worldCore.expectedPage;
+      final var usersPage = (UsersPage) world.expectedPage;
       usersPage.assertInvariants();
    }
 
    private UsersPage navigateToUsersPage() {
-      final var homePage = (HomePage) worldCore.expectedPage;
+      final var homePage = (HomePage) world.expectedPage;
       final var usersPage = homePage.navigateToUsersPage();
-      worldCore.expectedPage = usersPage;
+      world.expectedPage = usersPage;
       return usersPage;
    }
 
    @Then("redirected to home-page")
    public void redirected_to_home_page() {
-      final var homePage = (HomePage) worldCore.expectedPage;
+      final var homePage = (HomePage) world.expectedPage;
       homePage.assertInvariants();
    }
 
    @Then("the response is a list of users")
    public void response_is_list_of_users() {
-      final var usersPage = (UsersPage) worldCore.expectedPage;
+      final var usersPage = (UsersPage) world.expectedPage;
       assertAll(() -> usersPage.assertInvariants(),
                () -> usersPage.assertHasListOfUsers());
    }
@@ -162,33 +162,33 @@ public class UserSteps extends Steps {
 
    private void tryToLogin() {
       Objects.requireNonNull(user, "user");
-      final var homePage = worldCore.getHomePage();
+      final var homePage = world.getHomePage();
       final var loginPage = homePage.navigateToLoginPage();
-      worldCore.expectedPage = loginPage;
+      world.expectedPage = loginPage;
       loginPage.submitLoginForm(user.getUsername(), user.getPassword());
       homePage.awaitIsCurrentPageOrErrorMessage();
       if (homePage.isCurrentPage()) {
-         worldCore.expectedPage = homePage;
+         world.expectedPage = homePage;
       }
    }
 
    @Given("unknown user")
    public void unknown_user() {
-      user = worldCore.getUnknownUser();
+      user = world.getUnknownUser();
    }
 
    @Given("user does not have the {string} role")
    public void user_does_not_have_role(final String roleName) {
-      user = worldCore.getUserWithoutRole(parseRoleName(roleName));
+      user = world.getUserWithoutRole(parseRoleName(roleName));
    }
 
    @Given("user has the {string} role")
    public void user_has_role(final String roleName) {
-      user = worldCore.getUserWithRole(parseRoleName(roleName));
+      user = world.getUserWithRole(parseRoleName(roleName));
    }
 
    @Given("user is the administrator")
    public void user_is_administrator() {
-      user = worldCore.getAdministratorUser();
+      user = world.getAdministratorUser();
    }
 }

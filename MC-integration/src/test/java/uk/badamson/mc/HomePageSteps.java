@@ -40,13 +40,13 @@ public class HomePageSteps extends Steps {
    public static final String GAME_NAME = "Mission Command";
 
    @Autowired
-   public HomePageSteps(@Nonnull final World worldCore) {
-      super(worldCore);
+   public HomePageSteps(@Nonnull final World world) {
+      super(world);
    }
 
    private HomePage getExpectedPageAsHomePage() {
-      Objects.requireNonNull(worldCore.expectedPage, "expectedPage");
-      return (HomePage) worldCore.expectedPage;
+      Objects.requireNonNull(world.expectedPage, "expectedPage");
+      return (HomePage) world.expectedPage;
    }
 
    @Then("the home page header includes the name of the game")
@@ -74,6 +74,6 @@ public class HomePageSteps extends Steps {
 
    @When("the potential user gives the obvious URL http://example.com/ to a web browser")
    public void the_potential_user_gives_the_obvious_URL_to_a_web_browser() {
-      worldCore.getHomePage();
+      world.getHomePage();
    }
 }
