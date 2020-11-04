@@ -45,8 +45,8 @@ public class HomePageSteps extends Steps {
    }
 
    private HomePage getExpectedPageAsHomePage() {
-      Objects.requireNonNull(expectedPage, "expectedPage");
-      return (HomePage) expectedPage;
+      Objects.requireNonNull(worldCore.expectedPage, "expectedPage");
+      return (HomePage) worldCore.expectedPage;
    }
 
    @Then("the home page header includes the name of the game")
@@ -74,6 +74,6 @@ public class HomePageSteps extends Steps {
 
    @When("the potential user gives the obvious URL http://example.com/ to a web browser")
    public void the_potential_user_gives_the_obvious_URL_to_a_web_browser() {
-      getHomePage();
+      worldCore.getHomePage();
    }
 }

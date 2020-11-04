@@ -50,6 +50,8 @@ import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
 import uk.badamson.mc.McContainers.HttpServer;
+import uk.badamson.mc.presentation.HomePage;
+import uk.badamson.mc.presentation.Page;
 
 /**
  * <p>
@@ -125,6 +127,8 @@ public final class WorldCore implements AutoCloseable {
    private URI privateNetworkUrl;
 
    private URI localUrl;
+
+   protected Page expectedPage;
 
    /**
     * @param failureRecordingDirectory
@@ -277,6 +281,13 @@ public final class WorldCore implements AutoCloseable {
     */
    public String getCurrentUrlPath() {
       return getPathOfUrl(webDriver.getCurrentUrl());
+   }
+
+   public HomePage getHomePage() {
+      final var homePage = new HomePage(webDriver);
+      homePage.get();
+      expectedPage = homePage;
+      return homePage;
    }
 
    /**

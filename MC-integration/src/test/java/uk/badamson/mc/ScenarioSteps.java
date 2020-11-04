@@ -46,30 +46,31 @@ public class ScenarioSteps extends Steps {
 
    @When("MC serves the scenario page")
    public void mc_serves_scenario_page() {
-      final var scenarioPage = (ScenarioPage) expectedPage;
+      final var scenarioPage = (ScenarioPage) worldCore.expectedPage;
       scenarioPage.assertInvariants();
    }
 
    @Then("MC serves the scenarios page")
    public void mc_serves_scenarios_page() {
-      final var scenariosPage = (ScenariosPage) expectedPage;
+      final var scenariosPage = (ScenariosPage) worldCore.expectedPage;
       scenariosPage.assertInvariants();
    }
 
    @When("Navigate to one scenario")
    public void navigate_to_one_scenario() {
-      final var scenariosPage = (ScenariosPage) expectedPage;
+      final var scenariosPage = (ScenariosPage) worldCore.expectedPage;
       final var index = 0;
-      expectedPage = scenariosPage.navigateToScenario(index);
+      worldCore.expectedPage = scenariosPage.navigateToScenario(index);
    }
 
    private void navigateToScenariosPage() {
-      expectedPage = getHomePage().navigateToScenariosPage();
+      worldCore.expectedPage = worldCore.getHomePage()
+               .navigateToScenariosPage();
    }
 
    @Then("the response is a list of scenarios")
    public void response_is_list_of_scenarios() {
-      final var scenariosPage = (ScenariosPage) expectedPage;
+      final var scenariosPage = (ScenariosPage) worldCore.expectedPage;
       scenariosPage.assertHasListOfScenarios();
    }
 

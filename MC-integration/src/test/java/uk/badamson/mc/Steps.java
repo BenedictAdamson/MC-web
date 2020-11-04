@@ -22,9 +22,6 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
-import uk.badamson.mc.presentation.HomePage;
-import uk.badamson.mc.presentation.Page;
-
 /**
  * <p>
  * Definitions of BDD steps for the Cucumber-JVM BDD testing tool
@@ -35,16 +32,7 @@ abstract class Steps {
    @Nonnull
    protected final WorldCore worldCore;
 
-   protected Page expectedPage;
-
    protected Steps(@Nonnull final WorldCore worldCore) {
       this.worldCore = Objects.requireNonNull(worldCore, "worldCore");
-   }
-
-   protected final HomePage getHomePage() {
-      final var homePage = new HomePage(worldCore.getWebDriver());
-      homePage.get();
-      expectedPage = homePage;
-      return homePage;
    }
 }
