@@ -89,6 +89,6 @@ public class GameSteps extends Steps {
    @When("Viewing the games of the scenario")
    public void viewing_games_of_scenario() {
       navigateToScenario();
-      world.getExpectedPage(ScenarioPage.class).requireIsCurrentPath();
+      world.getExpectedPage(ScenarioPage.class).requireIsReady();
    }
 }

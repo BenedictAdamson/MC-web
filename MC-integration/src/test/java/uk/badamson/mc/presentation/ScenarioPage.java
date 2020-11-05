@@ -20,17 +20,14 @@ package uk.badamson.mc.presentation;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 
 import javax.annotation.concurrent.Immutable;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.opentest4j.AssertionFailedError;
 
 /**
  * <p>
@@ -67,25 +64,29 @@ public final class ScenarioPage extends Page {
                "scenarioTitle");
    }
 
+   private void assertDisplaysScenarioTitle(final WebElement body) {
+      assertThat("displays the scenario title", body.getText(),
+               containsString(scenarioTitle));
+   }
+
    public void assertHasListOfGames() {
-      try {
-         findElement(GAMES_LIST_LOCATOR);
-      } catch (final NoSuchElementException e) {
-         throw new AssertionFailedError("Has list of games", e);
-      }
+      assertHasListOfGames(getBody());
+   }
+
+   private void assertHasListOfGames(final WebElement body) {
+      assertHasElement(body, GAMES_LIST_LOCATOR);
    }
 
    @Override
-   public void assertInvariants() {
-      assertAll(() -> super.assertInvariants(),
-               () -> assertThat("displays the scenario title", getBodyText(),
-                        containsString(scenarioTitle)),
-               () -> assertHasListOfGames());
+   protected void assertValidBody(final WebElement body) {
+      assertHasListOfGames(body);
+      assertDisplaysScenarioTitle(body);
    }
 
    public List<WebElement> findGameElements() {
-      requireIsCurrentPath();
-      return findElement(GAMES_LIST_LOCATOR).findElements(By.tagName("li"));
+      requireIsReady();
+      return getBody().findElement(GAMES_LIST_LOCATOR)
+               .findElements(By.tagName("li"));
    }
 
    public String getScenarioTitle() {
@@ -99,13 +100,13 @@ public final class ScenarioPage extends Page {
    }
 
    public GamePage navigateToGamePage(final int gameIndex) {
-      requireIsCurrentPath();
+      requireIsReady();
       final var listEntry = findGameElements().get(gameIndex);
       final var title = listEntry.getText();
       final var link = listEntry.findElement(By.tagName("a"));
       link.click();
       final var gamePage = new GamePage(this, title);
-      gamePage.awaitIsCurrentPageAndReady();
+      gamePage.awaitIsReady();
       return gamePage;
    }
 

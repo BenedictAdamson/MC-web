@@ -45,7 +45,7 @@ public class HomePageSteps extends Steps {
    @Then("the home page header includes the name of the game")
    public void home_page_header_includes_name_of_game() {
       world.getAndAssertExpectedPage(HomePage.class)
-               .assertHeaderIncludesNameOfGame();
+               .assertHeadingIncludesNameOfGame();
    }
 
    @Then("the home page title includes the name of the game")

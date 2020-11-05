@@ -20,7 +20,6 @@ package uk.badamson.mc.presentation;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -29,6 +28,7 @@ import javax.annotation.concurrent.Immutable;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 /**
  * <p>
@@ -56,29 +56,40 @@ public final class HomePage extends Page {
       super(webDriver);
    }
 
-   public void assertHeaderIncludesNameOfGame() {
-      final var header = assertHasElementWithTag("h1");// guard
-      assertThat(header.getText(), containsString(GAME_NAME));
+   public void assertHeadingIncludesNameOfGame() {
+      assertHeadingIncludesNameOfGame(getBody());
    }
 
-   @Override
-   public void assertInvariants() {
-      assertAll(() -> super.assertInvariants(),
-               () -> assertHeaderIncludesNameOfGame(),
-               () -> assertTitleIncludesNameOfGame());
+   private void assertHeadingIncludesNameOfGame(final WebElement body) {
+      final var heading = assertHasElement(body, By.tagName("h1"));// guard
+      assertThat(heading.getText(), containsString(GAME_NAME));
    }
 
    public void assertReportsThatLoggedIn() {
-      assertThat("Reports that is logged in", getBodyText(),
+      assertThat("Reports that is logged in", getBody().getText(),
                containsString("Logged in"));
    }
 
    public void assertTitleIncludesNameOfGame() {
-      assertThat(getTitle(), containsString(GAME_NAME));
+      assertTitleIncludesNameOfGame(getTitle());
+   }
+
+   private void assertTitleIncludesNameOfGame(final String title) {
+      assertThat(title, containsString(GAME_NAME));
    }
 
    @Override
-   protected Optional<String> getPath() {
+   protected void assertValidBody(final WebElement body) {
+      assertHeadingIncludesNameOfGame(body);
+   }
+
+   @Override
+   protected void assertValidTitle(final String title) {
+      assertTitleIncludesNameOfGame(title);
+   }
+
+   @Override
+   protected Optional<String> getValidPath() {
       return Optional.of(PATH);
    }
 
@@ -89,26 +100,26 @@ public final class HomePage extends Page {
    }
 
    public LoginPage navigateToLoginPage() {
-      requireIsCurrentPath();
-      findElement(By.id("login")).click();
+      requireIsReady();
+      getBody().findElement(By.id("login")).click();
       final var loginPage = new LoginPage(this);
-      loginPage.awaitIsCurrentPageAndReady();
+      loginPage.awaitIsReady();
       return loginPage;
    }
 
    public ScenariosPage navigateToScenariosPage() {
-      requireIsCurrentPath();
-      findElement(By.id("scenarios")).click();
+      requireIsReady();
+      getBody().findElement(By.id("scenarios")).click();
       final var scenariosPage = new ScenariosPage(this);
-      scenariosPage.awaitIsCurrentPageAndReady();
+      scenariosPage.awaitIsReady();
       return scenariosPage;
    }
 
    public UsersPage navigateToUsersPage() {
-      requireIsCurrentPath();
-      findElement(By.id("users")).click();
+      requireIsReady();
+      getBody().findElement(By.id("users")).click();
       final var usersPage = new UsersPage(this);
-      usersPage.awaitIsCurrentPageAndReady();
+      usersPage.awaitIsReady();
       return usersPage;
    }
 }

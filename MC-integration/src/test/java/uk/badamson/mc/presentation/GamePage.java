@@ -26,6 +26,7 @@ import java.util.Objects;
 
 import javax.annotation.concurrent.Immutable;
 
+import org.openqa.selenium.WebElement;
 import org.springframework.web.util.UriTemplate;
 
 /**
@@ -62,7 +63,7 @@ public final class GamePage extends Page {
    }
 
    public void assertIncludesCreationTime() {
-      assertIncludesCreationTime(getBodyText());
+      assertIncludesCreationTime(getBody().getText());
    }
 
    private void assertIncludesCreationTime(final String bodyText) {
@@ -71,7 +72,7 @@ public final class GamePage extends Page {
    }
 
    public void assertIncludesScenarioTitle() {
-      assertIncludesScenarioTitle(getBodyText());
+      assertIncludesScenarioTitle(getBody().getText());
    }
 
    private void assertIncludesScenarioTitle(final String bodyText) {
@@ -80,10 +81,9 @@ public final class GamePage extends Page {
    }
 
    @Override
-   public void assertInvariants() {
-      final var bodyText = getBodyText();
-      assertAll(() -> super.assertInvariants(),
-               () -> assertIncludesCreationTime(bodyText),
+   protected void assertValidBody(final WebElement body) {
+      final var bodyText = body.getText();
+      assertAll(() -> assertIncludesCreationTime(bodyText),
                () -> assertIncludesScenarioTitle(bodyText));
    }
 
