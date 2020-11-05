@@ -118,7 +118,7 @@ public class UserSteps extends Steps {
    public void mc_accepts_the_addition() {
       try {
          world.getAndAssertExpectedPage(UsersPage.class)
-                  .awaitIsCurrentPageOrErrorMessage();
+                  .awaitIsCurrentPageAndReadyOrErrorMessage();
       } catch (final IllegalStateException e) {
          throw new AssertionFailedError(e.getMessage(), e);
       }
@@ -165,7 +165,7 @@ public class UserSteps extends Steps {
       final var loginPage = homePage.navigateToLoginPage();
       world.setExpectedPage(loginPage);
       loginPage.submitLoginForm(user.getUsername(), user.getPassword());
-      homePage.awaitIsCurrentPageOrErrorMessage();
+      homePage.awaitIsCurrentPageAndReadyOrErrorMessage();
       if (homePage.isCurrentPage()) {
          world.setExpectedPage(homePage);
       }

@@ -105,7 +105,7 @@ public final class ScenarioPage extends Page {
       final var link = listEntry.findElement(By.tagName("a"));
       link.click();
       final var gamePage = new GamePage(this, title);
-      gamePage.awaitIsCurrentPage();
+      gamePage.awaitIsCurrentPageAndReady();
       return gamePage;
    }
 

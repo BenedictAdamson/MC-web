@@ -58,6 +58,8 @@ public abstract class Page {
     */
    public static final By ERROR_LOCATOR = By.className("error");
 
+   private static final By BODY_LOCATOR = By.tagName("body");
+
    private static URI createUrl(final String path) {
       return McContainers.createIngressPrivateNetworkUriFromPath(path);
    }
@@ -153,12 +155,12 @@ public abstract class Page {
       assertThat("No error messages", errorMessages, is(empty()));
    }
 
-   public final void awaitIsCurrentPage() throws IllegalStateException {
+   public final void awaitIsCurrentPageAndReady() throws IllegalStateException {
       final var currentPath = new AtomicReference<String>();
       try {
          new WebDriverWait(webDriver, 17).until(driver -> {
             currentPath.set(getPathOfUrl(driver.getCurrentUrl()));
-            return isValidPath(currentPath.get());
+            return isValidPath(currentPath.get()) && isReady(driver);
          });
       } catch (final Exception e) {// give better diagnostics
          throw new IllegalStateException(
@@ -168,13 +170,13 @@ public abstract class Page {
       }
    }
 
-   public final void awaitIsCurrentPageOrErrorMessage()
+   public final void awaitIsCurrentPageAndReadyOrErrorMessage()
             throws IllegalStateException {
       final var currentPath = new AtomicReference<String>();
       try {
          new WebDriverWait(webDriver, 17).until(driver -> {
             currentPath.set(getPathOfUrl(driver.getCurrentUrl()));
-            return isValidPath(currentPath.get())
+            return isValidPath(currentPath.get()) && isReady(driver)
                      || !driver.findElements(ERROR_LOCATOR).isEmpty();
          });
       } catch (final Exception e) {// give better diagnostics
@@ -250,6 +252,35 @@ public abstract class Page {
 
    public final boolean isCurrentPage() {
       return isValidPath(getCurrentPath());
+   }
+
+   /**
+    * <p>
+    * Whether a page with given content corresponds to a loaded and ready page
+    * of this type.
+    * </p>
+    * <p>
+    * The provided implementation returns {@code true}.
+    * </p>
+    *
+    * @param title
+    *           The (window) title of the page.
+    * @param body
+    *           The {@code body} element of the page.
+    *
+    * @return whether loaded and ready
+    * @throws NullPointerException
+    *            <ul>
+    *            <li>If {@code title} is null.</li>
+    *            <li>If {@code body} is null.</li>
+    *            </ul>
+    */
+   protected boolean isReady(final String title, final WebElement body) {
+      return true;
+   }
+
+   private boolean isReady(final WebDriver driver) {
+      return isReady(driver.getTitle(), driver.findElement(BODY_LOCATOR));
    }
 
    /**
