@@ -19,13 +19,15 @@ package uk.badamson.mc.presentation;
  */
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Objects;
 
+import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import org.hamcrest.Matcher;
 import org.openqa.selenium.WebElement;
 import org.springframework.web.util.UriTemplate;
 
@@ -39,9 +41,13 @@ public final class GamePage extends Page {
 
    private static final UriTemplate URI_TEMPLATE = new UriTemplate(
             "/scenario/{scenario}/game/{created}");
+   private static final Matcher<String> INDICATES_IS_A_GAME = containsString(
+            "Game");
 
    private final String scenarioTitle;
-   private final String creationTime;
+
+   private final Matcher<String> includesCreationTime;
+   private final Matcher<String> includesScenarioTitile;
 
    /**
     * <p>
@@ -58,37 +64,36 @@ public final class GamePage extends Page {
     */
    public GamePage(final ScenarioPage scenarioPage, final String creationTime) {
       super(scenarioPage);
+      Objects.requireNonNull(creationTime, "creationTime");
       this.scenarioTitle = scenarioPage.getScenarioTitle();
-      this.creationTime = Objects.requireNonNull(creationTime, "creationTime");
+      includesCreationTime = containsString(creationTime);
+      includesScenarioTitile = containsString(scenarioTitle);
    }
 
    public void assertIncludesCreationTime() {
-      assertIncludesCreationTime(getBody().getText());
-   }
-
-   private void assertIncludesCreationTime(final String bodyText) {
-      assertThat("includes creation time", bodyText,
-               containsString(creationTime));
+      assertThat("includes creation time", getBody().getText(),
+               includesCreationTime);
    }
 
    public void assertIncludesScenarioTitle() {
-      assertIncludesScenarioTitle(getBody().getText());
-   }
-
-   private void assertIncludesScenarioTitle(final String bodyText) {
-      assertThat("includes scenario title", bodyText,
-               containsString(scenarioTitle));
+      assertThat("includes scenario title", getBody().getText(),
+               includesScenarioTitile);
    }
 
    @Override
-   protected void assertValidBody(final WebElement body) {
-      final var bodyText = body.getText();
-      assertAll(() -> assertIncludesCreationTime(bodyText),
-               () -> assertIncludesScenarioTitle(bodyText));
+   protected void assertValidBody(@Nonnull final WebElement body) {
+      assertThat("Body text", body.getText(), allOf(INDICATES_IS_A_GAME,
+               includesCreationTime, includesScenarioTitile));
    }
 
    @Override
-   protected boolean isValidPath(final String path) {
+   protected boolean isReady(@Nonnull final String path,
+            @Nonnull final String title, final @Nonnull WebElement body) {
+      return isValidPath(path) && INDICATES_IS_A_GAME.matches(body.getText());
+   }
+
+   @Override
+   protected boolean isValidPath(@Nonnull final String path) {
       Objects.requireNonNull(path, "path");
       return URI_TEMPLATE.matches(path);
    }
