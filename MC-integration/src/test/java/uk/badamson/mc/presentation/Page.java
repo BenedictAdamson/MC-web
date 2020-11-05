@@ -53,6 +53,7 @@ import uk.badamson.mc.McContainers;
  */
 public abstract class Page {
 
+   @SuppressWarnings("serial")
    private final class NotReadyException extends IllegalStateException {
 
       public NotReadyException() {
