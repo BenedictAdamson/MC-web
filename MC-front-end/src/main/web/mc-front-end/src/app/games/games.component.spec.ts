@@ -1,11 +1,10 @@
-import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { of } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
+import { ActivatedRoute, convertToParamMap } from '@angular/router';
+
 import { GameService } from '../game.service';
-import { Scenario } from '../scenario';
 import { GamesComponent } from './games.component';
-import { ScenarioService } from '../scenario.service';
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
@@ -13,17 +12,12 @@ describe('GamesComponent', () => {
 	let component: GamesComponent;
 	let fixture: ComponentFixture<GamesComponent>;
 
-	const IDENTIFIER_A: uuid = uuid();
-	const IDENTIFIER_B: uuid = uuid();
-	const SCENARIO_A: Scenario = { identifier: IDENTIFIER_A, title: 'Section Attack', description: 'Basic fire-and-movement tactical training.' };
-	const SCENARIO_B: Scenario = { identifier: IDENTIFIER_B, title: 'Beach Assault', description: 'Fast and deadly.' };
+	const SCENARIO_A: uuid = uuid();
+	const SCENARIO_B: uuid = uuid();
 	const GAMES_0: string[] = [];
 	const GAMES_2: string[] = ['1970-01-01T00:00:00.000Z', '2020-12-31T23:59:59.999Z'];
 
-	const setUp = (testScenario: Scenario, gamesOfScenario: string[]) => {
-		const scenarioServiceStub = jasmine.createSpyObj('ScenarioService', ['getScenario']);
-		scenarioServiceStub.getScenario.and.returnValue(of(testScenario));
-
+	const setUp = function(scenario: uuid, gamesOfScenario: string[]) {
 		const gameServiceStub = jasmine.createSpyObj('GameService', ['getGamesOfScenario']);
 		gameServiceStub.getGamesOfScenario.and.returnValue(of(gamesOfScenario));
 
@@ -32,32 +26,28 @@ describe('GamesComponent', () => {
 			providers: [{
 				provide: ActivatedRoute,
 				useValue: {
-					params: of({ id: testScenario.identifier }),
+					params: of({ id: scenario }),
 					snapshot: {
-						paramMap: convertToParamMap({ id: testScenario.identifier })
+						paramMap: convertToParamMap({ id: scenario })
 					}
 				}
 			},
-			{ provide: GameService, useValue: gameServiceStub },
-			{ provide: ScenarioService, useValue: scenarioServiceStub }]
+			{ provide: GameService, useValue: gameServiceStub }]
 		});
 
 		fixture = TestBed.createComponent(GamesComponent);
 		component = fixture.componentInstance;
 		fixture.detectChanges();
 	};
-	const canCreate = (testScenario: Scenario, gamesOfScenario: string[]) => {
-		setUp(testScenario, gamesOfScenario);
+	const canCreate = function (scenario: uuid, gamesOfScenario: string[])  {
+		setUp(scenario, gamesOfScenario);
 
 		expect(component).toBeTruthy();
-		expect(component.scenario).toBe(testScenario);
+		expect(component.scenario).toBe(scenario);
 		expect(component.games).toBe(gamesOfScenario);
 
 		const html: HTMLElement = fixture.nativeElement;
-		const displayText: string = html.innerText;
 		const gamesList: HTMLUListElement = html.querySelector('#games');
-		expect(displayText.includes(testScenario.title)).withContext("displayed text includes title").toBeTrue();
-		expect(displayText.includes(testScenario.description)).withContext("displayed text includes description").toBeTrue();
 		expect(gamesList).withContext('games list').not.toBeNull();
 		const gameEntries: NodeListOf<HTMLLIElement> = gamesList.querySelectorAll('li');
 		expect(gameEntries.length).withContext('number of game entries').toBe(gamesOfScenario.length);

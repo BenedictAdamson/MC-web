@@ -1,9 +1,9 @@
+import { v4 as uuid, parse as parseUuid } from 'uuid';
+
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { GameService } from '../game.service';
-import { Scenario } from '../scenario';
-import { ScenarioService } from '../scenario.service';
 
 @Component({
 	selector: 'app-scenario',
@@ -12,29 +12,22 @@ import { ScenarioService } from '../scenario.service';
 })
 export class GamesComponent implements OnInit {
 
-	scenario: Scenario;
+	scenario: uuid;
 	games: string[];
 
 	constructor(
 		private route: ActivatedRoute,
-		private scenarioService: ScenarioService,
 		private gameService: GameService
 	) { }
 
 	ngOnInit() {
-		const id: string = this.route.snapshot.paramMap.get('id');
-		this.getScenario(id);
-		this.getGames(id);
+		this.scenario = parseUuid(this.route.snapshot.paramMap.get('id'));
+		this.getGames();
 	}
 
 
-	private getScenario(id: string): void {
-		this.scenarioService.getScenario(id)
-			.subscribe(scenario => this.scenario = scenario);
-	}
-
-	private getGames(id: string): void {
-		this.gameService.getGamesOfScenario(id)
+	private getGames(): void {
+		this.gameService.getGamesOfScenario(this.scenario)
 			.subscribe(games => this.games = games);
 	}
 }
