@@ -21,7 +21,7 @@ export class GamesComponent implements OnInit {
 	) { }
 
 	ngOnInit() {
-		this.scenario = parseUuid(this.route.snapshot.paramMap.get('id'));
+		this.scenario = this.route.snapshot.paramMap.get('id');
 		this.getGames();
 	}
 
