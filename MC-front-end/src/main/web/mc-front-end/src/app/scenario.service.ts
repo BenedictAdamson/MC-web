@@ -1,10 +1,12 @@
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { v4 as uuid } from 'uuid';
+
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
+import { NamedUUID } from './named-uuid';
 import { Scenario } from './scenario';
-import { ScenarioIdentifier } from './scenario-identifier';
 
 @Injectable({
 	providedIn: 'root'
@@ -16,14 +18,14 @@ export class ScenarioService {
 	constructor(
 		private http: HttpClient) { }
 
-	getScenarioIdentifiers(): Observable<ScenarioIdentifier[]> {
-		return this.http.get<ScenarioIdentifier[]>(this.scenarioUrl)
+	getScenarioIdentifiers(): Observable<NamedUUID[]> {
+		return this.http.get<NamedUUID[]>(this.scenarioUrl)
 			.pipe(
-				catchError(this.handleError<ScenarioIdentifier[]>('getScenarioIdentifiers', []))
+				catchError(this.handleError<NamedUUID[]>('getScenarioIdentifiers', []))
 			);
 	}
 
-	getScenario(id: string): Observable<Scenario> {
+	getScenario(id: uuid): Observable<Scenario> {
 		const url = `${this.scenarioUrl}/${id}`;
 		return this.http.get<Scenario>(url)
 			.pipe(

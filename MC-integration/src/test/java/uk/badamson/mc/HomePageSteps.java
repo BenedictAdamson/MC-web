@@ -18,13 +18,10 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.util.Objects;
-
 import javax.annotation.Nonnull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -41,33 +38,25 @@ public class HomePageSteps extends Steps {
    public static final String GAME_NAME = "Mission Command";
 
    @Autowired
-   public HomePageSteps(@Nonnull final WorldCore worldCore) {
-      super(worldCore);
-   }
-
-   private HomePage getHomePage() {
-      Objects.requireNonNull(expectedPage, "currentPage");
-      return (HomePage) expectedPage;
+   public HomePageSteps(@Nonnull final World world) {
+      super(world);
    }
 
    @Then("the home page header includes the name of the game")
    public void home_page_header_includes_name_of_game() {
-      getHomePage().assertHeaderIncludesNameOfGame();
+      world.getAndAssertExpectedPage(HomePage.class)
+               .assertHeadingIncludesNameOfGame();
    }
 
    @Then("the home page title includes the name of the game")
    public void home_page_title_includes_name_of_game() {
-      getHomePage().assertTitleIncludesNameOfGame();
+      world.getAndAssertExpectedPage(HomePage.class)
+               .assertTitleIncludesNameOfGame();
    }
 
    @Then("MC serves the home page")
    public void mc_serves_the_home_page() {
-      getHomePage().assertInvariants();
-   }
-
-   @Before
-   public void setUp() {
-      expectedPage = new HomePage(worldCore.getWebDriver());
+      world.getAndAssertExpectedPage(HomePage.class).assertInvariants();
    }
 
    @Given("the DNS name, example.com, of an MC server")
@@ -80,6 +69,6 @@ public class HomePageSteps extends Steps {
 
    @When("the potential user gives the obvious URL http://example.com/ to a web browser")
    public void the_potential_user_gives_the_obvious_URL_to_a_web_browser() {
-      getHomePage().get();
+      world.getHomePage();
    }
 }

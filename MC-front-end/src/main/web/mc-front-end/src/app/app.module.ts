@@ -5,15 +5,18 @@ import { FormsModule } from '@angular/forms';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
+import { AppRoutingModule } from './app-routing.module';
+import { WINDOW_PROVIDER } from './window.provider';
+
 import { AddUserComponent } from './add-user/add-user.component';
 import { AppComponent } from './app.component';
-import { AppRoutingModule } from './app-routing.module';
+import { GameComponent } from './game/game.component';
+import { GamesComponent } from './games/games.component';
 import { LoginComponent } from './login/login.component';
 import { ScenarioComponent } from './scenario/scenario.component';
 import { ScenariosComponent } from './scenarios/scenarios.component';
 import { UserComponent } from './user/user.component';
 import { UsersComponent } from './users/users.component';
-import { WINDOW_PROVIDER } from './window.provider';
 import { HomeComponent } from './home/home.component';
 import { SelfComponent } from './self/self.component';
 
@@ -30,6 +33,8 @@ import { SelfComponent } from './self/self.component';
 		AddUserComponent,
 		AppComponent,
 		HomeComponent,
+		GameComponent,
+		GamesComponent,
 		LoginComponent,
 		ScenarioComponent,
 		ScenariosComponent,

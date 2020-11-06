@@ -20,11 +20,14 @@ package uk.badamson.mc.presentation;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.util.List;
 import java.util.Objects;
 
 import javax.annotation.concurrent.Immutable;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 /**
  * <p>
@@ -36,7 +39,9 @@ public final class ScenarioPage extends Page {
 
    private static final String BASE = "/scenario/";
 
-   private final String title;
+   private static final By GAMES_LIST_LOCATOR = By.id("games");
+
+   private final String scenarioTitle;
 
    /**
     * <p>
@@ -46,27 +51,63 @@ public final class ScenarioPage extends Page {
     *
     * @param scenariosPage
     *           The scenarios page.
-    * @param title
+    * @param scenarioTitle
     *           The expected title.
     * @throws NullPointerException
-    *            If {@code scenariosPage} is null. If {@code title} is null.
+    *            If {@code scenariosPage} is null. If {@code scenarioTitle} is
+    *            null.
     */
-   public ScenarioPage(final ScenariosPage scenariosPage, final String title) {
+   public ScenarioPage(final ScenariosPage scenariosPage,
+            final String scenarioTitle) {
       super(scenariosPage);
-      this.title = Objects.requireNonNull(title, "title");
+      this.scenarioTitle = Objects.requireNonNull(scenarioTitle,
+               "scenarioTitle");
+   }
+
+   private void assertDisplaysScenarioTitle(final WebElement body) {
+      assertThat("displays the scenario title", body.getText(),
+               containsString(scenarioTitle));
+   }
+
+   public void assertHasListOfGames() {
+      assertHasListOfGames(getBody());
+   }
+
+   private void assertHasListOfGames(final WebElement body) {
+      assertHasElement(body, GAMES_LIST_LOCATOR);
    }
 
    @Override
-   public void assertInvariants() {
-      assertAll(() -> super.assertInvariants(),
-               () -> assertThat("displays the scenario title", getBodyText(),
-                        containsString(title)));
+   protected void assertValidBody(final WebElement body) {
+      assertHasListOfGames(body);
+      assertDisplaysScenarioTitle(body);
+   }
+
+   public List<WebElement> findGameElements() {
+      requireIsReady();
+      return getBody().findElement(GAMES_LIST_LOCATOR)
+               .findElements(By.tagName("li"));
+   }
+
+   public String getScenarioTitle() {
+      return scenarioTitle;
    }
 
    @Override
    protected boolean isValidPath(final String path) {
       Objects.requireNonNull(path, "path");
       return path.startsWith(BASE);
+   }
+
+   public GamePage navigateToGamePage(final int gameIndex) {
+      requireIsReady();
+      final var listEntry = findGameElements().get(gameIndex);
+      final var title = listEntry.getText();
+      final var link = listEntry.findElement(By.tagName("a"));
+      link.click();
+      final var gamePage = new GamePage(this, title);
+      gamePage.awaitIsReady();
+      return gamePage;
    }
 
 }

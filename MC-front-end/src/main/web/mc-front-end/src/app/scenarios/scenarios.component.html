@@ -2,7 +2,7 @@
 
 <ul class="scenarios">
     <li *ngFor="let scenario of scenarios">
-        <a routerLink="/scenario/{{scenario.id}}">
+        <a [routerLink]="['/scenario/',scenario.id]">
             {{scenario.title}}
         </a>
     </li>

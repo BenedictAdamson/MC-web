@@ -1,4 +1,4 @@
-package uk.badamson.mc;
+package uk.badamson.mc.repository;
 /*
  * © Copyright Benedict Adamson 2020.
  *
@@ -18,34 +18,16 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.CrudRepository;
 
-import io.cucumber.java.After;
-import io.cucumber.java.Before;
-import io.cucumber.java.Scenario;
+import uk.badamson.mc.Game;
 
 /**
  * <p>
- * Enable automatic reporting of the beginning and ending of Cucumber scenarios
- * to a {@link WorldCore} bean.
+ * Interface for generic CRUD operations on a repository for {@link Game}
+ * objects.
  * </p>
  */
-public final class WorldCoreScenarioHook {
-   private final WorldCore worldCore;
-
-   @Autowired
-   public WorldCoreScenarioHook(final WorldCore worldCore) {
-      this.worldCore = worldCore;
-   }
-
-   @Before
-   public void beginScenario(final Scenario scenario) {
-      worldCore.beginScenario(scenario);
-   }
-
-   @After
-   public void endScenario(final Scenario scenario) {
-      worldCore.endScenario(scenario);
-   }
+public interface GameRepository extends CrudRepository<Game, Game.Identifier> {
 
 }

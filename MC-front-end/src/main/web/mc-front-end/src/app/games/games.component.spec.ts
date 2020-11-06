@@ -1,0 +1,68 @@
+import { of } from 'rxjs';
+import { v4 as uuid } from 'uuid';
+
+import { ActivatedRoute, convertToParamMap } from '@angular/router';
+
+import { GameService } from '../game.service';
+import { GamesComponent } from './games.component';
+
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+
+describe('GamesComponent', () => {
+	let component: GamesComponent;
+	let fixture: ComponentFixture<GamesComponent>;
+
+	const SCENARIO_A: uuid = uuid();
+	const SCENARIO_B: uuid = uuid();
+	const GAMES_0: string[] = [];
+	const GAMES_2: string[] = ['1970-01-01T00:00:00.000Z', '2020-12-31T23:59:59.999Z'];
+
+	const setUp = function(scenario: uuid, gamesOfScenario: string[]) {
+		const gameServiceStub = jasmine.createSpyObj('GameService', ['getGamesOfScenario']);
+		gameServiceStub.getGamesOfScenario.and.returnValue(of(gamesOfScenario));
+
+		TestBed.configureTestingModule({
+			declarations: [GamesComponent],
+			providers: [{
+				provide: ActivatedRoute,
+				useValue: {
+					params: of({ id: scenario }),
+					snapshot: {
+						paramMap: convertToParamMap({ id: scenario })
+					}
+				}
+			},
+			{ provide: GameService, useValue: gameServiceStub }]
+		});
+
+		fixture = TestBed.createComponent(GamesComponent);
+		component = fixture.componentInstance;
+		fixture.detectChanges();
+	};
+	const canCreate = function (scenario: uuid, gamesOfScenario: string[])  {
+		setUp(scenario, gamesOfScenario);
+
+		expect(component).toBeTruthy();
+		expect(component.scenario).toBe(scenario);
+		expect(component.games).toBe(gamesOfScenario);
+
+		const html: HTMLElement = fixture.nativeElement;
+		const gamesList: HTMLUListElement = html.querySelector('#games');
+		expect(gamesList).withContext('games list').not.toBeNull();
+		const gameEntries: NodeListOf<HTMLLIElement> = gamesList.querySelectorAll('li');
+		expect(gameEntries.length).withContext('number of game entries').toBe(gamesOfScenario.length);
+		for (let i = 0; i < gameEntries.length; i++) {
+			const expectedGame: string = gamesOfScenario[i];
+			const entry: HTMLLIElement = gameEntries.item(i);
+			const link: HTMLAnchorElement = entry.querySelector('a');
+			expect(link).withContext('entry has link').not.toBeNull();
+			expect(link.textContent).withContext('entry link text contains game title').toContain(expectedGame);
+		}
+	};
+	it('can create [a]', () => {
+		canCreate(SCENARIO_A, GAMES_0);
+	});
+	it('can create [b]', () => {
+		canCreate(SCENARIO_B, GAMES_2);
+	});
+});

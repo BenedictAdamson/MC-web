@@ -39,6 +39,7 @@ import org.openqa.selenium.WebElement;
 @Immutable
 public final class ScenariosPage extends Page {
 
+   private static final By SCENARIO_LIST_LOCATOR = By.tagName("ul");
    private static final String PATH = "/scenario";
 
    /**
@@ -55,21 +56,29 @@ public final class ScenariosPage extends Page {
       super(homePage);
    }
 
+   private void assertHasHeadingSayingScenarios(final WebElement body) {
+      final var heading = assertHasElement(body, By.tagName("h2"));// guard
+      assertThat("Has a header saying \"Scenarios\"", heading.getText(),
+               containsString("Scenarios"));
+   }
+
    public void assertHasListOfScenarios() {
-      assertHasElementWithTag("ul");
+      assertHasListOfScenarios(getBody());
+   }
+
+   private void assertHasListOfScenarios(final WebElement body) {
+      assertHasElement(body, SCENARIO_LIST_LOCATOR);
    }
 
    @Override
-   public void assertInvariants() {
-      assertAll(() -> super.assertInvariants(),
-               () -> assertThat("Has a header saying \"Scenarios\"",
-                        assertHasElementWithTag("h2").getText(),
-                        containsString("Scenarios")),
-               () -> assertHasListOfScenarios());
+   protected void assertValidBody(final WebElement body) {
+      assertAll(() -> assertHasHeadingSayingScenarios(body),
+               () -> assertHasListOfScenarios(body));
    }
 
    private List<WebElement> findScenarioElements() {
-      return findElement(By.tagName("ul")).findElements(By.tagName("li"));
+      return getBody().findElement(SCENARIO_LIST_LOCATOR)
+               .findElements(By.tagName("li"));
    }
 
    public List<String> getScenarioTitles() {
@@ -93,7 +102,7 @@ public final class ScenariosPage extends Page {
       final var link = entry.findElement(By.tagName("a"));
       link.click();
       final var scenarioPage = new ScenarioPage(this, title);
-      scenarioPage.awaitIsCurrentPageOrErrorMessage();
+      scenarioPage.awaitIsReady();
       return scenarioPage;
    }
 }

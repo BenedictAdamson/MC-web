@@ -22,6 +22,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Objects;
 
@@ -29,6 +30,7 @@ import javax.annotation.concurrent.Immutable;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 /**
  * <p>
@@ -37,6 +39,8 @@ import org.openqa.selenium.WebDriver;
  */
 @Immutable
 public final class UsersPage extends Page {
+
+   private static final By USER_LIST_LOCATOR = By.tagName("ul");
 
    private static final String PATH = "/user";
 
@@ -70,32 +74,40 @@ public final class UsersPage extends Page {
       super(webDriver);
    }
 
+   private void assertHasHeadingSayingUsers(final WebElement body) {
+      final var heading = assertHasElement(body, By.tagName("h2"));
+      assertThat("Has a heading saying \"Users\"", heading.getText(),
+               containsString("Users"));
+   }
+
    public void assertHasListOfUsers() {
-      assertHasElementWithTag("ul");
+      assertHasListOfUsers(getBody());
+   }
+
+   private void assertHasListOfUsers(final WebElement body) {
+      assertHasElement(body, USER_LIST_LOCATOR);
    }
 
    public void assertHasNoAddUserLink() {
-      assertThat("No add-user link", findElements(ADD_USER_LINK_LOCATOR),
-               empty());
-   }
-
-   @Override
-   public void assertInvariants() {
-      final var element = assertHasElementWithTag("h2");
-      assertThat("Has a header saying \"Users\"", element.getText(),
-               containsString("Users"));
-      assertHasListOfUsers();
+      assertThat("No add-user link",
+               getBody().findElements(ADD_USER_LINK_LOCATOR), empty());
    }
 
    public void assertListOfUsersIncludes(final String name) {
       Objects.requireNonNull(name, "name");
-      final var list = assertHasElementWithTag("ul");
+      final var list = assertHasElement(getBody(), USER_LIST_LOCATOR);
       assertThat(list.getText(), containsString(name));
    }
 
    public void assertListOfUsersNotEmpty() {
-      final var list = assertHasElementWithTag("ul");
+      final var list = assertHasElement(getBody(), USER_LIST_LOCATOR);
       assertThat(list.findElements(By.tagName("li")), not(empty()));
+   }
+
+   @Override
+   protected void assertValidBody(final WebElement body) {
+      assertAll(() -> assertHasHeadingSayingUsers(body),
+               () -> assertHasListOfUsers(body));
    }
 
    @Override
@@ -107,12 +119,13 @@ public final class UsersPage extends Page {
    public void submitAddUserForm(final String user, final String password) {
       Objects.requireNonNull(user, "user");
       Objects.requireNonNull(password, "password");
-      requireIsCurrentPath();
+      requireIsReady();
 
-      findElement(ADD_USER_LINK_LOCATOR).click();
-      findElement(By.name("username")).sendKeys(user);
-      findElement(By.xpath("//input[@type='password']")).sendKeys(password);
-      findElement(By.xpath("//button[@type='submit']")).submit();
+      getBody().findElement(ADD_USER_LINK_LOCATOR).click();
+      getBody().findElement(By.name("username")).sendKeys(user);
+      getBody().findElement(By.xpath("//input[@type='password']"))
+               .sendKeys(password);
+      getBody().findElement(By.xpath("//button[@type='submit']")).submit();
    }
 
 }

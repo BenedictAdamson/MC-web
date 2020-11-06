@@ -29,9 +29,12 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
@@ -48,14 +51,16 @@ import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
 import uk.badamson.mc.McContainers.HttpServer;
+import uk.badamson.mc.presentation.HomePage;
+import uk.badamson.mc.presentation.Page;
 
 /**
  * <p>
  * Encapsulate access to an instance of MC, for Cucumber (BDD) testing.
  * </p>
  * <p>
- * Instances of this class are intended to be used as the lowest-level (core
- * part) of the <i>world</i> used for a BDD test scenario.
+ * Instances of this class are intended to be used as the <i>world</i> used for
+ * a BDD test scenario.
  * </p>
  * <p>
  * Construction of an instance of this class creates, but does not start, a
@@ -72,9 +77,9 @@ import uk.badamson.mc.McContainers.HttpServer;
  * too expensive.
  * </p>
  *
- * @see WorldCoreScenarioHook
+ * @see WorldScenarioHook
  */
-public final class WorldCore implements AutoCloseable {
+public final class World implements AutoCloseable {
 
    private static Optional<Throwable> createOutcomeException(
             final Scenario scenario) {
@@ -124,13 +129,15 @@ public final class WorldCore implements AutoCloseable {
 
    private URI localUrl;
 
+   private Page expectedPage;
+
    /**
     * @param failureRecordingDirectory
     *           The location of a directory in which to store files holding
     *           verbose information about failed test cases. Or {@code null} if
     *           no such records are to be made.
     */
-   public WorldCore(final Path failureRecordingDirectory) {
+   public World(final Path failureRecordingDirectory) {
       containers = new McContainers(failureRecordingDirectory);
    }
 
@@ -168,7 +175,7 @@ public final class WorldCore implements AutoCloseable {
       final var currentPath = new AtomicReference<String>();
       try {
          new WebDriverWait(webDriver, 17).until(driver -> {
-            currentPath.set(WorldCore.getPathOfUrl(driver.getCurrentUrl()));
+            currentPath.set(getPathOfUrl(driver.getCurrentUrl()));
             return expectedSuccessUrlPath.equals(currentPath.get())
                      || !driver.findElements(By.className("error")).isEmpty();
          });
@@ -221,6 +228,10 @@ public final class WorldCore implements AutoCloseable {
       containers.close();
    }
 
+   public Game.Identifier createGame(final UUID scenario) {
+      return containers.createGame(scenario);
+   }
+
    private void createUsers() {
       users.put(User.ADMINISTRATOR_USERNAME,
                new User(User.ADMINISTRATOR_USERNAME,
@@ -258,6 +269,41 @@ public final class WorldCore implements AutoCloseable {
 
    /**
     * <p>
+    * Get the current expected page, which is expected to be of a given class,
+    * with failure of that expectation being interpreted as a test failure.
+    * </p>
+    * <ul>
+    * <li>Not null</li>
+    * </ul>
+    *
+    * @param <PAGE>
+    *           The class of the expected page.
+    * @param clazz
+    *           The {@link Class} object of the class of the expected page.
+    * @return The current expected page.
+    * @throws NullPointerException
+    *            If {@code clazz} is null
+    * @throws AssertionFailedError
+    *            <ul>
+    *            <li>If there is no current expected page.</li>
+    *            <li>If the class of the current expected page is not the given
+    *            {@code clazz} class.</li>
+    *            </ul>
+    * @see #getExpectedPage(Class)
+    */
+   @Nonnull
+   public <PAGE extends Page> PAGE getAndAssertExpectedPage(
+            @Nonnull final Class<PAGE> clazz) {
+      try {
+         return getExpectedPage(clazz);
+      } catch (final IllegalStateException e) {
+         throw new AssertionFailedError(
+                  "Current expected page is a " + clazz.getTypeName(), e);
+      }
+   }
+
+   /**
+    * <p>
     * The {@linkplain URI#getPath() path} component of the
     * {@linkplain WebDriver#getCurrentUrl() current URL} of the browser.
     * </p>
@@ -271,6 +317,48 @@ public final class WorldCore implements AutoCloseable {
     */
    public String getCurrentUrlPath() {
       return getPathOfUrl(webDriver.getCurrentUrl());
+   }
+
+   /**
+    * <p>
+    * Get the current expected page, which is expected to be of a given class.
+    * </p>
+    * <ul>
+    * <li>Not null</li>
+    * </ul>
+    *
+    * @param <PAGE>
+    *           The class of the expected page.
+    * @param clazz
+    *           The {@link Class} object of the class of the expected page.
+    * @return The current expected page.
+    * @throws NullPointerException
+    *            If {@code clazz} is null
+    * @throws IllegalStateException
+    *            <ul>
+    *            <li>If there is no current expected page.</li>
+    *            <li>If the class of the current expected page is not the given
+    *            {@code clazz} class.</li>
+    *            </ul>
+    * @see #getAndAssertExpectedPage(Class)
+    */
+   @Nonnull
+   public <PAGE extends Page> PAGE getExpectedPage(
+            @Nonnull final Class<PAGE> clazz) {
+      Objects.requireNonNull(clazz, "clazz");
+      try {
+         return clazz.cast(expectedPage);
+      } catch (final ClassCastException e) {
+         throw new IllegalStateException(
+                  "Current expected page is not a " + clazz.getTypeName(), e);
+      }
+   }
+
+   public HomePage getHomePage() {
+      final var homePage = new HomePage(webDriver);
+      homePage.get();
+      expectedPage = homePage;
+      return homePage;
    }
 
    /**
@@ -308,6 +396,10 @@ public final class WorldCore implements AutoCloseable {
       } catch (IOException | NullPointerException e) {
          throw new IllegalStateException(e);
       }
+   }
+
+   public Stream<NamedUUID> getScenarios() {
+      return containers.getScenarios();
    }
 
    public User getUnknownUser() {
@@ -399,6 +491,20 @@ public final class WorldCore implements AutoCloseable {
          close();
          throw e;
       }
+   }
+
+   /**
+    * <p>
+    * Change the current {@linkplain #getExpectedPage(Class) expected page}
+    * </p>
+    *
+    * @param expectedPage
+    *           The new expected page.
+    * @throws NullPointerException
+    *            If {@code expectedPage} is null
+    */
+   public void setExpectedPage(@Nonnull final Page expectedPage) {
+      this.expectedPage = Objects.requireNonNull(expectedPage, "expectedPage");
    }
 
    /**

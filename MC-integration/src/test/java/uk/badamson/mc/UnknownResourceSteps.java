@@ -43,13 +43,13 @@ public class UnknownResourceSteps extends Steps {
    private int httpResponseCode;
 
    @Autowired
-   public UnknownResourceSteps(@Nonnull final WorldCore worldCore) {
-      super(worldCore);
+   public UnknownResourceSteps(@Nonnull final World world) {
+      super(world);
    }
 
    private void doHttpRequest(final String method, final String path) {
-      worldCore.setUrlPath(path);
-      httpResponseCode = worldCore.getHttpResponseCode(method);
+      world.setUrlPath(path);
+      httpResponseCode = world.getHttpResponseCode(method);
    }
 
    @Then("MC replies with Not Found or Forbidden or Method Not Allowed")

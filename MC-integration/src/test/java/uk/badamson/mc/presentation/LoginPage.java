@@ -48,11 +48,6 @@ public final class LoginPage extends Page {
       super(page);
    }
 
-   @Override
-   public void assertInvariants() {
-      super.assertInvariants();
-   }
-
    public void assertRejectedLogin() {
       assertInvariants();// guard
       assertHasErrorMessage();
@@ -67,10 +62,12 @@ public final class LoginPage extends Page {
    public void submitLoginForm(final String user, final String password) {
       Objects.requireNonNull(user, "user");
       Objects.requireNonNull(password, "password");
-      requireIsCurrentPath();
+      requireIsReady();
 
-      findElement(By.name("username")).sendKeys(user);
-      findElement(By.xpath("//input[@type='password']")).sendKeys(password);
-      findElement(By.xpath("//button[@type='submit']")).submit();
+      final var body = getBody();
+      body.findElement(By.name("username")).sendKeys(user);
+      body.findElement(By.xpath("//input[@type='password']"))
+               .sendKeys(password);
+      body.findElement(By.xpath("//button[@type='submit']")).submit();
    }
 }

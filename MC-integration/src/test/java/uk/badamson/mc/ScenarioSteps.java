@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import uk.badamson.mc.presentation.HomePage;
 import uk.badamson.mc.presentation.ScenarioPage;
 import uk.badamson.mc.presentation.ScenariosPage;
 
@@ -36,15 +35,8 @@ import uk.badamson.mc.presentation.ScenariosPage;
 public class ScenarioSteps extends Steps {
 
    @Autowired
-   public ScenarioSteps(@Nonnull final WorldCore worldCore) {
-      super(worldCore);
-   }
-
-   private HomePage getHomePage() {
-      final var homePage = new HomePage(worldCore.getWebDriver());
-      homePage.get();
-      expectedPage = homePage;
-      return homePage;
+   public ScenarioSteps(@Nonnull final World world) {
+      super(world);
    }
 
    @When("getting the scenarios")
@@ -54,31 +46,34 @@ public class ScenarioSteps extends Steps {
 
    @When("MC serves the scenario page")
    public void mc_serves_scenario_page() {
-      final var scenarioPage = (ScenarioPage) expectedPage;
-      scenarioPage.assertInvariants();
+      world.getExpectedPage(ScenarioPage.class).assertInvariants();
    }
 
    @Then("MC serves the scenarios page")
    public void mc_serves_scenarios_page() {
-      final var scenariosPage = (ScenariosPage) expectedPage;
-      scenariosPage.assertInvariants();
+      world.getAndAssertExpectedPage(ScenariosPage.class).assertInvariants();
    }
 
    @When("Navigate to one scenario")
    public void navigate_to_one_scenario() {
-      final var scenariosPage = (ScenariosPage) expectedPage;
+      final var scenariosPage = world.getExpectedPage(ScenariosPage.class);
       final var index = 0;
-      expectedPage = scenariosPage.navigateToScenario(index);
+      world.setExpectedPage(scenariosPage.navigateToScenario(index));
    }
 
    private void navigateToScenariosPage() {
-      expectedPage = getHomePage().navigateToScenariosPage();
+      world.setExpectedPage(world.getHomePage().navigateToScenariosPage());
    }
 
    @Then("the response is a list of scenarios")
    public void response_is_list_of_scenarios() {
-      final var scenariosPage = (ScenariosPage) expectedPage;
-      scenariosPage.assertHasListOfScenarios();
+      world.getAndAssertExpectedPage(ScenariosPage.class)
+               .assertHasListOfScenarios();
+   }
+
+   @Then("The scenario page includes the list of games of that scenario")
+   public void scenario_page_includes_list_of_games_of_scenario() {
+      world.getAndAssertExpectedPage(ScenarioPage.class).assertHasListOfGames();
    }
 
    @Then("The scenario page includes the scenario description")
