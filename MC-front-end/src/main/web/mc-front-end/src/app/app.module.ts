@@ -11,6 +11,7 @@ import { WINDOW_PROVIDER } from './window.provider';
 import { AddUserComponent } from './add-user/add-user.component';
 import { AppComponent } from './app.component';
 import { GameComponent } from './game/game.component';
+import { GamesComponent } from './games/games.component';
 import { LoginComponent } from './login/login.component';
 import { ScenarioComponent } from './scenario/scenario.component';
 import { ScenariosComponent } from './scenarios/scenarios.component';
@@ -32,13 +33,14 @@ import { SelfComponent } from './self/self.component';
 		AddUserComponent,
 		AppComponent,
 		HomeComponent,
+		GameComponent,
+		GamesComponent,
 		LoginComponent,
 		ScenarioComponent,
 		ScenariosComponent,
 		SelfComponent,
 		UsersComponent,
-		UserComponent,
-		GameComponent
+		UserComponent
 	],
 	providers: [
 		WINDOW_PROVIDER

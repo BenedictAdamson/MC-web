@@ -4,14 +4,14 @@ import { v4 as uuid } from 'uuid';
 
 import { GameService } from '../game.service';
 import { Scenario } from '../scenario';
-import { ScenarioComponent } from './scenario.component';
+import { GamesComponent } from './games.component';
 import { ScenarioService } from '../scenario.service';
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-describe('ScenarioComponent', () => {
-	let component: ScenarioComponent;
-	let fixture: ComponentFixture<ScenarioComponent>;
+describe('GamesComponent', () => {
+	let component: GamesComponent;
+	let fixture: ComponentFixture<GamesComponent>;
 
 	const IDENTIFIER_A: uuid = uuid();
 	const IDENTIFIER_B: uuid = uuid();
@@ -28,7 +28,7 @@ describe('ScenarioComponent', () => {
 		gameServiceStub.getGamesOfScenario.and.returnValue(of(gamesOfScenario));
 
 		TestBed.configureTestingModule({
-			declarations: [ScenarioComponent],
+			declarations: [GamesComponent],
 			providers: [{
 				provide: ActivatedRoute,
 				useValue: {
@@ -42,7 +42,7 @@ describe('ScenarioComponent', () => {
 			{ provide: ScenarioService, useValue: scenarioServiceStub }]
 		});
 
-		fixture = TestBed.createComponent(ScenarioComponent);
+		fixture = TestBed.createComponent(GamesComponent);
 		component = fixture.componentInstance;
 		fixture.detectChanges();
 	};

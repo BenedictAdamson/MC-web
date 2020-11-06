@@ -7,10 +7,10 @@ import { ScenarioService } from '../scenario.service';
 
 @Component({
 	selector: 'app-scenario',
-	templateUrl: './scenario.component.html',
-	styleUrls: ['./scenario.component.css']
+	templateUrl: './games.component.html',
+	styleUrls: ['./games.component.css']
 })
-export class ScenarioComponent implements OnInit {
+export class GamesComponent implements OnInit {
 
 	scenario: Scenario;
 	games: string[];
