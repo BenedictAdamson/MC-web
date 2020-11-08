@@ -16,5 +16,8 @@
 	</logger>
 	<logger name="org.springframework.test" level="WARN">
 		<appender-ref ref="STDOUT" />
+	<logger name="org.testcontainers" level="WARN">
+		<appender-ref ref="STDOUT" />
+	</logger>
 	</logger>
 </configuration>
