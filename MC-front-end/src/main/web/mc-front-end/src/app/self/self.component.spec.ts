@@ -1,6 +1,8 @@
+import { HttpClient } from '@angular/common/http';
+
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { HttpClient } from '@angular/common/http';
+import { RouterTestingModule } from '@angular/router/testing';
 
 import { SelfComponent } from './self.component';
 import { SelfService } from '../self.service';
@@ -22,7 +24,7 @@ describe('SelfComponent', () => {
 
 	beforeEach(waitForAsync(() => {
 		TestBed.configureTestingModule({
-			imports: [HttpClientTestingModule],
+			imports: [HttpClientTestingModule, RouterTestingModule],
 			providers: [
 				{ provide: SelfService, useClass: SelfService }
 			],

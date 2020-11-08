@@ -8,6 +8,7 @@ import { ScenarioComponent } from './scenario.component';
 import { ScenarioService } from '../scenario.service';
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('ScenarioComponent', () => {
 	let component: ScenarioComponent;
@@ -28,6 +29,7 @@ describe('ScenarioComponent', () => {
 		gameServiceStub.getGamesOfScenario.and.returnValue(of(gamesOfScenario));
 
 		TestBed.configureTestingModule({
+			imports: [RouterTestingModule],
 			declarations: [ScenarioComponent],
 			providers: [{
 				provide: ActivatedRoute,

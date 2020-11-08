@@ -7,6 +7,7 @@ import { GameService } from '../game.service';
 import { GamesComponent } from './games.component';
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('GamesComponent', () => {
 	let component: GamesComponent;
@@ -22,6 +23,7 @@ describe('GamesComponent', () => {
 		gameServiceStub.getGamesOfScenario.and.returnValue(of(gamesOfScenario));
 
 		TestBed.configureTestingModule({
+			imports: [RouterTestingModule],
 			declarations: [GamesComponent],
 			providers: [{
 				provide: ActivatedRoute,
@@ -39,7 +41,7 @@ describe('GamesComponent', () => {
 		component = fixture.componentInstance;
 		fixture.detectChanges();
 	};
-	const canCreate = function (scenario: uuid, gamesOfScenario: string[])  {
+	const canCreate = function(scenario: uuid, gamesOfScenario: string[]) {
 		setUp(scenario, gamesOfScenario);
 
 		expect(component).toBeTruthy();
