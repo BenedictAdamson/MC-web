@@ -1,6 +1,7 @@
 import { tap } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 import { SelfService } from '../self.service';
 
