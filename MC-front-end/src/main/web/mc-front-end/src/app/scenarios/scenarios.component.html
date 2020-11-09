@@ -1,5 +1,7 @@
-<h2>Scenarios</h2>
-
+<section>
+<header>
+    <h2>Scenarios</h2>
+</header>
 <ul class="scenarios">
     <li *ngFor="let scenario of scenarios">
         <a [routerLink]="['/scenario/',scenario.id]">
@@ -7,3 +9,4 @@
         </a>
     </li>
 </ul>
+</section>
