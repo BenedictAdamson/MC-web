@@ -77,6 +77,6 @@ describe('UsersComponent', () => {
 		const element: HTMLElement = fixture.nativeElement;
 		const link = element.querySelector('a[id="add-user"]');
 		expect(link).not.toBeNull();
-		expect(link.textContent).toContain('add user');
+		expect(link.textContent).toContain('Add user');
 	});
 });

@@ -1,7 +1,7 @@
-<div class="self">
+<section class="self">
 	<p *ngIf="authenticated$ | async; else selfLogin">Logged in as
 		{{username}}</p>
 	<ng-template #selfLogin>
 	<a id="login" routerLink="/login">login</a>
 	</ng-template>
-</div>
+</section>

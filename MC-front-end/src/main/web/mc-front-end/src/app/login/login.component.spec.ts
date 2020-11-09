@@ -1,7 +1,9 @@
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { LoginComponent } from './login.component';
 import { SelfService } from '../self.service';
@@ -21,7 +23,7 @@ describe('LoginComponent', () => {
 		routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
 		routerSpy.navigateByUrl.and.returnValue(null);
 		TestBed.configureTestingModule({
-			imports: [HttpClientTestingModule],
+			imports: [FormsModule, HttpClientTestingModule],
 			providers: [
 				{ provide: Router, useValue: routerSpy },
 				{ provide: SelfService, useClass: SelfService }

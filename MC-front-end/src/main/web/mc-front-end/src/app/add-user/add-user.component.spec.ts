@@ -1,5 +1,8 @@
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
+
+import { FormsModule } from '@angular/forms';
+
 import { ComponentFixture, TestBed, waitForAsync, fakeAsync, tick } from '@angular/core/testing';
 
 import { AddUserComponent } from './add-user.component';
@@ -42,7 +45,7 @@ describe('AddUserComponent', () => {
 		routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
 		routerSpy.navigateByUrl.and.returnValue(null);
 		TestBed.configureTestingModule({
-			imports: [],
+			imports: [FormsModule],
 			providers: [
 				{ provide: Router, useValue: routerSpy },
 				{ provide: UserService, useClass: MockUserService }

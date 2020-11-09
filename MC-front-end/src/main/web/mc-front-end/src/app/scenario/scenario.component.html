@@ -1,10 +1,7 @@
-<h2>{{scenario.title}}</h2>
+<section>
+<header>
+   <h2>Scenario: {{scenario.title}}</h2>
+</header>
 <p>{{scenario.description}}</p>
-<h3>Games of this scenario</h3>
-<ul id="games">
-    <li *ngFor="let game of games">
-        <a [routerLink]="['/scenario',scenario.identifier,'game',game]">
-            {{game}}
-        </a>
-    </li>
-</ul>
+<router-outlet></router-outlet>
+</section>

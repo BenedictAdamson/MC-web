@@ -61,7 +61,8 @@ public class UserSteps extends Steps {
 
    @When("adding a user named {string} with  password {string}")
    public void adding_a_user(final String user, final String password) {
-      navigateToUsersPage().submitAddUserForm(user, password);
+      world.setExpectedPage(navigateToUsersPage().navigateToAddUserPage()
+               .submitForm(user, password));
    }
 
    @Then("can get the list of users")

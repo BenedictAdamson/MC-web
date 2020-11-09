@@ -68,7 +68,7 @@ export class SelfService {
 
 	private handleUserDetailsHttpError() {
 		return (error: any): Observable<User> => {
-			console.error(error); // log to console instead
+			// Do not log errors, all are equivalent to authentication failure.
 			return of(null as User);
 		};
 	}
