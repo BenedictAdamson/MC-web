@@ -1,7 +1,16 @@
-<h2>{{user.username}}</h2>
-<p>Authorities:</p>
+<article>
+<header>
+    <h2>{{user.username}}</h2>
+</header>
+
+<section>
+<header>
+    <h3>Authorities:</h3>
+</header>
 <ul class="authorities">
     <li *ngFor="let authority of user.authorities">
         {{authority}}
     </li>
 </ul>
+</section>
+</article>
