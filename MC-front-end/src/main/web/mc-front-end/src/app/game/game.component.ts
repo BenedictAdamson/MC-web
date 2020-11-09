@@ -1,13 +1,11 @@
-import { v4 as uuid, parse as parseUuid } from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
 
 import { Game } from '../game'
 import { GameIdentifier } from '../game-identifier'
 import { GameService } from '../game.service';
-import { Scenario } from '../scenario';
-import { ScenarioService } from '../scenario.service';
 
 @Component({
 	selector: 'app-game',
@@ -16,27 +14,26 @@ import { ScenarioService } from '../scenario.service';
 })
 export class GameComponent implements OnInit {
 
-	scenario: Scenario;
 	game: Game;
 
 	constructor(
 		private route: ActivatedRoute,
-		private scenarioService: ScenarioService,
 		private gameService: GameService
 	) { }
 
 	ngOnInit(): void {
-		const scenario: uuid = this.route.snapshot.paramMap.get('scenario');
-		const created: string = this.route.snapshot.paramMap.get('created');
-		const gameId: GameIdentifier = { scenario: scenario, created: created };
-		this.getGame(gameId);
-		this.getScenario(scenario);
+		this.getGame(this.getGameIdentifier());
 	}
 
 
-	private getScenario(id: uuid): void {
-		this.scenarioService.getScenario(id)
-			.subscribe(scenario => this.scenario = scenario);
+	private getGameIdentifier(): GameIdentifier {
+		const route: ActivatedRouteSnapshot = this.route.snapshot;
+		const scenario: uuid = route.parent.paramMap.get('scenario');
+		const created: string = route.paramMap.get('created');
+		if (scenario == null) throw new Error('null scenario');
+		if (created == null) throw new Error('null created');
+		const gameId: GameIdentifier = { scenario: scenario, created: created };
+		return gameId;
 	}
 
 	private getGame(id: GameIdentifier): void {

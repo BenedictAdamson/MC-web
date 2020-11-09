@@ -34,9 +34,9 @@ describe('ScenarioComponent', () => {
 			providers: [{
 				provide: ActivatedRoute,
 				useValue: {
-					params: of({ id: testScenario.identifier }),
+					params: of({ scenario: testScenario.identifier }),
 					snapshot: {
-						paramMap: convertToParamMap({ id: testScenario.identifier })
+						paramMap: convertToParamMap({ scenario: testScenario.identifier })
 					}
 				}
 			},
@@ -57,19 +57,8 @@ describe('ScenarioComponent', () => {
 
 		const html: HTMLElement = fixture.nativeElement;
 		const displayText: string = html.innerText;
-		const gamesList: HTMLUListElement = html.querySelector('#games');
 		expect(displayText.includes(testScenario.title)).withContext("displayed text includes title").toBeTrue();
 		expect(displayText.includes(testScenario.description)).withContext("displayed text includes description").toBeTrue();
-		expect(gamesList).withContext('games list').not.toBeNull();
-		const gameEntries: NodeListOf<HTMLLIElement> = gamesList.querySelectorAll('li');
-		expect(gameEntries.length).withContext('number of game entries').toBe(gamesOfScenario.length);
-		for (let i = 0; i < gameEntries.length; i++) {
-			const expectedGame: string = gamesOfScenario[i];
-			const entry: HTMLLIElement = gameEntries.item(i);
-			const link: HTMLAnchorElement = entry.querySelector('a');
-			expect(link).withContext('entry has link').not.toBeNull();
-			expect(link.textContent).withContext('entry link text contains game title').toContain(expectedGame);
-		}
 	};
 	it('can create [a]', () => {
 		canCreate(SCENARIO_A, GAMES_0);

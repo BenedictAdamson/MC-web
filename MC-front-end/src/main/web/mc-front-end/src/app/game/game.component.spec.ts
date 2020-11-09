@@ -44,7 +44,10 @@ describe('GameComponent', () => {
 				useValue: {
 					params: of({ scenario: game.identifier.scenario, created: game.identifier.created }),
 					snapshot: {
-						paramMap: convertToParamMap({ scenario: game.identifier.scenario, created: game.identifier.created })
+						parent: {
+							paramMap: convertToParamMap({ scenario: game.identifier.scenario })
+						},
+						paramMap: convertToParamMap({ created: game.identifier.created })
 					}
 				}
 			},
@@ -62,13 +65,10 @@ describe('GameComponent', () => {
 		setUp(scenario, game);
 
 		expect(component).toBeTruthy();
-		expect(component.scenario).withContext('scenario').toBe(scenario);
 		expect(component.game).withContext('game').toBe(game);
 
 		const html: HTMLElement = fixture.nativeElement;
 		const displayText: string = html.innerText;
-		expect(displayText.includes(scenario.title)).withContext("The game page includes the scenario title").toBeTrue();
-		expect(displayText.includes(scenario.description)).withContext("The game page includes the scenario description").toBeTrue();
 		expect(displayText.includes(game.identifier.created)).withContext("The game page includes the date and time that the game was set up").toBeTrue();
 	};
 

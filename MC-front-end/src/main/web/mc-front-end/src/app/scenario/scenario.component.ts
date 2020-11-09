@@ -22,7 +22,7 @@ export class ScenarioComponent implements OnInit {
 	) { }
 
 	ngOnInit() {
-		const id: string = this.route.snapshot.paramMap.get('id');
+		const id: string = this.route.snapshot.paramMap.get('scenario');
 		this.getScenario(id);
 		this.getGames(id);
 	}

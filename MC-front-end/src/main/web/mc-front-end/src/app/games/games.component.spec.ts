@@ -28,9 +28,11 @@ describe('GamesComponent', () => {
 			providers: [{
 				provide: ActivatedRoute,
 				useValue: {
-					params: of({ id: scenario }),
+					params: of({ scenario: scenario }),
 					snapshot: {
-						paramMap: convertToParamMap({ id: scenario })
+						parent: {
+							paramMap: convertToParamMap({ scenario: scenario })
+						}
 					}
 				}
 			},
