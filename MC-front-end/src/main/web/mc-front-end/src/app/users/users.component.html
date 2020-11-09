@@ -1,6 +1,10 @@
-<h2>Users</h2>
-
-<a id="add-user" routerLink="/user?add" *ngIf="mayManageUsers$ | async">add user</a>
+<section>
+<header>
+    <h2>Users</h2>
+</header>
+<nav>
+    <a id="add-user" routerLink="/user?add" *ngIf="mayManageUsers$ | async">Add user</a>
+</nav>
 	
 <ul class="users">
     <li *ngFor="let user of users">
@@ -9,3 +13,4 @@
         </a>
     </li>
 </ul>
+<section>
