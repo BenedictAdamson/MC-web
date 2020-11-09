@@ -116,16 +116,13 @@ public final class UsersPage extends Page {
       return PATH.equals(path);
    }
 
-   public void submitAddUserForm(final String user, final String password) {
-      Objects.requireNonNull(user, "user");
-      Objects.requireNonNull(password, "password");
+   public AddUserPage navigateToAddUserPage() {
       requireIsReady();
-
-      getBody().findElement(ADD_USER_LINK_LOCATOR).click();
-      getBody().findElement(By.name("username")).sendKeys(user);
-      getBody().findElement(By.xpath("//input[@type='password']"))
-               .sendKeys(password);
-      getBody().findElement(By.xpath("//button[@type='submit']")).submit();
+      final var link = getBody().findElement(ADD_USER_LINK_LOCATOR);
+      link.click();
+      final var addUserPage = new AddUserPage(this);
+      addUserPage.awaitIsReady();
+      return addUserPage;
    }
 
 }
