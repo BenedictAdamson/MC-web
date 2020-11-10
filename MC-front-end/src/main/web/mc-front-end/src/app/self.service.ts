@@ -128,12 +128,40 @@ export class SelfService {
 	logout(): Observable<null> {
 		return this.endServerSession().pipe(
 			flatMap(() => {
-				this.username_ = null;
-				this.password_ = null;
-				this.authoritiesRS$.next(null);
+				this.clear();
 				return of(null);
 			}
 			));
+	}
+
+
+	/**
+     * @description
+     * If the authentication system maintains session information on the server,
+     * update the authentication information (the credentials of the current user)
+     * to be the information of the current session.
+     *
+	 * The method provides a value indicating whether authentication was successful.
+     * That is, whether there is a current session.
+	 * That indirectly makes use of an HTTP request, which is a cold Observable,
+	 * so this is a cold Observable too.
+	 * That is, the expensive HTTP request will not be made until something subscribes to this Observable.
+	 *
+	 * The method updates the #username and #password attributes
+     * and the values of the #authorities$ and #authenticated$ Observables.
+     *
+     * Currently the authentication system does not maintain session inforamtion,
+     * so on this method is equivalent to the #logout() method.
+	 */
+	checkForCurrentAuthentication(): Observable<null> {
+		this.clear();
+		return of(null);
+	}
+
+	private clear(): void {
+		this.username_ = null;
+		this.password_ = null;
+		this.authoritiesRS$.next(null);
 	}
 
 	private endServerSession(): Observable<null> {

@@ -193,4 +193,33 @@ describe('SelfService', () => {
 		});
 		mockHttpAuthorizationSuccess(userDetails);
 	});
+
+
+	const checkForCurrentAuthentication = function(done: any) {
+		service.checkForCurrentAuthentication().subscribe({
+			next: () => { },
+			error: (err) => { fail(err); done() },
+			complete: () => {
+				assertInvariants(service);
+				assertNotAuthenticated();// at present do not have sessions
+				done();
+			}
+		});
+	}
+
+	it('handles check for current authentication from the initial state', (done) => {
+		checkForCurrentAuthentication(done);
+	});
+
+	it('handles check for current authentication while authenticated', (done) => {
+		const userDetails: User = USER_A;
+		service.authenticate(userDetails.username, userDetails.password).subscribe({
+			next: () => { },
+			error: (err) => { fail(err); done() },
+			complete: () => {
+				checkForCurrentAuthentication(done);
+			}
+		});
+		mockHttpAuthorizationSuccess(userDetails);
+	});
 });
