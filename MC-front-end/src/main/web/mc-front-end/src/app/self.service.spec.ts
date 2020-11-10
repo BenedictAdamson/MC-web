@@ -222,4 +222,40 @@ describe('SelfService', () => {
 		});
 		mockHttpAuthorizationSuccess(userDetails);
 	});
+
+
+
+	const testServerAmendingUsername = function(done: any, username: string, password: string, serverUserDetails: User) {
+		const expectedResultingUserDetails: User = {
+			username: serverUserDetails.username,
+			password: password,// the server will probably resturn null or the encrypted password
+			authorities: serverUserDetails.authorities
+		};
+		service.authenticate(username, password).subscribe({
+			next: (success) => {
+				expect(success).withContext('success').toBeTrue();
+			},
+			error: (err) => { fail(err); done() },
+			complete: () => {
+				assertInvariants(service);
+				assertAuthenticated(expectedResultingUserDetails);
+				done()
+			}
+		});
+		mockHttpAuthorizationSuccess(serverUserDetails);
+	};
+
+	it('handles server amending user name [A]', (done) => {
+		const username: string = 'benedict';
+		const password: string = 'letmein';
+		const serverUserDetails: User = { username: 'Benedict', password: null, authorities: ['ROLE_ADMIN'] };
+		testServerAmendingUsername(done, username, password, serverUserDetails);
+	});
+
+	it('handles server amending user name [B]', (done) => {
+		const username: string = 'user1234';
+		const password: string = 'password123';
+		const serverUserDetails: User = { username: 'Allan', password: '0123456789', authorities: [] };
+		testServerAmendingUsername(done, username, password, serverUserDetails);
+	});
 });

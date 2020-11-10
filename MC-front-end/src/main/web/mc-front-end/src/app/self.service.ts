@@ -85,7 +85,7 @@ export class SelfService {
 	}
 
 	private processResponse(username: string, password: string, details: User): boolean {
-		this.username_ = username;
+		this.username_ = details ? details.username : username;
 		this.password_ = password;
 		var authorities: string[] = details ? details.authorities : null;
 		this.authoritiesRS$.next(authorities);
@@ -102,10 +102,14 @@ export class SelfService {
 	 * so this is a cold Observable too.
 	 * That is, the expensive HTTP request will not be made until something subscribes to this Observable.
 	 *
-	 * Iff the authentication is sucessful, #authenticated$ will provide true.
-	 * The method however updates the #username and #password attributes even if authentication fails.
+	 * Iff the authentication is sucessful, {@link authenticated$} will provide true.
+	 * The method however updates the {@link username} and {@link password} attributes even if authentication fails.
 	 * The #authorities$ Observable will provide the authorities of the authenticated user,
 	 * if authentication is successful.
+     *
+     * The server may indicate that the user should use a different, canonical username,
+     * in which case the method sets the {@link username} attribute to that canonical username,
+     * rather than to the provided username.
 	 */
 	authenticate(username: string, password: string): Observable<boolean> {
 		return defer(() =>
