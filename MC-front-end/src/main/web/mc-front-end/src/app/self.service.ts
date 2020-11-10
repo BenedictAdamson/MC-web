@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, ReplaySubject, defer, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { map } from 'rxjs/operators';
+import { flatMap, map } from 'rxjs/operators';
 
 import { User } from './user';
 
@@ -113,6 +113,31 @@ export class SelfService {
 				map(ud => this.processResponse(username, password, ud))
 			)
 		);
+	}
+
+	/**
+	 * Clear the credentials of the current user.
+     *
+     * If the authentication system maintains session information on the server,
+     * this also ends the session. This method therefore may contact the server.
+     * It returns an Observable that indicates when communication with the server has completed.
+     *
+     * On competion of the returned Observable, the #username and #password of this sevice are null,
+     * and #authorities$ provides an empty array of autheorities.
+	 */
+	logout(): Observable<null> {
+		return this.endServerSession().pipe(
+			flatMap(() => {
+				this.username_ = null;
+				this.password_ = null;
+				this.authoritiesRS$.next(null);
+				return of(null);
+			}
+			));
+	}
+
+	private endServerSession(): Observable<null> {
+		return of(null);// at present, have no server sessions
 	}
 
     /**

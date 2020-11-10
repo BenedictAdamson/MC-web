@@ -31,9 +31,9 @@ describe('SelfService', () => {
 	let assertInvariants: CallableFunction = (s: SelfService) => {
 		var authenticated: boolean = getAuthenticated(s);
 		var authorities: string[] = getAuthorities(s);
-		expect(authenticated && s.username == null).toEqual(false, 'Not authenticated if username is null');
-		expect(authenticated && s.password == null).toEqual(false, 'Not authenticated if password is null');
-		expect(!authenticated && 0 < authorities.length).toEqual(false, 'A user that has not been authenticated has no authorities');
+		expect(authenticated && s.username == null).withContext('Not authenticated if username is null').toEqual(false);
+		expect(authenticated && s.password == null).withContext('Not authenticated if password is null').toEqual(false);
+		expect(!authenticated && 0 < authorities.length).withContext('A user that has not been authenticated has no authorities').toEqual(false);
 	};
 
 	const USER_A: User = { username: 'Administrator', password: 'letmein', authorities: ['ROLE_ADMIN'] };
@@ -60,12 +60,10 @@ describe('SelfService', () => {
 		service = new SelfService(httpClient);
 	});
 
-	it('should be created with initial state', () => {
+	it('constructs the initial state', () => {
 		expect(service).toBeTruthy();
 		assertInvariants(service);
-		expect(service.username).toBe(null, 'null username');
-		expect(service.password).toBe(null, 'null password');
-		expect(getAuthenticated(service)).toBe(false, 'not authenticated');
+		assertNotAuthenticated();
 	});
 
 	let mockHttpAuthorizationFailure = () => {
@@ -76,7 +74,7 @@ describe('SelfService', () => {
 		httpTestingController.verify();
 	};
 
-	it('should request server for authentication', (done) => {
+	it('contacts server for authentication', (done) => {
 		service.authenticate("user", "password").subscribe({
 			next: () => { },
 			error: (err) => { fail(err); done() },
@@ -106,11 +104,11 @@ describe('SelfService', () => {
 		mockHttpAuthorizationFailure();
 	};
 
-	it('should handle authentication failure [A]', (done) => {
+	it('handles authentication failure [A]', (done) => {
 		testAuthenticationFailure(done, USER_A.username, USER_A.password);
 	});
 
-	it('should handle authentication failure [B]', (done) => {
+	it('handles authentication failure [B]', (done) => {
 		testAuthenticationFailure(done, USER_B.username, USER_B.password);
 	});
 
@@ -122,13 +120,22 @@ describe('SelfService', () => {
 		httpTestingController.verify();
 	};
 
-	let assertAuthenticated = function(userDetails: User) {
+	const assertAuthenticated = function(userDetails: User) {
 		var authenticated: boolean = getAuthenticated(service);
 		var authorities: string[] = getAuthorities(service);
 		expect(service.username).toEqual(userDetails.username, 'username');
 		expect(service.password).toEqual(userDetails.password, 'password');
 		expect(authorities).toEqual(userDetails.authorities, 'authorities');
 		expect(authenticated).toEqual(true, 'authenticated');
+	}
+
+	const assertNotAuthenticated = function() {
+		var authenticated: boolean = getAuthenticated(service);
+		var authorities: string[] = getAuthorities(service);
+		expect(service.username).withContext('username').toBeNull();
+		expect(service.password).withContext('password').toBeNull();
+		expect(authorities).withContext('authorities').toEqual([]);
+		expect(authenticated).withContext('authenticated').toEqual(false);
 	}
 
 
@@ -149,11 +156,41 @@ describe('SelfService', () => {
 		mockHttpAuthorizationSuccess(userDetails);
 	};
 
-	it('should handle authentication success [A]', (done) => {
+	it('handles authentication success [A]', (done) => {
 		testAuthenticationSuccess(done, USER_A);
 	});
 
-	it('should handle authentication success [B]', (done) => {
+	it('handles authentication success [B]', (done) => {
 		testAuthenticationSuccess(done, USER_B);
+	});
+
+	const testLogout = function(done: any) {
+		service.logout().subscribe({
+			next: () => {
+				assertInvariants(service);
+			},
+			error: (err) => { fail(err); done() },
+			complete: () => {
+				assertInvariants(service);
+				assertNotAuthenticated();
+				done()
+			}
+		});
+	}
+
+	it('handles logout from the initial state', (done) => {
+		testLogout(done);
+	});
+
+	it('handles logout while authenticated', (done) => {
+		const userDetails: User = USER_A;
+		service.authenticate(userDetails.username, userDetails.password).subscribe({
+			next: () => { },
+			error: (err) => { fail(err); done() },
+			complete: () => {
+				testLogout(done);
+			}
+		});
+		mockHttpAuthorizationSuccess(userDetails);
 	});
 });
