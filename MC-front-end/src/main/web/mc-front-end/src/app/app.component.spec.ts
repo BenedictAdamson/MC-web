@@ -1,3 +1,5 @@
+import { of } from 'rxjs';
+
 import { TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
@@ -5,13 +7,15 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { SelfComponent } from './self/self.component';
+import { SelfService } from './self.service';
 
 describe('AppComponent', () => {
 
 	beforeEach(waitForAsync(() => {
+		const selfServiceStub = jasmine.createSpyObj('SelfService', ['checkForCurrentAuthentication']);
+		selfServiceStub.checkForCurrentAuthentication.and.returnValue(of(null));
+
 		TestBed.configureTestingModule({
-			providers: [
-			],
 			declarations: [
 				AppComponent, SelfComponent
 			],
@@ -19,7 +23,8 @@ describe('AppComponent', () => {
 				RouterTestingModule.withRoutes(
 					[{ path: '', component: HomeComponent }]
 				)
-			]
+			],
+			providers: [{ provide: SelfService, useValue: selfServiceStub }]
 		}).compileComponents();
 	}));
 
