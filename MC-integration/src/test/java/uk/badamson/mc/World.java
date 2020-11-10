@@ -207,6 +207,11 @@ public final class World implements AutoCloseable {
          throw new IllegalStateException("Not start()-ed", e);
       }
       containers.beforeTest(createTestDescription(scenario));
+      /*
+       * The previous test might have left us deep in the page hierarchy, so
+       * reset to the top location.
+       */
+      getHomePage();
    }
 
    /**
