@@ -154,8 +154,12 @@ export class SelfService {
      * so on this method is equivalent to the #logout() method.
 	 */
 	checkForCurrentAuthentication(): Observable<null> {
-		this.clear();
-		return of(null);
+		return of(null).pipe(
+			flatMap(() => {
+				this.clear();
+				return of(null);
+			}
+			));
 	}
 
 	private clear(): void {
