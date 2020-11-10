@@ -32,7 +32,6 @@ describe('SelfService', () => {
 		var authenticated: boolean = getAuthenticated(s);
 		var authorities: string[] = getAuthorities(s);
 		expect(authenticated && s.username == null).withContext('Not authenticated if username is null').toEqual(false);
-		expect(authenticated && s.password == null).withContext('Not authenticated if password is null').toEqual(false);
 		expect(!authenticated && 0 < authorities.length).withContext('A user that has not been authenticated has no authorities').toEqual(false);
 	};
 
@@ -66,10 +65,10 @@ describe('SelfService', () => {
 		assertNotAuthenticated();
 	});
 
-	let mockHttpAuthorizationFailure = () => {
+	const mockHttpAuthorizationFailure = function(expectAuthorizationHeader: boolean) {
 		const request = httpTestingController.expectOne('/api/self');
 		expect(request.request.method).toEqual('GET');
-		expect(request.request.headers.has("Authorization")).toEqual(true, 'has Authorization header');
+		expect(request.request.headers.has("Authorization")).withContext('has Authorization header').toEqual(expectAuthorizationHeader);
 		request.flush("", { headers: new HttpHeaders(), status: 401, statusText: 'Unauthorized' });
 		httpTestingController.verify();
 	};
@@ -83,7 +82,7 @@ describe('SelfService', () => {
 				done()
 			}
 		});
-		mockHttpAuthorizationFailure();
+		mockHttpAuthorizationFailure(true);
 	});
 
 
@@ -101,7 +100,7 @@ describe('SelfService', () => {
 				done()
 			}
 		});
-		mockHttpAuthorizationFailure();
+		mockHttpAuthorizationFailure(true);
 	};
 
 	it('handles authentication failure [A]', (done) => {
@@ -112,10 +111,10 @@ describe('SelfService', () => {
 		testAuthenticationFailure(done, USER_B.username, USER_B.password);
 	});
 
-	let mockHttpAuthorizationSuccess = function(userDetails: User) {
+	let mockHttpAuthorizationSuccess = function(userDetails: User, expectAuthorizationHeader: boolean) {
 		const request = httpTestingController.expectOne('/api/self');
 		expect(request.request.method).toEqual('GET');
-		expect(request.request.headers.has("Authorization")).toEqual(true, 'has Authorization header');
+		expect(request.request.headers.has("Authorization")).withContext('has Authorization header').toEqual(expectAuthorizationHeader);
 		request.flush(userDetails, { headers: new HttpHeaders(), status: 200, statusText: 'Ok' });
 		httpTestingController.verify();
 	};
@@ -153,7 +152,7 @@ describe('SelfService', () => {
 				done()
 			}
 		});
-		mockHttpAuthorizationSuccess(userDetails);
+		mockHttpAuthorizationSuccess(userDetails, true);
 	};
 
 	it('handles authentication success [A]', (done) => {
@@ -191,36 +190,70 @@ describe('SelfService', () => {
 				testLogout(done);
 			}
 		});
-		mockHttpAuthorizationSuccess(userDetails);
+		mockHttpAuthorizationSuccess(userDetails, true);
 	});
 
 
-	const checkForCurrentAuthentication = function(done: any) {
+	const checkForCurrentAuthenticationNone = function(done: any) {
 		service.checkForCurrentAuthentication().subscribe({
 			next: () => { },
 			error: (err) => { fail(err); done() },
 			complete: () => {
 				assertInvariants(service);
-				assertNotAuthenticated();// at present do not have sessions
+				assertNotAuthenticated();
 				done();
 			}
 		});
+		mockHttpAuthorizationFailure(false);
 	}
 
 	it('handles check for current authentication from the initial state', (done) => {
-		checkForCurrentAuthentication(done);
+		checkForCurrentAuthenticationNone(done);
 	});
 
-	it('handles check for current authentication while authenticated', (done) => {
-		const userDetails: User = USER_A;
+
+
+
+	const checkForCurrentAuthenticationWithSesson = function(done: any, serverUserDetails: User) {
+		const expectedFinalUserDetails: User = { username: serverUserDetails.username, password: null, authorities: serverUserDetails.authorities };
+		service.checkForCurrentAuthentication().subscribe({
+			next: () => { },
+			error: (err) => { fail(err); done() },
+			complete: () => {
+				assertInvariants(service);
+				assertAuthenticated(expectedFinalUserDetails);
+				done();
+			}
+		});
+		mockHttpAuthorizationSuccess(serverUserDetails, false);
+	}
+
+	const setUpAuthenticated = function(done: any, userDetails: User) {
 		service.authenticate(userDetails.username, userDetails.password).subscribe({
 			next: () => { },
 			error: (err) => { fail(err); done() },
 			complete: () => {
-				checkForCurrentAuthentication(done);
+				done();
 			}
 		});
-		mockHttpAuthorizationSuccess(userDetails);
+		mockHttpAuthorizationSuccess(userDetails, true);
+	};
+
+
+	const testCheckForCurrentAuthenticationWithSesson = function(done: any, userDetails: User) {
+		setUpAuthenticated(
+			() => checkForCurrentAuthenticationWithSesson(done, userDetails),
+			userDetails
+		);
+	}
+
+
+	it('handles check for current authentication while authenticated [A]', (done) => {
+		testCheckForCurrentAuthenticationWithSesson(done, USER_A);
+	});
+
+	it('handles check for current authentication while authenticated [B]', (done) => {
+		testCheckForCurrentAuthenticationWithSesson(done, USER_B);
 	});
 
 
@@ -242,7 +275,7 @@ describe('SelfService', () => {
 				done()
 			}
 		});
-		mockHttpAuthorizationSuccess(serverUserDetails);
+		mockHttpAuthorizationSuccess(serverUserDetails, true);
 	};
 
 	it('handles server amending user name [A]', (done) => {

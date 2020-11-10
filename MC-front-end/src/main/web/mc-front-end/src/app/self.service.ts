@@ -74,9 +74,13 @@ export class SelfService {
 	}
 
 	private static createHeaders(username: string, password: string): HttpHeaders {
-		return new HttpHeaders({
-			authorization: 'Basic ' + btoa(username + ':' + password)
-		});
+		if (username && password) {
+			return new HttpHeaders({
+				authorization: 'Basic ' + btoa(username + ':' + password)
+			});
+		} else {
+			return new HttpHeaders();
+		}
 	}
 
 	private getUserDetails(username: string, password: string): Observable<User> {
@@ -114,6 +118,10 @@ export class SelfService {
      * The server may indicate that the user should use a different, canonical username,
      * in which case the method sets the {@link username} attribute to that canonical username,
      * rather than to the provided username.
+     *
+     * The method makes use of the `/api/self` endpoint of the server,
+     * to check that the username and password are valid,
+     * and to get the authorities of the user.
 	 */
 	authenticate(username: string, password: string): Observable<boolean> {
 		return defer(() =>
@@ -158,16 +166,13 @@ export class SelfService {
 	 * The method updates the #username and #password attributes
      * and the values of the #authorities$ and #authenticated$ Observables.
      *
-     * Currently the authentication system does not maintain session inforamtion,
-     * so on this method is equivalent to the #logout() method.
+     * The method makes use of the `/api/self` endpoint of the server,
+     * to get the current user details.
 	 */
 	checkForCurrentAuthentication(): Observable<null> {
-		return of(null).pipe(
-			flatMap(() => {
-				this.clear();
-				return of(null);
-			}
-			));
+		return this.authenticate(null, null).pipe(
+			map(() => null)
+		);
 	}
 
 	private clear(): void {
@@ -184,7 +189,9 @@ export class SelfService {
      * @description
      * Whether the current user is authenticated (logged in).
      *
-     * Not authenticated if #username is null or #password is null.
+     * Not authenticated if {@link username} is null.
+     * Can be authenticated with a null {@link password},
+     * if the user has not (recently) provided a password, but the system was able to resume a session.
      */
 	get authenticated$(): Observable<boolean> {
 		return this.authoritiesRS$.pipe(
