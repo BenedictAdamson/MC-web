@@ -10,9 +10,10 @@ import { SelfComponent } from './self/self.component';
 import { SelfService } from './self.service';
 
 describe('AppComponent', () => {
+	let selfServiceStub: any;
 
 	beforeEach(waitForAsync(() => {
-		const selfServiceStub = jasmine.createSpyObj('SelfService', ['checkForCurrentAuthentication']);
+		selfServiceStub = jasmine.createSpyObj('SelfService', ['checkForCurrentAuthentication']);
 		selfServiceStub.checkForCurrentAuthentication.and.returnValue(of(null));
 
 		TestBed.configureTestingModule({
@@ -28,13 +29,14 @@ describe('AppComponent', () => {
 		}).compileComponents();
 	}));
 
-	it('should create the app', () => {
+	it('can be constructed', () => {
 		const fixture = TestBed.createComponent(AppComponent);
 		const app = fixture.debugElement.componentInstance;
 		expect(app).toBeTruthy();
+		expect(selfServiceStub.checkForCurrentAuthentication.calls.count()).withContext('Checked the server for current authentication information').toBe(1);
 	});
 
-	it('should render title in a h1 tag', () => {
+	it('renders title in a h1 tag', () => {
 		const fixture = TestBed.createComponent(AppComponent);
 		fixture.detectChanges();
 		const html = fixture.debugElement.nativeElement;
