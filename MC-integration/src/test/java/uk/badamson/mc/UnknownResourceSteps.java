@@ -40,6 +40,22 @@ import io.cucumber.java.en.When;
  */
 public class UnknownResourceSteps extends Steps {
 
+   private static final Set<Integer> CLIENT_ERROR_STATUSES = Set.<Integer>of(
+            HttpURLConnection.HTTP_BAD_REQUEST,
+            HttpURLConnection.HTTP_UNAUTHORIZED,
+            HttpURLConnection.HTTP_PAYMENT_REQUIRED,
+            HttpURLConnection.HTTP_FORBIDDEN, HttpURLConnection.HTTP_NOT_FOUND,
+            HttpURLConnection.HTTP_BAD_METHOD,
+            HttpURLConnection.HTTP_NOT_ACCEPTABLE,
+            HttpURLConnection.HTTP_PROXY_AUTH,
+            HttpURLConnection.HTTP_CLIENT_TIMEOUT,
+            HttpURLConnection.HTTP_CONFLICT, HttpURLConnection.HTTP_GONE,
+            HttpURLConnection.HTTP_LENGTH_REQUIRED,
+            HttpURLConnection.HTTP_PRECON_FAILED,
+            HttpURLConnection.HTTP_ENTITY_TOO_LARGE,
+            HttpURLConnection.HTTP_REQ_TOO_LONG,
+            HttpURLConnection.HTTP_UNSUPPORTED_TYPE);
+
    private int httpResponseCode;
 
    @Autowired
@@ -52,12 +68,9 @@ public class UnknownResourceSteps extends Steps {
       httpResponseCode = world.getHttpResponseCode(method);
    }
 
-   @Then("MC replies with Not Found or Forbidden or Method Not Allowed")
-   public void mc_replies_with_not_found_or_forbidden_or_method_not_allowed() {
-      final var expected = Set.<Integer>of(HttpURLConnection.HTTP_NOT_FOUND,
-               HttpURLConnection.HTTP_FORBIDDEN,
-               HttpURLConnection.HTTP_BAD_METHOD);
-      assertThat(httpResponseCode, is(in(expected)));
+   @Then("MC replies with Client Error")
+   public void mc_replies_with_client_error() {
+      assertThat(httpResponseCode, is(in(CLIENT_ERROR_STATUSES)));
    }
 
    @When("modifying the unknown resource with a {string} at {string}")
