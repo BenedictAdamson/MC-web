@@ -73,10 +73,14 @@ export class SelfService {
 		};
 	}
 
-	private getUserDetails(username: string, password: string): Observable<User> {
-		const headers = new HttpHeaders({
+	private static createHeaders(username: string, password: string): HttpHeaders {
+		return new HttpHeaders({
 			authorization: 'Basic ' + btoa(username + ':' + password)
 		});
+	}
+
+	private getUserDetails(username: string, password: string): Observable<User> {
+		const headers: HttpHeaders = SelfService.createHeaders(username, password);
 
 		return this.http.get<User>(apiUrl, { headers: headers })
 			.pipe(
