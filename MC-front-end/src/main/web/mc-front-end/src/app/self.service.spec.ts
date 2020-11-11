@@ -69,6 +69,7 @@ describe('SelfService', () => {
 		const request: TestRequest = httpTestingController.expectOne('/api/self');
 		expect(request.request.method).toEqual('GET');
 		expect(request.request.headers.has("Authorization")).withContext('has Authorization header').toEqual(expectAuthorizationHeader);
+		expect(request.request.headers.get("X-Requested-With")).withContext('X-Requested-With header').toEqual('XMLHttpRequest');
 		return request;
 	};
 

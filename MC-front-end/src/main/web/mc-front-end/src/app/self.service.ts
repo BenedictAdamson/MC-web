@@ -74,13 +74,12 @@ export class SelfService {
 	}
 
 	private static createHeaders(username: string, password: string): HttpHeaders {
+		var headers: HttpHeaders = new HttpHeaders();
+		headers = headers.set('X-Requested-With', 'XMLHttpRequest');
 		if (username && password) {
-			return new HttpHeaders({
-				authorization: 'Basic ' + btoa(username + ':' + password)
-			});
-		} else {
-			return new HttpHeaders();
+			headers = headers.set('Authorization', 'Basic ' + btoa(username + ':' + password));
 		}
+		return headers;
 	}
 
 	private getUserDetails(username: string, password: string): Observable<User> {
