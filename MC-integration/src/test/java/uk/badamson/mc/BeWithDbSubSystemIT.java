@@ -109,6 +109,33 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    }
 
    @Test
+   @Order(3)
+   public void getSelf_administrator() throws Exception {
+      final var user = be.getAdministrator();
+      final var request = be.createGetSelfRequest(user.getUsername(),
+               user.getPassword());
+
+      final var response = request.exchange();
+
+      final var result = response.returnResult(String.class);
+      final var responseJson = result.getResponseBody()
+               .blockFirst(Duration.ofSeconds(9));
+      final var responseUser = new ObjectMapper().readValue(responseJson,
+               User.class);
+      final var cookies = result.getResponseCookies();
+      assertAll(() -> response.expectStatus().isOk(),
+               () -> assertThat("response username", responseUser.getUsername(),
+                        is(user.getUsername())),
+               () -> assertThat("response authorities",
+                        responseUser.getAuthorities(),
+                        is(user.getAuthorities())),
+               () -> assertThat("Sets session cookie", cookies,
+                        hasKey("JSESSIONID")),
+               () -> assertThat("Sets CSRF protection cookie", cookies,
+                        hasKey("XSRF-TOKEN")));
+   }
+
+   @Test
    @Order(2)
    public void getSelf_unknownUser() throws Exception {
       final var user = USER_A;

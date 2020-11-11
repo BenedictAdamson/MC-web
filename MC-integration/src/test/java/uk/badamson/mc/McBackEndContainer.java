@@ -187,6 +187,10 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
                .headers(headers -> headers.setBasicAuth(username, password));
    }
 
+   public User getAdministrator() {
+      return administrator;
+   }
+
    private WebTestClient.ResponseSpec getJson(final String path) {
       return connectWebTestClient(path).get().accept(MediaType.APPLICATION_JSON)
                .exchange();
