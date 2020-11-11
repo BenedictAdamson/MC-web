@@ -212,6 +212,20 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
 
    @Test
    @Order(3)
+   public void logout_administratorNoSession() throws Exception {
+      final var user = be.getAdministrator();
+      final var request = be.connectWebTestClient("/logout").post()
+               .headers(headers -> {
+                  headers.setBasicAuth(user.getUsername(), user.getPassword());
+               });
+
+      final var response = request.exchange();
+
+      response.expectStatus().isNoContent();
+   }
+
+   @Test
+   @Order(3)
    public void logout_administratorWithSession() throws Exception {
       final var user = be.getAdministrator();
       final var cookies = be.login(user);
