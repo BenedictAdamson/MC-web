@@ -105,8 +105,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
          final var headers = connectWebTestClient("/api/user").post()
                   .contentType(MediaType.APPLICATION_JSON);
          secure(headers, administrator, cookies);
-         final var request = headers
-                  .bodyValue(encodeAsJson(user));
+         final var request = headers.bodyValue(encodeAsJson(user));
 
          final var response = request.exchange();
          response.expectStatus().is2xxSuccessful();
@@ -231,6 +230,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
          headers.add("X-XSRF-TOKEN", xsrfCookie.getValue());
       });
       request.cookie(sessionCookie.getName(), sessionCookie.getValue());
+      request.cookie(xsrfCookie.getName(), xsrfCookie.getValue());
    }
 
    private void logout(final User user,
