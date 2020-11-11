@@ -139,15 +139,16 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
 
       final var response = request.exchange();
 
-      response.expectStatus().isOk();
-      final var responseJson = response.returnResult(String.class)
-               .getResponseBody().blockFirst(Duration.ofSeconds(9));
+      final var result = response.returnResult(String.class);
+      final var responseJson = result.getResponseBody()
+               .blockFirst(Duration.ofSeconds(9));
       final var responseUser = new ObjectMapper().readValue(responseJson,
                User.class);
-      assertAll("responded with user details",
-               () -> assertThat("username", responseUser.getUsername(),
+      assertAll(() -> response.expectStatus().isOk(),
+               () -> assertThat("response username", responseUser.getUsername(),
                         is(user.getUsername())),
-               () -> assertThat("authorities", responseUser.getAuthorities(),
+               () -> assertThat("response authorities",
+                        responseUser.getAuthorities(),
                         is(user.getAuthorities())));
    }
 
