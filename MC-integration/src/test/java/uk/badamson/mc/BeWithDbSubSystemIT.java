@@ -19,10 +19,7 @@ package uk.badamson.mc;
  */
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.IOException;
@@ -39,7 +36,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.opentest4j.AssertionFailedError;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.test.web.reactive.server.WebTestClient.RequestHeadersSpec;
+import org.springframework.util.MultiValueMap;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -144,12 +143,19 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
                .blockFirst(Duration.ofSeconds(9));
       final var responseUser = new ObjectMapper().readValue(responseJson,
                User.class);
+      final MultiValueMap<String, ResponseCookie> cookies = result
+               .getResponseCookies();
       assertAll(() -> response.expectStatus().isOk(),
                () -> assertThat("response username", responseUser.getUsername(),
                         is(user.getUsername())),
                () -> assertThat("response authorities",
                         responseUser.getAuthorities(),
-                        is(user.getAuthorities())));
+                        is(user.getAuthorities())),
+               () -> assertThat("Sets session cookie", cookies,
+                        hasKey("JSESSIONID")),
+               // At present CSRF protection is disabled
+               () -> assertThat("No CSRF cookie set", cookies,
+                        not(hasKey("XSRF-TOKEN"))));
    }
 
    @Test
