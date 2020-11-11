@@ -18,13 +18,12 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import static java.util.stream.Collectors.toList;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -33,8 +32,12 @@ import java.util.stream.Stream;
 
 import org.springframework.http.HttpCookie;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.reactive.server.WebTestClient.RequestBodySpec;
+import org.springframework.test.web.reactive.server.WebTestClient.RequestBodyUriSpec;
 import org.springframework.test.web.reactive.server.WebTestClient.RequestHeadersSpec;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriTemplate;
 import org.testcontainers.containers.GenericContainer;
@@ -51,6 +54,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * </p>
  */
 final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
+
+   private static final String XSRF_TOKEN_COOKIE_NAME = "XSRF-TOKEN";
+
+   public static final String SESSION_COOKIE_NAME = "JSESSIONID";
 
    public static final String HEALTHCHECK_PATH = "/actuator/health";
 
@@ -71,11 +78,6 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    private static final UriTemplate GAME_URI_TEMPLATE = new UriTemplate(
             "/api/scenario/{scenario}/game/{game}");
-
-   public static void addCookies(final MultiValueMap<String, String> dst,
-            final Collection<? extends HttpCookie> src) {
-      src.forEach(cookie -> dst.add(cookie.getName(), cookie.getValue()));
-   }
 
    private static String encodeAsJson(final Object obj) {
       try {
@@ -104,13 +106,10 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
          Objects.requireNonNull(user, "user");
 
          final var cookies = login(administrator);
-         final var request = connectWebTestClient("/api/user").post()
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .cookies(cookiesMultiMap -> addCookies(cookiesMultiMap,
-                           cookies))
-                  .headers(headers -> headers.setBasicAuth(
-                           administrator.getUsername(),
-                           administrator.getPassword()))
+         final var headers = connectWebTestClient("/api/user").post()
+                  .contentType(MediaType.APPLICATION_JSON);
+         secure(headers, administrator, cookies);
+         final var request = headers
                   .bodyValue(encodeAsJson(user));
 
          final var response = request.exchange();
@@ -209,28 +208,39 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
                .getResponseBody().toStream();
    }
 
-   Collection<HttpCookie> login(final User user) {
+   MultiValueMap<String, HttpCookie> login(final User user) {
       final var request = createGetSelfRequest(user.getUsername(),
                user.getPassword());
 
       final var response = request.exchange();
 
-      final var result = response.returnResult(String.class);
-      final var cookies = result.getResponseCookies();
-      if (!cookies.containsKey("JSESSIONID")
-               || !cookies.containsKey("XSRF-TOKEN")) {
+      final var cookies = response.returnResult(String.class)
+               .getResponseCookies();
+      if (!cookies.containsKey(SESSION_COOKIE_NAME)
+               || !cookies.containsKey(XSRF_TOKEN_COOKIE_NAME)) {
          throw new IllegalStateException(
                   "Cookies missing from response " + cookies);
       }
-      return cookies.values().stream()
-               .flatMap(cookieList -> cookieList.stream()).collect(toList());
+      final MultiValueMap<String, HttpCookie> result = new LinkedMultiValueMap<String, HttpCookie>();
+      cookies.forEach((name, values) -> result.addAll(name, values));
+      return result;
    }
 
-   private void logout(final User user, final Collection<HttpCookie> cookies) {
-      final var request = connectWebTestClient("/logout").post()
-               .headers(headers -> headers.setBasicAuth(user.getUsername(),
-                        user.getPassword()))
-               .cookies(map -> addCookies(map, cookies));
+   static void secure(final RequestBodySpec request, final User user,
+            final MultiValueMap<String, HttpCookie> cookies) {
+      final var sessionCookie = cookies.getFirst(SESSION_COOKIE_NAME);
+      final var xsrfCookie = cookies.getFirst(XSRF_TOKEN_COOKIE_NAME);
+      request.headers(headers -> {
+         headers.setBasicAuth(user.getUsername(), user.getPassword());
+         headers.add("X-XSRF-TOKEN", xsrfCookie.getValue());
+      });
+      request.cookie(sessionCookie.getName(), sessionCookie.getValue());
+   }
+
+   private void logout(final User user,
+            final MultiValueMap<String, HttpCookie> cookies) {
+      final var request = connectWebTestClient("/logout").post();
+      secure(request, user, cookies);
       final var response = request.exchange();
       response.expectStatus().is2xxSuccessful();
    }

@@ -185,7 +185,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
 
       final var response = request.exchange();
 
-      response.expectStatus().isUnauthorized();
+      response.expectStatus().is4xxClientError();
    }
 
    @Test
@@ -221,7 +221,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
 
       final var response = request.exchange();
 
-      response.expectStatus().isNoContent();
+      response.expectStatus().isForbidden();
    }
 
    @Test
@@ -229,10 +229,8 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    public void logout_administratorWithSession() throws Exception {
       final var user = be.getAdministrator();
       final var cookies = be.login(user);
-      final var request = be.connectWebTestClient("/logout").post()
-               .headers(headers -> {
-                  headers.setBasicAuth(user.getUsername(), user.getPassword());
-               }).cookies(map -> McBackEndContainer.addCookies(map, cookies));
+      final var request = be.connectWebTestClient("/logout").post();
+      McBackEndContainer.secure(request, user, cookies);
 
       final var response = request.exchange();
 
@@ -241,7 +239,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
 
    @Test
    @Order(3)
-   public void logout_notLoggedIn() throws Exception {
+   public void logout_noSession() throws Exception {
       final var user = USER_A;
       be.addUser(user);
       final var request = be.connectWebTestClient("/logout").post()
@@ -250,7 +248,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
 
       final var response = request.exchange();
 
-      response.expectStatus().isNoContent();
+      response.expectStatus().isForbidden();
    }
 
    @Test
@@ -259,10 +257,8 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       final var user = USER_A;
       be.addUser(user);
       final var cookies = be.login(user);
-      final var request = be.connectWebTestClient("/logout").post()
-               .headers(headers -> {
-                  headers.setBasicAuth(user.getUsername(), user.getPassword());
-               }).cookies(map -> McBackEndContainer.addCookies(map, cookies));
+      final var request = be.connectWebTestClient("/logout").post();
+      McBackEndContainer.secure(request, user, cookies);
 
       final var response = request.exchange();
 
@@ -280,7 +276,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
 
       final var response = request.exchange();
 
-      response.expectStatus().isNoContent();
+      response.expectStatus().is4xxClientError();
    }
 
    @BeforeEach
