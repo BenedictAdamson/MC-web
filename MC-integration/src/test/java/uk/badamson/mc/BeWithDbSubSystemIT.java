@@ -21,6 +21,7 @@ package uk.badamson.mc;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -38,8 +39,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.opentest4j.AssertionFailedError;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.reactive.server.WebTestClient.RequestHeadersSpec;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -86,9 +85,8 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    @Test
    @Order(2)
    public void addUser() {
-      final var response = be.addUser(USER_A);
+      be.addUser(USER_A);
 
-      response.expectStatus().isCreated();
       final List<User> users;
       try {
          users = getUsers1();
@@ -110,18 +108,38 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       network.close();
    }
 
-   private RequestHeadersSpec<?> createGetSelfRequest(final String username,
-            final String password) {
-      return be.connectWebTestClient("/api/self").get()
-               .accept(MediaType.APPLICATION_JSON)
-               .headers(headers -> headers.setBasicAuth(username, password));
+   @Test
+   @Order(3)
+   public void getSelf_administrator() throws Exception {
+      final var user = be.getAdministrator();
+      final var request = be.createGetSelfRequest(user.getUsername(),
+               user.getPassword());
+
+      final var response = request.exchange();
+
+      final var result = response.returnResult(String.class);
+      final var responseJson = result.getResponseBody()
+               .blockFirst(Duration.ofSeconds(9));
+      final var responseUser = new ObjectMapper().readValue(responseJson,
+               User.class);
+      final var cookies = result.getResponseCookies();
+      assertAll(() -> response.expectStatus().isOk(),
+               () -> assertThat("response username", responseUser.getUsername(),
+                        is(user.getUsername())),
+               () -> assertThat("response authorities",
+                        responseUser.getAuthorities(),
+                        is(user.getAuthorities())),
+               () -> assertThat("Sets session cookie", cookies,
+                        hasKey("JSESSIONID")),
+               () -> assertThat("Sets CSRF protection cookie", cookies,
+                        hasKey("XSRF-TOKEN")));
    }
 
    @Test
    @Order(2)
    public void getSelf_unknownUser() throws Exception {
       final var user = USER_A;
-      final var request = createGetSelfRequest(user.getUsername(),
+      final var request = be.createGetSelfRequest(user.getUsername(),
                user.getPassword());
 
       final var response = request.exchange();
@@ -134,21 +152,27 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    public void getSelf_valid() throws Exception {
       final var user = USER_A;
       be.addUser(user);
-      final var request = createGetSelfRequest(user.getUsername(),
+      final var request = be.createGetSelfRequest(user.getUsername(),
                user.getPassword());
 
       final var response = request.exchange();
 
-      response.expectStatus().isOk();
-      final var responseJson = response.returnResult(String.class)
-               .getResponseBody().blockFirst(Duration.ofSeconds(9));
+      final var result = response.returnResult(String.class);
+      final var responseJson = result.getResponseBody()
+               .blockFirst(Duration.ofSeconds(9));
       final var responseUser = new ObjectMapper().readValue(responseJson,
                User.class);
-      assertAll("responded with user details",
-               () -> assertThat("username", responseUser.getUsername(),
+      final var cookies = result.getResponseCookies();
+      assertAll(() -> response.expectStatus().isOk(),
+               () -> assertThat("response username", responseUser.getUsername(),
                         is(user.getUsername())),
-               () -> assertThat("authorities", responseUser.getAuthorities(),
-                        is(user.getAuthorities())));
+               () -> assertThat("response authorities",
+                        responseUser.getAuthorities(),
+                        is(user.getAuthorities())),
+               () -> assertThat("Sets session cookie", cookies,
+                        hasKey("JSESSIONID")),
+               () -> assertThat("Sets CSRF protection cookie", cookies,
+                        hasKey("XSRF-TOKEN")));
    }
 
    @Test
@@ -156,12 +180,12 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    public void getSelf_wrongPassword() throws Exception {
       final var user = USER_A;
       be.addUser(user);
-      final var request = createGetSelfRequest(user.getUsername(),
+      final var request = be.createGetSelfRequest(user.getUsername(),
                "*" + user.getPassword());
 
       final var response = request.exchange();
 
-      response.expectStatus().isUnauthorized();
+      response.expectStatus().is4xxClientError();
    }
 
    @Test
@@ -184,6 +208,75 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       final var typeId = mapper.getTypeFactory()
                .constructCollectionType(List.class, User.class);
       return mapper.readValue(usersAsJson, typeId);
+   }
+
+   @Test
+   @Order(3)
+   public void logout_administratorNoSession() throws Exception {
+      final var user = be.getAdministrator();
+      final var request = be.connectWebTestClient("/logout").post()
+               .headers(headers -> {
+                  headers.setBasicAuth(user.getUsername(), user.getPassword());
+               });
+
+      final var response = request.exchange();
+
+      response.expectStatus().isForbidden();
+   }
+
+   @Test
+   @Order(3)
+   public void logout_administratorWithSession() throws Exception {
+      final var user = be.getAdministrator();
+      final var cookies = be.login(user);
+      final var request = be.connectWebTestClient("/logout").post();
+      McBackEndContainer.secure(request, user, cookies);
+
+      final var response = request.exchange();
+
+      response.expectStatus().isNoContent();
+   }
+
+   @Test
+   @Order(3)
+   public void logout_noSession() throws Exception {
+      final var user = USER_A;
+      be.addUser(user);
+      final var request = be.connectWebTestClient("/logout").post()
+               .headers(headers -> headers.setBasicAuth(user.getUsername(),
+                        user.getPassword()));
+
+      final var response = request.exchange();
+
+      response.expectStatus().isForbidden();
+   }
+
+   @Test
+   @Order(3)
+   public void logout_withSession() throws Exception {
+      final var user = USER_A;
+      be.addUser(user);
+      final var cookies = be.login(user);
+      final var request = be.connectWebTestClient("/logout").post();
+      McBackEndContainer.secure(request, user, cookies);
+
+      final var response = request.exchange();
+
+      response.expectStatus().isNoContent();
+   }
+
+   @Test
+   @Order(4)
+   public void logout_wrongPassword() throws Exception {
+      final var user = USER_A;
+      be.addUser(user);
+      final var request = be.connectWebTestClient("/logout").post()
+               .headers(headers -> headers.setBasicAuth(user.getUsername(),
+                        "*" + user.getPassword()));
+
+      final var response = request.exchange();
+
+      response.expectStatus().is4xxClientError();
    }
 
    @BeforeEach

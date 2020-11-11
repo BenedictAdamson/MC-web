@@ -164,7 +164,7 @@ public final class World implements AutoCloseable {
    public WebElement assertHasElementWithTag(final String tag) {
       Objects.requireNonNull(tag, "tag");
       try {
-         return webDriver.findElement(By.tagName(tag));
+         return getWebDriver().findElement(By.tagName(tag));
       } catch (final NoSuchElementException e) {
          throw new AssertionFailedError("Has element with tag " + tag, e);
       }
@@ -172,6 +172,7 @@ public final class World implements AutoCloseable {
 
    public void awaitSuccessOrErrorMessage(final String expectedSuccessUrlPath)
             throws IllegalStateException {
+      final var webDriver = getWebDriver();
       final var currentPath = new AtomicReference<String>();
       try {
          new WebDriverWait(webDriver, 17).until(driver -> {
@@ -201,12 +202,17 @@ public final class World implements AutoCloseable {
     *            If {@code scenario} is null;
     */
    public void beginScenario(final Scenario scenario) {
-      try {
-         Objects.requireNonNull(webDriver, "webDriver");
-      } catch (final Exception e) {
-         throw new IllegalStateException("Not start()-ed", e);
-      }
+      /*
+       * Recreates the web driver, so tests do not share cookies, JavaScript
+       * state, etc.
+       */
       containers.beforeTest(createTestDescription(scenario));
+      webDriver = containers.getWebDriver();
+      /*
+       * The previous test might have left us deep in the page hierarchy, so
+       * reset to the top location, and must not use the old webDriver.
+       */
+      getHomePage();
    }
 
    /**
@@ -219,10 +225,7 @@ public final class World implements AutoCloseable {
    @Override
    @PreDestroy
    public void close() {
-      if (webDriver != null) {
-         webDriver.quit();
-         webDriver = null;
-      }
+      webDriver = null;
       privateNetworkUrl = null;
       containers.stop();
       containers.close();
@@ -260,7 +263,11 @@ public final class World implements AutoCloseable {
     *            If {@code scenario} is null;
     */
    public void endScenario(final Scenario scenario) {
-      tellContainersTestOutcome(scenario);
+      final var testDescription = createTestDescription(scenario);
+      final var exception = createOutcomeException(scenario);
+      containers.afterTest(testDescription, exception);// invalidates webDriver
+      expectedPage = null;// expectedPage holds reference to webDriver
+      webDriver = null;
    }
 
    public User getAdministratorUser() {
@@ -316,7 +323,7 @@ public final class World implements AutoCloseable {
     * @return the path; not null.
     */
    public String getCurrentUrlPath() {
-      return getPathOfUrl(webDriver.getCurrentUrl());
+      return getPathOfUrl(getWebDriver().getCurrentUrl());
    }
 
    /**
@@ -355,7 +362,7 @@ public final class World implements AutoCloseable {
    }
 
    public HomePage getHomePage() {
-      final var homePage = new HomePage(webDriver);
+      final var homePage = new HomePage(getWebDriver());
       homePage.get();
       expectedPage = homePage;
       return homePage;
@@ -485,7 +492,6 @@ public final class World implements AutoCloseable {
           * must roll-back ourself in that case. Important because this
           * allocates expensive resources.
           */
-         webDriver = containers.getWebDriver();
          createUsers();
       } catch (final Exception e) {
          close();
@@ -526,12 +532,6 @@ public final class World implements AutoCloseable {
       localUrl = containers.createUriFromPath(HttpServer.INGRESS, path);
    }
 
-   private void tellContainersTestOutcome(final Scenario scenario) {
-      final var testDescription = createTestDescription(scenario);
-      final var exception = createOutcomeException(scenario);
-      containers.afterTest(testDescription, exception);
-   }
-
    /**
     * <p>
     * Wait until the {@linkplain #getCurrentUrlPath() path component of the
@@ -552,7 +552,7 @@ public final class World implements AutoCloseable {
             throws TimeoutException {
       final var current = new AtomicReference<String>();
       try {
-         new WebDriverWait(webDriver, timeout).until(driver -> {
+         new WebDriverWait(getWebDriver(), timeout).until(driver -> {
             final var p = getPathOfUrl(driver.getCurrentUrl());
             current.set(p);
             return p.equals(path);

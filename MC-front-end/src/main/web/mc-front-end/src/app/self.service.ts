@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, ReplaySubject, defer, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { map } from 'rxjs/operators';
+import { flatMap, map } from 'rxjs/operators';
 
 import { User } from './user';
 
@@ -73,10 +73,17 @@ export class SelfService {
 		};
 	}
 
+	private static createHeaders(username: string, password: string): HttpHeaders {
+		var headers: HttpHeaders = new HttpHeaders();
+		headers = headers.set('X-Requested-With', 'XMLHttpRequest');
+		if (username && password) {
+			headers = headers.set('Authorization', 'Basic ' + btoa(username + ':' + password));
+		}
+		return headers;
+	}
+
 	private getUserDetails(username: string, password: string): Observable<User> {
-		const headers = new HttpHeaders({
-			authorization: 'Basic ' + btoa(username + ':' + password)
-		});
+		const headers: HttpHeaders = SelfService.createHeaders(username, password);
 
 		return this.http.get<User>(apiUrl, { headers: headers })
 			.pipe(
@@ -85,7 +92,7 @@ export class SelfService {
 	}
 
 	private processResponse(username: string, password: string, details: User): boolean {
-		this.username_ = username;
+		this.username_ = details ? details.username : username;
 		this.password_ = password;
 		var authorities: string[] = details ? details.authorities : null;
 		this.authoritiesRS$.next(authorities);
@@ -102,10 +109,18 @@ export class SelfService {
 	 * so this is a cold Observable too.
 	 * That is, the expensive HTTP request will not be made until something subscribes to this Observable.
 	 *
-	 * Iff the authentication is sucessful, #authenticated$ will provide true.
-	 * The method however updates the #username and #password attributes even if authentication fails.
+	 * Iff the authentication is sucessful, {@link authenticated$} will provide true.
+	 * The method however updates the {@link username} and {@link password} attributes even if authentication fails.
 	 * The #authorities$ Observable will provide the authorities of the authenticated user,
 	 * if authentication is successful.
+     *
+     * The server may indicate that the user should use a different, canonical username,
+     * in which case the method sets the {@link username} attribute to that canonical username,
+     * rather than to the provided username.
+     *
+     * The method makes use of the `/api/self` endpoint of the server,
+     * to check that the username and password are valid,
+     * and to get the authorities of the user.
 	 */
 	authenticate(username: string, password: string): Observable<boolean> {
 		return defer(() =>
@@ -115,11 +130,67 @@ export class SelfService {
 		);
 	}
 
+	/**
+	 * Clear the credentials of the current user.
+     *
+     * If the authentication system maintains session information on the server,
+     * this also ends the session. This method therefore may contact the server.
+     * It returns an Observable that indicates when communication with the server has completed.
+     *
+     * On competion of the returned Observable, the #username and #password of this sevice are null,
+     * and #authorities$ provides an empty array of autheorities.
+	 */
+	logout(): Observable<null> {
+		return this.endServerSession().pipe(
+			flatMap(() => {
+				this.clear();
+				return of(null);
+			}
+			));
+	}
+
+
+	/**
+     * @description
+     * If the authentication system maintains session information on the server,
+     * update the authentication information (the credentials of the current user)
+     * to be the information of the current session.
+     *
+	 * The method provides a value indicating whether authentication was successful.
+     * That is, whether there is a current session.
+	 * That indirectly makes use of an HTTP request, which is a cold Observable,
+	 * so this is a cold Observable too.
+	 * That is, the expensive HTTP request will not be made until something subscribes to this Observable.
+	 *
+	 * The method updates the #username and #password attributes
+     * and the values of the #authorities$ and #authenticated$ Observables.
+     *
+     * The method makes use of the `/api/self` endpoint of the server,
+     * to get the current user details.
+	 */
+	checkForCurrentAuthentication(): Observable<null> {
+		return this.authenticate(null, null).pipe(
+			map(() => null)
+		);
+	}
+
+	private clear(): void {
+		this.username_ = null;
+		this.password_ = null;
+		this.authoritiesRS$.next(null);
+	}
+
+	private endServerSession(): Observable<null> {
+		return of(null);// at present, have no server sessions
+	}
+
     /**
      * @description
      * Whether the current user is authenticated (logged in).
      *
-     * Not authenticated if #username is null or #password is null.
+     * Not authenticated if {@link username} is null.
+     * Can be authenticated with a null {@link password},
+     * if the user has not (recently) provided a password, but the system was able to resume a session.
      */
 	get authenticated$(): Observable<boolean> {
 		return this.authoritiesRS$.pipe(

@@ -119,7 +119,7 @@ public class McContainers
    private final McReverseProxyContainer in = new McReverseProxyContainer()
             .withNetwork(network).withNetworkAliases(REVERSE_PROXY_HOST);
 
-   private final BrowserWebDriverContainer<?> browser;
+   private BrowserWebDriverContainer<?> browser;
 
    /**
     * @param failureRecordingDirectory
@@ -129,19 +129,6 @@ public class McContainers
     */
    public McContainers(final Path failureRecordingDirectory) {
       this.failureRecordingDirectory = failureRecordingDirectory;
-      browser = new BrowserWebDriverContainer<>();
-      browser.withCapabilities(new FirefoxOptions().addPreference(
-               "security.insecure_field_warning.contextual.enabled", false))
-               .withNetwork(network);
-      if (failureRecordingDirectory != null) {
-         try {
-            Files.createDirectories(failureRecordingDirectory);
-         } catch (final IOException e) {
-            throw new IllegalArgumentException(e);
-         }
-         browser.withRecordingMode(VncRecordingMode.RECORD_FAILING,
-                  failureRecordingDirectory.toFile());
-      }
    }
 
    /**
@@ -162,17 +149,21 @@ public class McContainers
     *            If the addition was rejected by the back-end.
     */
    public void addUser(final User user) {
-      try {
-         final var response = be.addUser(user);
-         response.expectStatus().is2xxSuccessful();
-      } catch (final Exception e) {
-         throw new RuntimeException("Failed to add user", e);
-      }
+      be.addUser(user);
    }
 
+   /**
+    * {@inheritDoc}
+    *
+    * <p>
+    * Calling this method invalidates the {@linkplain RemoteWebDriver web
+    * drivers} returned by previous calls to {@link #getWebDriver()}.
+    * </p>
+    */
    @Override
    public void afterTest(final TestDescription description,
             final Optional<Throwable> throwable) {
+      requireBroswer();
       browser.afterTest(description, throwable);
       if (failureRecordingDirectory != null && throwable.isPresent()) {
          final var timestamp = FILENAME_TIMESTAMP_FORMAT.format(new Date());
@@ -180,6 +171,7 @@ public class McContainers
          retainLogFiles(filenamePrefix, timestamp);
          retainScreenshot(filenamePrefix, timestamp);
       }
+      stopBrowser();
    }
 
    public void assertThatNoErrorMessagesLogged() {
@@ -187,11 +179,14 @@ public class McContainers
       assertThatNoErrorMessagesLogged("be", be.getLogs());
       assertThatNoErrorMessagesLogged("fe", fe.getLogs());
       assertThatNoErrorMessagesLogged("in", in.getLogs());
-      assertThatNoErrorMessagesLogged("browser", browser.getLogs());
+      if (browser != null) {
+         assertThatNoErrorMessagesLogged("browser", browser.getLogs());
+      }
    }
 
    @Override
    public void beforeTest(final TestDescription description) {
+      createAndStartBrowser();
       browser.beforeTest(description);
    }
 
@@ -201,12 +196,31 @@ public class McContainers
        * Close the resources top-down, to reduce the number of transient
        * connection errors.
        */
-      browser.close();
+      if (browser != null) {
+         browser.close();
+      }
       in.close();
       fe.close();
       be.close();
       db.close();
       network.close();
+   }
+
+   private void createAndStartBrowser() {
+      browser = new BrowserWebDriverContainer<>();
+      browser.withCapabilities(new FirefoxOptions().addPreference(
+               "security.insecure_field_warning.contextual.enabled", false))
+               .withNetwork(network);
+      if (failureRecordingDirectory != null) {
+         try {
+            Files.createDirectories(failureRecordingDirectory);
+         } catch (final IOException e) {
+            throw new IllegalArgumentException(e);
+         }
+         browser.withRecordingMode(VncRecordingMode.RECORD_FAILING,
+                  failureRecordingDirectory.toFile());
+      }
+      browser.start();
    }
 
    public Game.Identifier createGame(final UUID scenario) {
@@ -236,7 +250,14 @@ public class McContainers
    }
 
    public RemoteWebDriver getWebDriver() {
+      requireBroswer();
       return browser.getWebDriver();
+   }
+
+   private void requireBroswer() {
+      if (browser == null) {
+         throw new IllegalStateException("no browser");
+      }
    }
 
    private void retainLogFiles(final String prefix, final String timestamp) {
@@ -269,7 +290,6 @@ public class McContainers
       be.start();
       fe.start();
       in.start();
-      browser.start();
    }
 
    @Override
@@ -278,11 +298,20 @@ public class McContainers
        * Stop the resources top-down, to reduce the number of transient
        * connection errors.
        */
-      browser.stop();
+      stopBrowser();
       in.stop();
       fe.stop();
       be.stop();
       db.stop();
       close();
+   }
+
+   private void stopBrowser() {
+      if (browser != null) {
+         browser.getWebDriver().quit();
+         browser.stop();
+         browser.close();
+         browser = null;
+      }
    }
 }
