@@ -39,9 +39,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.opentest4j.AssertionFailedError;
-import org.springframework.http.HttpCookie;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.reactive.server.WebTestClient.RequestHeadersSpec;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -88,9 +85,8 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    @Test
    @Order(2)
    public void addUser() {
-      final var response = be.addUser(USER_A);
+      be.addUser(USER_A);
 
-      response.expectStatus().isCreated();
       final List<User> users;
       try {
          users = getUsers1();
@@ -112,18 +108,11 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       network.close();
    }
 
-   private RequestHeadersSpec<?> createGetSelfRequest(final String username,
-            final String password) {
-      return be.connectWebTestClient("/api/self").get()
-               .accept(MediaType.APPLICATION_JSON)
-               .headers(headers -> headers.setBasicAuth(username, password));
-   }
-
    @Test
    @Order(2)
    public void getSelf_unknownUser() throws Exception {
       final var user = USER_A;
-      final var request = createGetSelfRequest(user.getUsername(),
+      final var request = be.createGetSelfRequest(user.getUsername(),
                user.getPassword());
 
       final var response = request.exchange();
@@ -136,7 +125,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    public void getSelf_valid() throws Exception {
       final var user = USER_A;
       be.addUser(user);
-      final var request = createGetSelfRequest(user.getUsername(),
+      final var request = be.createGetSelfRequest(user.getUsername(),
                user.getPassword());
 
       final var response = request.exchange();
@@ -165,7 +154,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    public void getSelf_wrongPassword() throws Exception {
       final var user = USER_A;
       be.addUser(user);
-      final var request = createGetSelfRequest(user.getUsername(),
+      final var request = be.createGetSelfRequest(user.getUsername(),
                "*" + user.getPassword());
 
       final var response = request.exchange();
@@ -195,17 +184,6 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       return mapper.readValue(usersAsJson, typeId);
    }
 
-   private HttpCookie login(final User user) throws Exception {
-      final var request = createGetSelfRequest(user.getUsername(),
-               user.getPassword());
-
-      final var response = request.exchange();
-
-      final var result = response.returnResult(String.class);
-      final var cookies = result.getResponseCookies();
-      return cookies.getFirst("JSESSIONID");
-   }
-
    @Test
    @Order(3)
    public void logout_notLoggedIn() throws Exception {
@@ -225,11 +203,11 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    public void logout_withSession() throws Exception {
       final var user = USER_A;
       be.addUser(user);
-      final var sessionCookie = login(user);
+      final var cookies = be.login(user);
       final var request = be.connectWebTestClient("/logout").post()
                .headers(headers -> {
                   headers.setBasicAuth(user.getUsername(), user.getPassword());
-               }).cookie(sessionCookie.getName(), sessionCookie.getValue());
+               }).cookies(map -> McBackEndContainer.addCookies(map, cookies));
 
       final var response = request.exchange();
 

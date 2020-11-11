@@ -18,19 +18,24 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static java.util.stream.Collectors.toList;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
+import org.springframework.test.web.reactive.server.WebTestClient.RequestHeadersSpec;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriTemplate;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.WaitingConsumer;
@@ -67,6 +72,11 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
    private static final UriTemplate GAME_URI_TEMPLATE = new UriTemplate(
             "/api/scenario/{scenario}/game/{game}");
 
+   public static void addCookies(final MultiValueMap<String, String> dst,
+            final Collection<? extends HttpCookie> src) {
+      src.forEach(cookie -> dst.add(cookie.getName(), cookie.getValue()));
+   }
+
    private static String encodeAsJson(final Object obj) {
       try {
          final var mapper = new ObjectMapper();
@@ -76,27 +86,38 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       }
    }
 
-   private final String administratorPassword;
+   private final User administrator;
 
    McBackEndContainer(final String mongoDbHost, final String mongoDbPassword,
             final String administratorPassword) {
       super(IMAGE);
-      this.administratorPassword = Objects.requireNonNull(administratorPassword,
-               "administratorPassword");
+      administrator = new User(User.ADMINISTRATOR_USERNAME,
+               administratorPassword, Authority.ALL, true, true, true, true);
       waitingFor(WAIT_STRATEGY);
       withEnv("SPRING_DATA_MONGODB_PASSWORD", mongoDbPassword);
       withEnv("ADMINISTRATOR_PASSWORD", administratorPassword);
       withCommand("--spring.data.mongodb.host=" + mongoDbHost);
    }
 
-   public ResponseSpec addUser(final User user) {
-      Objects.requireNonNull(user, "user");
-      final var request = connectWebTestClient("/api/user").post()
-               .contentType(MediaType.APPLICATION_JSON)
-               .headers(headers -> headers.setBasicAuth(
-                        User.ADMINISTRATOR_USERNAME, administratorPassword))
-               .bodyValue(encodeAsJson(user));
-      return request.exchange();
+   public void addUser(final User user) {
+      try {
+         Objects.requireNonNull(user, "user");
+
+         final var cookies = login(administrator);
+         final var request = connectWebTestClient("/api/user").post()
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .cookies(cookiesMultiMap -> addCookies(cookiesMultiMap,
+                           cookies))
+                  .headers(headers -> headers.setBasicAuth(
+                           administrator.getUsername(),
+                           administrator.getPassword()))
+                  .bodyValue(encodeAsJson(user));
+
+         final var response = request.exchange();
+         response.expectStatus().is2xxSuccessful();
+      } catch (final Exception e) {
+         throw new RuntimeException("Failed to add user", e);
+      }
    }
 
    void assertHealthCheckOk() {
@@ -158,6 +179,13 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       return new Game.Identifier(scenario, created);
    }
 
+   RequestHeadersSpec<?> createGetSelfRequest(final String username,
+            final String password) {
+      return connectWebTestClient("/api/self").get()
+               .accept(MediaType.APPLICATION_JSON)
+               .headers(headers -> headers.setBasicAuth(username, password));
+   }
+
    private WebTestClient.ResponseSpec getJson(final String path) {
       return connectWebTestClient(path).get().accept(MediaType.APPLICATION_JSON)
                .exchange();
@@ -166,12 +194,25 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
    public WebTestClient.ResponseSpec getJsonAsAdministrator(final String path) {
       return connectWebTestClient(path).get().accept(MediaType.APPLICATION_JSON)
                .headers(headers -> headers.setBasicAuth(
-                        User.ADMINISTRATOR_USERNAME, administratorPassword))
+                        administrator.getUsername(),
+                        administrator.getPassword()))
                .exchange();
    }
 
    public Stream<NamedUUID> getScenarios() {
       return getJson("/api/scenario").returnResult(NamedUUID.class)
                .getResponseBody().toStream();
+   }
+
+   Collection<HttpCookie> login(final User user) {
+      final var request = createGetSelfRequest(user.getUsername(),
+               user.getPassword());
+
+      final var response = request.exchange();
+
+      final var result = response.returnResult(String.class);
+      final var cookies = result.getResponseCookies();
+      return cookies.values().stream()
+               .flatMap(cookieList -> cookieList.stream()).collect(toList());
    }
 }

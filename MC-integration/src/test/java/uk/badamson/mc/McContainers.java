@@ -149,12 +149,7 @@ public class McContainers
     *            If the addition was rejected by the back-end.
     */
    public void addUser(final User user) {
-      try {
-         final var response = be.addUser(user);
-         response.expectStatus().is2xxSuccessful();
-      } catch (final Exception e) {
-         throw new RuntimeException("Failed to add user", e);
-      }
+      be.addUser(user);
    }
 
    /**
