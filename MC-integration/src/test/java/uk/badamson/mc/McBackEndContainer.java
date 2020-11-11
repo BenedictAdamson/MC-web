@@ -115,6 +115,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
          final var response = request.exchange();
          response.expectStatus().is2xxSuccessful();
+         logout(administrator, cookies);
       } catch (final Exception e) {
          throw new RuntimeException("Failed to add user", e);
       }
@@ -214,5 +215,14 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       final var cookies = result.getResponseCookies();
       return cookies.values().stream()
                .flatMap(cookieList -> cookieList.stream()).collect(toList());
+   }
+
+   private void logout(final User user, final Collection<HttpCookie> cookies) {
+      final var request = connectWebTestClient("/logout").post()
+               .headers(headers -> headers.setBasicAuth(user.getUsername(),
+                        user.getPassword()))
+               .cookies(map -> addCookies(map, cookies));
+      final var response = request.exchange();
+      response.expectStatus().is2xxSuccessful();
    }
 }
