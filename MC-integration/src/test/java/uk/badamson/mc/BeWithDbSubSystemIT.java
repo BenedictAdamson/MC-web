@@ -144,9 +144,8 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
                         is(user.getAuthorities())),
                () -> assertThat("Sets session cookie", cookies,
                         hasKey("JSESSIONID")),
-               // At present CSRF protection is disabled
-               () -> assertThat("No CSRF cookie set", cookies,
-                        not(hasKey("XSRF-TOKEN"))));
+               () -> assertThat("Sets CSRF protection cookie", cookies,
+                        hasKey("XSRF-TOKEN")));
    }
 
    @Test
