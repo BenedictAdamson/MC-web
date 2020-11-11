@@ -217,6 +217,11 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
       final var result = response.returnResult(String.class);
       final var cookies = result.getResponseCookies();
+      if (!cookies.containsKey("JSESSIONID")
+               || !cookies.containsKey("XSRF-TOKEN")) {
+         throw new IllegalStateException(
+                  "Cookies missing from response " + cookies);
+      }
       return cookies.values().stream()
                .flatMap(cookieList -> cookieList.stream()).collect(toList());
    }
