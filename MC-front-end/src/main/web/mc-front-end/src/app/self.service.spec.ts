@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 
 import { SelfService } from './self.service';
 import { User } from './user';
@@ -65,10 +65,15 @@ describe('SelfService', () => {
 		assertNotAuthenticated();
 	});
 
-	const mockHttpAuthorizationFailure = function(expectAuthorizationHeader: boolean) {
-		const request = httpTestingController.expectOne('/api/self');
+	const expectAutheorizationRequestHeaders = function(expectAuthorizationHeader: boolean): TestRequest {
+		const request: TestRequest = httpTestingController.expectOne('/api/self');
 		expect(request.request.method).toEqual('GET');
 		expect(request.request.headers.has("Authorization")).withContext('has Authorization header').toEqual(expectAuthorizationHeader);
+		return request;
+	};
+
+	const mockHttpAuthorizationFailure = function(expectAuthorizationHeader: boolean) {
+		const request = expectAutheorizationRequestHeaders(expectAuthorizationHeader);
 		request.flush("", { headers: new HttpHeaders(), status: 401, statusText: 'Unauthorized' });
 		httpTestingController.verify();
 	};
@@ -112,9 +117,7 @@ describe('SelfService', () => {
 	});
 
 	let mockHttpAuthorizationSuccess = function(userDetails: User, expectAuthorizationHeader: boolean) {
-		const request = httpTestingController.expectOne('/api/self');
-		expect(request.request.method).toEqual('GET');
-		expect(request.request.headers.has("Authorization")).withContext('has Authorization header').toEqual(expectAuthorizationHeader);
+		const request = expectAutheorizationRequestHeaders(expectAuthorizationHeader);
 		request.flush(userDetails, { headers: new HttpHeaders(), status: 200, statusText: 'Ok' });
 		httpTestingController.verify();
 	};
