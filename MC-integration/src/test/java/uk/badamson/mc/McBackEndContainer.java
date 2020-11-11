@@ -163,9 +163,15 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    public Game.Identifier createGame(final UUID scenario) {
       Objects.requireNonNull(scenario, "scenario");
+
+      final var cookies = login(administrator);
       final var path = "/api/scenario/" + scenario + "/game";
-      final var response = connectWebTestClient(path).post()
-               .accept(MediaType.APPLICATION_JSON).exchange();
+      final var request = connectWebTestClient(path).post()
+               .accept(MediaType.APPLICATION_JSON);
+      secure(request, administrator, cookies);
+      final var response = request.exchange();
+      logout(administrator, cookies);
+
       response.expectStatus().isFound();
       final var location = response.returnResult(String.class)
                .getResponseHeaders().getLocation();
