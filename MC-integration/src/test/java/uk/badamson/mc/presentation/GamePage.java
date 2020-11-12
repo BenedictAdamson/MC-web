@@ -58,21 +58,25 @@ public final class GamePage extends Page {
     * @param scenarioPage
     *           The scenarios page.
     * @param creationTime
-    *           The expected creation time.
+    *           The expected creation time. Or {@code null} if the creation time
+    *           is unknown.
     * @throws NullPointerException
-    *            If {@code scenariosPage} is null. If {@code title} is null.
+    *            If {@code scenariosPage} is null.
     */
    public GamePage(final ScenarioPage scenarioPage, final String creationTime) {
       super(scenarioPage);
-      Objects.requireNonNull(creationTime, "creationTime");
       this.scenarioTitle = scenarioPage.getScenarioTitle();
-      includesCreationTime = containsString(creationTime);
+      includesCreationTime = creationTime == null ? null
+               : containsString(creationTime);
       includesScenarioTitile = containsString(scenarioTitle);
    }
 
    public void assertIncludesCreationTime() {
-      assertThat("includes creation time", getBody().getText(),
-               includesCreationTime);
+      if (includesCreationTime != null) {
+         assertThat("includes creation time", getBody().getText(),
+                  includesCreationTime);
+      }
+      // else can not check
    }
 
    public void assertIncludesScenarioTitle() {
@@ -82,8 +86,10 @@ public final class GamePage extends Page {
 
    @Override
    protected void assertValidBody(@Nonnull final WebElement body) {
-      assertThat("Body text", body.getText(), allOf(INDICATES_IS_A_GAME,
-               includesCreationTime, includesScenarioTitile));
+      if (includesCreationTime != null) {
+         assertThat("Body text", body.getText(), allOf(INDICATES_IS_A_GAME,
+                  includesCreationTime, includesScenarioTitile));
+      } // else can not check
    }
 
    @Override

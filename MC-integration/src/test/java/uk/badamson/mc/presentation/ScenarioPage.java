@@ -40,6 +40,7 @@ public final class ScenarioPage extends Page {
    private static final String BASE = "/scenario/";
 
    private static final By GAMES_LIST_LOCATOR = By.id("games");
+   private static final By CREATE_GAME_LOCATOR = By.id("create-game");
 
    private final String scenarioTitle;
 
@@ -106,6 +107,14 @@ public final class ScenarioPage extends Page {
       final var link = listEntry.findElement(By.tagName("a"));
       link.click();
       final var gamePage = new GamePage(this, title);
+      gamePage.awaitIsReady();
+      return gamePage;
+   }
+
+   public GamePage createGame() {
+      final var button = getBody().findElement(CREATE_GAME_LOCATOR);
+      button.click();
+      final var gamePage = new GamePage(this, null);
       gamePage.awaitIsReady();
       return gamePage;
    }

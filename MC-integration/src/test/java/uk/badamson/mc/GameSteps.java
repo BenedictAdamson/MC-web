@@ -45,6 +45,14 @@ public class GameSteps extends Steps {
       super(world);
    }
 
+   @When("creating a game")
+   public void creating_game() {
+      scenarioIndex = 0;
+      navigateToScenario();
+      world.setExpectedPage(
+               world.getExpectedPage(ScenarioPage.class).createGame());
+   }
+
    @Then("The game page includes the scenario description")
    public void game_page_includes_scenario_description() {
       // hard to test
