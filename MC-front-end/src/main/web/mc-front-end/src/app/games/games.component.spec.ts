@@ -43,7 +43,7 @@ describe('GamesComponent', () => {
 		component = fixture.componentInstance;
 		fixture.detectChanges();
 	};
-	const canCreate = function(scenario: uuid, gamesOfScenario: string[]) {
+	const testNgInit = function(scenario: uuid, gamesOfScenario: string[]) {
 		setUp(scenario, gamesOfScenario);
 
 		expect(component).toBeTruthy();
@@ -68,10 +68,10 @@ describe('GamesComponent', () => {
 		expect(createGame).withContext('#create-game element').not.toBeNull();
 		expect(createGame.innerText).withContext('#create-game element text').toEqual('Create game');
 	};
-	it('can create [a]', () => {
-		canCreate(SCENARIO_A, GAMES_0);
+	it('can initialize [a]', () => {
+		testNgInit(SCENARIO_A, GAMES_0);
 	});
-	it('can create [b]', () => {
-		canCreate(SCENARIO_B, GAMES_2);
+	it('can initialize [b]', () => {
+		testNgInit(SCENARIO_B, GAMES_2);
 	});
 });
