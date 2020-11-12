@@ -46,6 +46,23 @@ export class GameService {
 	}
 
     /**
+     * Create a new game for a given scenario.
+     *
+     * @param scenario
+     * The unique ID of the scenario for which to create a gave.
+     * @returns
+     * An [[Observable]] that provides the created game.
+     * The [[GameIdentifier.scenario]] of the [[Game.identifier]] of the created game
+     * is equal to the given {@code scenario}.
+     */
+	createGame(scenario: uuid): Observable<Game> {
+		/* The server actually replies to the POST with a 302 (Found) redirect to the resource of the created game.
+		 * The HttpoClient or browser itself handles that redirect for us.
+	     */
+		return this.http.post<Game>(GameService.getGamesPath(scenario), "");
+	}
+
+    /**
      * Handle Http operation that failed.
      * Let the app continue.
      * @param operation - name of the operation that failed
