@@ -1,7 +1,7 @@
 import { v4 as uuid, parse as parseUuid } from 'uuid';
 
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { GameService } from '../game.service';
 
@@ -17,6 +17,7 @@ export class GamesComponent implements OnInit {
 
 	constructor(
 		private route: ActivatedRoute,
+		private readonly router: Router,
 		private gameService: GameService
 	) { }
 
@@ -29,5 +30,15 @@ export class GamesComponent implements OnInit {
 	private getGames(): void {
 		this.gameService.getGamesOfScenario(this.scenario)
 			.subscribe(games => this.games = games);
+	}
+
+	/**
+     * Attempts to create a new game for the scenario of this games list.
+     * On completion, redirects to the the game page for that game.
+	 */
+	createGame(): void {
+		this.gameService.createGame(this.scenario).subscribe(
+			game => this.router.navigateByUrl(GameService.getGamePath(game.identifier))
+		);
 	}
 }
