@@ -52,6 +52,8 @@ describe('GamesComponent', () => {
 
 		const html: HTMLElement = fixture.nativeElement;
 		const gamesList: HTMLUListElement = html.querySelector('#games');
+		const createGame: HTMLElement = html.querySelector('#create-game');
+
 		expect(gamesList).withContext('games list').not.toBeNull();
 		const gameEntries: NodeListOf<HTMLLIElement> = gamesList.querySelectorAll('li');
 		expect(gameEntries.length).withContext('number of game entries').toBe(gamesOfScenario.length);
@@ -62,6 +64,9 @@ describe('GamesComponent', () => {
 			expect(link).withContext('entry has link').not.toBeNull();
 			expect(link.textContent).withContext('entry link text contains game title').toContain(expectedGame);
 		}
+
+		expect(createGame).withContext('#create-game element').not.toBeNull();
+		expect(createGame.innerText).withContext('#create-game element text').toEqual('Create game');
 	};
 	it('can create [a]', () => {
 		canCreate(SCENARIO_A, GAMES_0);

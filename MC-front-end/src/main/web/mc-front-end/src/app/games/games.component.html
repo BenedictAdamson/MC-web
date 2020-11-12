@@ -1,5 +1,7 @@
 <nav>
 <h3>Games of this scenario</h3>
+
+<a id="create-game" href='#FIXME'>Create game</a>
 <ul id="games">
     <li *ngFor="let game of games">
         <a [routerLink]="['/scenario',scenario,'game',game]">
