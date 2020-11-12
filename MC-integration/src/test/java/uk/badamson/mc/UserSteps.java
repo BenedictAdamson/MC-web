@@ -45,9 +45,9 @@ public class UserSteps extends Steps {
    private static Authority parseRoleName(final String roleName) {
       final Authority role;
       try {
-         role = Authority.valueOf(roleName);
+         role = Authority.valueOf("ROLE_" + roleName);
       } catch (final Exception e) {
-         throw new IllegalArgumentException("roleName", e);
+         throw new IllegalArgumentException("roleName "+roleName, e);
       }
       return role;
    }
