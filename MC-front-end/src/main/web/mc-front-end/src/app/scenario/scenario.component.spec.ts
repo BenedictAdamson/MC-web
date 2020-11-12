@@ -21,7 +21,7 @@ describe('ScenarioComponent', () => {
 	const GAMES_0: string[] = [];
 	const GAMES_2: string[] = ['1970-01-01T00:00:00.000Z', '2020-12-31T23:59:59.999Z'];
 
-	const setUp = (testScenario: Scenario, gamesOfScenario: string[]) => {
+	const setUpForNgInit = function(testScenario: Scenario, gamesOfScenario: string[])  {
 		const scenarioServiceStub = jasmine.createSpyObj('ScenarioService', ['getScenario']);
 		scenarioServiceStub.getScenario.and.returnValue(of(testScenario));
 
@@ -49,7 +49,7 @@ describe('ScenarioComponent', () => {
 		fixture.detectChanges();
 	};
 	const canCreate = (testScenario: Scenario, gamesOfScenario: string[]) => {
-		setUp(testScenario, gamesOfScenario);
+		setUpForNgInit(testScenario, gamesOfScenario);
 
 		expect(component).toBeTruthy();
 		expect(component.scenario).toBe(testScenario);
