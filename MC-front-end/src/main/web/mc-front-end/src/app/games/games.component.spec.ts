@@ -1,4 +1,4 @@
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
@@ -8,14 +8,33 @@ import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
 import { GameService } from '../game.service';
 import { GamesComponent } from './games.component';
+import { SelfService } from '../self.service';
+import { User } from '../user';
 
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+
+class MockSelfService {
+
+	constructor(private self: User) { };
+
+	get username(): string {
+		return this.self.username;
+	}
+
+
+	get authorities$(): Observable<string[]> {
+		return of(this.self.authorities);
+	}
+}
 
 describe('GamesComponent', () => {
 	let routerSpy: any;
 	let component: GamesComponent;
 	let fixture: ComponentFixture<GamesComponent>;
+
+	const USER_ADMIN = { username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
+	const USER_NORMAL = { username: 'Benedict', password: null, authorities: [] };
 
 	const SCENARIO_A: uuid = uuid();
 	const SCENARIO_B: uuid = uuid();
@@ -28,7 +47,7 @@ describe('GamesComponent', () => {
 	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A };
 	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B };
 
-	const setUpForNgInit = function(scenario: uuid, gamesOfScenario: string[]) {
+	const setUpForNgInit = function(self: User, scenario: uuid, gamesOfScenario: string[]) {
 		const gameServiceStub = jasmine.createSpyObj('GameService', ['getGamesOfScenario']);
 		gameServiceStub.getGamesOfScenario.and.returnValue(of(gamesOfScenario));
 
@@ -46,15 +65,16 @@ describe('GamesComponent', () => {
 					}
 				}
 			},
-			{ provide: GameService, useValue: gameServiceStub }]
+			{ provide: GameService, useValue: gameServiceStub },
+			{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }]
 		});
 
 		fixture = TestBed.createComponent(GamesComponent);
 		component = fixture.componentInstance;
 		fixture.detectChanges();
 	};
-	const testNgInit = function(scenario: uuid, gamesOfScenario: string[]) {
-		setUpForNgInit(scenario, gamesOfScenario);
+	const testNgInit = function(self: User, scenario: uuid, gamesOfScenario: string[]) {
+		setUpForNgInit(self, scenario, gamesOfScenario);
 
 		expect(component).toBeTruthy();
 		expect(component.scenario).toBe(scenario);
@@ -62,7 +82,6 @@ describe('GamesComponent', () => {
 
 		const html: HTMLElement = fixture.nativeElement;
 		const gamesList: HTMLUListElement = html.querySelector('#games');
-		const createGame: HTMLElement = html.querySelector('#create-game');
 
 		expect(gamesList).withContext('games list').not.toBeNull();
 		const gameEntries: NodeListOf<HTMLLIElement> = gamesList.querySelectorAll('li');
@@ -74,15 +93,12 @@ describe('GamesComponent', () => {
 			expect(link).withContext('entry has link').not.toBeNull();
 			expect(link.textContent).withContext('entry link text contains game title').toContain(expectedGame);
 		}
-
-		expect(createGame).withContext('#create-game element').not.toBeNull();
-		expect(createGame.innerText).withContext('#create-game element text').toEqual('Create game');
 	};
 	it('can initialize [a]', () => {
-		testNgInit(SCENARIO_A, GAMES_0);
+		testNgInit(USER_ADMIN, SCENARIO_A, GAMES_0);
 	});
 	it('can initialize [b]', () => {
-		testNgInit(SCENARIO_B, GAMES_2);
+		testNgInit(USER_NORMAL, SCENARIO_B, GAMES_2);
 	});
 
 
@@ -110,8 +126,8 @@ describe('GamesComponent', () => {
 				}
 			},
 			{ provide: GameService, useValue: gameServiceSpy },
-
-			{ provide: Router, useValue: routerSpy },]
+			{ provide: Router, useValue: routerSpy },
+			{ provide: SelfService, useFactory: () => { return new MockSelfService(USER_ADMIN); } }]
 		});
 
 		fixture = TestBed.createComponent(GamesComponent);
@@ -138,4 +154,21 @@ describe('GamesComponent', () => {
 	it('can create game [B]', fakeAsync(() => {
 		testCreateGame(GAME_B);
 	}));
+
+	it('does not provide a create game button for normal users', () => {
+		setUpForNgInit(USER_NORMAL, SCENARIO_A, []);
+
+		const html: HTMLElement = fixture.nativeElement;
+		const createGameButton: HTMLButtonElement = html.querySelector('button#create-game');
+		expect(createGameButton).toBeNull();
+	});
+
+	it('provides a create game button for an administrator', () => {
+		setUpForNgInit(USER_ADMIN, SCENARIO_A, []);
+
+		const html: HTMLElement = fixture.nativeElement;
+		const createGameButton: HTMLButtonElement = html.querySelector('button#create-game');
+		expect(createGameButton).withContext('#create-game button').not.toBeNull();
+		expect(createGameButton.innerText).withContext('#create-game button text').toEqual('Create game');
+	});
 });
