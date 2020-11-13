@@ -70,8 +70,12 @@ const routes: Routes = [
 })
 export class AppRoutingModule {
 
+	static getScenarioPath(scenario: uuid): string {
+		return '/scenario/' + scenario;
+	}
+
 	static getGamesPath(scenario: uuid): string {
-		return '/scenario/' + scenario + '/game/';
+		return AppRoutingModule.getScenarioPath(scenario) + '/game/';
 	}
 
 	static getGamePath(id: GameIdentifier): string {

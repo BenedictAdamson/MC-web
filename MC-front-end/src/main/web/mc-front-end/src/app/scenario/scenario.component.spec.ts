@@ -18,7 +18,7 @@ describe('ScenarioComponent', () => {
 	const SCENARIO_A: Scenario = { identifier: IDENTIFIER_A, title: 'Section Attack', description: 'Basic fire-and-movement tactical training.' };
 	const SCENARIO_B: Scenario = { identifier: IDENTIFIER_B, title: 'Beach Assault', description: 'Fast and deadly.' };
 
-	const setUpForNgInit = function(testScenario: Scenario,)  {
+	const setUpForNgInit = function(testScenario: Scenario,) {
 		const scenarioServiceStub = jasmine.createSpyObj('ScenarioService', ['getScenario']);
 		scenarioServiceStub.getScenario.and.returnValue(of(testScenario));
 
@@ -49,8 +49,10 @@ describe('ScenarioComponent', () => {
 
 		const html: HTMLElement = fixture.nativeElement;
 		const displayText: string = html.innerText;
+		const selfLink: HTMLAnchorElement = html.querySelector('a#scenario');
 		expect(displayText.includes(testScenario.title)).withContext("displayed text includes title").toBeTrue();
 		expect(displayText.includes(testScenario.description)).withContext("displayed text includes description").toBeTrue();
+		expect(selfLink).withContext("self link").not.toBeNull();
 	};
 	it('can create [a]', () => {
 		canCreate(SCENARIO_A);
