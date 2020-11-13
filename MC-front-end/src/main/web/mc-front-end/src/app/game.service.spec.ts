@@ -48,7 +48,7 @@ describe('GameService', () => {
 
 		service.getGamesOfScenario(scenario).subscribe(ids => expect(ids).toEqual(identifiers));
 
-		const request = httpTestingController.expectOne(GameService.getGamesPath(scenario));
+		const request = httpTestingController.expectOne(GameService.getApiGamesPath(scenario));
 		expect(request.request.method).toEqual('GET');
 		request.flush(identifiers);
 		httpTestingController.verify();
@@ -71,7 +71,7 @@ describe('GameService', () => {
 
 		service.getGame(game.identifier).subscribe(g => expect(g).toEqual(game));
 
-		const request = httpTestingController.expectOne(GameService.getGamePath(game.identifier));
+		const request = httpTestingController.expectOne(GameService.getApiGamePath(game.identifier));
 		expect(request.request.method).toEqual('GET');
 		request.flush(game);
 		httpTestingController.verify();
@@ -97,7 +97,7 @@ describe('GameService', () => {
 			expect(game.identifier.scenario).withContext('Game.identifier.scenario').toEqual(scenario);
 		});
 
-		const request = httpTestingController.expectOne(GameService.getGamesPath(scenario));
+		const request = httpTestingController.expectOne(GameService.getApiGamesPath(scenario));
 		expect(request.request.method).toEqual('POST');
 		request.flush(createdGame);
 		httpTestingController.verify();

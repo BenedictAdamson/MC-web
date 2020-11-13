@@ -1,5 +1,6 @@
 import { v4 as uuid, parse as parseUuid } from 'uuid';
 
+import { AppRoutingModule } from '../app-routing.module';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -38,7 +39,7 @@ export class GamesComponent implements OnInit {
 	 */
 	createGame(): void {
 		this.gameService.createGame(this.scenario).subscribe(
-			game => this.router.navigateByUrl(GameService.getGamePath(game.identifier))
+			game => this.router.navigateByUrl(AppRoutingModule.getGamePath(game.identifier))
 		);
 	}
 }

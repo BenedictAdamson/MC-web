@@ -3,6 +3,7 @@ import { v4 as uuid } from 'uuid';
 
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 
+import { AppRoutingModule } from '../app-routing.module';
 import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
 import { GameService } from '../game.service';
@@ -22,10 +23,10 @@ describe('GamesComponent', () => {
 	const CREATED_B: string = '2020-12-31T23:59:59.999Z';
 	const GAMES_0: string[] = [];
 	const GAMES_2: string[] = [CREATED_A, CREATED_B];
-	const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_A, created: CREATED_A};
-	const GAME_IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_B, created: CREATED_B};
-	const GAME_A: Game = {identifier: GAME_IDENTIFIER_A};
-	const GAME_B: Game = {identifier: GAME_IDENTIFIER_B};
+	const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_A, created: CREATED_A };
+	const GAME_IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_B, created: CREATED_B };
+	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A };
+	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B };
 
 	const setUpForNgInit = function(scenario: uuid, gamesOfScenario: string[]) {
 		const gameServiceStub = jasmine.createSpyObj('GameService', ['getGamesOfScenario']);
@@ -109,8 +110,8 @@ describe('GamesComponent', () => {
 				}
 			},
 			{ provide: GameService, useValue: gameServiceSpy },
-			
-				{ provide: Router, useValue: routerSpy },]
+
+			{ provide: Router, useValue: routerSpy },]
 		});
 
 		fixture = TestBed.createComponent(GamesComponent);
@@ -118,7 +119,7 @@ describe('GamesComponent', () => {
 		fixture.detectChanges();
 	};
 	const testCreateGame = function(game: Game) {
-		const expectedPath: string = GameService.getGamePath(game.identifier);
+		const expectedPath: string = AppRoutingModule.getGamePath(game.identifier);
 		setUpForCreateGame(game);
 
 		component.createGame();

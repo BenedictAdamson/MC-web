@@ -1,8 +1,11 @@
+import { v4 as uuid } from 'uuid';
+
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { AddUserComponent } from './add-user/add-user.component';
 import { GameComponent } from './game/game.component';
+import { GameIdentifier } from './game-identifier'
 import { GamesComponent } from './games/games.component';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
@@ -65,4 +68,13 @@ const routes: Routes = [
 		RouterModule
 	]
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {
+
+	static getGamesPath(scenario: uuid): string {
+		return '/scenario/' + scenario + '/game/';
+	}
+
+	static getGamePath(id: GameIdentifier): string {
+		return AppRoutingModule.getGamesPath(id.scenario) + id.created;
+	}
+}
