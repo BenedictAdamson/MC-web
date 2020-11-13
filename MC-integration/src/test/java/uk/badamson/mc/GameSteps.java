@@ -70,6 +70,11 @@ public class GameSteps extends Steps {
                .assertIncludesCreationTime();
    }
 
+   @Then("MC accepts the creation of the game")
+   public void mc_accepts_creation_of_game() {
+      world.getAndAssertExpectedPage(GamePage.class).assertInvariants();
+   }
+
    @Then("MC serves the game page")
    public void mc_serves_game_page() {
       world.getAndAssertExpectedPage(GamePage.class).assertInvariants();
