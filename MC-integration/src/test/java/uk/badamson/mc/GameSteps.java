@@ -18,6 +18,8 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import javax.annotation.Nonnull;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,8 @@ public class GameSteps extends Steps {
 
    private int gameIndex;
 
+   private int nGames0;
+
    private Game.Identifier identifier;
 
    @Autowired
@@ -57,8 +61,9 @@ public class GameSteps extends Steps {
    public void creating_game() {
       scenarioIndex = 0;
       navigateToScenario();
-      world.setExpectedPage(
-               world.getExpectedPage(ScenarioPage.class).createGame());
+      final var scenarioPage = world.getExpectedPage(ScenarioPage.class);
+      nGames0 = scenarioPage.getNumberOfGamesListed();
+      world.setExpectedPage(scenarioPage.createGame());
    }
 
    @Then("The game page includes the scenario description")
@@ -76,6 +81,13 @@ public class GameSteps extends Steps {
    public void game_page_includes_time_set_up() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIncludesCreationTime();
+   }
+
+   @Then("the list of games includes the new game")
+   public void list_of_games_includes_new_game() {
+      final var nGames = world.getExpectedPage(ScenarioPage.class)
+               .getNumberOfGamesListed();
+      assertEquals(nGames0 + 1, nGames, "Added a game to the list of games");
    }
 
    @Then("MC accepts the creation of the game")

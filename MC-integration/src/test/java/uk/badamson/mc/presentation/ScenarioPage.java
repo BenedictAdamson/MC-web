@@ -84,10 +84,22 @@ public final class ScenarioPage extends Page {
       assertDisplaysScenarioTitle(body);
    }
 
-   public List<WebElement> findGameElements() {
+   public GamePage createGame() {
+      final var button = getBody().findElement(CREATE_GAME_LOCATOR);
+      button.click();
+      final var gamePage = new GamePage(this, null);
+      gamePage.awaitIsReady();
+      return gamePage;
+   }
+
+   private List<WebElement> findGameElements() {
       requireIsReady();
       return getBody().findElement(GAMES_LIST_LOCATOR)
                .findElements(By.tagName("li"));
+   }
+
+   public int getNumberOfGamesListed() {
+      return findGameElements().size();
    }
 
    public String getScenarioTitle() {
@@ -107,14 +119,6 @@ public final class ScenarioPage extends Page {
       final var link = listEntry.findElement(By.tagName("a"));
       link.click();
       final var gamePage = new GamePage(this, title);
-      gamePage.awaitIsReady();
-      return gamePage;
-   }
-
-   public GamePage createGame() {
-      final var button = getBody().findElement(CREATE_GAME_LOCATOR);
-      button.click();
-      final var gamePage = new GamePage(this, null);
       gamePage.awaitIsReady();
       return gamePage;
    }
