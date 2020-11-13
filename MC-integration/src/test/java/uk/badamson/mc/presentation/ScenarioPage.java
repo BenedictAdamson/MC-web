@@ -85,11 +85,15 @@ public final class ScenarioPage extends Page {
    }
 
    public GamePage createGame() {
-      final var button = getBody().findElement(CREATE_GAME_LOCATOR);
+      final var button = findCreateGameButton();
       button.click();
       final var gamePage = new GamePage(this, null);
       gamePage.awaitIsReady();
       return gamePage;
+   }
+
+   private WebElement findCreateGameButton() {
+      return getBody().findElement(CREATE_GAME_LOCATOR);
    }
 
    private List<WebElement> findGameElements() {
@@ -104,6 +108,10 @@ public final class ScenarioPage extends Page {
 
    public String getScenarioTitle() {
       return scenarioTitle;
+   }
+
+   public boolean hasCreateGameButton() {
+      return !getBody().findElements(CREATE_GAME_LOCATOR).isEmpty();
    }
 
    @Override

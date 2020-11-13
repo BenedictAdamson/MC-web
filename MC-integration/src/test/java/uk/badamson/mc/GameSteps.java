@@ -19,6 +19,7 @@ package uk.badamson.mc;
  */
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import javax.annotation.Nonnull;
 
@@ -60,8 +61,7 @@ public class GameSteps extends Steps {
    @When("creating a game")
    public void creating_game() {
       scenarioIndex = 0;
-      navigateToScenario();
-      final var scenarioPage = world.getExpectedPage(ScenarioPage.class);
+      final var scenarioPage = navigateToScenario();
       nGames0 = scenarioPage.getNumberOfGamesListed();
       world.setExpectedPage(scenarioPage.createGame());
    }
@@ -95,6 +95,12 @@ public class GameSteps extends Steps {
       world.getAndAssertExpectedPage(GamePage.class).assertInvariants();
    }
 
+   @Then("MC does not present creating a game as an option")
+   public void mc_does_not_present_creating_game_option() {
+      final var scenarioPage = navigateToScenario();
+      assertFalse(scenarioPage.hasCreateGameButton());
+   }
+
    @Then("MC serves the game page")
    public void mc_serves_game_page() {
       world.getAndAssertExpectedPage(GamePage.class).assertInvariants();
@@ -107,9 +113,11 @@ public class GameSteps extends Steps {
       world.setExpectedPage(scenarioPage.navigateToGamePage(gameIndex));
    }
 
-   private void navigateToScenario() {
-      final var scenariosPage = world.getHomePage().navigateToScenariosPage();
-      world.setExpectedPage(scenariosPage.navigateToScenario(scenarioIndex));
+   private ScenarioPage navigateToScenario() {
+      final var scenarioPage = world.getHomePage().navigateToScenariosPage()
+               .navigateToScenario(scenarioIndex);
+      world.setExpectedPage(scenarioPage);
+      return scenarioPage;
    }
 
    @When("A scenario has games")
@@ -121,7 +129,6 @@ public class GameSteps extends Steps {
 
    @When("Viewing the games of the scenario")
    public void viewing_games_of_scenario() {
-      navigateToScenario();
-      world.getExpectedPage(ScenarioPage.class).requireIsReady();
+      navigateToScenario().requireIsReady();
    }
 }
