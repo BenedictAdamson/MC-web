@@ -40,6 +40,7 @@ public final class ScenarioPage extends Page {
    private static final String BASE = "/scenario/";
 
    private static final By GAMES_LIST_LOCATOR = By.id("games");
+   private static final By CREATE_GAME_LOCATOR = By.id("create-game");
 
    private final String scenarioTitle;
 
@@ -83,14 +84,34 @@ public final class ScenarioPage extends Page {
       assertDisplaysScenarioTitle(body);
    }
 
-   public List<WebElement> findGameElements() {
+   public GamePage createGame() {
+      final var button = findCreateGameButton();
+      button.click();
+      final var gamePage = new GamePage(this, null);
+      gamePage.awaitIsReady();
+      return gamePage;
+   }
+
+   private WebElement findCreateGameButton() {
+      return getBody().findElement(CREATE_GAME_LOCATOR);
+   }
+
+   private List<WebElement> findGameElements() {
       requireIsReady();
       return getBody().findElement(GAMES_LIST_LOCATOR)
                .findElements(By.tagName("li"));
    }
 
+   public int getNumberOfGamesListed() {
+      return findGameElements().size();
+   }
+
    public String getScenarioTitle() {
       return scenarioTitle;
+   }
+
+   public boolean hasCreateGameButton() {
+      return !getBody().findElements(CREATE_GAME_LOCATOR).isEmpty();
    }
 
    @Override

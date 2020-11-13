@@ -28,6 +28,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 import org.hamcrest.Matcher;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.springframework.web.util.UriTemplate;
 
@@ -43,9 +44,9 @@ public final class GamePage extends Page {
             "/scenario/{scenario}/game/{created}");
    private static final Matcher<String> INDICATES_IS_A_GAME = containsString(
             "Game");
+   private static final By SCENARIO_LINK_LOCATOR = By.id("scenario");
 
-   private final String scenarioTitle;
-
+   private final ScenarioPage scenarioPage;
    private final Matcher<String> includesCreationTime;
    private final Matcher<String> includesScenarioTitile;
 
@@ -58,21 +59,25 @@ public final class GamePage extends Page {
     * @param scenarioPage
     *           The scenarios page.
     * @param creationTime
-    *           The expected creation time.
+    *           The expected creation time. Or {@code null} if the creation time
+    *           is unknown.
     * @throws NullPointerException
-    *            If {@code scenariosPage} is null. If {@code title} is null.
+    *            If {@code scenariosPage} is null.
     */
    public GamePage(final ScenarioPage scenarioPage, final String creationTime) {
       super(scenarioPage);
-      Objects.requireNonNull(creationTime, "creationTime");
-      this.scenarioTitle = scenarioPage.getScenarioTitle();
-      includesCreationTime = containsString(creationTime);
-      includesScenarioTitile = containsString(scenarioTitle);
+      this.scenarioPage = scenarioPage;
+      includesCreationTime = creationTime == null ? null
+               : containsString(creationTime);
+      includesScenarioTitile = containsString(scenarioPage.getScenarioTitle());
    }
 
    public void assertIncludesCreationTime() {
-      assertThat("includes creation time", getBody().getText(),
-               includesCreationTime);
+      if (includesCreationTime != null) {
+         assertThat("includes creation time", getBody().getText(),
+                  includesCreationTime);
+      }
+      // else can not check
    }
 
    public void assertIncludesScenarioTitle() {
@@ -82,8 +87,10 @@ public final class GamePage extends Page {
 
    @Override
    protected void assertValidBody(@Nonnull final WebElement body) {
-      assertThat("Body text", body.getText(), allOf(INDICATES_IS_A_GAME,
-               includesCreationTime, includesScenarioTitile));
+      if (includesCreationTime != null) {
+         assertThat("Body text", body.getText(), allOf(INDICATES_IS_A_GAME,
+                  includesCreationTime, includesScenarioTitile));
+      } // else can not check
    }
 
    @Override
@@ -96,5 +103,13 @@ public final class GamePage extends Page {
    protected boolean isValidPath(@Nonnull final String path) {
       Objects.requireNonNull(path, "path");
       return URI_TEMPLATE.matches(path);
+   }
+
+   public ScenarioPage navigateToScenarioPage() {
+      requireIsReady();
+      final var link = getBody().findElement(SCENARIO_LINK_LOCATOR);
+      link.click();
+      scenarioPage.awaitIsReady();
+      return scenarioPage;
    }
 }

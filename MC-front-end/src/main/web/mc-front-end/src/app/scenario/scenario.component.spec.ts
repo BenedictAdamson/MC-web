@@ -2,7 +2,6 @@ import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { of } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
-import { GameService } from '../game.service';
 import { Scenario } from '../scenario';
 import { ScenarioComponent } from './scenario.component';
 import { ScenarioService } from '../scenario.service';
@@ -18,15 +17,10 @@ describe('ScenarioComponent', () => {
 	const IDENTIFIER_B: uuid = uuid();
 	const SCENARIO_A: Scenario = { identifier: IDENTIFIER_A, title: 'Section Attack', description: 'Basic fire-and-movement tactical training.' };
 	const SCENARIO_B: Scenario = { identifier: IDENTIFIER_B, title: 'Beach Assault', description: 'Fast and deadly.' };
-	const GAMES_0: string[] = [];
-	const GAMES_2: string[] = ['1970-01-01T00:00:00.000Z', '2020-12-31T23:59:59.999Z'];
 
-	const setUp = (testScenario: Scenario, gamesOfScenario: string[]) => {
+	const setUpForNgInit = function(testScenario: Scenario,) {
 		const scenarioServiceStub = jasmine.createSpyObj('ScenarioService', ['getScenario']);
 		scenarioServiceStub.getScenario.and.returnValue(of(testScenario));
-
-		const gameServiceStub = jasmine.createSpyObj('GameService', ['getGamesOfScenario']);
-		gameServiceStub.getGamesOfScenario.and.returnValue(of(gamesOfScenario));
 
 		TestBed.configureTestingModule({
 			imports: [RouterTestingModule],
@@ -40,7 +34,6 @@ describe('ScenarioComponent', () => {
 					}
 				}
 			},
-			{ provide: GameService, useValue: gameServiceStub },
 			{ provide: ScenarioService, useValue: scenarioServiceStub }]
 		});
 
@@ -48,22 +41,23 @@ describe('ScenarioComponent', () => {
 		component = fixture.componentInstance;
 		fixture.detectChanges();
 	};
-	const canCreate = (testScenario: Scenario, gamesOfScenario: string[]) => {
-		setUp(testScenario, gamesOfScenario);
+	const canCreate = (testScenario: Scenario) => {
+		setUpForNgInit(testScenario);
 
 		expect(component).toBeTruthy();
 		expect(component.scenario).toBe(testScenario);
-		expect(component.games).toBe(gamesOfScenario);
 
 		const html: HTMLElement = fixture.nativeElement;
 		const displayText: string = html.innerText;
+		const selfLink: HTMLAnchorElement = html.querySelector('a#scenario');
 		expect(displayText.includes(testScenario.title)).withContext("displayed text includes title").toBeTrue();
 		expect(displayText.includes(testScenario.description)).withContext("displayed text includes description").toBeTrue();
+		expect(selfLink).withContext("self link").not.toBeNull();
 	};
 	it('can create [a]', () => {
-		canCreate(SCENARIO_A, GAMES_0);
+		canCreate(SCENARIO_A);
 	});
 	it('can create [b]', () => {
-		canCreate(SCENARIO_B, GAMES_2);
+		canCreate(SCENARIO_B);
 	});
 });

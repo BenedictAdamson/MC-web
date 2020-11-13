@@ -18,6 +18,9 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 import javax.annotation.Nonnull;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +41,29 @@ public class GameSteps extends Steps {
 
    private int gameIndex;
 
+   private int nGames0;
+
    private Game.Identifier identifier;
 
    @Autowired
    public GameSteps(@Nonnull final World world) {
       super(world);
+   }
+
+   @Then("can get the list of games")
+   public void can_get_list_of_games() {
+      final var scenarioPage = world.getExpectedPage(GamePage.class)
+               .navigateToScenarioPage();
+      scenarioPage.assertHasListOfGames();
+      world.setExpectedPage(scenarioPage);
+   }
+
+   @When("creating a game")
+   public void creating_game() {
+      scenarioIndex = 0;
+      final var scenarioPage = navigateToScenario();
+      nGames0 = scenarioPage.getNumberOfGamesListed();
+      world.setExpectedPage(scenarioPage.createGame());
    }
 
    @Then("The game page includes the scenario description")
@@ -62,6 +83,24 @@ public class GameSteps extends Steps {
                .assertIncludesCreationTime();
    }
 
+   @Then("the list of games includes the new game")
+   public void list_of_games_includes_new_game() {
+      final var nGames = world.getExpectedPage(ScenarioPage.class)
+               .getNumberOfGamesListed();
+      assertEquals(nGames0 + 1, nGames, "Added a game to the list of games");
+   }
+
+   @Then("MC accepts the creation of the game")
+   public void mc_accepts_creation_of_game() {
+      world.getAndAssertExpectedPage(GamePage.class).assertInvariants();
+   }
+
+   @Then("MC does not present creating a game as an option")
+   public void mc_does_not_present_creating_game_option() {
+      final var scenarioPage = navigateToScenario();
+      assertFalse(scenarioPage.hasCreateGameButton());
+   }
+
    @Then("MC serves the game page")
    public void mc_serves_game_page() {
       world.getAndAssertExpectedPage(GamePage.class).assertInvariants();
@@ -74,9 +113,11 @@ public class GameSteps extends Steps {
       world.setExpectedPage(scenarioPage.navigateToGamePage(gameIndex));
    }
 
-   private void navigateToScenario() {
-      final var scenariosPage = world.getHomePage().navigateToScenariosPage();
-      world.setExpectedPage(scenariosPage.navigateToScenario(scenarioIndex));
+   private ScenarioPage navigateToScenario() {
+      final var scenarioPage = world.getHomePage().navigateToScenariosPage()
+               .navigateToScenario(scenarioIndex);
+      world.setExpectedPage(scenarioPage);
+      return scenarioPage;
    }
 
    @When("A scenario has games")
@@ -88,7 +129,6 @@ public class GameSteps extends Steps {
 
    @When("Viewing the games of the scenario")
    public void viewing_games_of_scenario() {
-      navigateToScenario();
-      world.getExpectedPage(ScenarioPage.class).requireIsReady();
+      navigateToScenario().requireIsReady();
    }
 }

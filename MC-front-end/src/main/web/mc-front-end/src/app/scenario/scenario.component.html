@@ -1,6 +1,6 @@
 <section>
 <header>
-   <h2>Scenario: {{scenario.title}}</h2>
+   <h2><a id="scenario" [routerLink]="['/scenario/',scenario.identifier]">Scenario: {{scenario.title}}</a></h2>
 </header>
 <p>{{scenario.description}}</p>
 <router-outlet></router-outlet>

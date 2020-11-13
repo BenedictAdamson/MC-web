@@ -17,19 +17,19 @@ export class GameService {
 	constructor(
 		private http: HttpClient) { }
 
-	static getGamesPath(scenario: uuid): string {
+	static getApiGamesPath(scenario: uuid): string {
 		return '/api/scenario/' + scenario + '/game/';
 	}
 
-	static getGamePath(id: GameIdentifier): string {
-		return GameService.getGamesPath(id.scenario) + id.created;
+	static getApiGamePath(id: GameIdentifier): string {
+		return GameService.getApiGamesPath(id.scenario) + id.created;
 	}
 
     /**
      * Get the creation times (instance IDs) of the games of a scenario.
      */
 	getGamesOfScenario(scenario: uuid): Observable<string[]> {
-		return this.http.get<string[]>(GameService.getGamesPath(scenario))
+		return this.http.get<string[]>(GameService.getApiGamesPath(scenario))
 			.pipe(
 				catchError(this.handleError<string[]>('getGamesOfScenario', []))
 			);
@@ -39,10 +39,27 @@ export class GameService {
      * Get the game that has a given ID.
      */
 	getGame(id: GameIdentifier): Observable<Game> {
-		return this.http.get<Game>(GameService.getGamePath(id))
+		return this.http.get<Game>(GameService.getApiGamePath(id))
 			.pipe(
 				catchError(this.handleError<Game>('getGame', null))
 			);
+	}
+
+    /**
+     * Create a new game for a given scenario.
+     *
+     * @param scenario
+     * The unique ID of the scenario for which to create a gave.
+     * @returns
+     * An [[Observable]] that provides the created game.
+     * The [[GameIdentifier.scenario]] of the [[Game.identifier]] of the created game
+     * is equal to the given {@code scenario}.
+     */
+	createGame(scenario: uuid): Observable<Game> {
+		/* The server actually replies to the POST with a 302 (Found) redirect to the resource of the created game.
+		 * The HttpoClient or browser itself handles that redirect for us.
+	     */
+		return this.http.post<Game>(GameService.getApiGamesPath(scenario), "");
 	}
 
     /**
