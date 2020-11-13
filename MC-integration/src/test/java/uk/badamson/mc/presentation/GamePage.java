@@ -28,6 +28,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
 import org.hamcrest.Matcher;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.springframework.web.util.UriTemplate;
 
@@ -43,9 +44,9 @@ public final class GamePage extends Page {
             "/scenario/{scenario}/game/{created}");
    private static final Matcher<String> INDICATES_IS_A_GAME = containsString(
             "Game");
+   private static final By SCENARIO_LINK_LOCATOR = By.id("scenario");
 
-   private final String scenarioTitle;
-
+   private final ScenarioPage scenarioPage;
    private final Matcher<String> includesCreationTime;
    private final Matcher<String> includesScenarioTitile;
 
@@ -65,10 +66,10 @@ public final class GamePage extends Page {
     */
    public GamePage(final ScenarioPage scenarioPage, final String creationTime) {
       super(scenarioPage);
-      this.scenarioTitle = scenarioPage.getScenarioTitle();
+      this.scenarioPage = scenarioPage;
       includesCreationTime = creationTime == null ? null
                : containsString(creationTime);
-      includesScenarioTitile = containsString(scenarioTitle);
+      includesScenarioTitile = containsString(scenarioPage.getScenarioTitle());
    }
 
    public void assertIncludesCreationTime() {
@@ -102,5 +103,13 @@ public final class GamePage extends Page {
    protected boolean isValidPath(@Nonnull final String path) {
       Objects.requireNonNull(path, "path");
       return URI_TEMPLATE.matches(path);
+   }
+
+   public ScenarioPage navigateToScenarioPage() {
+      requireIsReady();
+      final var link = getBody().findElement(SCENARIO_LINK_LOCATOR);
+      link.click();
+      scenarioPage.awaitIsReady();
+      return scenarioPage;
    }
 }

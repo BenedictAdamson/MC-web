@@ -45,6 +45,14 @@ public class GameSteps extends Steps {
       super(world);
    }
 
+   @Then("can get the list of games")
+   public void can_get_list_of_games() {
+      final var scenarioPage = world.getExpectedPage(GamePage.class)
+               .navigateToScenarioPage();
+      scenarioPage.assertHasListOfGames();
+      world.setExpectedPage(scenarioPage);
+   }
+
    @When("creating a game")
    public void creating_game() {
       scenarioIndex = 0;
