@@ -26,11 +26,11 @@ describe('GameComponent', () => {
 
 
 
-	const setUp = function( game: Game) {
+	const setUp = function(game: Game) {
 		const gameServiceStub = jasmine.createSpyObj('GameService', ['getGame']);
 		gameServiceStub.getGame.and.returnValue(of(game));
 
-        const identifier: GameIdentifier = game.identifier;
+		const identifier: GameIdentifier = game.identifier;
 		TestBed.configureTestingModule({
 			declarations: [GameComponent],
 			providers: [{
@@ -62,7 +62,9 @@ describe('GameComponent', () => {
 
 		const html: HTMLElement = fixture.nativeElement;
 		const displayText: string = html.innerText;
+		const selfLink: HTMLAnchorElement = html.querySelector('a#game');
 		expect(displayText.includes(game.identifier.created)).withContext("The game page includes the date and time that the game was set up").toBeTrue();
+		expect(selfLink).withContext("self link").not.toBeNull();
 	};
 
 	it('can create [A]', () => {
