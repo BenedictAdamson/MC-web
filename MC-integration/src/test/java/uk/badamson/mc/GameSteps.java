@@ -85,6 +85,12 @@ public class GameSteps extends Steps {
                .assertIncludesCreationTime();
    }
 
+   @Then("the game page indicates that the game is not recruiting players")
+   public void game_page_indicates_game_not_recuiting_players() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertIndicatesIsNotRecruitingPlayers();
+   }
+
    @Then("the game page indicates that the game is recruiting players")
    public void game_page_indicates_that_game_recuiring_players() {
       world.getAndAssertExpectedPage(GamePage.class)
@@ -113,8 +119,7 @@ public class GameSteps extends Steps {
    public void mc_accepts_ending_recuitment_for_game() {
       final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
       assertAll(() -> gamePage.assertInvariants(),
-               () -> gamePage.assertNoErrorMessages(),
-               () -> gamePage.assertIndicatesIsNotRecruitingPlayers());
+               () -> gamePage.assertNoErrorMessages());
    }
 
    @Then("MC does not present creating a game as an option")
