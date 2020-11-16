@@ -20,6 +20,7 @@ package uk.badamson.mc.presentation;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.matchesPattern;
 
@@ -105,12 +106,12 @@ public final class GamePage extends Page {
 
    @Override
    protected void assertValidBody(@Nonnull final WebElement body) {
+      var textConstraints = allOf(INDICATES_IS_A_GAME,
+               INDICATES_WHETHER_RECRUITING_PLAYERS, includesScenarioTitile);
       if (includesCreationTime != null) {
-         assertThat("Body text", body.getText(),
-                  allOf(INDICATES_IS_A_GAME,
-                           INDICATES_WHETHER_RECRUITING_PLAYERS,
-                           includesCreationTime, includesScenarioTitile));
+         textConstraints = both(textConstraints).and(includesCreationTime);
       } // else can not check
+      assertThat("Body text", body.getText(), textConstraints);
    }
 
    @Override
