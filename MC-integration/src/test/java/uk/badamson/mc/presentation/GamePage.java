@@ -21,6 +21,7 @@ package uk.badamson.mc.presentation;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 
 import java.util.Objects;
 
@@ -44,6 +45,8 @@ public final class GamePage extends Page {
             "/scenario/{scenario}/game/{created}");
    private static final Matcher<String> INDICATES_IS_A_GAME = containsString(
             "Game");
+   private static final Matcher<String> INDICATES_WHETHER_RECUITING_PLAYERS = matchesPattern(
+            "[Rr]ecruiting");
    private static final By SCENARIO_LINK_LOCATOR = By.id("scenario");
 
    private final ScenarioPage scenarioPage;
@@ -85,11 +88,18 @@ public final class GamePage extends Page {
                includesScenarioTitile);
    }
 
+   public void assertIndicatesWhetherRecruitingPlayers() {
+      assertThat("includes scenario title", getBody().getText(),
+               INDICATES_WHETHER_RECUITING_PLAYERS);
+   }
+
    @Override
    protected void assertValidBody(@Nonnull final WebElement body) {
       if (includesCreationTime != null) {
-         assertThat("Body text", body.getText(), allOf(INDICATES_IS_A_GAME,
-                  includesCreationTime, includesScenarioTitile));
+         assertThat("Body text", body.getText(),
+                  allOf(INDICATES_IS_A_GAME,
+                           INDICATES_WHETHER_RECUITING_PLAYERS,
+                           includesCreationTime, includesScenarioTitile));
       } // else can not check
    }
 
