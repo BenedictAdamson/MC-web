@@ -18,6 +18,7 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -106,6 +107,14 @@ public class GameSteps extends Steps {
    @Then("MC accepts the creation of the game")
    public void mc_accepts_creation_of_game() {
       world.getAndAssertExpectedPage(GamePage.class).assertInvariants();
+   }
+
+   @Then("MC accepts ending recruitment for the game")
+   public void mc_accepts_ending_recuitment_for_game() {
+      final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
+      assertAll(() -> gamePage.assertInvariants(),
+               () -> gamePage.assertNoErrorMessages(),
+               () -> gamePage.assertIndicatesIsNotRecruitingPlayers());
    }
 
    @Then("MC does not present creating a game as an option")

@@ -20,9 +20,12 @@ package uk.badamson.mc.presentation;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Objects;
 
@@ -32,6 +35,7 @@ import javax.annotation.concurrent.Immutable;
 import org.hamcrest.Matcher;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.opentest4j.MultipleFailuresError;
 import org.springframework.web.util.UriTemplate;
 
 /**
@@ -48,8 +52,10 @@ public final class GamePage extends Page {
             "Game");
    private static final Matcher<String> INDICATES_WHETHER_RECRUITING_PLAYERS = matchesPattern(
             "[Rr]ecruiting");
-   private static final Matcher<String> INDICATES_IS_RECUITING_PLAYERS = containsString(
+   private static final Matcher<String> INDICATES_IS_RECRUITING_PLAYERS = containsString(
             "This game is recruiting players");
+   private static final Matcher<String> INDICATES_IS_NOT_RECRUITING_PLAYERS = containsString(
+            "This game is not recruiting players");
    private static final By SCENARIO_LINK_LOCATOR = By.id("scenario");
    private static final By RECRUITING_ELEMENT_LOCATOR = By.id("recruiting");
    private static final By END_RECRUITMENT_BUTTON_LOCATOR = By
@@ -94,26 +100,45 @@ public final class GamePage extends Page {
                includesScenarioTitile);
    }
 
+   public void assertIndicatesIsNotRecruitingPlayers() {
+      final var element = assertHasElement(getBody(),
+               RECRUITING_ELEMENT_LOCATOR);
+      assertThat(element.getText(), INDICATES_IS_NOT_RECRUITING_PLAYERS);
+   }
+
    public void assertIndicatesIsRecruitingPlayers() {
       final var element = assertHasElement(getBody(),
                RECRUITING_ELEMENT_LOCATOR);
-      assertThat(element.getText(), INDICATES_IS_RECUITING_PLAYERS);
+      assertThat(element.getText(), INDICATES_IS_RECRUITING_PLAYERS);
    }
 
    public void assertIndicatesWhetherRecruitingPlayers() {
-      assertThat("text mentions recruiting", getBody().getText(),
-               INDICATES_WHETHER_RECRUITING_PLAYERS);
-      assertHasElement(getBody(), RECRUITING_ELEMENT_LOCATOR);
+      assertIndicatesWhetherRecruitingPlayers(getBody());
+   }
+
+   private void assertIndicatesWhetherRecruitingPlayers(final WebElement body)
+            throws MultipleFailuresError {
+      final var element = assertHasElement(body, RECRUITING_ELEMENT_LOCATOR);
+      final var elementText = element.getText();
+      assertAll(
+               () -> assertThat("page text mentions recruiting", body.getText(),
+                        INDICATES_WHETHER_RECRUITING_PLAYERS),
+               () -> assertThat("Element text indicates something", elementText,
+                        either(INDICATES_IS_RECRUITING_PLAYERS)
+                                 .or(INDICATES_IS_NOT_RECRUITING_PLAYERS)));
    }
 
    @Override
    protected void assertValidBody(@Nonnull final WebElement body) {
-      var textConstraints = allOf(INDICATES_IS_A_GAME,
+      final var universalConstraints = allOf(INDICATES_IS_A_GAME,
                INDICATES_WHETHER_RECRUITING_PLAYERS, includesScenarioTitile);
-      if (includesCreationTime != null) {
-         textConstraints = both(textConstraints).and(includesCreationTime);
-      } // else can not check
-      assertThat("Body text", body.getText(), textConstraints);
+      final var optionalConstraints = includesCreationTime == null
+               ? any(String.class)
+               : includesCreationTime;
+      final var textConstraints = both(universalConstraints)
+               .and(optionalConstraints);
+      assertAll(() -> assertThat("Body text", body.getText(), textConstraints),
+               () -> assertIndicatesWhetherRecruitingPlayers(body));
    }
 
    public void endRecruitement() {
@@ -154,7 +179,7 @@ public final class GamePage extends Page {
                   e);
       }
       final var text = element.getText();
-      if (!INDICATES_IS_RECUITING_PLAYERS.matches(text)) {
+      if (!INDICATES_IS_RECRUITING_PLAYERS.matches(text)) {
          throw new IllegalStateException("Wrong text (" + text + ")");
       }
    }
