@@ -45,9 +45,12 @@ public final class GamePage extends Page {
             "/scenario/{scenario}/game/{created}");
    private static final Matcher<String> INDICATES_IS_A_GAME = containsString(
             "Game");
-   private static final Matcher<String> INDICATES_WHETHER_RECUITING_PLAYERS = matchesPattern(
+   private static final Matcher<String> INDICATES_WHETHER_RECRUITING_PLAYERS = matchesPattern(
             "[Rr]ecruiting");
+   private static final Matcher<String> INDICATES_IS_RECUITING_PLAYERS = containsString(
+            "This game is recruiting players");
    private static final By SCENARIO_LINK_LOCATOR = By.id("scenario");
+   private static final By RECRUITING_ELEMENT_LOCATOR = By.id("recruiting");
 
    private final ScenarioPage scenarioPage;
    private final Matcher<String> includesCreationTime;
@@ -88,9 +91,16 @@ public final class GamePage extends Page {
                includesScenarioTitile);
    }
 
+   public void assertIndicatesIsRecruitingPlayers() {
+      final var element = assertHasElement(getBody(),
+               RECRUITING_ELEMENT_LOCATOR);
+      assertThat(element.getText(), INDICATES_IS_RECUITING_PLAYERS);
+   }
+
    public void assertIndicatesWhetherRecruitingPlayers() {
-      assertThat("includes scenario title", getBody().getText(),
-               INDICATES_WHETHER_RECUITING_PLAYERS);
+      assertThat("text mentions recruiting", getBody().getText(),
+               INDICATES_WHETHER_RECRUITING_PLAYERS);
+      assertHasElement(getBody(), RECRUITING_ELEMENT_LOCATOR);
    }
 
    @Override
@@ -98,7 +108,7 @@ public final class GamePage extends Page {
       if (includesCreationTime != null) {
          assertThat("Body text", body.getText(),
                   allOf(INDICATES_IS_A_GAME,
-                           INDICATES_WHETHER_RECUITING_PLAYERS,
+                           INDICATES_WHETHER_RECRUITING_PLAYERS,
                            includesCreationTime, includesScenarioTitile));
       } // else can not check
    }

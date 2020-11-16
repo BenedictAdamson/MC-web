@@ -83,6 +83,12 @@ public class GameSteps extends Steps {
                .assertIncludesCreationTime();
    }
 
+   @Then("the game page indicates that the game is recruiting players")
+   public void game_page_indicates_that_game_recuiring_players() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertIndicatesIsRecruitingPlayers();
+   }
+
    @Then("The game page indicates whether the game is recruiting players")
    public void game_page_indicates_whether_game_recuiting_players() {
       world.getAndAssertExpectedPage(GamePage.class)
