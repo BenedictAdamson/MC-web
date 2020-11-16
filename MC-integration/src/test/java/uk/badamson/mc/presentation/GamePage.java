@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -61,8 +62,13 @@ public final class GamePage extends Page {
    private static final By END_RECRUITMENT_BUTTON_LOCATOR = By
             .id("end-recuiting");
 
+   private static boolean isEnabled(final WebElement button) {
+      return button.getAttribute("disabled") != null;
+   }
+
    private final ScenarioPage scenarioPage;
    private final Matcher<String> includesCreationTime;
+
    private final Matcher<String> includesScenarioTitile;
 
    /**
@@ -144,8 +150,23 @@ public final class GamePage extends Page {
    public void endRecruitement() {
       requireIsReady();
       final var button = getBody().findElement(END_RECRUITMENT_BUTTON_LOCATOR);
+      if (!isEnabled(button)) {
+         throw new IllegalStateException(
+                  "Button [" + button + "] is not enabled");
+      }
       button.click();
       awaitIsReady();
+   }
+
+   public boolean hasEndRecruitmentOption() {
+      requireIsReady();
+      final WebElement button;
+      try {
+         button = getBody().findElement(END_RECRUITMENT_BUTTON_LOCATOR);
+      } catch (final NoSuchElementException e) {
+         return false;
+      }
+      return isEnabled(button);
    }
 
    @Override
@@ -175,7 +196,7 @@ public final class GamePage extends Page {
          element = getBody().findElement(RECRUITING_ELEMENT_LOCATOR);
       } catch (final Exception e) {
          throw new IllegalStateException(
-                  "Unable to find element that indicates whether requireting",
+                  "Unable to find element that indicates whether recruiting",
                   e);
       }
       final var text = element.getText();

@@ -128,6 +128,12 @@ public class GameSteps extends Steps {
       assertFalse(scenarioPage.hasCreateGameButton());
    }
 
+   @Then("MC does not present ending recruitment for the game as an option")
+   public void mc_does_not_present_ending_recuitement_for_game_as_option() {
+      final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
+      assertFalse(gamePage.hasEndRecruitmentOption());
+   }
+
    @Then("MC serves the game page")
    public void mc_serves_game_page() {
       world.getAndAssertExpectedPage(GamePage.class).assertInvariants();
