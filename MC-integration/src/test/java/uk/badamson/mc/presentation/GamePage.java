@@ -133,4 +133,20 @@ public final class GamePage extends Page {
       scenarioPage.awaitIsReady();
       return scenarioPage;
    }
+
+   public void requireIndicatesIsRecruitingPlayers()
+            throws IllegalStateException {
+      final WebElement element;
+      try {
+         element = getBody().findElement(RECRUITING_ELEMENT_LOCATOR);
+      } catch (final Exception e) {
+         throw new IllegalStateException(
+                  "Unable to find element that indicates whether requireting",
+                  e);
+      }
+      final var text = element.getText();
+      if (!INDICATES_IS_RECUITING_PLAYERS.matches(text)) {
+         throw new IllegalStateException("Wrong text (" + text + ")");
+      }
+   }
 }

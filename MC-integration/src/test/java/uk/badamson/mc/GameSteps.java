@@ -25,6 +25,7 @@ import javax.annotation.Nonnull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import uk.badamson.mc.presentation.GamePage;
@@ -137,6 +138,17 @@ public class GameSteps extends Steps {
       final var scenario = world.getScenarios().findFirst().get().getId();
       scenarioIndex = 0;
       identifier = world.createGame(scenario);
+   }
+
+   @Given("viewing a game that is recruiting players")
+   public void viewing_game_recuiting_players() {
+      scenarioIndex = 0;
+      final var scenarioPage = navigateToScenario();
+      nGames0 = scenarioPage.getNumberOfGamesListed();
+      final var gamePage = scenarioPage.createGame();
+      gamePage.requireIsReady();
+      gamePage.requireIndicatesIsRecruitingPlayers();
+      world.setExpectedPage(gamePage);
    }
 
    @When("Viewing the games of the scenario")
