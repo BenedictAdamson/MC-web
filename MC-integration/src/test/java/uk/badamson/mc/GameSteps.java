@@ -140,6 +140,11 @@ public class GameSteps extends Steps {
       identifier = world.createGame(scenario);
    }
 
+   @When("user ends recruitment for the game")
+   public void user_ends_recuitement_for_game() {
+      world.getExpectedPage(GamePage.class).endRecruitement();
+   }
+
    @Given("viewing a game that is recruiting players")
    public void viewing_game_recuiting_players() {
       scenarioIndex = 0;

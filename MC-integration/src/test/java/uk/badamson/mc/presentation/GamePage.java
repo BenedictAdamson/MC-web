@@ -52,6 +52,8 @@ public final class GamePage extends Page {
             "This game is recruiting players");
    private static final By SCENARIO_LINK_LOCATOR = By.id("scenario");
    private static final By RECRUITING_ELEMENT_LOCATOR = By.id("recruiting");
+   private static final By END_RECRUITMENT_BUTTON_LOCATOR = By
+            .id("end-recuiting");
 
    private final ScenarioPage scenarioPage;
    private final Matcher<String> includesCreationTime;
@@ -112,6 +114,13 @@ public final class GamePage extends Page {
          textConstraints = both(textConstraints).and(includesCreationTime);
       } // else can not check
       assertThat("Body text", body.getText(), textConstraints);
+   }
+
+   public void endRecruitement() {
+      requireIsReady();
+      final var button = getBody().findElement(END_RECRUITMENT_BUTTON_LOCATOR);
+      button.click();
+      awaitIsReady();
    }
 
    @Override
