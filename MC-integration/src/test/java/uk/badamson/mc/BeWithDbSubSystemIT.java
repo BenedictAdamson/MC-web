@@ -25,10 +25,13 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.AfterEach;
@@ -40,6 +43,10 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.opentest4j.AssertionFailedError;
+import org.springframework.http.HttpCookie;
+import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -62,6 +69,46 @@ import uk.badamson.mc.repository.McDatabaseContainer;
 @Testcontainers
 @Tag("IT")
 public class BeWithDbSubSystemIT implements AutoCloseable {
+   @Nested
+   public class CreateGame {
+
+      @Nested
+      public class Valid {
+
+         @Test
+         public void administrator() {
+            final var scenario = be.getScenarios().findAny().get().getId();
+            test(scenario, be.getAdministrator());
+         }
+
+         private Game.Identifier test(final UUID scenario, final User user) {
+            Objects.requireNonNull(user, "user");
+            final var response = exchange(scenario, user);
+
+            response.expectStatus().isFound();
+            final var gameId = McBackEndContainer
+                     .parseCreateGameResponse(response);
+            assertEquals(scenario, gameId.getScenario(),
+                     "scenario of created game is the given scenario");
+            return gameId;
+         }
+
+      }// class
+
+      private ResponseSpec exchange(final UUID scenario, final User user) {
+         Objects.requireNonNull(scenario, "scenario");
+
+         final var cookies = user == null ? NO_COOKIES : be.login(user);
+         final var request = be.createCreateGameRequest(scenario, user,
+                  cookies);
+         final var response = request.exchange();
+         if (user != null) {
+            be.logout(user, cookies);
+         }
+
+         return response;
+      }
+   }// class
 
    @Nested
    public class GetSelf {
@@ -221,6 +268,8 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       }
 
    }// class
+
+   private static final MultiValueMap<String, HttpCookie> NO_COOKIES = new LinkedMultiValueMap<>();
 
    private static final String BE_HOST = "be";
    private static final String DB_HOST = "db";
