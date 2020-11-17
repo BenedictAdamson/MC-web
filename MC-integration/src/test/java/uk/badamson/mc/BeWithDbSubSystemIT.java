@@ -34,6 +34,7 @@ import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -62,11 +63,171 @@ import uk.badamson.mc.repository.McDatabaseContainer;
 @Tag("IT")
 public class BeWithDbSubSystemIT implements AutoCloseable {
 
+   @Nested
+   public class GetSelf {
+      @Test
+      @Order(2)
+      public void administrator() throws Exception {
+         final var user = be.getAdministrator();
+         final var request = be.createGetSelfRequest(user.getUsername(),
+                  user.getPassword());
+
+         final var response = request.exchange();
+
+         final var result = response.returnResult(String.class);
+         final var responseJson = result.getResponseBody()
+                  .blockFirst(Duration.ofSeconds(9));
+         final var responseUser = new ObjectMapper().readValue(responseJson,
+                  User.class);
+         final var cookies = result.getResponseCookies();
+         assertAll(() -> response.expectStatus().isOk(),
+                  () -> assertThat("response username",
+                           responseUser.getUsername(), is(user.getUsername())),
+                  () -> assertThat("response authorities",
+                           responseUser.getAuthorities(),
+                           is(user.getAuthorities())),
+                  () -> assertThat("Sets session cookie", cookies,
+                           hasKey("JSESSIONID")),
+                  () -> assertThat("Sets CSRF protection cookie", cookies,
+                           hasKey("XSRF-TOKEN")));
+      }
+
+      @Test
+      @Order(1)
+      public void unknownUser() throws Exception {
+         final var user = USER_A;
+         final var request = be.createGetSelfRequest(user.getUsername(),
+                  user.getPassword());
+
+         final var response = request.exchange();
+
+         response.expectStatus().isUnauthorized();
+      }
+
+      @Test
+      @Order(3)
+      public void valid() throws Exception {
+         final var user = USER_A;
+         be.addUser(user);
+         final var request = be.createGetSelfRequest(user.getUsername(),
+                  user.getPassword());
+
+         final var response = request.exchange();
+
+         final var result = response.returnResult(String.class);
+         final var responseJson = result.getResponseBody()
+                  .blockFirst(Duration.ofSeconds(9));
+         final var responseUser = new ObjectMapper().readValue(responseJson,
+                  User.class);
+         final var cookies = result.getResponseCookies();
+         assertAll(() -> response.expectStatus().isOk(),
+                  () -> assertThat("response username",
+                           responseUser.getUsername(), is(user.getUsername())),
+                  () -> assertThat("response authorities",
+                           responseUser.getAuthorities(),
+                           is(user.getAuthorities())),
+                  () -> assertThat("Sets session cookie", cookies,
+                           hasKey("JSESSIONID")),
+                  () -> assertThat("Sets CSRF protection cookie", cookies,
+                           hasKey("XSRF-TOKEN")));
+      }
+
+      @Test
+      @Order(1)
+      public void wrongPassword() throws Exception {
+         final var user = USER_A;
+         be.addUser(user);
+         final var request = be.createGetSelfRequest(user.getUsername(),
+                  "*" + user.getPassword());
+
+         final var response = request.exchange();
+
+         response.expectStatus().is4xxClientError();
+      }
+
+   }// class
+
+   @Nested
+   public class Logout {
+
+      @Test
+      @Order(1)
+      public void administratorNoSession() throws Exception {
+         final var user = be.getAdministrator();
+         final var request = be.connectWebTestClient("/logout").post()
+                  .headers(headers -> {
+                     headers.setBasicAuth(user.getUsername(),
+                              user.getPassword());
+                  });
+
+         final var response = request.exchange();
+
+         response.expectStatus().isForbidden();
+      }
+
+      @Test
+      @Order(2)
+      public void administratorWithSession() throws Exception {
+         final var user = be.getAdministrator();
+         final var cookies = be.login(user);
+         final var request = be.connectWebTestClient("/logout").post();
+         McBackEndContainer.secure(request, user, cookies);
+
+         final var response = request.exchange();
+
+         response.expectStatus().isNoContent();
+      }
+
+      @Test
+      @Order(1)
+      public void noSession() throws Exception {
+         final var user = USER_A;
+         be.addUser(user);
+         final var request = be.connectWebTestClient("/logout").post()
+                  .headers(headers -> headers.setBasicAuth(user.getUsername(),
+                           user.getPassword()));
+
+         final var response = request.exchange();
+
+         response.expectStatus().isForbidden();
+      }
+
+      @Test
+      @Order(3)
+      public void withSession() throws Exception {
+         final var user = USER_A;
+         be.addUser(user);
+         final var cookies = be.login(user);
+         final var request = be.connectWebTestClient("/logout").post();
+         McBackEndContainer.secure(request, user, cookies);
+
+         final var response = request.exchange();
+
+         response.expectStatus().isNoContent();
+      }
+
+      @Test
+      @Order(1)
+      public void wrongPassword() throws Exception {
+         final var user = USER_A;
+         be.addUser(user);
+         final var request = be.connectWebTestClient("/logout").post()
+                  .headers(headers -> headers.setBasicAuth(user.getUsername(),
+                           "*" + user.getPassword()));
+
+         final var response = request.exchange();
+
+         response.expectStatus().is4xxClientError();
+      }
+
+   }// class
+
    private static final String BE_HOST = "be";
    private static final String DB_HOST = "db";
-
    private static final String DB_ROOT_PASSWORD = "secret2";
+
    private static final String DB_USER_PASSWORD = "secret3";
+
    private static final String ADMINISTARTOR_PASSWORD = "secret4";
 
    private static final User USER_A = new User("jeff", "password",
@@ -109,86 +270,6 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    }
 
    @Test
-   @Order(3)
-   public void getSelf_administrator() throws Exception {
-      final var user = be.getAdministrator();
-      final var request = be.createGetSelfRequest(user.getUsername(),
-               user.getPassword());
-
-      final var response = request.exchange();
-
-      final var result = response.returnResult(String.class);
-      final var responseJson = result.getResponseBody()
-               .blockFirst(Duration.ofSeconds(9));
-      final var responseUser = new ObjectMapper().readValue(responseJson,
-               User.class);
-      final var cookies = result.getResponseCookies();
-      assertAll(() -> response.expectStatus().isOk(),
-               () -> assertThat("response username", responseUser.getUsername(),
-                        is(user.getUsername())),
-               () -> assertThat("response authorities",
-                        responseUser.getAuthorities(),
-                        is(user.getAuthorities())),
-               () -> assertThat("Sets session cookie", cookies,
-                        hasKey("JSESSIONID")),
-               () -> assertThat("Sets CSRF protection cookie", cookies,
-                        hasKey("XSRF-TOKEN")));
-   }
-
-   @Test
-   @Order(2)
-   public void getSelf_unknownUser() throws Exception {
-      final var user = USER_A;
-      final var request = be.createGetSelfRequest(user.getUsername(),
-               user.getPassword());
-
-      final var response = request.exchange();
-
-      response.expectStatus().isUnauthorized();
-   }
-
-   @Test
-   @Order(3)
-   public void getSelf_valid() throws Exception {
-      final var user = USER_A;
-      be.addUser(user);
-      final var request = be.createGetSelfRequest(user.getUsername(),
-               user.getPassword());
-
-      final var response = request.exchange();
-
-      final var result = response.returnResult(String.class);
-      final var responseJson = result.getResponseBody()
-               .blockFirst(Duration.ofSeconds(9));
-      final var responseUser = new ObjectMapper().readValue(responseJson,
-               User.class);
-      final var cookies = result.getResponseCookies();
-      assertAll(() -> response.expectStatus().isOk(),
-               () -> assertThat("response username", responseUser.getUsername(),
-                        is(user.getUsername())),
-               () -> assertThat("response authorities",
-                        responseUser.getAuthorities(),
-                        is(user.getAuthorities())),
-               () -> assertThat("Sets session cookie", cookies,
-                        hasKey("JSESSIONID")),
-               () -> assertThat("Sets CSRF protection cookie", cookies,
-                        hasKey("XSRF-TOKEN")));
-   }
-
-   @Test
-   @Order(4)
-   public void getSelf_wrongPassword() throws Exception {
-      final var user = USER_A;
-      be.addUser(user);
-      final var request = be.createGetSelfRequest(user.getUsername(),
-               "*" + user.getPassword());
-
-      final var response = request.exchange();
-
-      response.expectStatus().is4xxClientError();
-   }
-
-   @Test
    @Order(2)
    public void getUsers() {
       final List<User> users;
@@ -208,75 +289,6 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       final var typeId = mapper.getTypeFactory()
                .constructCollectionType(List.class, User.class);
       return mapper.readValue(usersAsJson, typeId);
-   }
-
-   @Test
-   @Order(3)
-   public void logout_administratorNoSession() throws Exception {
-      final var user = be.getAdministrator();
-      final var request = be.connectWebTestClient("/logout").post()
-               .headers(headers -> {
-                  headers.setBasicAuth(user.getUsername(), user.getPassword());
-               });
-
-      final var response = request.exchange();
-
-      response.expectStatus().isForbidden();
-   }
-
-   @Test
-   @Order(3)
-   public void logout_administratorWithSession() throws Exception {
-      final var user = be.getAdministrator();
-      final var cookies = be.login(user);
-      final var request = be.connectWebTestClient("/logout").post();
-      McBackEndContainer.secure(request, user, cookies);
-
-      final var response = request.exchange();
-
-      response.expectStatus().isNoContent();
-   }
-
-   @Test
-   @Order(3)
-   public void logout_noSession() throws Exception {
-      final var user = USER_A;
-      be.addUser(user);
-      final var request = be.connectWebTestClient("/logout").post()
-               .headers(headers -> headers.setBasicAuth(user.getUsername(),
-                        user.getPassword()));
-
-      final var response = request.exchange();
-
-      response.expectStatus().isForbidden();
-   }
-
-   @Test
-   @Order(3)
-   public void logout_withSession() throws Exception {
-      final var user = USER_A;
-      be.addUser(user);
-      final var cookies = be.login(user);
-      final var request = be.connectWebTestClient("/logout").post();
-      McBackEndContainer.secure(request, user, cookies);
-
-      final var response = request.exchange();
-
-      response.expectStatus().isNoContent();
-   }
-
-   @Test
-   @Order(4)
-   public void logout_wrongPassword() throws Exception {
-      final var user = USER_A;
-      be.addUser(user);
-      final var request = be.connectWebTestClient("/logout").post()
-               .headers(headers -> headers.setBasicAuth(user.getUsername(),
-                        "*" + user.getPassword()));
-
-      final var response = request.exchange();
-
-      response.expectStatus().is4xxClientError();
    }
 
    @BeforeEach
