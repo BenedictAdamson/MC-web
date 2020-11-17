@@ -328,6 +328,14 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    }
 
    @Test
+   public void getGameCreationTimes_empty() {
+      final var scenario = be.getScenarios().findAny().get().getId();
+      final Collection<Instant> creationTimes = be
+               .getGameCreationTimes(scenario);
+      assertThat(creationTimes, empty());
+   }
+
+   @Test
    @Order(2)
    public void getUsers() {
       final List<User> users;
