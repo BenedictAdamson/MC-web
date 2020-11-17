@@ -78,7 +78,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
    private static final UriTemplate GAME_URI_TEMPLATE = new UriTemplate(
             "/api/scenario/{scenario}/game/{game}");
 
-   private static final ParameterizedTypeReference<List<Instant>> LIST_INSTANT_TYPE = new ParameterizedTypeReference<List<Instant>>() {
+   private static final ParameterizedTypeReference<List<Instant>> LIST_INSTANT_TYPE = new ParameterizedTypeReference<>() {
    };
 
    private static String createGamesListPath(final UUID scenario) {
@@ -246,10 +246,14 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
    }
 
    List<Instant> getGameCreationTimes(final UUID scenario) {
-      final var response = getJson(createGamesListPath(scenario));
+      final var response = getGameCreationTimesResponse(scenario);
       response.expectStatus().isOk();
       return response.returnResult(LIST_INSTANT_TYPE).getResponseBody()
                .blockFirst();
+   }
+
+   ResponseSpec getGameCreationTimesResponse(final UUID scenario) {
+      return getJson(createGamesListPath(scenario));
    }
 
    private WebTestClient.ResponseSpec getJson(final String path) {

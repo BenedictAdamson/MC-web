@@ -330,9 +330,9 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    @Test
    public void getGameCreationTimes_empty() {
       final var scenario = be.getScenarios().findAny().get().getId();
-      final Collection<Instant> creationTimes = be
-               .getGameCreationTimes(scenario);
-      assertThat(creationTimes, empty());
+      final var response = be.getGameCreationTimesResponse(scenario);
+      response.expectStatus().isOk();
+      response.expectBodyList(Instant.class).hasSize(0);
    }
 
    @Test
