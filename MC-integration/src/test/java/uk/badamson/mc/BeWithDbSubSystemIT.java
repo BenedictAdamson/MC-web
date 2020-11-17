@@ -22,6 +22,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -29,6 +30,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -88,8 +91,14 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
             response.expectStatus().isFound();
             final var gameId = McBackEndContainer
                      .parseCreateGameResponse(response);
-            assertEquals(scenario, gameId.getScenario(),
-                     "scenario of created game is the given scenario");
+            final Collection<Instant> creationTimes = be
+                     .getGameCreationTimes(scenario);
+            assertAll(
+                     () -> assertEquals(scenario, gameId.getScenario(),
+                              "scenario of created game is the given scenario"),
+                     () -> assertThat(
+                              "added the creation time of the created game to the list of creatino times",
+                              gameId.getCreated(), in(creationTimes)));
             return gameId;
          }
 

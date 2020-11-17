@@ -22,12 +22,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -75,6 +77,14 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    private static final UriTemplate GAME_URI_TEMPLATE = new UriTemplate(
             "/api/scenario/{scenario}/game/{game}");
+
+   private static final ParameterizedTypeReference<List<Instant>> LIST_INSTANT_TYPE = new ParameterizedTypeReference<List<Instant>>() {
+   };
+
+   private static String createGamesListPath(final UUID scenario) {
+      Objects.requireNonNull(scenario, "scenario");
+      return "/api/scenario/" + scenario + "/game";
+   }
 
    private static String encodeAsJson(final Object obj) {
       try {
@@ -202,10 +212,9 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    RequestBodySpec createCreateGameRequest(final UUID scenario, final User user,
             final MultiValueMap<String, HttpCookie> cookies) {
-      Objects.requireNonNull(scenario, "scenario");
       Objects.requireNonNull(cookies, "cookies");
 
-      final var path = "/api/scenario/" + scenario + "/game";
+      final var path = createGamesListPath(scenario);
       final var request = connectWebTestClient(path).post()
                .accept(MediaType.APPLICATION_JSON);
       secure(request, user, cookies);
@@ -234,6 +243,13 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    public User getAdministrator() {
       return administrator;
+   }
+
+   List<Instant> getGameCreationTimes(final UUID scenario) {
+      final var response = getJson(createGamesListPath(scenario));
+      response.expectStatus().isOk();
+      return response.returnResult(LIST_INSTANT_TYPE).getResponseBody()
+               .blockFirst();
    }
 
    private WebTestClient.ResponseSpec getJson(final String path) {
