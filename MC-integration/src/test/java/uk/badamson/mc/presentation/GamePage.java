@@ -59,7 +59,7 @@ public final class GamePage extends Page {
    private static final By SCENARIO_LINK_LOCATOR = By.id("scenario");
    private static final By RECRUITING_ELEMENT_LOCATOR = By.id("recruiting");
    private static final By END_RECRUITMENT_BUTTON_LOCATOR = By
-            .id("end-recruiting");
+            .id("end-recruitment");
 
    private static boolean isEnabled(final WebElement button) {
       return button.getAttribute("disabled") != null;
