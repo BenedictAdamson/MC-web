@@ -24,7 +24,6 @@ import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.NoSuchElementException;
@@ -51,8 +50,8 @@ public final class GamePage extends Page {
             "/scenario/{scenario}/game/{created}");
    private static final Matcher<String> INDICATES_IS_A_GAME = containsString(
             "Game");
-   private static final Matcher<String> INDICATES_WHETHER_RECRUITING_PLAYERS = matchesPattern(
-            ".*[Rr]ecruiting.*");
+   private static final Matcher<String> INDICATES_WHETHER_RECRUITING_PLAYERS = containsString(
+            "recruiting");
    private static final Matcher<String> INDICATES_IS_RECRUITING_PLAYERS = containsString(
             "This game is recruiting players");
    private static final Matcher<String> INDICATES_IS_NOT_RECRUITING_PLAYERS = containsString(
