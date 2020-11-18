@@ -22,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import java.util.UUID;
+
 import javax.annotation.Nonnull;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -168,9 +170,12 @@ public class GameSteps extends Steps {
    @Given("viewing a game that is recruiting players")
    public void viewing_game_recuiting_players() {
       scenarioIndex = 0;
+      final UUID scenario = world.getScenarios().map(namedId -> namedId.getId())
+               .findFirst().get();
+      world.createGame(scenario);
+      nGames0 = world.getGameCreationTimes(scenario).size();
       final var scenarioPage = navigateToScenario();
-      nGames0 = scenarioPage.getNumberOfGamesListed();
-      final var gamePage = scenarioPage.createGame();
+      final var gamePage = scenarioPage.navigateToGamePage(nGames0 - 1);
       gamePage.requireIsReady();
       gamePage.requireIndicatesIsRecruitingPlayers();
       world.setExpectedPage(gamePage);

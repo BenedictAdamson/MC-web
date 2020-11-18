@@ -245,7 +245,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       return administrator;
    }
 
-   List<Instant> getGameCreationTimes(final UUID scenario) {
+   public List<Instant> getGameCreationTimes(final UUID scenario) {
       final var response = getGameCreationTimesResponse(scenario);
       response.expectStatus().isOk();
       return response.returnResult(LIST_INSTANT_TYPE).getResponseBody()
