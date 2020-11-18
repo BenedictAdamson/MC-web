@@ -9,5 +9,6 @@ import { GameIdentifier } from './game-identifier'
  * </p>
  */
 export class Game {
-	identifier: GameIdentifier
+	identifier: GameIdentifier;
+	recruiting: boolean
 }
