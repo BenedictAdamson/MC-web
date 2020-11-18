@@ -6,7 +6,7 @@
    <ng-template #notRecruiting>
    <p id="recruiting" >This game is not recruiting players.</p>
    </ng-template>
-   <button id="end-recruitment" *ngIf="mayEndRecruitment$() | async">End recuitment</button>
+   <button id="end-recruitment" *ngIf="mayEndRecruitment$() | async" (click)="endRecuitment()">End recuitment</button>
 </div>
 
 </section>

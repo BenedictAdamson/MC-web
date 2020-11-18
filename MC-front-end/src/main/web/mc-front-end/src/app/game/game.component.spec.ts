@@ -3,7 +3,7 @@ import { v4 as uuid } from 'uuid';
 
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 
-import { ComponentFixture, TestBed, waitForAsync, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
 import { Game } from '../game'
 import { GameIdentifier } from '../game-identifier'
@@ -45,7 +45,7 @@ describe('GameComponent', () => {
 
 
 
-	const setUp = function(game: Game, self: User) {
+	const setUpForNgInit = function(game: Game, self: User) {
 		const gameServiceStub = jasmine.createSpyObj('GameService', ['getGame']);
 		gameServiceStub.getGame.and.returnValue(of(game));
 
@@ -79,7 +79,7 @@ describe('GameComponent', () => {
 		const manager: boolean = self.authorities.includes('ROLE_MANAGE_GAMES');
 		const mayEndRecuitment: boolean = recruiting && manager;
 
-		setUp(game, self);
+		setUpForNgInit(game, self);
 		tick();
 		fixture.detectChanges();
 
@@ -121,4 +121,62 @@ describe('GameComponent', () => {
 	it('can create [D]', fakeAsync(() => {
 		canCreate(GAME_B, USER_NORMAL);
 	}));
+
+	const setUpForEndRecuitment = function(game0: Game, self: User) {
+		const identifier: GameIdentifier = game0.identifier;
+		const game1: Game = { identifier: identifier, recruiting: false };
+
+		const gameServiceStub = jasmine.createSpyObj('GameService', ['getGame', 'endRecuitment']);
+		gameServiceStub.getGame.and.returnValue(of(game0));
+		gameServiceStub.endRecuitment.and.returnValue(of(game1));
+
+		TestBed.configureTestingModule({
+			declarations: [GameComponent],
+			providers: [{
+				provide: ActivatedRoute,
+				useValue: {
+					params: of({ scenario: identifier.scenario, created: identifier.created }),
+					snapshot: {
+						parent: {
+							paramMap: convertToParamMap({ scenario: identifier.scenario })
+						},
+						paramMap: convertToParamMap({ created: identifier.created })
+					}
+				}
+			},
+			{ provide: GameService, useValue: gameServiceStub },
+			{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }]
+		});
+
+		fixture = TestBed.createComponent(GameComponent);
+		component = fixture.componentInstance;
+		fixture.detectChanges();
+	};
+
+
+	const testEndRecuitment = function(game: Game) {
+		const self: User = USER_ADMIN;
+
+		setUpForEndRecuitment(game, self);
+		component.endRecuitment();
+		tick();
+		fixture.detectChanges();
+
+		const html: HTMLElement = fixture.nativeElement;
+		const recruitingElement: HTMLElement = html.querySelector('#recruiting');
+		const endRecuitmentButton: HTMLElement = html.querySelector('button#end-recruitment');
+
+		expect(recruitingElement).withContext("recruiting element").not.toBeNull();
+		const recruitingText: string = recruitingElement.innerText;
+		expect(recruitingText.includes('This game is not recruiting players')).withContext("recruiting element text indicates that not recruiting").toBeTrue();
+		expect(endRecuitmentButton != null).withContext('has end-recuitment button').toBeFalse();
+	};
+
+	it('can end recuitment [A]', fakeAsync((() => {
+		testEndRecuitment(GAME_A);
+	})));
+
+	it('can end recuitment [B]', fakeAsync((() => {
+		testEndRecuitment(GAME_B);
+	})));
 });

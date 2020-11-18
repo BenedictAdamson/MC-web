@@ -17,6 +17,7 @@ import { SelfService } from '../self.service';
 })
 export class GameComponent implements OnInit {
 
+	identifier: GameIdentifier;
 	game: Game;
 
 	constructor(
@@ -26,7 +27,8 @@ export class GameComponent implements OnInit {
 	) { }
 
 	ngOnInit(): void {
-		this.getGame(this.getGameIdentifier());
+		this.identifier = this.getGameIdentifier();
+		this.getGame();
 	}
 
 
@@ -40,8 +42,8 @@ export class GameComponent implements OnInit {
 		return gameId;
 	}
 
-	private getGame(id: GameIdentifier): void {
-		this.gameService.getGame(id)
+	private getGame(): void {
+		this.gameService.getGame(this.identifier)
 			.subscribe(game => this.game = game);
 	}
 
@@ -49,6 +51,10 @@ export class GameComponent implements OnInit {
 		return this.selfService.authorities$.pipe(
 			map(authorities => this.game.recruiting && authorities.includes('ROLE_MANAGE_GAMES'))
 		);
+	}
+
+	endRecuitment() {
+		this.gameService.endRecuitment(this.identifier).subscribe(game => this.game = game);
 	}
 
 }
