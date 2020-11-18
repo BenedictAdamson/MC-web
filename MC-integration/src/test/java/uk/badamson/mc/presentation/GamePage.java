@@ -62,7 +62,7 @@ public final class GamePage extends Page {
             .id("end-recruitment");
 
    private static boolean isEnabled(final WebElement button) {
-      return button.getAttribute("disabled") != null;
+      return button.getAttribute("disabled") == null;
    }
 
    private final ScenarioPage scenarioPage;
