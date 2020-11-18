@@ -55,6 +55,8 @@ describe('GameComponent', () => {
 
 
 	const canCreate = function(game: Game) {
+		const recruiting: boolean = game.recruiting;
+
 		setUp(game);
 
 		expect(component).toBeTruthy();
@@ -63,8 +65,15 @@ describe('GameComponent', () => {
 		const html: HTMLElement = fixture.nativeElement;
 		const displayText: string = html.innerText;
 		const selfLink: HTMLAnchorElement = html.querySelector('a#game');
+		const recruitingElement: HTMLElement = html.querySelector('#recruiting');
+
 		expect(displayText.includes(game.identifier.created)).withContext("The game page includes the date and time that the game was set up").toBeTrue();
 		expect(selfLink).withContext("self link").not.toBeNull();
+		expect(recruitingElement).withContext("recruiting element").not.toBeNull();
+		const recruitingText: string = recruitingElement.innerText;
+		expect(recruitingText).withContext("recruiting element text mentions recruiting").toMatch('[Rr]ecruiting');
+		expect(recruiting || recruitingText.includes('This game is not recruiting players')).withContext("recruiting element text can indicate that not recruiting").toBeTrue();
+		expect(!recruiting || recruitingText.includes('This game is recruiting players')).withContext("recruiting element text can indicate that is recruiting").toBeTrue();
 	};
 
 	it('can create [A]', () => {

@@ -1,3 +1,8 @@
 <section>
 <h3><a id="game" [routerLink]="['/scenario/',game.identifier.scenario,'game',game.identifier.created]">Game created {{game.identifier.created}}</a></h3>
+
+<p id="recruiting" *ngIf="game.recruiting; else notRecruiting">This game is recruiting players.</p>
+<ng-template #notRecruiting>
+<p id="recruiting" >This game is not recruiting players.</p>
+</ng-template>
 </section>
