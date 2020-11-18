@@ -18,6 +18,7 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
@@ -31,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -91,8 +91,8 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
             response.expectStatus().isFound();
             final var gameId = McBackEndContainer
                      .parseCreateGameResponse(response);
-            final Collection<Instant> creationTimes = be
-                     .getGameCreationTimes(scenario);
+            final var creationTimes = be.getGameCreationTimes(scenario)
+                     .collect(toList());
             assertAll(
                      () -> assertEquals(scenario, gameId.getScenario(),
                               "scenario of created game is the given scenario"),

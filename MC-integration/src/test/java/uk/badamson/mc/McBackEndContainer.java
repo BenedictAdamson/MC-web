@@ -22,14 +22,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -77,9 +75,6 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    private static final UriTemplate GAME_URI_TEMPLATE = new UriTemplate(
             "/api/scenario/{scenario}/game/{game}");
-
-   private static final ParameterizedTypeReference<List<Instant>> LIST_INSTANT_TYPE = new ParameterizedTypeReference<>() {
-   };
 
    private static String createGamesListPath(final UUID scenario) {
       Objects.requireNonNull(scenario, "scenario");
@@ -245,11 +240,10 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       return administrator;
    }
 
-   public List<Instant> getGameCreationTimes(final UUID scenario) {
+   public Stream<Instant> getGameCreationTimes(final UUID scenario) {
       final var response = getGameCreationTimesResponse(scenario);
       response.expectStatus().isOk();
-      return response.returnResult(LIST_INSTANT_TYPE).getResponseBody()
-               .blockFirst();
+      return response.returnResult(Instant.class).getResponseBody().toStream();
    }
 
    ResponseSpec getGameCreationTimesResponse(final UUID scenario) {

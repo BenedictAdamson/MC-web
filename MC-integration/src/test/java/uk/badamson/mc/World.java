@@ -25,7 +25,6 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -411,7 +410,7 @@ public final class World implements AutoCloseable {
       return containers.getScenarios();
    }
 
-   public List<Instant> getGameCreationTimes(final UUID scenario) {
+   public Stream<Instant> getGameCreationTimes(final UUID scenario) {
       return containers.getGameCreationTimes(scenario);
    }
 
