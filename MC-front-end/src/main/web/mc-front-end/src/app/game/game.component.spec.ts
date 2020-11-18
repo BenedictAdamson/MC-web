@@ -1,14 +1,30 @@
-import { ActivatedRoute, convertToParamMap } from '@angular/router';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { v4 as uuid } from 'uuid';
+
+import { ActivatedRoute, convertToParamMap } from '@angular/router';
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { Game } from '../game'
 import { GameIdentifier } from '../game-identifier'
 import { GameService } from '../game.service';
-
 import { GameComponent } from './game.component';
+import { SelfService } from '../self.service';
+import { User } from '../user';
+
+class MockSelfService {
+
+	constructor(private self: User) { };
+
+	get username(): string {
+		return this.self.username;
+	}
+
+
+	get authorities$(): Observable<string[]> {
+		return of(this.self.authorities);
+	}
+}
 
 
 describe('GameComponent', () => {
@@ -24,9 +40,12 @@ describe('GameComponent', () => {
 	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A, recruiting: true };
 	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B, recruiting: false };
 
+	const USER_ADMIN = { username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
+	const USER_NORMAL = { username: 'Benedict', password: null, authorities: [] };
 
 
-	const setUp = function(game: Game) {
+
+	const setUp = function(game: Game, self: User) {
 		const gameServiceStub = jasmine.createSpyObj('GameService', ['getGame']);
 		gameServiceStub.getGame.and.returnValue(of(game));
 
@@ -45,7 +64,8 @@ describe('GameComponent', () => {
 					}
 				}
 			},
-			{ provide: GameService, useValue: gameServiceStub }]
+			{ provide: GameService, useValue: gameServiceStub },
+			{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }]
 		});
 
 		fixture = TestBed.createComponent(GameComponent);
@@ -54,10 +74,10 @@ describe('GameComponent', () => {
 	};
 
 
-	const canCreate = function(game: Game) {
+	const canCreate = function(game: Game, self: User) {
 		const recruiting: boolean = game.recruiting;
 
-		setUp(game);
+		setUp(game, self);
 
 		expect(component).toBeTruthy();
 		expect(component.game).withContext('game').toBe(game);
@@ -77,10 +97,10 @@ describe('GameComponent', () => {
 	};
 
 	it('can create [A]', () => {
-		canCreate(GAME_A);
+		canCreate(GAME_A, USER_ADMIN);
 	});
 
 	it('can create [B]', () => {
-		canCreate(GAME_B);
+		canCreate(GAME_B, USER_NORMAL);
 	});
 });

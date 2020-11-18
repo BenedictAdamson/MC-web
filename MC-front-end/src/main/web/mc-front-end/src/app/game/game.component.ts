@@ -3,9 +3,10 @@ import { v4 as uuid } from 'uuid';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
 
-import { Game } from '../game'
-import { GameIdentifier } from '../game-identifier'
+import { Game } from '../game';
+import { GameIdentifier } from '../game-identifier';
 import { GameService } from '../game.service';
+import { SelfService } from '../self.service';
 
 @Component({
 	selector: 'app-game',
@@ -18,7 +19,8 @@ export class GameComponent implements OnInit {
 
 	constructor(
 		private route: ActivatedRoute,
-		private gameService: GameService
+		private gameService: GameService,
+		private selfService: SelfService
 	) { }
 
 	ngOnInit(): void {
