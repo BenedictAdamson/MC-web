@@ -23,6 +23,7 @@ import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URI;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -407,6 +408,10 @@ public final class World implements AutoCloseable {
 
    public Stream<NamedUUID> getScenarios() {
       return containers.getScenarios();
+   }
+
+   public Stream<Instant> getGameCreationTimes(final UUID scenario) {
+      return containers.getGameCreationTimes(scenario);
    }
 
    public User getUnknownUser() {

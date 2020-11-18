@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
@@ -243,6 +244,10 @@ public class McContainers
       final var base = URI.create("http://" + container.getHost() + ":"
                + container.getFirstMappedPort());
       return base.resolve(path);
+   }
+
+   public Stream<Instant> getGameCreationTimes(final UUID scenario) {
+      return be.getGameCreationTimes(scenario);
    }
 
    public Stream<NamedUUID> getScenarios() {

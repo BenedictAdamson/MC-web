@@ -18,6 +18,7 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -25,6 +26,7 @@ import javax.annotation.Nonnull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import uk.badamson.mc.presentation.GamePage;
@@ -83,6 +85,24 @@ public class GameSteps extends Steps {
                .assertIncludesCreationTime();
    }
 
+   @Then("the game page indicates that the game is not recruiting players")
+   public void game_page_indicates_game_not_recuiting_players() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertIndicatesIsNotRecruitingPlayers();
+   }
+
+   @Then("the game page indicates that the game is recruiting players")
+   public void game_page_indicates_that_game_recuiring_players() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertIndicatesIsRecruitingPlayers();
+   }
+
+   @Then("The game page indicates whether the game is recruiting players")
+   public void game_page_indicates_whether_game_recuiting_players() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertIndicatesWhetherRecruitingPlayers();
+   }
+
    @Then("the list of games includes the new game")
    public void list_of_games_includes_new_game() {
       final var nGames = world.getExpectedPage(ScenarioPage.class)
@@ -95,10 +115,23 @@ public class GameSteps extends Steps {
       world.getAndAssertExpectedPage(GamePage.class).assertInvariants();
    }
 
+   @Then("MC accepts ending recruitment for the game")
+   public void mc_accepts_ending_recuitment_for_game() {
+      final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
+      assertAll(() -> gamePage.assertInvariants(),
+               () -> gamePage.assertNoErrorMessages());
+   }
+
    @Then("MC does not present creating a game as an option")
    public void mc_does_not_present_creating_game_option() {
       final var scenarioPage = navigateToScenario();
       assertFalse(scenarioPage.hasCreateGameButton());
+   }
+
+   @Then("MC does not present ending recruitment for the game as an option")
+   public void mc_does_not_present_ending_recuitement_for_game_as_option() {
+      final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
+      assertFalse(gamePage.hasEndRecruitmentOption());
    }
 
    @Then("MC serves the game page")
@@ -125,6 +158,25 @@ public class GameSteps extends Steps {
       final var scenario = world.getScenarios().findFirst().get().getId();
       scenarioIndex = 0;
       identifier = world.createGame(scenario);
+   }
+
+   @When("user ends recruitment for the game")
+   public void user_ends_recuitement_for_game() {
+      world.getExpectedPage(GamePage.class).endRecruitement();
+   }
+
+   @Given("viewing a game that is recruiting players")
+   public void viewing_game_recuiting_players() {
+      scenarioIndex = 0;
+      final var scenario = world.getScenarios().map(namedId -> namedId.getId())
+               .findFirst().get();
+      world.createGame(scenario);
+      nGames0 = (int) world.getGameCreationTimes(scenario).count();
+      final var scenarioPage = navigateToScenario();
+      final var gamePage = scenarioPage.navigateToGamePage(nGames0 - 1);
+      gamePage.requireIsReady();
+      gamePage.requireIndicatesIsRecruitingPlayers();
+      world.setExpectedPage(gamePage);
    }
 
    @When("Viewing the games of the scenario")

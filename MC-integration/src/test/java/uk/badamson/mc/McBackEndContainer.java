@@ -33,6 +33,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.RequestBodySpec;
 import org.springframework.test.web.reactive.server.WebTestClient.RequestHeadersSpec;
+import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriTemplate;
@@ -75,6 +76,11 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
    private static final UriTemplate GAME_URI_TEMPLATE = new UriTemplate(
             "/api/scenario/{scenario}/game/{game}");
 
+   private static String createGamesListPath(final UUID scenario) {
+      Objects.requireNonNull(scenario, "scenario");
+      return "/api/scenario/" + scenario + "/game";
+   }
+
    private static String encodeAsJson(final Object obj) {
       try {
          final var mapper = new ObjectMapper();
@@ -82,6 +88,44 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       } catch (final Exception e) {
          throw new IllegalArgumentException("can not encode Object as JSON", e);
       }
+   }
+
+   static Game.Identifier parseCreateGameResponse(final ResponseSpec response) {
+      Objects.requireNonNull(response, "response");
+
+      final UUID scenario;
+      final Instant created;
+      try {
+         final var location = response.returnResult(String.class)
+                  .getResponseHeaders().getLocation();
+         Objects.requireNonNull(location, "Has Location header");
+         final var uriComponents = GAME_URI_TEMPLATE.match(location.getPath());
+         scenario = UUID.fromString(uriComponents.get("scenario"));
+         created = Instant.parse(uriComponents.get("game"));
+      } catch (final NullPointerException e) {
+         throw new IllegalArgumentException("Invalid response", e);
+      }
+
+      return new Game.Identifier(scenario, created);
+   }
+
+   static void secure(final RequestBodySpec request, final User user,
+            final MultiValueMap<String, HttpCookie> cookies) {
+      Objects.requireNonNull(request, "request");
+      Objects.requireNonNull(cookies, "cookies");
+
+      final var sessionCookie = cookies.getFirst(SESSION_COOKIE_NAME);
+      final var xsrfCookie = cookies.getFirst(XSRF_TOKEN_COOKIE_NAME);
+      if (user != null) {
+         request.headers(headers -> {
+            headers.setBasicAuth(user.getUsername(), user.getPassword());
+         });
+      }
+      request.headers(headers -> {
+         headers.add("X-XSRF-TOKEN", xsrfCookie.getValue());
+      });
+      request.cookie(sessionCookie.getName(), sessionCookie.getValue());
+      request.cookie(xsrfCookie.getName(), xsrfCookie.getValue());
    }
 
    private final User administrator;
@@ -161,23 +205,28 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       return WebTestClient.bindToServer().baseUrl(uri.toString()).build();
    }
 
+   RequestBodySpec createCreateGameRequest(final UUID scenario, final User user,
+            final MultiValueMap<String, HttpCookie> cookies) {
+      Objects.requireNonNull(cookies, "cookies");
+
+      final var path = createGamesListPath(scenario);
+      final var request = connectWebTestClient(path).post()
+               .accept(MediaType.APPLICATION_JSON);
+      secure(request, user, cookies);
+      return request;
+   }
+
    public Game.Identifier createGame(final UUID scenario) {
       Objects.requireNonNull(scenario, "scenario");
 
       final var cookies = login(administrator);
-      final var path = "/api/scenario/" + scenario + "/game";
-      final var request = connectWebTestClient(path).post()
-               .accept(MediaType.APPLICATION_JSON);
-      secure(request, administrator, cookies);
+      final var request = createCreateGameRequest(scenario, administrator,
+               cookies);
       final var response = request.exchange();
       logout(administrator, cookies);
 
       response.expectStatus().isFound();
-      final var location = response.returnResult(String.class)
-               .getResponseHeaders().getLocation();
-      final var uriComponents = GAME_URI_TEMPLATE.match(location.getPath());
-      final var created = Instant.parse(uriComponents.get("game"));
-      return new Game.Identifier(scenario, created);
+      return parseCreateGameResponse(response);
    }
 
    RequestHeadersSpec<?> createGetSelfRequest(final String username,
@@ -189,6 +238,16 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    public User getAdministrator() {
       return administrator;
+   }
+
+   public Stream<Instant> getGameCreationTimes(final UUID scenario) {
+      final var response = getGameCreationTimesResponse(scenario);
+      response.expectStatus().isOk();
+      return response.returnResult(Instant.class).getResponseBody().toStream();
+   }
+
+   ResponseSpec getGameCreationTimesResponse(final UUID scenario) {
+      return getJson(createGamesListPath(scenario));
    }
 
    private WebTestClient.ResponseSpec getJson(final String path) {
@@ -222,24 +281,12 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
          throw new IllegalStateException(
                   "Cookies missing from response " + cookies);
       }
-      final MultiValueMap<String, HttpCookie> result = new LinkedMultiValueMap<String, HttpCookie>();
+      final MultiValueMap<String, HttpCookie> result = new LinkedMultiValueMap<>();
       cookies.forEach((name, values) -> result.addAll(name, values));
       return result;
    }
 
-   static void secure(final RequestBodySpec request, final User user,
-            final MultiValueMap<String, HttpCookie> cookies) {
-      final var sessionCookie = cookies.getFirst(SESSION_COOKIE_NAME);
-      final var xsrfCookie = cookies.getFirst(XSRF_TOKEN_COOKIE_NAME);
-      request.headers(headers -> {
-         headers.setBasicAuth(user.getUsername(), user.getPassword());
-         headers.add("X-XSRF-TOKEN", xsrfCookie.getValue());
-      });
-      request.cookie(sessionCookie.getName(), sessionCookie.getValue());
-      request.cookie(xsrfCookie.getName(), xsrfCookie.getValue());
-   }
-
-   private void logout(final User user,
+   void logout(final User user,
             final MultiValueMap<String, HttpCookie> cookies) {
       final var request = connectWebTestClient("/logout").post();
       secure(request, user, cookies);
