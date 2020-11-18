@@ -52,7 +52,7 @@ public final class GamePage extends Page {
    private static final Matcher<String> INDICATES_IS_A_GAME = containsString(
             "Game");
    private static final Matcher<String> INDICATES_WHETHER_RECRUITING_PLAYERS = matchesPattern(
-            "[Rr]ecruiting");
+            ".*[Rr]ecruiting.*");
    private static final Matcher<String> INDICATES_IS_RECRUITING_PLAYERS = containsString(
             "This game is recruiting players");
    private static final Matcher<String> INDICATES_IS_NOT_RECRUITING_PLAYERS = containsString(
