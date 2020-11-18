@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 
 import { Component, OnInit } from '@angular/core';
@@ -41,6 +43,12 @@ export class GameComponent implements OnInit {
 	private getGame(id: GameIdentifier): void {
 		this.gameService.getGame(id)
 			.subscribe(game => this.game = game);
+	}
+
+	mayEndRecruitment$(): Observable<boolean> {
+		return this.selfService.authorities$.pipe(
+			map(authorities => this.game.recruiting && authorities.includes('ROLE_MANAGE_GAMES'))
+		);
 	}
 
 }

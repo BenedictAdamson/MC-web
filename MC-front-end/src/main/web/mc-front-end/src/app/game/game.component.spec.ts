@@ -3,7 +3,7 @@ import { v4 as uuid } from 'uuid';
 
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync, fakeAsync, tick } from '@angular/core/testing';
 
 import { Game } from '../game'
 import { GameIdentifier } from '../game-identifier'
@@ -76,16 +76,25 @@ describe('GameComponent', () => {
 
 	const canCreate = function(game: Game, self: User) {
 		const recruiting: boolean = game.recruiting;
+		const manager: boolean = self.authorities.includes('ROLE_MANAGE_GAMES');
+		const mayEndRecuitment: boolean = recruiting && manager;
 
 		setUp(game, self);
+		tick();
+		fixture.detectChanges();
 
 		expect(component).toBeTruthy();
 		expect(component.game).withContext('game').toBe(game);
+
+		component.mayEndRecruitment$().subscribe(may => {
+			expect(may).withContext('may end recuitment only if game is recuiting and user is authorised').toEqual(mayEndRecuitment);
+		});
 
 		const html: HTMLElement = fixture.nativeElement;
 		const displayText: string = html.innerText;
 		const selfLink: HTMLAnchorElement = html.querySelector('a#game');
 		const recruitingElement: HTMLElement = html.querySelector('#recruiting');
+		const endRecuitmentButton: HTMLElement = html.querySelector('button#end-recruitment');
 
 		expect(displayText.includes(game.identifier.created)).withContext("The game page includes the date and time that the game was set up").toBeTrue();
 		expect(selfLink).withContext("self link").not.toBeNull();
@@ -94,13 +103,22 @@ describe('GameComponent', () => {
 		expect(recruitingText).withContext("recruiting element text mentions recruiting").toMatch('[Rr]ecruiting');
 		expect(recruiting || recruitingText.includes('This game is not recruiting players')).withContext("recruiting element text can indicate that not recruiting").toBeTrue();
 		expect(!recruiting || recruitingText.includes('This game is recruiting players')).withContext("recruiting element text can indicate that is recruiting").toBeTrue();
+		expect(endRecuitmentButton != null).withContext('has end-recuitment button').toEqual(mayEndRecuitment);
 	};
 
-	it('can create [A]', () => {
+	it('can create [A]', fakeAsync(() => {
 		canCreate(GAME_A, USER_ADMIN);
-	});
+	}));
 
-	it('can create [B]', () => {
+	it('can create [B]', fakeAsync(() => {
+		canCreate(GAME_A, USER_NORMAL);
+	}));
+
+	it('can create [C]', fakeAsync(() => {
+		canCreate(GAME_B, USER_ADMIN);
+	}));
+
+	it('can create [D]', fakeAsync(() => {
 		canCreate(GAME_B, USER_NORMAL);
-	});
+	}));
 });
