@@ -125,4 +125,25 @@ public final class UsersPage extends Page {
       return addUserPage;
    }
 
+   public UserPage navigateToUserPage(final int index) {
+      if (index < 0) {
+         throw new IllegalArgumentException("negative index");
+      }
+      requireIsReady();
+      final var list = getBody().findElement(USER_LIST_LOCATOR);
+      final var entries = list.findElements(By.tagName("li"));
+      final WebElement entry;
+      try {
+         entry = entries.get(index);
+      } catch (final IndexOutOfBoundsException e) {
+         throw new IllegalArgumentException("index too large", e);
+      }
+      final var link = entry.findElement(By.tagName("a"));
+      final var displayName = link.getText();
+      link.click();
+      final var userPage = new UserPage(this, displayName);
+      userPage.awaitIsReady();
+      return userPage;
+   }
+
 }

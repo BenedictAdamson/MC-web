@@ -33,6 +33,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import uk.badamson.mc.presentation.HomePage;
 import uk.badamson.mc.presentation.LoginPage;
+import uk.badamson.mc.presentation.UserPage;
 import uk.badamson.mc.presentation.UsersPage;
 
 /**
@@ -130,9 +131,23 @@ public class UserSteps extends Steps {
       world.getAndAssertExpectedPage(LoginPage.class).assertRejectedLogin();
    }
 
+   @Then("MC serves the user page")
+   public void mc_serves_user_page() {
+      final var userPage = world.getAndAssertExpectedPage(UserPage.class);
+      userPage.assertInvariants();
+      userPage.assertNoErrorMessages();
+   }
+
    @Then("MC serves the users page")
    public void mc_serves_users_page() {
       world.getAndAssertExpectedPage(UsersPage.class).assertInvariants();
+   }
+
+   @When("Navigate to one user")
+   public void navigate_to_one_user() {
+      final var usersPage = world.getExpectedPage(UsersPage.class);
+      world.setExpectedPage(usersPage.navigateToUserPage(0));
+
    }
 
    private UsersPage navigateToUsersPage() {
@@ -190,5 +205,20 @@ public class UserSteps extends Steps {
    @Given("user is the administrator")
    public void user_is_administrator() {
       user = world.getAdministratorUser();
+   }
+
+   @Then("The user page includes the user name")
+   public void user_page_includes_user_name() {
+      world.getAndAssertExpectedPage(UserPage.class).assertIncludesUserName();
+   }
+
+   @Then("The user page lists the roles of the user")
+   public void user_page_lists_roles_of_user() {
+      world.getAndAssertExpectedPage(UserPage.class).assertListsRolesOfUser();
+   }
+
+   @Given("Viewing the list of users")
+   public void viewing_list_of_users() {
+      navigateToUsersPage();
    }
 }
