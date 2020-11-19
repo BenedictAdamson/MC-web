@@ -25,6 +25,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
+import org.testcontainers.utility.DockerImageName;
 
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoCredential;
@@ -44,8 +45,8 @@ public final class McDatabaseContainer
 
    public static final String VERSION = Version.VERSION;
 
-   public static final String IMAGE = "index.docker.io/benedictadamson/mc-database:"
-            + VERSION;
+   public static final DockerImageName IMAGE = DockerImageName
+            .parse("index.docker.io/benedictadamson/mc-database:" + VERSION);
 
    public static final int PORT = 27017;
 

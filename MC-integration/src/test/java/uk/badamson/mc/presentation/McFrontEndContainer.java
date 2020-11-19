@@ -20,6 +20,7 @@ package uk.badamson.mc.presentation;
 
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.utility.DockerImageName;
 
 import uk.badamson.mc.Version;
 
@@ -35,8 +36,8 @@ public final class McFrontEndContainer
 
    public static final int PORT = 80;
 
-   public static final String IMAGE = "index.docker.io/benedictadamson/mc-front-end-srv:"
-            + VERSION;
+   public static final DockerImageName IMAGE = DockerImageName.parse(
+            "index.docker.io/benedictadamson/mc-front-end-srv:" + VERSION);
 
    public McFrontEndContainer() {
       super(IMAGE);
