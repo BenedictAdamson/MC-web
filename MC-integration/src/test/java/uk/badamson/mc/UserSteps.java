@@ -20,6 +20,7 @@ package uk.badamson.mc;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.util.Locale;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -42,14 +43,13 @@ import uk.badamson.mc.presentation.UsersPage;
  */
 public class UserSteps extends Steps {
 
-   private static Authority parseRoleName(final String roleName) {
-      final Authority role;
+   private static Authority parseRole(final String role) {
       try {
-         role = Authority.valueOf("ROLE_" + roleName);
+         return Authority.valueOf(
+                  "ROLE_" + role.replace(' ', '_').toUpperCase(Locale.ENGLISH));
       } catch (final Exception e) {
-         throw new IllegalArgumentException("roleName "+roleName, e);
+         throw new IllegalArgumentException("roleName " + role, e);
       }
-      return role;
    }
 
    private User user;
@@ -179,12 +179,12 @@ public class UserSteps extends Steps {
 
    @Given("user does not have the {string} role")
    public void user_does_not_have_role(final String roleName) {
-      user = world.getUserWithoutRole(parseRoleName(roleName));
+      user = world.getUserWithoutRole(parseRole(roleName));
    }
 
    @Given("user has the {string} role")
    public void user_has_role(final String roleName) {
-      user = world.getUserWithRole(parseRoleName(roleName));
+      user = world.getUserWithRole(parseRole(roleName));
    }
 
    @Given("user is the administrator")
