@@ -61,7 +61,7 @@ public final class McDatabaseContainer
    public static final MongoCredential BAD_CREDENTIALS = MongoCredential
             .createCredential("BAD", AUTHENTICATION_DB, "BAD".toCharArray());
 
-   private static final Duration STARTUP_TIME = Duration.ofMillis(100);
+   private static final Duration STARTUP_TIME = Duration.ofSeconds(45);
 
    private static final WaitStrategy WAIT_STRATEGY = new WaitAllStrategy()
             .withStrategy(Wait.forLogMessage(".*MongoDB starting.*", 1))
@@ -70,7 +70,8 @@ public final class McDatabaseContainer
                      ".*[Ii]nitiali[sz]ation of mc db complete.*", 1))
             .withStrategy(Wait.forLogMessage(".*init process complete.*", 1))
             .withStrategy(
-                     Wait.forLogMessage(".*[Ww]aiting for connection.*", 1));
+                     Wait.forLogMessage(".*[Ww]aiting for connection.*", 1))
+            .withStartupTimeout(STARTUP_TIME);
 
    public final MongoCredential userCredentials;
 
@@ -87,7 +88,6 @@ public final class McDatabaseContainer
       withEnv("MONGO_INITDB_ROOT_PASSWORD", rootPassword);
       withEnv("MC_INIT_PASSWORD", userPassword);
       withCommand("--bind_ip", "0.0.0.0");
-      withMinimumRunningDuration(STARTUP_TIME);
       waitingFor(WAIT_STRATEGY);
    }
 
