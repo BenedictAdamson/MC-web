@@ -7,9 +7,9 @@
 <header>
     <h3>Authorities:</h3>
 </header>
-<ul class="authorities">
+<ul id="roles">
     <li *ngFor="let authority of user.authorities">
-        {{authority}}
+        {{roleName(authority)}}
     </li>
 </ul>
 </section>

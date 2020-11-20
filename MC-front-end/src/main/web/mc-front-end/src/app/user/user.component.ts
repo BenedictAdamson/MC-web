@@ -4,26 +4,39 @@ import { UserService } from '../user.service';
 import { User } from '../user';
 
 @Component({
-    selector: 'app-user',
-    templateUrl: './user.component.html',
-    styleUrls: ['./user.component.css']
+	selector: 'app-user',
+	templateUrl: './user.component.html',
+	styleUrls: ['./user.component.css']
 })
 export class UserComponent implements OnInit {
 
-    user: User;
+	user: User;
 
-    constructor(
-        private route: ActivatedRoute,
-        private userService: UserService) { }
+	constructor(
+		private route: ActivatedRoute,
+		private userService: UserService) { }
 
-    ngOnInit() {
-        this.getUser();
-    }
+	ngOnInit() {
+		this.getUser();
+	}
 
+	roleName(authority: string): string {
+		switch (authority) {
+			case 'ROLE_PLAYER':
+				return 'player';
+			case 'ROLE_MANAGE_USERS':
+				return 'manage users';
+			case 'ROLE_MANAGE_GAMES':
+				return 'manage games';
+			default:
+				return authority.replace('/^ROLE_/', '').replace('/ /g', ' ').toLowerCase();
+		}
 
-    getUser(): void {
-        const username = this.route.snapshot.paramMap.get('username');
-        this.userService.getUser(username)
-            .subscribe(user => this.user = user);
-    }
+	}
+
+	getUser(): void {
+		const username = this.route.snapshot.paramMap.get('username');
+		this.userService.getUser(username)
+			.subscribe(user => this.user = user);
+	}
 }

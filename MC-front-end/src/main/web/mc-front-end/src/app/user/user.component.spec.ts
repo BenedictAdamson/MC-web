@@ -11,8 +11,10 @@ describe('UserComponent', () => {
 	let component: UserComponent;
 	let fixture: ComponentFixture<UserComponent>;
 
-	const USER_A = { username: 'Administrator', password: null, authorities: ['ROLE_ADMIN'] };
-	const USER_B = { username: 'Benedict', password: null, authorities: [] };
+	const USER_A: User = { username: 'Administrator', password: null, authorities: ['ROLE_PLAYER', 'ROLE_MANAGE_USERS', 'ROLE_MANAGE_GAMES'] };
+	const USER_B: User = { username: 'Benedict', password: null, authorities: [] };
+	const EXPECTED_ROLE_NAMES_A: string[] = ['player', 'manage users', 'manage games'];
+	const EXPECTED_ROLE_NAMES_B: string[] = [];
 
 	const setUp = (testUser: User) => {
 		const userServiceStub = jasmine.createSpyObj('UserService', ['getUser']);
@@ -36,20 +38,30 @@ describe('UserComponent', () => {
 		component = fixture.componentInstance;
 		fixture.detectChanges();
 	};
-	const canCreate = (testUser: User) => {
-		setUp(testUser);
+	const canCreate = function(user: User, expectedRoleNames: string[]) {
+		setUp(user);
 
 		expect(component).toBeTruthy();
-		expect(component.user).toBe(testUser);
+		expect(component.user).toBe(user);
 
 		const html: HTMLElement = fixture.nativeElement;
 		const displayText: string = html.innerText;
-		expect(displayText.includes(testUser.username)).withContext("The user page includes the user name").toBeTrue();
+		const rolesElement: HTMLUListElement = html.querySelector('ul#roles');
+		expect(displayText).withContext("The user page includes the user name").toContain(user.username);
+		expect(rolesElement).withContext('roles element').not.toBeNull();//guard
+		const roleEntries: NodeListOf<HTMLLIElement> = rolesElement.querySelectorAll('li');
+		expect(roleEntries.length).withContext('number of role entries').toBe(user.authorities.length);
+		for (let i = 0; i < roleEntries.length; i++) {
+			const expectedRoleName: string = expectedRoleNames[i];
+			const roleEntry: HTMLLIElement = roleEntries.item(i);
+			expect(roleEntry.textContent).withContext('role text').toContain(expectedRoleName);
+		}
+
 	};
 	it('can create [a]', () => {
-		canCreate(USER_A);
+		canCreate(USER_A, EXPECTED_ROLE_NAMES_A);
 	});
 	it('can create [b]', () => {
-		canCreate(USER_B);
+		canCreate(USER_B, EXPECTED_ROLE_NAMES_B);
 	});
 });
