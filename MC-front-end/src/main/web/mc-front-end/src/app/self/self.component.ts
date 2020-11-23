@@ -20,6 +20,10 @@ export class SelfComponent implements OnInit {
 
 	get username(): string { return this.service.username; };
 
-	authenticated$: Observable<boolean> = this.service.authenticated$;
+	get authenticated$(): Observable<boolean> { return this.service.authenticated$; };
+
+	logout() {
+		this.service.logout().subscribe();
+	}
 
 }

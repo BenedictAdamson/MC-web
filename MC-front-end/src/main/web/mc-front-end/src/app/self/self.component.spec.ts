@@ -1,6 +1,6 @@
-import { Observable, of } from 'rxjs';
+import { Observable, defer, of } from 'rxjs';
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { SelfComponent } from './self.component';
@@ -21,6 +21,13 @@ class MockSelfService {
 
 	get authenticated$(): Observable<boolean> {
 		return of(this.self != null);
+	}
+
+	logout(): Observable<null> {
+		return defer(() => {
+			this.self = null;
+			return of(null)
+		});
 	}
 }// class
 
@@ -56,9 +63,7 @@ describe('SelfComponent', () => {
 		fixture.detectChanges();
 	};
 
-	it('handles not logged-in case', () => {
-		setup(null);
-		expect(component).toBeDefined();
+	const assertNotLoggedIn = function() {
 		expect(getAuthenticated(component)).withContext('authenticated').toBeFalse();
 		expect(component.username).withContext('username').toBeNull();
 		const element: HTMLElement = fixture.nativeElement;
@@ -67,6 +72,12 @@ describe('SelfComponent', () => {
 		expect(loginLink).withContext('login link').not.toBeNull();
 		expect(loginLink.textContent).withContext('login link text').toContain('login');
 		expect(logoutButton).withContext('logout button').toBeNull();
+	};
+
+	it('handles not logged-in case', () => {
+		setup(null);
+		expect(component).toBeDefined();
+		assertNotLoggedIn();
 	});
 
 	const testLoggedIn = function(self: User) {
@@ -89,5 +100,16 @@ describe('SelfComponent', () => {
 	it('handles logged-in case [B]', () => {
 		testLoggedIn(USER_B);
 	});
+
+	it('handles logout', fakeAsync(() => {
+		const self: User = USER_A;
+		setup(self);
+
+		component.logout();
+		tick();
+		fixture.detectChanges();
+
+		assertNotLoggedIn();
+	}));
 
 });
