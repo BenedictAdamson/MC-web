@@ -116,6 +116,14 @@ public class UserSteps extends Steps {
                () -> homePage.assertReportsThatLoggedIn());
    }
 
+   @Then("MC accepts the logout")
+   public void mc_accepts_logout() {
+      final var homePage = world.getAndAssertExpectedPage(HomePage.class);
+      assertAll(() -> homePage.assertInvariants(),
+               () -> homePage.assertNoErrorMessages(),
+               () -> homePage.assertReportsThatNotLoggedIn());
+   }
+
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() {
       try {
@@ -124,6 +132,12 @@ public class UserSteps extends Steps {
       } catch (final IllegalStateException e) {
          throw new AssertionFailedError(e.getMessage(), e);
       }
+   }
+
+   @Then("MC presents logout as an option")
+   public void mc_presents_logout_option() {
+      world.getAndAssertExpectedPage(HomePage.class)
+               .assertPresentsLogoutOption();
    }
 
    @Then("MC rejects the login")
@@ -162,6 +176,12 @@ public class UserSteps extends Steps {
       world.getAndAssertExpectedPage(HomePage.class).assertInvariants();
    }
 
+   @When("request logout")
+   public void request_logout() {
+      final var homePage = world.getAndAssertExpectedPage(HomePage.class);
+      homePage.logout();
+   }
+
    @Then("the response is a list of users")
    public void response_is_list_of_users() {
       final var usersPage = world.getAndAssertExpectedPage(UsersPage.class);
@@ -195,6 +215,11 @@ public class UserSteps extends Steps {
    @Given("user does not have the {string} role")
    public void user_does_not_have_role(final String roleName) {
       user = world.getUserWithoutRole(parseRole(roleName));
+   }
+
+   @Given("user has any role")
+   public void user_has_any_role() {
+      user = world.getUserWithRole(Authority.values()[0]);
    }
 
    @Given("user has the {string} role")

@@ -20,12 +20,14 @@ package uk.badamson.mc.presentation;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 
 import java.util.Objects;
 import java.util.Optional;
 
 import javax.annotation.concurrent.Immutable;
 
+import org.hamcrest.Matcher;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -38,9 +40,15 @@ import org.openqa.selenium.WebElement;
 @Immutable
 public final class HomePage extends Page {
 
+   private static final Matcher<String> LOGGED_IN_TEXT_MATCHER = containsString(
+            "Logged in");
+
    public static final String GAME_NAME = "Mission Command";
 
    private static final String PATH = "/";
+
+   private static final By LOGOUT_BUTTON_LOCATOR = By
+            .xpath("//button[@id='logout']");
 
    /**
     * <p>
@@ -65,9 +73,20 @@ public final class HomePage extends Page {
       assertThat(heading.getText(), containsString(GAME_NAME));
    }
 
+   public void assertPresentsLogoutOption() {
+      final var button = assertHasElement(getBody(), LOGOUT_BUTTON_LOCATOR);// guard
+      assertThat("Logout button has a useful label", button.getText(),
+               containsString("Logout"));
+   }
+
    public void assertReportsThatLoggedIn() {
       assertThat("Reports that is logged in", getBody().getText(),
-               containsString("Logged in"));
+               LOGGED_IN_TEXT_MATCHER);
+   }
+
+   public void assertReportsThatNotLoggedIn() {
+      assertThat("Reports that is not logged in", getBody().getText(),
+               not(LOGGED_IN_TEXT_MATCHER));
    }
 
    public void assertTitleIncludesNameOfGame() {
@@ -97,6 +116,12 @@ public final class HomePage extends Page {
    protected boolean isValidPath(final String path) {
       Objects.requireNonNull(path, "path");
       return PATH.equals(path);
+   }
+
+   public void logout() {
+      final var button = getBody().findElement(LOGOUT_BUTTON_LOCATOR);
+      button.click();
+      awaitIsReady();
    }
 
    public LoginPage navigateToLoginPage() {
