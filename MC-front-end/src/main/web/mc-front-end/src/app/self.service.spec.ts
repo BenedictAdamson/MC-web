@@ -65,7 +65,7 @@ describe('SelfService', () => {
 		assertNotAuthenticated();
 	});
 
-	const expectAutheorizationRequestHeaders = function(expectAuthorizationHeader: boolean): TestRequest {
+	const expectAuthorizationRequestHeaders = function(expectAuthorizationHeader: boolean): TestRequest {
 		const request: TestRequest = httpTestingController.expectOne('/api/self');
 		expect(request.request.method).toEqual('GET');
 		expect(request.request.headers.has("Authorization")).withContext('has Authorization header').toEqual(expectAuthorizationHeader);
@@ -74,7 +74,7 @@ describe('SelfService', () => {
 	};
 
 	const mockHttpAuthorizationFailure = function(expectAuthorizationHeader: boolean) {
-		const request = expectAutheorizationRequestHeaders(expectAuthorizationHeader);
+		const request = expectAuthorizationRequestHeaders(expectAuthorizationHeader);
 		request.flush("", { headers: new HttpHeaders(), status: 401, statusText: 'Unauthorized' });
 		httpTestingController.verify();
 	};
@@ -117,8 +117,8 @@ describe('SelfService', () => {
 		testAuthenticationFailure(done, USER_B.username, USER_B.password);
 	});
 
-	let mockHttpAuthorizationSuccess = function(userDetails: User, expectAuthorizationHeader: boolean) {
-		const request = expectAutheorizationRequestHeaders(expectAuthorizationHeader);
+	const mockHttpAuthorizationSuccess = function(userDetails: User, expectAuthorizationHeader: boolean) {
+		const request = expectAuthorizationRequestHeaders(expectAuthorizationHeader);
 		request.flush(userDetails, { headers: new HttpHeaders(), status: 200, statusText: 'Ok' });
 		httpTestingController.verify();
 	};
@@ -167,7 +167,13 @@ describe('SelfService', () => {
 		testAuthenticationSuccess(done, USER_B);
 	});
 
-	const testLogout = function(done: any) {
+	const mockHttpLogout = function(expectAuthorizationHeader: boolean) {
+		const request: TestRequest = httpTestingController.expectOne('/logout');
+		expect(request.request.method).toEqual('POST');
+		request.flush(null, { headers: new HttpHeaders(), status: 204, statusText: 'No Content' });
+	};
+
+	const testLogout = function(done: any, expectAuthorizationHeader: boolean) {
 		service.logout().subscribe({
 			next: () => {
 				assertInvariants(service);
@@ -179,22 +185,25 @@ describe('SelfService', () => {
 				done()
 			}
 		});
+
+		mockHttpLogout(expectAuthorizationHeader);
+		httpTestingController.verify();
 	}
 
 	it('handles logout from the initial state', (done) => {
-		testLogout(done);
+		testLogout(done, false);
 	});
 
 	it('handles logout while authenticated', (done) => {
-		const userDetails: User = USER_A;
-		service.authenticate(userDetails.username, userDetails.password).subscribe({
+		const user: User = USER_A;
+		service.authenticate(user.username, user.password).subscribe({
 			next: () => { },
 			error: (err) => { fail(err); done() },
 			complete: () => {
-				testLogout(done);
+				testLogout(done, true);
 			}
 		});
-		mockHttpAuthorizationSuccess(userDetails, true);
+		mockHttpAuthorizationSuccess(user, true);
 	});
 
 

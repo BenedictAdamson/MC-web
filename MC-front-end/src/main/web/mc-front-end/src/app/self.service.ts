@@ -1,12 +1,14 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, ReplaySubject, defer, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { flatMap, map } from 'rxjs/operators';
+
+import { flatMap, map, tap } from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { User } from './user';
 
-const apiUrl: string = '/api/self';
+const selfUrl: string = '/api/self';
+const logoutUrl: string = '/logout';
 
 /**
  * @description
@@ -85,7 +87,7 @@ export class SelfService {
 	private getUserDetails(username: string, password: string): Observable<User> {
 		const headers: HttpHeaders = SelfService.createHeaders(username, password);
 
-		return this.http.get<User>(apiUrl, { headers: headers })
+		return this.http.get<User>(selfUrl, { headers: headers })
 			.pipe(
 				catchError(this.handleUserDetailsHttpError())
 			);
@@ -133,12 +135,13 @@ export class SelfService {
 	/**
 	 * Clear the credentials of the current user.
      *
-     * If the authentication system maintains session information on the server,
-     * this also ends the session. This method therefore may contact the server.
+     * This also tells the server to end (clear) its session information,
+     * if the user is [[authenticated$]],
+     * by posting to the `/logout` end-point. This method therefore contacts the server.
      * It returns an Observable that indicates when communication with the server has completed.
      *
-     * On competion of the returned Observable, the #username and #password of this sevice are null,
-     * and #authorities$ provides an empty array of autheorities.
+     * On completion of the returned Observable, the #username and #password of this service are null,
+     * and #authorities$ provides an empty array of authorities.
 	 */
 	logout(): Observable<null> {
 		return this.endServerSession().pipe(
@@ -181,7 +184,17 @@ export class SelfService {
 	}
 
 	private endServerSession(): Observable<null> {
-		return of(null);// at present, have no server sessions
+		return this.http.post<null>(logoutUrl, null)
+			.pipe(
+				catchError(this.handleLogoutHttpError())
+			);
+	}
+
+	private handleLogoutHttpError() {
+		return (error: any): Observable<null> => {
+			// Do not log errors, all are equivalent to authentication failure.
+			return of(null);
+		};
 	}
 
     /**
