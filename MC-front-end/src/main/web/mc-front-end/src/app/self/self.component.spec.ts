@@ -1,12 +1,28 @@
-import { HttpClient } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { SelfComponent } from './self.component';
 import { SelfService } from '../self.service';
+import { User } from '../user';
 
+class MockSelfService {
+
+	constructor(private self: User) { };
+
+	get username(): string {
+		return this.self ? this.self.username : null;
+	}
+
+	get authorities$(): Observable<string[]> {
+		return of(this.self ? this.self.authorities : []);
+	}
+
+	get authenticated$(): Observable<boolean> {
+		return of(this.self != null);
+	}
+}// class
 
 describe('SelfComponent', () => {
 	let fixture: ComponentFixture<SelfComponent>;
@@ -22,42 +38,30 @@ describe('SelfComponent', () => {
 		return loggedIn;
 	};
 
-	beforeEach(waitForAsync(() => {
+	const setup = function(self: User) {
 		TestBed.configureTestingModule({
-			imports: [HttpClientTestingModule, RouterTestingModule],
+			imports: [RouterTestingModule],
 			providers: [
-				{ provide: SelfService, useClass: SelfService }
-			],
+				{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }],
 			declarations: [
 				SelfComponent
 			]
-		}).compileComponents();
-	}));
-	beforeEach(() => {
-        /* Inject for each test:
-         * HTTP requests will be handled by the mock back-end.
-          */
-		TestBed.get(HttpClient);
-		TestBed.get(HttpTestingController);
+		});
+
 		fixture = TestBed.createComponent(SelfComponent);
 		component = fixture.componentInstance;
-	});
-
-	it('should create', () => {
-		expect(component).toBeDefined();
-	});
-
-	it('should not initially be authenticated', () => {
-		expect(getAuthenticated(component)).toBe(false, 'not authenticated');
-		expect(component.username).toBeNull();
-	});
-
-	it('should initially provide a login link', () => {
 		fixture.detectChanges();
+	};
+
+	it('handles not logged-in case', () => {
+		setup(null);
+		expect(component).toBeDefined();
+		expect(getAuthenticated(component)).toBe(false, 'not authenticated');
+		expect(component.username).withContext('username').toBeNull();
 		const element: HTMLElement = fixture.nativeElement;
-		const button = element.querySelector('a[id="login"]');
-		expect(button).not.toBeNull();
-		expect(button.textContent).toContain('login');
+		const loginLink = element.querySelector('a[id="login"]');
+		expect(loginLink).withContext('login link').not.toBeNull();
+		expect(loginLink.textContent).withContext('login link text').toContain('login');
 	});
 
 });
