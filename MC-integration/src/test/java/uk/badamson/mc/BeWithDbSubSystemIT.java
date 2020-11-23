@@ -28,6 +28,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -53,6 +54,7 @@ import org.springframework.util.MultiValueMap;
 import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.badamson.mc.repository.McDatabaseContainer;
@@ -72,6 +74,7 @@ import uk.badamson.mc.repository.McDatabaseContainer;
 @Testcontainers
 @Tag("IT")
 public class BeWithDbSubSystemIT implements AutoCloseable {
+
    @Nested
    public class CreateGame {
 
@@ -130,22 +133,50 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
 
          final var response = request.exchange();
 
-         final var result = response.returnResult(String.class);
-         final var responseJson = result.getResponseBody()
-                  .blockFirst(Duration.ofSeconds(9));
-         final var responseUser = new ObjectMapper().readValue(responseJson,
-                  User.class);
-         final var cookies = result.getResponseCookies();
-         assertAll(() -> response.expectStatus().isOk(),
-                  () -> assertThat("response username",
-                           responseUser.getUsername(), is(user.getUsername())),
-                  () -> assertThat("response authorities",
-                           responseUser.getAuthorities(),
-                           is(user.getAuthorities())),
-                  () -> assertThat("Sets session cookie", cookies,
-                           hasKey("JSESSIONID")),
-                  () -> assertThat("Sets CSRF protection cookie", cookies,
-                           hasKey("XSRF-TOKEN")));
+         assertSelfResponseEquivalent(user, true, response);
+      }
+
+      @Test
+      @Order(4)
+      public void twiceWithoutSessionCookie() throws Exception {
+         final var user = USER_A;
+         final var username = user.getUsername();
+         final var password = user.getPassword();
+         be.addUser(user);
+         final var response1 = be.createGetSelfRequest(username, password)
+                  .exchange();
+         final var sessionCookie1 = response1.returnResult(String.class)
+                  .getResponseCookies()
+                  .getFirst(McBackEndContainer.SESSION_COOKIE_NAME).getValue();
+
+         final var request2 = be.createGetSelfRequest(username, password);
+         final var response2 = request2.exchange();
+         final var sessionCookie2 = response2.returnResult(String.class)
+                  .getResponseCookies()
+                  .getFirst(McBackEndContainer.SESSION_COOKIE_NAME).getValue();
+
+         assertNotEquals(sessionCookie1, sessionCookie2,
+                  "Different session cookies");
+      }
+
+      @Test
+      @Order(4)
+      public void twiceWithSessionCookie() throws Exception {
+         final var user = USER_A;
+         final var username = user.getUsername();
+         final var password = user.getPassword();
+         be.addUser(user);
+         final var response1 = be.createGetSelfRequest(username, password)
+                  .exchange();
+         final var sessionCookie = response1.returnResult(String.class)
+                  .getResponseCookies()
+                  .getFirst(McBackEndContainer.SESSION_COOKIE_NAME).getValue();
+
+         final var request2 = be.createGetSelfRequest(username, password);
+         request2.cookie(McBackEndContainer.SESSION_COOKIE_NAME, sessionCookie);
+         final var response2 = request2.exchange();
+
+         assertSelfResponseEquivalent(user, false, response2);
       }
 
       @Test
@@ -170,22 +201,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
 
          final var response = request.exchange();
 
-         final var result = response.returnResult(String.class);
-         final var responseJson = result.getResponseBody()
-                  .blockFirst(Duration.ofSeconds(9));
-         final var responseUser = new ObjectMapper().readValue(responseJson,
-                  User.class);
-         final var cookies = result.getResponseCookies();
-         assertAll(() -> response.expectStatus().isOk(),
-                  () -> assertThat("response username",
-                           responseUser.getUsername(), is(user.getUsername())),
-                  () -> assertThat("response authorities",
-                           responseUser.getAuthorities(),
-                           is(user.getAuthorities())),
-                  () -> assertThat("Sets session cookie", cookies,
-                           hasKey("JSESSIONID")),
-                  () -> assertThat("Sets CSRF protection cookie", cookies,
-                           hasKey("XSRF-TOKEN")));
+         assertSelfResponseEquivalent(user, true, response);
       }
 
       @Test
@@ -278,18 +294,45 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
 
    }// class
 
+   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
    private static final MultiValueMap<String, HttpCookie> NO_COOKIES = new LinkedMultiValueMap<>();
 
    private static final String BE_HOST = "be";
+
    private static final String DB_HOST = "db";
    private static final String DB_ROOT_PASSWORD = "secret2";
-
    private static final String DB_USER_PASSWORD = "secret3";
 
    private static final String ADMINISTARTOR_PASSWORD = "secret4";
 
    private static final User USER_A = new User("jeff", "password",
             Authority.ALL, true, true, true, true);
+
+   private static void assertSelfResponseEquivalent(final User expectedUser,
+            final boolean expectSetSessionCookie, final ResponseSpec response) {
+      final var result = response.returnResult(String.class);
+      final var responseJson = result.getResponseBody()
+               .blockFirst(Duration.ofSeconds(9));
+      final User responseUser;
+      try {
+         responseUser = OBJECT_MAPPER.readValue(responseJson, User.class);
+      } catch (final JsonProcessingException e) {
+         throw new AssertionFailedError("Response has valid JSON", e);
+      }
+      final var cookies = result.getResponseCookies();
+      assertAll(() -> response.expectStatus().isOk(),
+               () -> assertThat("response username", responseUser.getUsername(),
+                        is(expectedUser.getUsername())),
+               () -> assertThat("response authorities",
+                        responseUser.getAuthorities(),
+                        is(expectedUser.getAuthorities())),
+               () -> assertThat("Sets session cookie", cookies,
+                        expectSetSessionCookie ? hasKey("JSESSIONID")
+                                 : not(hasKey("JSESSIONID"))),
+               () -> assertThat("Sets CSRF protection cookie", cookies,
+                        hasKey("XSRF-TOKEN")));
+   }
 
    private final Network network = Network.newNetwork();
 
@@ -351,7 +394,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       final var usersAsJson = be.getJsonAsAdministrator("/api/user")
                .returnResult(String.class).getResponseBody()
                .blockFirst(Duration.ofSeconds(9));
-      final var mapper = new ObjectMapper();
+      final var mapper = OBJECT_MAPPER;
       final var typeId = mapper.getTypeFactory()
                .constructCollectionType(List.class, User.class);
       return mapper.readValue(usersAsJson, typeId);
