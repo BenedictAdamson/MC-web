@@ -38,6 +38,9 @@ describe('SelfComponent', () => {
 		return loggedIn;
 	};
 
+	const USER_A = { username: 'Allan', password: 'letmein', authorities: ['ROLE_MANAGE_GAMES'] };
+	const USER_B = { username: 'Benedict', password: 'password123', authorities: [] };
+
 	const setup = function(self: User) {
 		TestBed.configureTestingModule({
 			imports: [RouterTestingModule],
@@ -56,12 +59,35 @@ describe('SelfComponent', () => {
 	it('handles not logged-in case', () => {
 		setup(null);
 		expect(component).toBeDefined();
-		expect(getAuthenticated(component)).toBe(false, 'not authenticated');
+		expect(getAuthenticated(component)).withContext('authenticated').toBeFalse();
 		expect(component.username).withContext('username').toBeNull();
 		const element: HTMLElement = fixture.nativeElement;
 		const loginLink = element.querySelector('a[id="login"]');
+		const logoutButton = element.querySelector('button[id="logout"]');
 		expect(loginLink).withContext('login link').not.toBeNull();
 		expect(loginLink.textContent).withContext('login link text').toContain('login');
+		expect(logoutButton).withContext('logout button').toBeNull();
+	});
+
+	const testLoggedIn = function(self: User) {
+		setup(self);
+		expect(component).toBeDefined();
+		expect(getAuthenticated(component)).withContext('authenticated').toBeTrue();
+		expect(component.username).withContext('username').toEqual(self.username);
+		const element: HTMLElement = fixture.nativeElement;
+		const loginLink = element.querySelector('a[id="login"]');
+		const logoutButton = element.querySelector('button[id="logout"]');
+		expect(loginLink).withContext('login link').toBeNull();
+		expect(logoutButton).withContext('logout button').not.toBeNull();
+		expect(logoutButton.textContent).withContext('logout button link text').toContain('Logout');
+	};
+
+	it('handles logged-in case [A]', () => {
+		testLoggedIn(USER_A);
+	});
+
+	it('handles logged-in case [B]', () => {
+		testLoggedIn(USER_B);
 	});
 
 });
