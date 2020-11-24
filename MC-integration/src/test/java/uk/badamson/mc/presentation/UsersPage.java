@@ -44,7 +44,7 @@ public final class UsersPage extends Page {
 
    private static final String PATH = "/user";
 
-   private static final By ADD_USER_LINK_LOCATOR = By.id("add-user");
+   private static final By ADD_USER_LINK_LOCATOR = By.xpath("a[@id='add-user']");
 
    /**
     * <p>
@@ -105,8 +105,8 @@ public final class UsersPage extends Page {
                () -> assertHasListOfUsers(body));
    }
 
-   public boolean isAddUserLinkEnabled() {
-      return isEnabled(getBody().findElement(ADD_USER_LINK_LOCATOR));
+   public boolean hasAddUserLink() {
+      return !getBody().findElements(ADD_USER_LINK_LOCATOR).isEmpty();
    }
 
    @Override
