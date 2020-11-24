@@ -73,13 +73,17 @@ describe('GamesComponent', () => {
 		component = fixture.componentInstance;
 		fixture.detectChanges();
 	};
-	
-	
+
+
 	const assertInvariants = function() {
 		expect(component).toBeTruthy();
 
 		const html: HTMLElement = fixture.nativeElement;
 		const gamesList: HTMLUListElement = html.querySelector('#games');
+		const createGameButton: HTMLButtonElement = html.querySelector('button#create-game');
+
+		expect(createGameButton).withContext('#create-game button').not.toBeNull();
+		expect(createGameButton.innerText).withContext('#create-game button text').toEqual('Create game');
 
 		expect(gamesList).withContext('games list').not.toBeNull();
 		const gameEntries: NodeListOf<HTMLLIElement> = gamesList.querySelectorAll('li');
@@ -89,12 +93,12 @@ describe('GamesComponent', () => {
 			expect(link).withContext('entry has link').not.toBeNull();
 		}
 	};
-	
-	
+
+
 	const testNgInit = function(self: User, scenario: uuid, gamesOfScenario: string[]) {
 		setUpForNgInit(self, scenario, gamesOfScenario);
 
-        assertInvariants();
+		assertInvariants();
 		expect(component.scenario).toBe(scenario);
 		expect(component.games).toBe(gamesOfScenario);
 
@@ -159,7 +163,7 @@ describe('GamesComponent', () => {
 		tick();
 		fixture.detectChanges();
 
-        assertInvariants();
+		assertInvariants();
 		expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(1);
 		expect(routerSpy.navigateByUrl.calls.argsFor(0)).withContext('router.navigateByUrl args').toEqual([expectedPath]);
 	};
@@ -172,20 +176,21 @@ describe('GamesComponent', () => {
 		testCreateGame(GAME_B);
 	}));
 
-	it('does not provide a create game button for normal users', () => {
+	it('disables create game button for normal users', () => {
 		setUpForNgInit(USER_NORMAL, SCENARIO_A, []);
 
+		assertInvariants();
 		const html: HTMLElement = fixture.nativeElement;
 		const createGameButton: HTMLButtonElement = html.querySelector('button#create-game');
-		expect(createGameButton).toBeNull();
+		expect(createGameButton.disabled).withContext('create game button is disabled').toBeTrue();
 	});
 
-	it('provides a create game button for an administrator', () => {
+	it('enables create game button for an administrator', () => {
 		setUpForNgInit(USER_ADMIN, SCENARIO_A, []);
 
+		assertInvariants();
 		const html: HTMLElement = fixture.nativeElement;
 		const createGameButton: HTMLButtonElement = html.querySelector('button#create-game');
-		expect(createGameButton).withContext('#create-game button').not.toBeNull();
-		expect(createGameButton.innerText).withContext('#create-game button text').toEqual('Create game');
+		expect(createGameButton.disabled).withContext('create game button is disabled').toBeFalse();
 	});
 });
