@@ -47,9 +47,9 @@ export class GameComponent implements OnInit {
 			.subscribe(game => this.game = game);
 	}
 
-	mayEndRecruitment$(): Observable<boolean> {
+	isEndRecruitmentDisabled$(): Observable<boolean> {
 		return this.selfService.authorities$.pipe(
-			map(authorities => this.game.recruiting && authorities.includes('ROLE_MANAGE_GAMES'))
+			map(authorities => !this.game.recruiting || !authorities.includes('ROLE_MANAGE_GAMES'))
 		);
 	}
 
