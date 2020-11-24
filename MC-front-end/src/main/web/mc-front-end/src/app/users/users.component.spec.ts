@@ -48,10 +48,14 @@ describe('UsersComponent', () => {
 		fixture.detectChanges();
 	};
 
-	const canCreate = (self: User, testUsers: User[]) => {
+	const assertInvariants = function() {
+		expect(component).toBeTruthy();
+	};
+
+	const canCreate = function (self: User, testUsers: User[]) {
 		setUp(self, testUsers);
 
-		expect(component).toBeTruthy();
+		assertInvariants();
 		expect(component.users).toBe(testUsers);
 	};
 
