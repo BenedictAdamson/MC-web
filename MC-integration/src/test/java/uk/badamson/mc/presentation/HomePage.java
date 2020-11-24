@@ -54,6 +54,8 @@ public final class HomePage extends Page {
 
    private static final By LOGIN_LINK_LOCATOR = By.id("login");
 
+   private static final By SELF_LINK_LOCATOR = By.id("self");
+
    /**
     * <p>
     * Construct a page object using a given web driver interface.
@@ -66,6 +68,12 @@ public final class HomePage extends Page {
     */
    public HomePage(final WebDriver webDriver) {
       super(webDriver);
+   }
+
+   public void assertDoesNotPresentExamineCurrentUserOption() {
+      assertThrows(NoSuchElementException.class,
+               () -> getBody().findElement(SELF_LINK_LOCATOR),
+               "Does not have a self link");
    }
 
    public void assertDoesNotPresentLogoutOption() {
@@ -81,6 +89,10 @@ public final class HomePage extends Page {
    private void assertHeadingIncludesNameOfGame(final WebElement body) {
       final var heading = assertHasElement(body, By.tagName("h1"));// guard
       assertThat(heading.getText(), containsString(GAME_NAME));
+   }
+
+   public void assertPresentsExamineCurrentUserOption() {
+      assertHasElement(getBody(), SELF_LINK_LOCATOR);
    }
 
    public void assertPresentsLoginOption() {
