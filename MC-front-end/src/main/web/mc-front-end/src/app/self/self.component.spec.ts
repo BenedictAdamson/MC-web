@@ -69,9 +69,11 @@ describe('SelfComponent', () => {
 		const element: HTMLElement = fixture.nativeElement;
 		const loginLink = element.querySelector('a[id="login"]');
 		const logoutButton = element.querySelector('button[id="logout"]');
+		const selfLink = element.querySelector('a[id="self"]');
 		expect(loginLink).withContext('login link').not.toBeNull();
 		expect(loginLink.textContent).withContext('login link text').toContain('Login');
 		expect(logoutButton).withContext('logout button').toBeNull();
+		expect(selfLink).withContext('self link').toBeNull();
 	};
 
 	it('handles not logged-in case', () => {
@@ -88,9 +90,12 @@ describe('SelfComponent', () => {
 		const element: HTMLElement = fixture.nativeElement;
 		const loginLink = element.querySelector('a[id="login"]');
 		const logoutButton = element.querySelector('button[id="logout"]');
+		const selfLink = element.querySelector('a[id="self"]');
 		expect(loginLink).withContext('login link').toBeNull();
 		expect(logoutButton).withContext('logout button').not.toBeNull();
-		expect(logoutButton.textContent).withContext('logout button link text').toContain('Logout');
+		expect(logoutButton.textContent).withContext('logout button text').toContain('Logout');
+		expect(selfLink).withContext('self link').not.toBeNull();
+		expect(selfLink.textContent).withContext('self link text').toEqual(self.username);
 	};
 
 	it('handles logged-in case [A]', () => {
