@@ -1,4 +1,4 @@
-import { of } from 'rxjs';
+import { Observable, defer, of } from 'rxjs';
 
 import { TestBed, waitForAsync } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -9,13 +9,40 @@ import { HomeComponent } from './home/home.component';
 import { SelfComponent } from './self/self.component';
 import { SelfService } from './self.service';
 
+
+
+class MockSelfService {
+
+	checkForCurrentAuthentication_calls: number = 0;
+
+	get username(): string {
+		return null;
+	}
+
+	get authorities$(): Observable<string[]> {
+		return of([]);
+	}
+
+	get authenticated$(): Observable<boolean> {
+		return of(false);
+	}
+
+	logout(): Observable<null> {
+		return defer(() => {
+			return of(null)
+		});
+	}
+
+	checkForCurrentAuthentication(): Observable<null> {
+		this.checkForCurrentAuthentication_calls++;
+		return of(null);
+	}
+}// class
+
 describe('AppComponent', () => {
-	let selfServiceStub: any;
-
+	let mockSelfService;
 	beforeEach(waitForAsync(() => {
-		selfServiceStub = jasmine.createSpyObj('SelfService', ['checkForCurrentAuthentication']);
-		selfServiceStub.checkForCurrentAuthentication.and.returnValue(of(null));
-
+		mockSelfService = new MockSelfService();
 		TestBed.configureTestingModule({
 			declarations: [
 				AppComponent, SelfComponent
@@ -25,7 +52,7 @@ describe('AppComponent', () => {
 					[{ path: '', component: HomeComponent }]
 				)
 			],
-			providers: [{ provide: SelfService, useValue: selfServiceStub }]
+			providers: [{ provide: SelfService, useValue: mockSelfService }]
 		}).compileComponents();
 	}));
 
@@ -33,7 +60,7 @@ describe('AppComponent', () => {
 		const fixture = TestBed.createComponent(AppComponent);
 		const app = fixture.debugElement.componentInstance;
 		expect(app).toBeTruthy();
-		expect(selfServiceStub.checkForCurrentAuthentication.calls.count()).withContext('Checked the server for current authentication information').toBe(1);
+		expect(mockSelfService.checkForCurrentAuthentication_calls).withContext('Checked the server for current authentication information').toBe(1);
 	});
 
 	it('renders title in a h1 tag', () => {

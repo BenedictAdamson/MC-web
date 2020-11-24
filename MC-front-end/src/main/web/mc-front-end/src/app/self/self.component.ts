@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+import { Component, OnInit } from '@angular/core';
 
 import { SelfService } from '../self.service';
 
@@ -21,6 +23,12 @@ export class SelfComponent implements OnInit {
 	get username(): string { return this.service.username; };
 
 	get authenticated$(): Observable<boolean> { return this.service.authenticated$; };
+
+	get isLogoutDisabled$(): Observable<boolean> {
+		return this.authenticated$.pipe(
+			map(a => !a)
+		);
+	};
 
 	logout() {
 		this.service.logout().subscribe();

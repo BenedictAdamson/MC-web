@@ -63,38 +63,46 @@ describe('SelfComponent', () => {
 		fixture.detectChanges();
 	};
 
+	const assertInvariants = function() {
+		expect(component).toBeDefined();
+		const element: HTMLElement = fixture.nativeElement;
+		const logoutButton: HTMLButtonElement = element.querySelector('button[id="logout"]');
+		const selfElement = element.querySelector('#self');
+		expect(logoutButton).withContext('logout button').not.toBeNull();
+		expect(selfElement).withContext('self element').not.toBeNull();
+	};
+
 	const assertNotLoggedIn = function() {
 		expect(getAuthenticated(component)).withContext('authenticated').toBeFalse();
 		expect(component.username).withContext('username').toBeNull();
 		const element: HTMLElement = fixture.nativeElement;
-		const loginLink = element.querySelector('a[id="login"]');
-		const logoutButton = element.querySelector('button[id="logout"]');
-		const selfLink = element.querySelector('a[id="self"]');
+		const loginLink: HTMLAnchorElement = element.querySelector('a[id="login"]');
+		const logoutButton: HTMLButtonElement = element.querySelector('button[id="logout"]');
+		const selfElement = element.querySelector('#self');
 		expect(loginLink).withContext('login link').not.toBeNull();
 		expect(loginLink.textContent).withContext('login link text').toContain('Login');
-		expect(logoutButton).withContext('logout button').toBeNull();
-		expect(selfLink).withContext('self link').toBeNull();
+		expect(logoutButton.disabled).withContext('logout button disabled').toBeTrue();
+		expect(selfElement).withContext('self element').not.toBeNull();
+		expect(selfElement.textContent).withContext('self element text').toMatch('[Nn]ot logged in');
 	};
 
 	it('handles not logged-in case', () => {
 		setup(null);
-		expect(component).toBeDefined();
+		assertInvariants();
 		assertNotLoggedIn();
 	});
 
 	const testLoggedIn = function(self: User) {
 		setup(self);
-		expect(component).toBeDefined();
+		assertInvariants();
 		expect(getAuthenticated(component)).withContext('authenticated').toBeTrue();
 		expect(component.username).withContext('username').toEqual(self.username);
 		const element: HTMLElement = fixture.nativeElement;
-		const loginLink = element.querySelector('a[id="login"]');
-		const logoutButton = element.querySelector('button[id="logout"]');
+		const loginLink: HTMLAnchorElement = element.querySelector('a[id="login"]');
+		const logoutButton: HTMLButtonElement = element.querySelector('button[id="logout"]');
 		const selfLink = element.querySelector('a[id="self"]');
 		expect(loginLink).withContext('login link').toBeNull();
-		expect(logoutButton).withContext('logout button').not.toBeNull();
-		expect(logoutButton.textContent).withContext('logout button text').toContain('Logout');
-		expect(selfLink).withContext('self link').not.toBeNull();
+		expect(logoutButton.disabled).withContext('logout button disabled').toBeFalse();
 		expect(selfLink.textContent).withContext('self link text').toEqual(self.username);
 	};
 
@@ -114,6 +122,7 @@ describe('SelfComponent', () => {
 		tick();
 		fixture.detectChanges();
 
+		assertInvariants();
 		assertNotLoggedIn();
 	}));
 

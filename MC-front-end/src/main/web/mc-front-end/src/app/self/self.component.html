@@ -1,9 +1,11 @@
-<section class="self" *ngIf="authenticated$ | async; else selfLogin">
-	<p>Logged in as <a id="self" [routerLink]="['/user',username]">{{username}}</a></p>
-	<button id="logout" (click)="logout()">Logout</button>
-</section>
-<ng-template #selfLogin>
 <section class="self">
-	<a id="login" routerLink="/login">Login</a>
+  <p *ngIf="authenticated$ | async; else notLoggedIn">
+    Logged in as <a id="self" [routerLink]="['/user',username]">{{username}}</a>
+  </p>
+  <ng-template #notLoggedIn>
+  <p>
+    <span  id="self">Not logged in.</span> <a id="login" routerLink="/login">Login</a>
+  </p>
+  </ng-template>
+  <button id="logout" [disabled]="isLogoutDisabled$ | async" (click)="logout()">Logout</button>
 </section>
-</ng-template>
