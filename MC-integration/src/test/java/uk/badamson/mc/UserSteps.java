@@ -134,6 +134,18 @@ public class UserSteps extends Steps {
       }
    }
 
+   @Then("MC does not present logout as an option")
+   public void mc_does_not_present_logout_option() {
+      final var homePage = world.getAndAssertExpectedPage(HomePage.class);
+      homePage.assertDoesNotPresentLogoutOption();
+   }
+
+   @Then("MC presents logging in as an option")
+   public void mc_presents_logging_in_option() {
+      final var homePage = world.getAndAssertExpectedPage(HomePage.class);
+      homePage.assertPresentsLoginOption();
+   }
+
    @Then("MC presents logout as an option")
    public void mc_presents_logout_option() {
       world.getAndAssertExpectedPage(HomePage.class)

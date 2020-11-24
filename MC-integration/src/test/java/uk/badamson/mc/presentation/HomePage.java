@@ -21,6 +21,7 @@ package uk.badamson.mc.presentation;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -29,6 +30,7 @@ import javax.annotation.concurrent.Immutable;
 
 import org.hamcrest.Matcher;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -50,6 +52,8 @@ public final class HomePage extends Page {
    private static final By LOGOUT_BUTTON_LOCATOR = By
             .xpath("//button[@id='logout']");
 
+   private static final By LOGIN_LINK_LOCATOR = By.id("login");
+
    /**
     * <p>
     * Construct a page object using a given web driver interface.
@@ -64,6 +68,12 @@ public final class HomePage extends Page {
       super(webDriver);
    }
 
+   public void assertDoesNotPresentLogoutOption() {
+      assertThrows(NoSuchElementException.class,
+               () -> getBody().findElement(LOGOUT_BUTTON_LOCATOR),
+               "Does not have a logout button");
+   }
+
    public void assertHeadingIncludesNameOfGame() {
       assertHeadingIncludesNameOfGame(getBody());
    }
@@ -71,6 +81,12 @@ public final class HomePage extends Page {
    private void assertHeadingIncludesNameOfGame(final WebElement body) {
       final var heading = assertHasElement(body, By.tagName("h1"));// guard
       assertThat(heading.getText(), containsString(GAME_NAME));
+   }
+
+   public void assertPresentsLoginOption() {
+      final var button = assertHasElement(getBody(), LOGIN_LINK_LOCATOR);// guard
+      assertThat("Login button has a useful label", button.getText(),
+               containsString("Login"));
    }
 
    public void assertPresentsLogoutOption() {
@@ -126,7 +142,7 @@ public final class HomePage extends Page {
 
    public LoginPage navigateToLoginPage() {
       requireIsReady();
-      getBody().findElement(By.id("login")).click();
+      getBody().findElement(LOGIN_LINK_LOCATOR).click();
       final var loginPage = new LoginPage(this);
       loginPage.awaitIsReady();
       return loginPage;
