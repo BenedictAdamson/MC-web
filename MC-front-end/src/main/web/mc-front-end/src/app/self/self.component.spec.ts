@@ -70,7 +70,7 @@ describe('SelfComponent', () => {
 		const loginLink = element.querySelector('a[id="login"]');
 		const logoutButton = element.querySelector('button[id="logout"]');
 		expect(loginLink).withContext('login link').not.toBeNull();
-		expect(loginLink.textContent).withContext('login link text').toContain('login');
+		expect(loginLink.textContent).withContext('login link text').toContain('Login');
 		expect(logoutButton).withContext('logout button').toBeNull();
 	};
 
