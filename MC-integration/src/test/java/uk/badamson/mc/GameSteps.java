@@ -120,14 +120,14 @@ public class GameSteps extends Steps {
                () -> gamePage.assertNoErrorMessages());
    }
 
-   @Then("MC does not allow creating a game as an option")
-   public void mc_does_not_allow_creating_game_option() {
+   @Then("MC does not allow creating a game")
+   public void mc_does_not_allow_creating_a_game() {
       final var scenarioPage = navigateToScenario();
       assertFalse(scenarioPage.isGameButtonEnabled());
    }
 
-   @Then("MC does not allow ending recruitment for the game as an option")
-   public void mc_does_not_allow_ending_recuitement_for_game_as_option() {
+   @Then("MC does not allow ending recruitment for the game")
+   public void mc_does_not_allow_ending_recuitement_for_game() {
       final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
       assertFalse(gamePage.isEndRecruitmentEnabled());
    }

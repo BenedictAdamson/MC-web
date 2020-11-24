@@ -73,8 +73,8 @@ public class UserSteps extends Steps {
       world.getAndAssertExpectedPage(UsersPage.class).assertInvariants();
    }
 
-   @Then("MC does not allow adding a user as an option")
-   public void does_not_allow_adding_user_option() {
+   @Then("MC does not allow adding a user")
+   public void does_not_allow_adding_user() {
       final var usersPage = navigateToUsersPage();
       assertFalse(usersPage.isAddUserLinkEnabled(),
                "Add user link is not enabled");
@@ -138,34 +138,34 @@ public class UserSteps extends Steps {
       }
    }
 
-   @Then("MC allows examining the current user as an option")
-   public void mc_allows_examining_current_user_option() {
+   @Then("MC allows examining the current user")
+   public void mc_allows_examining_current_user() {
       final var homePage = world.getAndAssertExpectedPage(HomePage.class);
       assertTrue(homePage.isExamineCurrentUserLinkEnabled());
    }
 
-   @Then("MC allows logging in as an option")
-   public void mc_allows_logging_in_option() {
+   @Then("MC allows logging in")
+   public void mc_allows_logging_in() {
       final var homePage = world.getAndAssertExpectedPage(HomePage.class);
       assertTrue(homePage.isLoginEnabled());
    }
 
-   @Then("MC does not allow examining the current user as an option")
+   @Then("MC allows logout")
+   public void mc_allows_logout() {
+      final var homePage = world.getAndAssertExpectedPage(HomePage.class);
+      assertTrue(homePage.isLogoutEnabled());
+   }
+
+   @Then("MC does not allow examining the current user")
    public void mc_does_not_allow_examining_current_user_option() {
       final var homePage = world.getAndAssertExpectedPage(HomePage.class);
       assertFalse(homePage.isExamineCurrentUserLinkEnabled());
    }
 
-   @Then("MC does not allow logout as an option")
-   public void mc_does_not_allow_logout_option() {
+   @Then("MC does not allow logout")
+   public void mc_does_not_allow_logout() {
       final var homePage = world.getAndAssertExpectedPage(HomePage.class);
       assertFalse(homePage.isLogoutButtonEnabled());
-   }
-
-   @Then("MC allows logout as an option")
-   public void mc_presents_logout_option() {
-      final var homePage = world.getAndAssertExpectedPage(HomePage.class);
-      assertTrue(homePage.isLogoutEnabled());
    }
 
    @Then("MC rejects the login")
