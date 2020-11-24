@@ -45,8 +45,6 @@ public class GameSteps extends Steps {
 
    private int nGames0;
 
-   private Game.Identifier identifier;
-
    @Autowired
    public GameSteps(@Nonnull final World world) {
       super(world);
@@ -157,7 +155,7 @@ public class GameSteps extends Steps {
    public void scenario_has_games() {
       final var scenario = world.getScenarios().findFirst().get().getId();
       scenarioIndex = 0;
-      identifier = world.createGame(scenario);
+      world.createGame(scenario);
    }
 
    @When("user ends recruitment for the game")
