@@ -141,7 +141,8 @@ public class UserSteps extends Steps {
    @Then("MC allows examining the current user")
    public void mc_allows_examining_current_user() {
       final var homePage = world.getAndAssertExpectedPage(HomePage.class);
-      assertTrue(homePage.isExamineCurrentUserLinkEnabled());
+      assertTrue(homePage.hasExamineCurrentUserLink(),
+               "has link for examining the current user");
    }
 
    @Then("MC allows logging in")
@@ -159,7 +160,8 @@ public class UserSteps extends Steps {
    @Then("MC does not allow examining the current user")
    public void mc_does_not_allow_examining_current_user_option() {
       final var homePage = world.getAndAssertExpectedPage(HomePage.class);
-      assertFalse(homePage.isExamineCurrentUserLinkEnabled());
+      assertFalse(homePage.hasExamineCurrentUserLink(),
+               "does not have link for examining the current user");
    }
 
    @Then("MC does not allow logout")

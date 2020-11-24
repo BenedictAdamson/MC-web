@@ -52,7 +52,7 @@ public final class HomePage extends Page {
 
    private static final By LOGIN_LINK_LOCATOR = By.id("login");
 
-   private static final By SELF_LINK_LOCATOR = By.id("self");
+   private static final By SELF_LINK_LOCATOR = By.xpath("//a[@id='self']");
 
    /**
     * <p>
@@ -110,8 +110,8 @@ public final class HomePage extends Page {
       return Optional.of(PATH);
    }
 
-   public boolean isExamineCurrentUserLinkEnabled() {
-      return isEnabled(getBody().findElement(SELF_LINK_LOCATOR));
+   public boolean hasExamineCurrentUserLink() {
+      return !getBody().findElements(SELF_LINK_LOCATOR).isEmpty();
    }
 
    public boolean isLoginEnabled() {
