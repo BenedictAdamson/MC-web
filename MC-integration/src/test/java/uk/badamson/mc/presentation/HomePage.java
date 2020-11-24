@@ -21,7 +21,6 @@ package uk.badamson.mc.presentation;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -30,7 +29,6 @@ import javax.annotation.concurrent.Immutable;
 
 import org.hamcrest.Matcher;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -70,18 +68,6 @@ public final class HomePage extends Page {
       super(webDriver);
    }
 
-   public void assertDoesNotPresentExamineCurrentUserOption() {
-      assertThrows(NoSuchElementException.class,
-               () -> getBody().findElement(SELF_LINK_LOCATOR),
-               "Does not have a self link");
-   }
-
-   public void assertDoesNotPresentLogoutOption() {
-      assertThrows(NoSuchElementException.class,
-               () -> getBody().findElement(LOGOUT_BUTTON_LOCATOR),
-               "Does not have a logout button");
-   }
-
    public void assertHeadingIncludesNameOfGame() {
       assertHeadingIncludesNameOfGame(getBody());
    }
@@ -89,22 +75,6 @@ public final class HomePage extends Page {
    private void assertHeadingIncludesNameOfGame(final WebElement body) {
       final var heading = assertHasElement(body, By.tagName("h1"));// guard
       assertThat(heading.getText(), containsString(GAME_NAME));
-   }
-
-   public void assertPresentsExamineCurrentUserOption() {
-      assertHasElement(getBody(), SELF_LINK_LOCATOR);
-   }
-
-   public void assertPresentsLoginOption() {
-      final var button = assertHasElement(getBody(), LOGIN_LINK_LOCATOR);// guard
-      assertThat("Login button has a useful label", button.getText(),
-               containsString("Login"));
-   }
-
-   public void assertPresentsLogoutOption() {
-      final var button = assertHasElement(getBody(), LOGOUT_BUTTON_LOCATOR);// guard
-      assertThat("Logout button has a useful label", button.getText(),
-               containsString("Logout"));
    }
 
    public void assertReportsThatLoggedIn() {
@@ -138,6 +108,22 @@ public final class HomePage extends Page {
    @Override
    protected Optional<String> getValidPath() {
       return Optional.of(PATH);
+   }
+
+   public boolean isExamineCurrentUserLinkEnabled() {
+      return isEnabled(getBody().findElement(SELF_LINK_LOCATOR));
+   }
+
+   public boolean isLoginEnabled() {
+      return isEnabled(getBody().findElement(LOGIN_LINK_LOCATOR));
+   }
+
+   public boolean isLogoutButtonEnabled() {
+      return isEnabled(getBody().findElement(LOGOUT_BUTTON_LOCATOR));
+   }
+
+   public boolean isLogoutEnabled() {
+      return isEnabled(getBody().findElement(LOGOUT_BUTTON_LOCATOR));
    }
 
    @Override

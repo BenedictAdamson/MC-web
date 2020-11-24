@@ -19,6 +19,8 @@ package uk.badamson.mc;
  */
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -71,9 +73,11 @@ public class UserSteps extends Steps {
       world.getAndAssertExpectedPage(UsersPage.class).assertInvariants();
    }
 
-   @Then("MC does not present adding a user as an option")
-   public void does_not_present_adding_user_option() {
-      navigateToUsersPage().assertHasNoAddUserLink();
+   @Then("MC does not allow adding a user as an option")
+   public void does_not_allow_adding_user_option() {
+      final var usersPage = navigateToUsersPage();
+      assertFalse(usersPage.isAddUserLinkEnabled(),
+               "Add user link is not enabled");
    }
 
    @When("getting the users")
@@ -134,34 +138,34 @@ public class UserSteps extends Steps {
       }
    }
 
-   @Then("MC does not present examining the current user as an option")
-   public void mc_does_not_present_examining_current_user_option() {
+   @Then("MC allows examining the current user as an option")
+   public void mc_allows_examining_current_user_option() {
       final var homePage = world.getAndAssertExpectedPage(HomePage.class);
-      homePage.assertDoesNotPresentExamineCurrentUserOption();
+      assertTrue(homePage.isExamineCurrentUserLinkEnabled());
    }
 
-   @Then("MC does not present logout as an option")
-   public void mc_does_not_present_logout_option() {
+   @Then("MC allows logging in as an option")
+   public void mc_allows_logging_in_option() {
       final var homePage = world.getAndAssertExpectedPage(HomePage.class);
-      homePage.assertDoesNotPresentLogoutOption();
+      assertTrue(homePage.isLoginEnabled());
    }
 
-   @Then("MC presents examining the current user as an option")
-   public void mc_presents_examining_current_user_option() {
-      world.getAndAssertExpectedPage(HomePage.class)
-               .assertPresentsExamineCurrentUserOption();
-   }
-
-   @Then("MC presents logging in as an option")
-   public void mc_presents_logging_in_option() {
+   @Then("MC does not allow examining the current user as an option")
+   public void mc_does_not_allow_examining_current_user_option() {
       final var homePage = world.getAndAssertExpectedPage(HomePage.class);
-      homePage.assertPresentsLoginOption();
+      assertFalse(homePage.isExamineCurrentUserLinkEnabled());
    }
 
-   @Then("MC presents logout as an option")
+   @Then("MC does not allow logout as an option")
+   public void mc_does_not_allow_logout_option() {
+      final var homePage = world.getAndAssertExpectedPage(HomePage.class);
+      assertFalse(homePage.isLogoutButtonEnabled());
+   }
+
+   @Then("MC allows logout as an option")
    public void mc_presents_logout_option() {
-      world.getAndAssertExpectedPage(HomePage.class)
-               .assertPresentsLogoutOption();
+      final var homePage = world.getAndAssertExpectedPage(HomePage.class);
+      assertTrue(homePage.isLogoutEnabled());
    }
 
    @Then("MC rejects the login")

@@ -110,8 +110,8 @@ public final class ScenarioPage extends Page {
       return scenarioTitle;
    }
 
-   public boolean hasCreateGameButton() {
-      return !getBody().findElements(CREATE_GAME_LOCATOR).isEmpty();
+   public boolean isGameButtonEnabled() {
+      return isEnabled(getBody().findElement(CREATE_GAME_LOCATOR));
    }
 
    @Override
@@ -128,7 +128,7 @@ public final class ScenarioPage extends Page {
       final WebElement listEntry;
       try {
          listEntry = findGameElements().get(gameIndex);
-      } catch (IndexOutOfBoundsException e) {
+      } catch (final IndexOutOfBoundsException e) {
          throw new IllegalStateException(
                   "Games list too short \n" + getBody().getText());
       }

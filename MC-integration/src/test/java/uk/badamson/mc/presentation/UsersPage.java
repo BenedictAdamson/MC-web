@@ -88,11 +88,6 @@ public final class UsersPage extends Page {
       assertHasElement(body, USER_LIST_LOCATOR);
    }
 
-   public void assertHasNoAddUserLink() {
-      assertThat("No add-user link",
-               getBody().findElements(ADD_USER_LINK_LOCATOR), empty());
-   }
-
    public void assertListOfUsersIncludes(final String name) {
       Objects.requireNonNull(name, "name");
       final var list = assertHasElement(getBody(), USER_LIST_LOCATOR);
@@ -108,6 +103,10 @@ public final class UsersPage extends Page {
    protected void assertValidBody(final WebElement body) {
       assertAll(() -> assertHasHeadingSayingUsers(body),
                () -> assertHasListOfUsers(body));
+   }
+
+   public boolean isAddUserLinkEnabled() {
+      return isEnabled(getBody().findElement(ADD_USER_LINK_LOCATOR));
    }
 
    @Override
