@@ -1,4 +1,4 @@
-<button id="create-game" type=button (click)="createGame()" *ngIf="mayManageGames$ | async">Create game</button>
+<button id="create-game" type=button  [disabled]="isDisabledCreateGame$ | async" (click)="createGame()">Create game</button>
 <nav>
 <h3>Games of this scenario</h3>
 

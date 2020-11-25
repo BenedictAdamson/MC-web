@@ -33,7 +33,6 @@ import javax.annotation.concurrent.Immutable;
 
 import org.hamcrest.Matcher;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.opentest4j.MultipleFailuresError;
 import org.springframework.web.util.UriTemplate;
@@ -60,10 +59,6 @@ public final class GamePage extends Page {
    private static final By RECRUITING_ELEMENT_LOCATOR = By.id("recruiting");
    private static final By END_RECRUITMENT_BUTTON_LOCATOR = By
             .id("end-recruitment");
-
-   private static boolean isEnabled(final WebElement button) {
-      return button.getAttribute("disabled") == null;
-   }
 
    private final ScenarioPage scenarioPage;
    private final Matcher<String> includesCreationTime;
@@ -157,15 +152,9 @@ public final class GamePage extends Page {
       awaitIsReady();
    }
 
-   public boolean hasEndRecruitmentOption() {
+   public boolean isEndRecruitmentEnabled() {
       requireIsReady();
-      final WebElement button;
-      try {
-         button = getBody().findElement(END_RECRUITMENT_BUTTON_LOCATOR);
-      } catch (final NoSuchElementException e) {
-         return false;
-      }
-      return isEnabled(button);
+      return isEnabled(getBody().findElement(END_RECRUITMENT_BUTTON_LOCATOR));
    }
 
    @Override

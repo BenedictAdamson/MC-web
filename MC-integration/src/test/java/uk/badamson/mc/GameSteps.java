@@ -45,8 +45,6 @@ public class GameSteps extends Steps {
 
    private int nGames0;
 
-   private Game.Identifier identifier;
-
    @Autowired
    public GameSteps(@Nonnull final World world) {
       super(world);
@@ -122,16 +120,16 @@ public class GameSteps extends Steps {
                () -> gamePage.assertNoErrorMessages());
    }
 
-   @Then("MC does not present creating a game as an option")
-   public void mc_does_not_present_creating_game_option() {
+   @Then("MC does not allow creating a game")
+   public void mc_does_not_allow_creating_a_game() {
       final var scenarioPage = navigateToScenario();
-      assertFalse(scenarioPage.hasCreateGameButton());
+      assertFalse(scenarioPage.isGameButtonEnabled());
    }
 
-   @Then("MC does not present ending recruitment for the game as an option")
-   public void mc_does_not_present_ending_recuitement_for_game_as_option() {
+   @Then("MC does not allow ending recruitment for the game")
+   public void mc_does_not_allow_ending_recuitement_for_game() {
       final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
-      assertFalse(gamePage.hasEndRecruitmentOption());
+      assertFalse(gamePage.isEndRecruitmentEnabled());
    }
 
    @Then("MC serves the game page")
@@ -157,7 +155,7 @@ public class GameSteps extends Steps {
    public void scenario_has_games() {
       final var scenario = world.getScenarios().findFirst().get().getId();
       scenarioIndex = 0;
-      identifier = world.createGame(scenario);
+      world.createGame(scenario);
    }
 
    @When("user ends recruitment for the game")

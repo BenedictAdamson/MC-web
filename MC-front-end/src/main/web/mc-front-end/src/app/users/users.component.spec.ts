@@ -48,10 +48,18 @@ describe('UsersComponent', () => {
 		fixture.detectChanges();
 	};
 
-	const canCreate = (self: User, testUsers: User[]) => {
+	const assertInvariants = function() {
+		expect(component).toBeTruthy();
+
+		const element: HTMLElement = fixture.nativeElement;
+		const addUser = element.querySelector('#add-user');
+		expect(addUser).withContext('add-user element').not.toBeNull();
+	};
+
+	const canCreate = function (self: User, testUsers: User[]) {
 		setUp(self, testUsers);
 
-		expect(component).toBeTruthy();
+		assertInvariants();
 		expect(component.users).toBe(testUsers);
 	};
 
@@ -68,7 +76,7 @@ describe('UsersComponent', () => {
 
 		const element: HTMLElement = fixture.nativeElement;
 		const link = element.querySelector('a[id="add-user"]');
-		expect(link).toBeNull();
+		expect(link).withContext('add-user link').toBeNull();
 	});
 
 	it('provides an add-user link for an administrator', () => {
@@ -76,7 +84,7 @@ describe('UsersComponent', () => {
 
 		const element: HTMLElement = fixture.nativeElement;
 		const link = element.querySelector('a[id="add-user"]');
-		expect(link).not.toBeNull();
+		expect(link).withContext('add-user link').not.toBeNull();
 		expect(link.textContent).toContain('Add user');
 	});
 });

@@ -38,13 +38,13 @@ export class GamesComponent implements OnInit {
 
 	/**
 	 * @description
-     * Whether the current user has permission to manage (create and remove) games.
+     * Whether the current user does not have permission to create games.
      *
      * A user that has not been authenticated does not have that permission.
 	 */
-	get mayManageGames$(): Observable<boolean> {
+	get isDisabledCreateGame$(): Observable<boolean> {
 		return this.selfService.authorities$.pipe(
-			map(authorities => authorities.includes('ROLE_MANAGE_GAMES'))
+			map(authorities => !authorities.includes('ROLE_MANAGE_GAMES'))
 		);
 	}
 

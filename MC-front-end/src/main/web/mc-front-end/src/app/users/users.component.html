@@ -3,7 +3,10 @@
     <h2>Users</h2>
 </header>
 <nav>
-    <a id="add-user" routerLink="/user?add" *ngIf="mayManageUsers$ | async">Add user</a>
+  <a id="add-user" routerLink="/user?add" *ngIf="mayManageUsers$ | async; else mayNotAdd">Add user</a>
+  <ng-template #mayNotAdd>
+  <span id="add-user">You may not add users.</span>
+  </ng-template>
 </nav>
 	
 <ul class="users">

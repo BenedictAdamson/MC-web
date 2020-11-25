@@ -42,6 +42,7 @@ import org.testcontainers.containers.output.WaitingConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
+import org.testcontainers.utility.DockerImageName;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -62,8 +63,8 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    public static final String VERSION = Version.VERSION;
 
-   public static final String IMAGE = "index.docker.io/benedictadamson/mc-back-end:"
-            + VERSION;
+   public static final DockerImageName IMAGE = DockerImageName.parse("index.docker.io/benedictadamson/mc-back-end:"
+            + VERSION);
 
    public static final String STARTED_MESSAGE = "Started Application";
 

@@ -28,7 +28,7 @@ export class GameComponent implements OnInit {
 
 	ngOnInit(): void {
 		this.identifier = this.getGameIdentifier();
-		this.getGame();
+		this.subscribeToGame();
 	}
 
 
@@ -42,14 +42,14 @@ export class GameComponent implements OnInit {
 		return gameId;
 	}
 
-	private getGame(): void {
+	private subscribeToGame(): void {
 		this.gameService.getGame(this.identifier)
 			.subscribe(game => this.game = game);
 	}
 
-	mayEndRecruitment$(): Observable<boolean> {
+	isEndRecruitmentDisabled$(): Observable<boolean> {
 		return this.selfService.authorities$.pipe(
-			map(authorities => this.game.recruiting && authorities.includes('ROLE_MANAGE_GAMES'))
+			map(authorities => !this.game.recruiting || !authorities.includes('ROLE_MANAGE_GAMES'))
 		);
 	}
 

@@ -20,12 +20,14 @@ package uk.badamson.mc.presentation;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 
 import java.util.Objects;
 import java.util.Optional;
 
 import javax.annotation.concurrent.Immutable;
 
+import org.hamcrest.Matcher;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -38,9 +40,19 @@ import org.openqa.selenium.WebElement;
 @Immutable
 public final class HomePage extends Page {
 
+   private static final Matcher<String> LOGGED_IN_TEXT_MATCHER = containsString(
+            "Logged in");
+
    public static final String GAME_NAME = "Mission Command";
 
    private static final String PATH = "/";
+
+   private static final By LOGOUT_BUTTON_LOCATOR = By
+            .xpath("//button[@id='logout']");
+
+   private static final By LOGIN_LINK_LOCATOR = By.id("login");
+
+   private static final By SELF_LINK_LOCATOR = By.xpath("//a[@id='self']");
 
    /**
     * <p>
@@ -67,7 +79,12 @@ public final class HomePage extends Page {
 
    public void assertReportsThatLoggedIn() {
       assertThat("Reports that is logged in", getBody().getText(),
-               containsString("Logged in"));
+               LOGGED_IN_TEXT_MATCHER);
+   }
+
+   public void assertReportsThatNotLoggedIn() {
+      assertThat("Reports that is not logged in", getBody().getText(),
+               not(LOGGED_IN_TEXT_MATCHER));
    }
 
    public void assertTitleIncludesNameOfGame() {
@@ -93,15 +110,37 @@ public final class HomePage extends Page {
       return Optional.of(PATH);
    }
 
+   public boolean hasExamineCurrentUserLink() {
+      return !getBody().findElements(SELF_LINK_LOCATOR).isEmpty();
+   }
+
+   public boolean isLoginEnabled() {
+      return isEnabled(getBody().findElement(LOGIN_LINK_LOCATOR));
+   }
+
+   public boolean isLogoutButtonEnabled() {
+      return isEnabled(getBody().findElement(LOGOUT_BUTTON_LOCATOR));
+   }
+
+   public boolean isLogoutEnabled() {
+      return isEnabled(getBody().findElement(LOGOUT_BUTTON_LOCATOR));
+   }
+
    @Override
    protected boolean isValidPath(final String path) {
       Objects.requireNonNull(path, "path");
       return PATH.equals(path);
    }
 
+   public void logout() {
+      final var button = getBody().findElement(LOGOUT_BUTTON_LOCATOR);
+      button.click();
+      awaitIsReady();
+   }
+
    public LoginPage navigateToLoginPage() {
       requireIsReady();
-      getBody().findElement(By.id("login")).click();
+      getBody().findElement(LOGIN_LINK_LOCATOR).click();
       final var loginPage = new LoginPage(this);
       loginPage.awaitIsReady();
       return loginPage;

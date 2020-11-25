@@ -74,6 +74,21 @@ describe('GameComponent', () => {
 	};
 
 
+	const assertInvariants = function() {
+		expect(component).toBeTruthy();
+
+		const html: HTMLElement = fixture.nativeElement;
+		const selfLink: HTMLAnchorElement = html.querySelector('a#game');
+		const recruitingElement: HTMLElement = html.querySelector('#recruiting');
+		const endRecuitmentButton: HTMLButtonElement = html.querySelector('button#end-recruitment');
+
+		expect(selfLink).withContext("self link").not.toBeNull();
+		expect(recruitingElement).withContext("recruiting element").not.toBeNull();
+		expect(recruitingElement.innerText).withContext("recruiting element text mentions recruiting").toMatch('[Rr]ecruiting');
+		expect(endRecuitmentButton).withContext('end-recuitment button').not.toBeNull();
+	};
+
+
 	const canCreate = function(game: Game, self: User) {
 		const recruiting: boolean = game.recruiting;
 		const manager: boolean = self.authorities.includes('ROLE_MANAGE_GAMES');
@@ -83,27 +98,24 @@ describe('GameComponent', () => {
 		tick();
 		fixture.detectChanges();
 
-		expect(component).toBeTruthy();
+		assertInvariants();
+
 		expect(component.game).withContext('game').toBe(game);
 
-		component.mayEndRecruitment$().subscribe(may => {
-			expect(may).withContext('may end recuitment only if game is recuiting and user is authorised').toEqual(mayEndRecuitment);
+		component.isEndRecruitmentDisabled$().subscribe(may => {
+			expect(may).withContext('end recuitment disabled if game is not recuiting or user is not authorised').toEqual(!mayEndRecuitment);
 		});
 
 		const html: HTMLElement = fixture.nativeElement;
 		const displayText: string = html.innerText;
-		const selfLink: HTMLAnchorElement = html.querySelector('a#game');
 		const recruitingElement: HTMLElement = html.querySelector('#recruiting');
-		const endRecuitmentButton: HTMLElement = html.querySelector('button#end-recruitment');
+		const endRecuitmentButton: HTMLButtonElement = html.querySelector('button#end-recruitment');
 
 		expect(displayText.includes(game.identifier.created)).withContext("The game page includes the date and time that the game was set up").toBeTrue();
-		expect(selfLink).withContext("self link").not.toBeNull();
-		expect(recruitingElement).withContext("recruiting element").not.toBeNull();
 		const recruitingText: string = recruitingElement.innerText;
-		expect(recruitingText).withContext("recruiting element text mentions recruiting").toMatch('[Rr]ecruiting');
 		expect(recruiting || recruitingText.includes('This game is not recruiting players')).withContext("recruiting element text can indicate that not recruiting").toBeTrue();
 		expect(!recruiting || recruitingText.includes('This game is recruiting players')).withContext("recruiting element text can indicate that is recruiting").toBeTrue();
-		expect(endRecuitmentButton != null).withContext('has end-recuitment button').toEqual(mayEndRecuitment);
+		expect(endRecuitmentButton.disabled).withContext('end-recuitment button is disabled').toEqual(!mayEndRecuitment);
 	};
 
 	it('can create [A]', fakeAsync(() => {
@@ -162,14 +174,14 @@ describe('GameComponent', () => {
 		tick();
 		fixture.detectChanges();
 
+		assertInvariants();
 		const html: HTMLElement = fixture.nativeElement;
 		const recruitingElement: HTMLElement = html.querySelector('#recruiting');
-		const endRecuitmentButton: HTMLElement = html.querySelector('button#end-recruitment');
+		const endRecuitmentButton: HTMLButtonElement = html.querySelector('button#end-recruitment');
 
-		expect(recruitingElement).withContext("recruiting element").not.toBeNull();
 		const recruitingText: string = recruitingElement.innerText;
 		expect(recruitingText.includes('This game is not recruiting players')).withContext("recruiting element text indicates that not recruiting").toBeTrue();
-		expect(endRecuitmentButton != null).withContext('has end-recuitment button').toBeFalse();
+		expect(endRecuitmentButton.disabled).withContext('end-recuitment button is disabled').toBeTrue();
 	};
 
 	it('can end recuitment [A]', fakeAsync((() => {

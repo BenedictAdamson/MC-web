@@ -19,7 +19,10 @@ package uk.badamson.mc;
  */
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Locale;
 import java.util.Objects;
 
 import javax.annotation.Nonnull;
@@ -32,6 +35,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import uk.badamson.mc.presentation.HomePage;
 import uk.badamson.mc.presentation.LoginPage;
+import uk.badamson.mc.presentation.UserPage;
 import uk.badamson.mc.presentation.UsersPage;
 
 /**
@@ -42,14 +46,13 @@ import uk.badamson.mc.presentation.UsersPage;
  */
 public class UserSteps extends Steps {
 
-   private static Authority parseRoleName(final String roleName) {
-      final Authority role;
+   private static Authority parseRole(final String role) {
       try {
-         role = Authority.valueOf("ROLE_" + roleName);
+         return Authority.valueOf(
+                  "ROLE_" + role.replace(' ', '_').toUpperCase(Locale.ENGLISH));
       } catch (final Exception e) {
-         throw new IllegalArgumentException("roleName "+roleName, e);
+         throw new IllegalArgumentException("roleName " + role, e);
       }
-      return role;
    }
 
    private User user;
@@ -70,9 +73,10 @@ public class UserSteps extends Steps {
       world.getAndAssertExpectedPage(UsersPage.class).assertInvariants();
    }
 
-   @Then("MC does not present adding a user as an option")
-   public void does_not_present_adding_user_option() {
-      navigateToUsersPage().assertHasNoAddUserLink();
+   @Then("MC does not allow adding a user")
+   public void does_not_allow_adding_user() {
+      final var usersPage = navigateToUsersPage();
+      assertFalse(usersPage.hasAddUserLink(), "Add user link is absent");
    }
 
    @When("getting the users")
@@ -115,6 +119,14 @@ public class UserSteps extends Steps {
                () -> homePage.assertReportsThatLoggedIn());
    }
 
+   @Then("MC accepts the logout")
+   public void mc_accepts_logout() {
+      final var homePage = world.getAndAssertExpectedPage(HomePage.class);
+      assertAll(() -> homePage.assertInvariants(),
+               () -> homePage.assertNoErrorMessages(),
+               () -> homePage.assertReportsThatNotLoggedIn());
+   }
+
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() {
       try {
@@ -125,14 +137,60 @@ public class UserSteps extends Steps {
       }
    }
 
+   @Then("MC allows examining the current user")
+   public void mc_allows_examining_current_user() {
+      final var homePage = world.getAndAssertExpectedPage(HomePage.class);
+      assertTrue(homePage.hasExamineCurrentUserLink(),
+               "has link for examining the current user");
+   }
+
+   @Then("MC allows logging in")
+   public void mc_allows_logging_in() {
+      final var homePage = world.getAndAssertExpectedPage(HomePage.class);
+      assertTrue(homePage.isLoginEnabled());
+   }
+
+   @Then("MC allows logout")
+   public void mc_allows_logout() {
+      final var homePage = world.getAndAssertExpectedPage(HomePage.class);
+      assertTrue(homePage.isLogoutEnabled());
+   }
+
+   @Then("MC does not allow examining the current user")
+   public void mc_does_not_allow_examining_current_user_option() {
+      final var homePage = world.getAndAssertExpectedPage(HomePage.class);
+      assertFalse(homePage.hasExamineCurrentUserLink(),
+               "does not have link for examining the current user");
+   }
+
+   @Then("MC does not allow logout")
+   public void mc_does_not_allow_logout() {
+      final var homePage = world.getAndAssertExpectedPage(HomePage.class);
+      assertFalse(homePage.isLogoutButtonEnabled());
+   }
+
    @Then("MC rejects the login")
    public void mc_rejects_login() {
       world.getAndAssertExpectedPage(LoginPage.class).assertRejectedLogin();
    }
 
+   @Then("MC serves the user page")
+   public void mc_serves_user_page() {
+      final var userPage = world.getAndAssertExpectedPage(UserPage.class);
+      userPage.assertInvariants();
+      userPage.assertNoErrorMessages();
+   }
+
    @Then("MC serves the users page")
    public void mc_serves_users_page() {
       world.getAndAssertExpectedPage(UsersPage.class).assertInvariants();
+   }
+
+   @When("Navigate to one user")
+   public void navigate_to_one_user() {
+      final var usersPage = world.getExpectedPage(UsersPage.class);
+      world.setExpectedPage(usersPage.navigateToUserPage(0));
+
    }
 
    private UsersPage navigateToUsersPage() {
@@ -145,6 +203,12 @@ public class UserSteps extends Steps {
    @Then("redirected to home-page")
    public void redirected_to_home_page() {
       world.getAndAssertExpectedPage(HomePage.class).assertInvariants();
+   }
+
+   @When("request logout")
+   public void request_logout() {
+      final var homePage = world.getAndAssertExpectedPage(HomePage.class);
+      homePage.logout();
    }
 
    @Then("the response is a list of users")
@@ -179,16 +243,36 @@ public class UserSteps extends Steps {
 
    @Given("user does not have the {string} role")
    public void user_does_not_have_role(final String roleName) {
-      user = world.getUserWithoutRole(parseRoleName(roleName));
+      user = world.getUserWithoutRole(parseRole(roleName));
+   }
+
+   @Given("user has any role")
+   public void user_has_any_role() {
+      user = world.getUserWithRole(Authority.values()[0]);
    }
 
    @Given("user has the {string} role")
    public void user_has_role(final String roleName) {
-      user = world.getUserWithRole(parseRoleName(roleName));
+      user = world.getUserWithRole(parseRole(roleName));
    }
 
    @Given("user is the administrator")
    public void user_is_administrator() {
       user = world.getAdministratorUser();
+   }
+
+   @Then("The user page includes the user name")
+   public void user_page_includes_user_name() {
+      world.getAndAssertExpectedPage(UserPage.class).assertIncludesUserName();
+   }
+
+   @Then("The user page lists the roles of the user")
+   public void user_page_lists_roles_of_user() {
+      world.getAndAssertExpectedPage(UserPage.class).assertListsRolesOfUser();
+   }
+
+   @Given("Viewing the list of users")
+   public void viewing_list_of_users() {
+      navigateToUsersPage();
    }
 }

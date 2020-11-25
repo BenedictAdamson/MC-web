@@ -44,7 +44,8 @@ public final class UsersPage extends Page {
 
    private static final String PATH = "/user";
 
-   private static final By ADD_USER_LINK_LOCATOR = By.id("add-user");
+   private static final By ADD_USER_LINK_LOCATOR = By
+            .xpath("//a[@id='add-user']");
 
    /**
     * <p>
@@ -88,11 +89,6 @@ public final class UsersPage extends Page {
       assertHasElement(body, USER_LIST_LOCATOR);
    }
 
-   public void assertHasNoAddUserLink() {
-      assertThat("No add-user link",
-               getBody().findElements(ADD_USER_LINK_LOCATOR), empty());
-   }
-
    public void assertListOfUsersIncludes(final String name) {
       Objects.requireNonNull(name, "name");
       final var list = assertHasElement(getBody(), USER_LIST_LOCATOR);
@@ -110,6 +106,10 @@ public final class UsersPage extends Page {
                () -> assertHasListOfUsers(body));
    }
 
+   public boolean hasAddUserLink() {
+      return !getBody().findElements(ADD_USER_LINK_LOCATOR).isEmpty();
+   }
+
    @Override
    protected boolean isValidPath(final String path) {
       Objects.requireNonNull(path, "path");
@@ -123,6 +123,27 @@ public final class UsersPage extends Page {
       final var addUserPage = new AddUserPage(this);
       addUserPage.awaitIsReady();
       return addUserPage;
+   }
+
+   public UserPage navigateToUserPage(final int index) {
+      if (index < 0) {
+         throw new IllegalArgumentException("negative index");
+      }
+      requireIsReady();
+      final var list = getBody().findElement(USER_LIST_LOCATOR);
+      final var entries = list.findElements(By.tagName("li"));
+      final WebElement entry;
+      try {
+         entry = entries.get(index);
+      } catch (final IndexOutOfBoundsException e) {
+         throw new IllegalArgumentException("index too large", e);
+      }
+      final var link = entry.findElement(By.tagName("a"));
+      final var displayName = link.getText();
+      link.click();
+      final var userPage = new UserPage(this, displayName);
+      userPage.awaitIsReady();
+      return userPage;
    }
 
 }

@@ -108,6 +108,25 @@ public abstract class Page {
       return URI.create(url).getPath();
    }
 
+   /**
+    * <p>
+    * Whether a (control or navigation) element is <i>enabled</i>
+    * </p>
+    * <p>
+    * Enabled elements respond to mouse clicks.
+    * </p>
+    *
+    * @param element
+    *           The element to examine
+    * @return whether the {@code element} is enabled
+    * @throws NullPointerException
+    *            If {@code element} is null.
+    */
+   protected static final boolean isEnabled(final WebElement element) {
+      Objects.requireNonNull(element, "element");
+      return element.getAttribute("disabled") == null;
+   }
+
    private final WebDriver webDriver;
 
    private final Matcher<String> IS_VALID_PATH = createMatcher("Has valid path",
