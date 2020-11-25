@@ -44,7 +44,8 @@ public final class UsersPage extends Page {
 
    private static final String PATH = "/user";
 
-   private static final By ADD_USER_LINK_LOCATOR = By.xpath("a[@id='add-user']");
+   private static final By ADD_USER_LINK_LOCATOR = By
+            .xpath("//a[@id='add-user']");
 
    /**
     * <p>
