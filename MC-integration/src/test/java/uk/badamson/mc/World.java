@@ -120,7 +120,7 @@ public final class World implements AutoCloseable {
 
    private final McContainers containers;
 
-   private final Map<String, User> users = new HashMap<>();
+   private final Map<UUID, User> users = new HashMap<>();
 
    private final Map<String, User> unknownUsers = new HashMap<>();
 
@@ -148,7 +148,7 @@ public final class World implements AutoCloseable {
 
    private void addUser(final User user) {
       containers.addUser(user);// records the user in the DB, through the BE
-      users.put(user.getUsername(), user);
+      users.put(user.getId(), user);
 
    }
 
@@ -237,16 +237,14 @@ public final class World implements AutoCloseable {
    }
 
    private void createUsers() {
-      users.put(User.ADMINISTRATOR_USERNAME,
-               new User(User.ADMINISTRATOR_USERNAME,
-                        McContainers.ADMINISTARTOR_PASSWORD, Authority.ALL,
-                        true, true, true, true));
-      addUser(new User("jeff", "password1", Authority.ALL, true, true, true,
-               true));
-      addUser(new User("allan", "password2", Set.of(Authority.ROLE_PLAYER),
+      users.put(User.ADMINISTRATOR_ID,
+               User.createAdministrator(McContainers.ADMINISTARTOR_PASSWORD));
+      addUser(new User(UUID.randomUUID(), "jeff", "password1", Authority.ALL,
                true, true, true, true));
-      addUnknownUser(new User("mark", "password3", Authority.ALL, true, true,
-               true, true));
+      addUser(new User(UUID.randomUUID(), "allan", "password2",
+               Set.of(Authority.ROLE_PLAYER), true, true, true, true));
+      addUnknownUser(new User(UUID.randomUUID(), "mark", "password3",
+               Authority.ALL, true, true, true, true));
    }
 
    /**
@@ -272,7 +270,7 @@ public final class World implements AutoCloseable {
    }
 
    public User getAdministratorUser() {
-      return users.get(User.ADMINISTRATOR_USERNAME);
+      return users.get(User.ADMINISTRATOR_ID);
    }
 
    /**
@@ -362,6 +360,10 @@ public final class World implements AutoCloseable {
       }
    }
 
+   public Stream<Instant> getGameCreationTimes(final UUID scenario) {
+      return containers.getGameCreationTimes(scenario);
+   }
+
    public HomePage getHomePage() {
       final var homePage = new HomePage(getWebDriver());
       homePage.get();
@@ -408,10 +410,6 @@ public final class World implements AutoCloseable {
 
    public Stream<NamedUUID> getScenarios() {
       return containers.getScenarios();
-   }
-
-   public Stream<Instant> getGameCreationTimes(final UUID scenario) {
-      return containers.getGameCreationTimes(scenario);
    }
 
    public User getUnknownUser() {

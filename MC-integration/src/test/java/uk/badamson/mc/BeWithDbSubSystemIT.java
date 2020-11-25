@@ -306,8 +306,8 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
 
    private static final String ADMINISTARTOR_PASSWORD = "secret4";
 
-   private static final User USER_A = new User("jeff", "password",
-            Authority.ALL, true, true, true, true);
+   private static final User USER_A = new User(UUID.randomUUID(), "jeff",
+            "password", Authority.ALL, true, true, true, true);
 
    private static void assertSelfResponseEquivalent(final User expectedUser,
             final boolean expectSetSessionCookie, final ResponseSpec response) {

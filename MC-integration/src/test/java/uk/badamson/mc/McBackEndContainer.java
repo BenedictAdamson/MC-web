@@ -63,8 +63,8 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    public static final String VERSION = Version.VERSION;
 
-   public static final DockerImageName IMAGE = DockerImageName.parse("index.docker.io/benedictadamson/mc-back-end:"
-            + VERSION);
+   public static final DockerImageName IMAGE = DockerImageName
+            .parse("index.docker.io/benedictadamson/mc-back-end:" + VERSION);
 
    public static final String STARTED_MESSAGE = "Started Application";
 
@@ -134,8 +134,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
    McBackEndContainer(final String mongoDbHost, final String mongoDbPassword,
             final String administratorPassword) {
       super(IMAGE);
-      administrator = new User(User.ADMINISTRATOR_USERNAME,
-               administratorPassword, Authority.ALL, true, true, true, true);
+      administrator = User.createAdministrator(administratorPassword);
       waitingFor(WAIT_STRATEGY);
       withEnv("SPRING_DATA_MONGODB_PASSWORD", mongoDbPassword);
       withEnv("ADMINISTRATOR_PASSWORD", administratorPassword);
