@@ -57,7 +57,7 @@ export class GameService {
      */
 	createGame(scenario: uuid): Observable<Game> {
 		/* The server actually replies to the POST with a 302 (Found) redirect to the resource of the created game.
-		 * The HttpoClient or browser itself handles that redirect for us.
+		 * The HttpClient or browser itself handles that redirect for us.
 	     */
 		return this.http.post<Game>(GameService.getApiGamesPath(scenario), "");
 	}
