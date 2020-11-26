@@ -186,8 +186,8 @@ public class UserSteps extends Steps {
       world.getAndAssertExpectedPage(UsersPage.class).assertInvariants();
    }
 
-   @When("Navigate to one user")
-   public void navigate_to_one_user() {
+   @When("Navigate to one user page")
+   public void navigate_to_one_user_page() {
       final var usersPage = world.getExpectedPage(UsersPage.class);
       world.setExpectedPage(usersPage.navigateToUserPage(0));
 
