@@ -160,7 +160,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
          final var response = request.exchange();
          response.expectStatus().isFound();
          final var location = response.returnResult(Void.class)
-                  .getRequestHeaders().getLocation();
+                  .getResponseHeaders().getLocation();
          assertNotNull(location, "response has Location header");// guard
          final var id = UUID.fromString(
                   USER_URI_TEMPLATE.match(location.toString()).get("user"));
