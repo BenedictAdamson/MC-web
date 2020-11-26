@@ -200,6 +200,11 @@ public class UserSteps extends Steps {
       return usersPage;
    }
 
+   @Given("not logged in")
+   public void not_logged_in() {
+      world.getHomePage();
+   }
+
    @Then("redirected to home-page")
    public void redirected_to_home_page() {
       world.getAndAssertExpectedPage(HomePage.class).assertInvariants();
