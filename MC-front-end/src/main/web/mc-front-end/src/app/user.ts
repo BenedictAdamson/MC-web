@@ -1,3 +1,5 @@
+import { UserDetails } from './user-details';
+
 /**
  * <p>
  * A user of the Mission Command game.
@@ -6,8 +8,5 @@
  * This front-end class corresponds to the back-end class uk.badamson.mc.User.
  * </p>
  */
-export class User {
-    username: string;
-    password: string; // often null
-    authorities: string[];
+export class User extends UserDetails {
 }
