@@ -9,4 +9,8 @@ import { UserDetails } from './user-details';
  * </p>
  */
 export class User extends UserDetails {
+
+	constructor(userDetails: UserDetails) {
+		super(userDetails);
+	}
 }

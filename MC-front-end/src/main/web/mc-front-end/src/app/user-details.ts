@@ -11,4 +11,11 @@ export class UserDetails {
 	username: string;// a unique ID
 	password: string;// often null
 	authorities: string[];
+	
+	constructor (userDetails: UserDetails)
+	{
+		this.username = userDetails.username;
+		this.password = userDetails.password;
+		this.authorities = userDetails.authorities;
+	}
 }
