@@ -118,6 +118,11 @@ public final class World implements AutoCloseable {
       return URI.create(url).getPath();
    }
 
+   private static <TYPE> boolean intersects(final Set<TYPE> set1,
+            final Set<TYPE> set2) {
+      return set1.stream().filter(x -> set2.contains(x)).findAny().isEmpty();
+   }
+
    private final McContainers containers;
 
    private final Map<UUID, User> users = new HashMap<>();
@@ -240,11 +245,17 @@ public final class World implements AutoCloseable {
    private void createUsers() {
       users.put(User.ADMINISTRATOR_ID,
                User.createAdministrator(McContainers.ADMINISTARTOR_PASSWORD));
+
       addUser(new BasicUserDetails("jeff", "password1", Authority.ALL, true,
                true, true, true));
       addUser(new BasicUserDetails("allan", "password2",
                Set.of(Authority.ROLE_PLAYER), true, true, true, true));
-      addUnknownUser(new User(UUID.randomUUID(), "mark", "password3",
+      addUser(new BasicUserDetails("Bob", "password3",
+               Set.of(Authority.ROLE_MANAGE_USERS), true, true, true, true));
+      addUser(new BasicUserDetails("Alice", "password4",
+               Set.of(Authority.ROLE_MANAGE_GAMES), true, true, true, true));
+
+      addUnknownUser(new User(UUID.randomUUID(), "mark", "PasswordXXX",
                Authority.ALL, true, true, true, true));
    }
 
@@ -471,12 +482,19 @@ public final class World implements AutoCloseable {
                .get();
    }
 
-   public User getUserWithRole(final Authority role) {
-      Objects.requireNonNull(role, "role");
+   public User getUserWithRoles(final Set<Authority> included,
+            final Set<Authority> excluded) {
+      Objects.requireNonNull(included, "included");
+      Objects.requireNonNull(excluded, "excluded");
+      if (intersects(included, excluded)) {
+         throw new IllegalArgumentException("Contradictory role constraints");
+      }
+
       return users.values().stream()
-               .filter(user -> user.getAuthorities().contains(role)
-                        && !BasicUserDetails.ADMINISTRATOR_USERNAME
-                                 .equals(user.getUsername()))
+               .filter(user -> !BasicUserDetails.ADMINISTRATOR_USERNAME
+                        .equals(user.getUsername()))
+               .filter(user -> user.getAuthorities().containsAll(included))
+               .filter(user -> !intersects(user.getAuthorities(), excluded))
                .findAny().get();
    }
 

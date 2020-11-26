@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 
@@ -260,12 +261,24 @@ public class UserSteps extends Steps {
 
    @Given("user has any role")
    public void user_has_any_role() {
-      user = world.getUserWithRole(Authority.values()[0]);
+      user = world.getUserWithRoles(Set.of(Authority.values()[0]), Set.of());
    }
 
    @Given("user has the {string} role")
    public void user_has_role(final String roleName) {
-      user = world.getUserWithRole(parseRole(roleName));
+      user = world.getUserWithRoles(Set.of(parseRole(roleName)), Set.of());
+   }
+
+   @When("user has the {string} role but not the {string} role")
+   public void user_has_role_but_not_role(final String included,
+            final String excluded) {
+      final var includedRole = parseRole(included);
+      final var excludedRole = parseRole(excluded);
+      if (includedRole == excludedRole) {
+         throw new IllegalArgumentException("Contradictory role constraints");
+      }
+
+      user = world.getUserWithRoles(Set.of(includedRole), Set.of(excludedRole));
    }
 
    @Given("user is the administrator")
