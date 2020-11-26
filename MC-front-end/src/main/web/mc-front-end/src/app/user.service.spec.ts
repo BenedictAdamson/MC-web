@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { HttpClient } from '@angular/common/http';
 
+import { UserDetails } from './user-details';
 import { UserService } from './user.service';
 import { User } from './user';
 
@@ -9,8 +10,10 @@ import { User } from './user';
 describe('UserService', () => {
 	let httpTestingController: HttpTestingController;
 
-	const USER_A: User = { username: 'Benedict', password: 'letmein', authorities: [] };
-	const USER_B: User = { username: 'jeff', password: 'secret', authorities: [] };
+	const USER_DETAILS_A: UserDetails = { username: 'Benedict', password: 'letmein', authorities: [] };
+	const USER_A: User = new User(USER_DETAILS_A);
+	const USER_DETAILS_B: UserDetails = { username: 'jeff', password: 'secret', authorities: [] };
+	const USER_B: User = new User(USER_DETAILS_B);
 
 	beforeEach(() => {
 		TestBed.configureTestingModule({
@@ -41,8 +44,7 @@ describe('UserService', () => {
 		httpTestingController.verify();
 	});
 
-	let canGetUser: CallableFunction;
-	canGetUser = (testUser: User) => {
+	const canGetUser = function(testUser: User) {
 		const username = testUser.username;
 		const service: UserService = TestBed.get(UserService);
 
@@ -60,14 +62,15 @@ describe('UserService', () => {
 		canGetUser(USER_B);
 	});
 
-	let canAddUser = function(user: User) {
+	const canAddUser = function(user: User) {
+		const userDetails: UserDetails = new UserDetails(user);
 		const service: UserService = TestBed.get(UserService);
 
-		service.add(user).subscribe(ok => expect(ok).withContext('indicates success').toBeTrue());
+		service.add(userDetails).subscribe(result => expect(result).withContext('returned user').toEqual(user));
 
 		const request = httpTestingController.expectOne(`/api/user`);
 		expect(request.request.method).toEqual('POST');
-		request.flush("", { status: 201, statusText: 'Created' });
+		request.flush(user);
 		httpTestingController.verify();
 	};
 	it('can add [A]', () => {
