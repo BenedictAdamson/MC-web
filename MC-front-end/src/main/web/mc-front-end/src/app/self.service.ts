@@ -1,5 +1,6 @@
 import { Observable, ReplaySubject, defer, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { v4 as uuid } from 'uuid';
 
 import { flatMap, map, tap } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
@@ -22,6 +23,8 @@ export class SelfService {
 
 	private username_: string = null;
 	private password_: string = null;
+	private id_: uuid = null;
+
 	/**
 	 * provides null if not authenticated
 	 */
@@ -41,6 +44,18 @@ export class SelfService {
 		private http: HttpClient
 	) {
 		this.authoritiesRS$.next(null);
+	}
+
+    /**
+     * @description
+     * The unique ID of the current user.
+     *
+     * null if the user ID is unknown,
+     * which includes the case that the user is not logged in.
+     * The current user ID can be known even if that user has not been authenticated.
+     */
+	get id(): uuid {
+		return this.id_;
 	}
 
     /**
@@ -96,7 +111,14 @@ export class SelfService {
 	private processResponse(username: string, password: string, details: User): boolean {
 		this.username_ = details ? details.username : username;
 		this.password_ = password;
-		var authorities: string[] = details ? details.authorities : null;
+		var authorities: string[];
+		if (details) {
+			this.id_ = details.id;
+			authorities = details.authorities;
+		} else {
+			this.id_ = null;
+			authorities = null;
+		}
 		this.authoritiesRS$.next(authorities);
 		return authorities != null;
 	}
@@ -180,6 +202,7 @@ export class SelfService {
 	private clear(): void {
 		this.username_ = null;
 		this.password_ = null;
+		this.id_ = null;
 		this.authoritiesRS$.next(null);
 	}
 

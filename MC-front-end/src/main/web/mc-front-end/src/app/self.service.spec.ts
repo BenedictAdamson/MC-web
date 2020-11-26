@@ -61,6 +61,17 @@ describe('SelfService', () => {
 		service = new SelfService(httpClient);
 	});
 
+
+	const assertNotAuthenticated = function() {
+		var authenticated: boolean = getAuthenticated(service);
+		var authorities: string[] = getAuthorities(service);
+		expect(service.username).withContext('username').toBeNull();
+		expect(service.password).withContext('password').toBeNull();
+		expect(authorities).withContext('authorities').toEqual([]);
+		expect(authenticated).withContext('authenticated').toEqual(false);
+		expect(service.id).withContext('id').toBeNull();
+	}
+
 	it('constructs the initial state', () => {
 		expect(service).toBeTruthy();
 		assertInvariants(service);
@@ -94,7 +105,7 @@ describe('SelfService', () => {
 	});
 
 
-	let testAuthenticationFailure = (done: any, username: string, password: string) => {
+	const testAuthenticationFailure = function(done: any, username: string, password: string) {
 		service.authenticate(username, password).subscribe({
 			next: (success) => {
 				expect(success).withContext('success').toBeFalse();
@@ -105,6 +116,7 @@ describe('SelfService', () => {
 				expect(getAuthenticated(service)).toEqual(false, 'not authenticated');
 				expect(service.username).toEqual(username, 'updated username');
 				expect(service.password).toEqual(password, 'updated password');
+				expect(service.id).withContext('id').toBeNull();
 				done()
 			}
 		});
@@ -119,46 +131,35 @@ describe('SelfService', () => {
 		testAuthenticationFailure(done, USER_B.username, USER_B.password);
 	});
 
-	const mockHttpAuthorizationSuccess = function(userDetails: User, expectAuthorizationHeader: boolean) {
+	const mockHttpAuthorizationSuccess = function(user: User, expectAuthorizationHeader: boolean) {
 		const request = expectAuthorizationRequestHeaders(expectAuthorizationHeader);
-		request.flush(userDetails, { headers: new HttpHeaders(), status: 200, statusText: 'Ok' });
+		request.flush(user);
 		httpTestingController.verify();
 	};
 
-	const assertAuthenticated = function(userDetails: User) {
+	const assertAuthenticated = function(user: User) {
 		var authenticated: boolean = getAuthenticated(service);
 		var authorities: string[] = getAuthorities(service);
-		expect(service.username).toEqual(userDetails.username, 'username');
-		expect(service.password).toEqual(userDetails.password, 'password');
-		expect(authorities).toEqual(userDetails.authorities, 'authorities');
-		expect(authenticated).toEqual(true, 'authenticated');
+		expect(service.username).withContext('username').toEqual(user.username);
+		expect(service.password).withContext('password').toEqual(user.password);
+		expect(service.id).withContext('id').toBe(user.id);
+		expect(authorities).withContext('authorities').toEqual(user.authorities);
+		expect(authenticated).withContext('authenticated').toEqual(true, 'authenticated');
 	}
 
-	const assertNotAuthenticated = function() {
-		var authenticated: boolean = getAuthenticated(service);
-		var authorities: string[] = getAuthorities(service);
-		expect(service.username).withContext('username').toBeNull();
-		expect(service.password).withContext('password').toBeNull();
-		expect(authorities).withContext('authorities').toEqual([]);
-		expect(authenticated).withContext('authenticated').toEqual(false);
-	}
-
-
-
-
-	let testAuthenticationSuccess = (done: any, userDetails: User) => {
-		service.authenticate(userDetails.username, userDetails.password).subscribe({
+	let testAuthenticationSuccess = (done: any, user: User) => {
+		service.authenticate(user.username, user.password).subscribe({
 			next: (success) => {
 				expect(success).withContext('success').toBeTrue();
 			},
 			error: (err) => { fail(err); done() },
 			complete: () => {
 				assertInvariants(service);
-				assertAuthenticated(userDetails);
+				assertAuthenticated(user);
 				done()
 			}
 		});
-		mockHttpAuthorizationSuccess(userDetails, true);
+		mockHttpAuthorizationSuccess(user, true);
 	};
 
 	it('handles authentication success [A]', (done) => {
@@ -169,13 +170,13 @@ describe('SelfService', () => {
 		testAuthenticationSuccess(done, USER_B);
 	});
 
-	const mockHttpLogout = function(expectAuthorizationHeader: boolean) {
+	const mockHttpLogout = function() {
 		const request: TestRequest = httpTestingController.expectOne('/logout');
 		expect(request.request.method).toEqual('POST');
 		request.flush(null, { headers: new HttpHeaders(), status: 204, statusText: 'No Content' });
 	};
 
-	const testLogout = function(done: any, expectAuthorizationHeader: boolean) {
+	const testLogout = function(done: any) {
 		service.logout().subscribe({
 			next: () => {
 				assertInvariants(service);
@@ -188,12 +189,12 @@ describe('SelfService', () => {
 			}
 		});
 
-		mockHttpLogout(expectAuthorizationHeader);
+		mockHttpLogout();
 		httpTestingController.verify();
 	}
 
 	it('handles logout from the initial state', (done) => {
-		testLogout(done, false);
+		testLogout(done);
 	});
 
 	it('handles logout while authenticated', (done) => {
@@ -202,7 +203,7 @@ describe('SelfService', () => {
 			next: () => { },
 			error: (err) => { fail(err); done() },
 			complete: () => {
-				testLogout(done, true);
+				testLogout(done);
 			}
 		});
 		mockHttpAuthorizationSuccess(user, true);
@@ -229,8 +230,8 @@ describe('SelfService', () => {
 
 
 
-	const checkForCurrentAuthenticationWithSesson = function(done: any, serverUserDetails: User) {
-		const expectedFinalUserDetails: User = { id: serverUserDetails.id, username: serverUserDetails.username, password: null, authorities: serverUserDetails.authorities };
+	const checkForCurrentAuthenticationWithSesson = function(done: any, serverUser: User) {
+		const expectedFinalUserDetails: User = { id: serverUser.id, username: serverUser.username, password: null, authorities: serverUser.authorities };
 		service.checkForCurrentAuthentication().subscribe({
 			next: () => { },
 			error: (err) => { fail(err); done() },
@@ -240,25 +241,25 @@ describe('SelfService', () => {
 				done();
 			}
 		});
-		mockHttpAuthorizationSuccess(serverUserDetails, false);
+		mockHttpAuthorizationSuccess(serverUser, false);
 	}
 
-	const setUpAuthenticated = function(done: any, userDetails: User) {
-		service.authenticate(userDetails.username, userDetails.password).subscribe({
+	const setUpAuthenticated = function(done: any, user: User) {
+		service.authenticate(user.username, user.password).subscribe({
 			next: () => { },
 			error: (err) => { fail(err); done() },
 			complete: () => {
 				done();
 			}
 		});
-		mockHttpAuthorizationSuccess(userDetails, true);
+		mockHttpAuthorizationSuccess(user, true);
 	};
 
 
-	const testCheckForCurrentAuthenticationWithSesson = function(done: any, userDetails: User) {
+	const testCheckForCurrentAuthenticationWithSesson = function(done: any, user: User) {
 		setUpAuthenticated(
-			() => checkForCurrentAuthenticationWithSesson(done, userDetails),
-			userDetails
+			() => checkForCurrentAuthenticationWithSesson(done, user),
+			user
 		);
 	}
 
@@ -273,12 +274,12 @@ describe('SelfService', () => {
 
 
 
-	const testServerAmendingUsername = function(done: any, username: string, password: string, serverUserDetails: User) {
+	const testServerAmendingUsername = function(done: any, username: string, password: string, serverUser: User) {
 		const expectedResultingUserDetails: User = {
-			id: serverUserDetails.id,
-			username: serverUserDetails.username,
+			id: serverUser.id,
+			username: serverUser.username,
 			password: password,// the server will probably resturn null or the encrypted password
-			authorities: serverUserDetails.authorities
+			authorities: serverUser.authorities
 		};
 		service.authenticate(username, password).subscribe({
 			next: (success) => {
@@ -291,20 +292,20 @@ describe('SelfService', () => {
 				done()
 			}
 		});
-		mockHttpAuthorizationSuccess(serverUserDetails, true);
+		mockHttpAuthorizationSuccess(serverUser, true);
 	};
 
 	it('handles server amending user name [A]', (done) => {
 		const username: string = 'benedict';
 		const password: string = 'letmein';
-		const serverUserDetails: User = { id: new uuid(), username: 'Benedict', password: null, authorities: ['ROLE_ADMIN'] };
-		testServerAmendingUsername(done, username, password, serverUserDetails);
+		const serverUser: User = { id: new uuid(), username: 'Benedict', password: null, authorities: ['ROLE_ADMIN'] };
+		testServerAmendingUsername(done, username, password, serverUser);
 	});
 
 	it('handles server amending user name [B]', (done) => {
 		const username: string = 'user1234';
 		const password: string = 'password123';
-		const serverUserDetails: User = { id: new uuid(), username: 'Allan', password: '0123456789', authorities: [] };
-		testServerAmendingUsername(done, username, password, serverUserDetails);
+		const serverUser: User = { id: new uuid(), username: 'Allan', password: '0123456789', authorities: [] };
+		testServerAmendingUsername(done, username, password, serverUser);
 	});
 });
