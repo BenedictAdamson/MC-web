@@ -40,7 +40,7 @@ const routes: Routes = [
 			}]
 	},
 	{
-		path: 'user/:username',
+		path: 'user/:id',
 		component: UserComponent
 	},
 	{

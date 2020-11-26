@@ -1,7 +1,9 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { v4 as uuid } from 'uuid';
+
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 import { User } from './user';
 import { UserDetails } from './user-details';
@@ -23,11 +25,11 @@ export class UserService {
 			);
 	}
 
-	getUser(username: string): Observable<User> {
-		const url = `${this.userUrl}/${username}`;
+	getUser(id: uuid): Observable<User> {
+		const url = `${this.userUrl}/${id}`;
 		return this.http.get<User>(url)
 			.pipe(
-				catchError(this.handleError<User>(`getUser id=${username}`))
+				catchError(this.handleError<User>(`getUser id=${id}`))
 			);
 	}
 

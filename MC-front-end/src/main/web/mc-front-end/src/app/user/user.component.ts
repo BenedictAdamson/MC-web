@@ -1,5 +1,8 @@
+import { v4 as uuid } from 'uuid';
+
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+
 import { UserService } from '../user.service';
 import { User } from '../user';
 
@@ -35,8 +38,8 @@ export class UserComponent implements OnInit {
 	}
 
 	getUser(): void {
-		const username = this.route.snapshot.paramMap.get('username');
-		this.userService.getUser(username)
+		const id: uuid = this.route.snapshot.paramMap.get('id');
+		this.userService.getUser(id)
 			.subscribe(user => this.user = user);
 	}
 }

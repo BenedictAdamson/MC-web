@@ -27,9 +27,9 @@ describe('UserComponent', () => {
 			providers: [{
 				provide: ActivatedRoute,
 				useValue: {
-					params: of({ username: testUser.username }),
+					params: of({ id: testUser.id }),
 					snapshot: {
-						paramMap: convertToParamMap({ username: testUser.username })
+						paramMap: convertToParamMap({ id: testUser.id })
 					}
 				}
 			},
