@@ -158,7 +158,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
          final var request = headers.bodyValue(encodeAsJson(userDetails));
 
          final var response = request.exchange();
-         response.expectStatus().is2xxSuccessful();
+         response.expectStatus().isFound();
          final var location = response.returnResult(Void.class)
                   .getRequestHeaders().getLocation();
          assertNotNull(location, "response has Location header");// guard
