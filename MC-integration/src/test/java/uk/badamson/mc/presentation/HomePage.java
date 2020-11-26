@@ -54,6 +54,8 @@ public final class HomePage extends Page {
 
    private static final By SELF_LINK_LOCATOR = By.xpath("//a[@id='self']");
 
+   private static final By USERS_LINK_LOCATOR = By.xpath("//a[@id='users']");
+
    /**
     * <p>
     * Construct a page object using a given web driver interface.
@@ -114,6 +116,10 @@ public final class HomePage extends Page {
       return !getBody().findElements(SELF_LINK_LOCATOR).isEmpty();
    }
 
+   public boolean hasUsersLink() {
+      return !getBody().findElements(USERS_LINK_LOCATOR).isEmpty();
+   }
+
    public boolean isLoginEnabled() {
       return isEnabled(getBody().findElement(LOGIN_LINK_LOCATOR));
    }
@@ -156,7 +162,7 @@ public final class HomePage extends Page {
 
    public UsersPage navigateToUsersPage() {
       requireIsReady();
-      getBody().findElement(By.id("users")).click();
+      getBody().findElement(USERS_LINK_LOCATOR).click();
       final var usersPage = new UsersPage(this);
       usersPage.awaitIsReady();
       return usersPage;
