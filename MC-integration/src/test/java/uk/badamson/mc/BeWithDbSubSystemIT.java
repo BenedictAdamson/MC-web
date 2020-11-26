@@ -139,7 +139,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       @Test
       @Order(4)
       public void twiceWithoutSessionCookie() throws Exception {
-         final var user = USER_A;
+         final var user = USER_DETAILS_A;
          final var username = user.getUsername();
          final var password = user.getPassword();
          be.addUser(user);
@@ -162,7 +162,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       @Test
       @Order(4)
       public void twiceWithSessionCookie() throws Exception {
-         final var user = USER_A;
+         final var user = USER_DETAILS_A;
          final var username = user.getUsername();
          final var password = user.getPassword();
          be.addUser(user);
@@ -182,7 +182,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       @Test
       @Order(1)
       public void unknownUser() throws Exception {
-         final var user = USER_A;
+         final var user = USER_DETAILS_A;
          final var request = be.createGetSelfRequest(user.getUsername(),
                   user.getPassword());
 
@@ -194,7 +194,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       @Test
       @Order(3)
       public void valid() throws Exception {
-         final var user = USER_A;
+         final var user = USER_DETAILS_A;
          be.addUser(user);
          final var request = be.createGetSelfRequest(user.getUsername(),
                   user.getPassword());
@@ -207,7 +207,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       @Test
       @Order(1)
       public void wrongPassword() throws Exception {
-         final var user = USER_A;
+         final var user = USER_DETAILS_A;
          be.addUser(user);
          final var request = be.createGetSelfRequest(user.getUsername(),
                   "*" + user.getPassword());
@@ -253,7 +253,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       @Test
       @Order(1)
       public void noSession() throws Exception {
-         final var user = USER_A;
+         final var user = USER_DETAILS_A;
          be.addUser(user);
          final var request = be.connectWebTestClient("/logout").post()
                   .headers(headers -> headers.setBasicAuth(user.getUsername(),
@@ -267,7 +267,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       @Test
       @Order(3)
       public void withSession() throws Exception {
-         final var user = USER_A;
+         final var user = USER_DETAILS_A;
          be.addUser(user);
          final var cookies = be.login(user);
          final var request = be.connectWebTestClient("/logout").post();
@@ -281,7 +281,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
       @Test
       @Order(1)
       public void wrongPassword() throws Exception {
-         final var user = USER_A;
+         final var user = USER_DETAILS_A;
          be.addUser(user);
          final var request = be.connectWebTestClient("/logout").post()
                   .headers(headers -> headers.setBasicAuth(user.getUsername(),
@@ -306,10 +306,10 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
 
    private static final String ADMINISTARTOR_PASSWORD = "secret4";
 
-   private static final User USER_A = new User(UUID.randomUUID(), "jeff",
+   private static final BasicUserDetails USER_DETAILS_A = new BasicUserDetails("jeff",
             "password", Authority.ALL, true, true, true, true);
 
-   private static void assertSelfResponseEquivalent(final User expectedUser,
+   private static void assertSelfResponseEquivalent(final BasicUserDetails expectedUser,
             final boolean expectSetSessionCookie, final ResponseSpec response) {
       final var result = response.returnResult(String.class);
       final var responseJson = result.getResponseBody()
@@ -347,7 +347,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
    @Test
    @Order(2)
    public void addUser() {
-      be.addUser(USER_A);
+      be.addUser(USER_DETAILS_A);
 
       final List<User> users;
       try {
@@ -356,7 +356,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
          throw new AssertionFailedError("Unable to get list of users", e);
       }
       assertThat("Added user", users.stream()
-               .anyMatch(u -> USER_A.getUsername().equals(u.getUsername())));
+               .anyMatch(u -> USER_DETAILS_A.getUsername().equals(u.getUsername())));
    }
 
    private void assertThatNoErrorMessagesLogged(final String logs) {

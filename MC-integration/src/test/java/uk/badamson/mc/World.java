@@ -146,9 +146,10 @@ public final class World implements AutoCloseable {
       unknownUsers.put(user.getUsername(), user);
    }
 
-   private void addUser(final User user) {
-      containers.addUser(user);// records the user in the DB, through the BE
-      users.put(user.getId(), user);
+   private void addUser(final BasicUserDetails userDetails) {
+      // records the user in the DB, through the BE
+      final var id = containers.addUser(userDetails);
+      users.put(id, new User(id, userDetails));
 
    }
 
@@ -239,9 +240,9 @@ public final class World implements AutoCloseable {
    private void createUsers() {
       users.put(User.ADMINISTRATOR_ID,
                User.createAdministrator(McContainers.ADMINISTARTOR_PASSWORD));
-      addUser(new User(UUID.randomUUID(), "jeff", "password1", Authority.ALL,
-               true, true, true, true));
-      addUser(new User(UUID.randomUUID(), "allan", "password2",
+      addUser(new BasicUserDetails("jeff", "password1", Authority.ALL, true,
+               true, true, true));
+      addUser(new BasicUserDetails("allan", "password2",
                Set.of(Authority.ROLE_PLAYER), true, true, true, true));
       addUnknownUser(new User(UUID.randomUUID(), "mark", "password3",
                Authority.ALL, true, true, true, true));
@@ -472,9 +473,10 @@ public final class World implements AutoCloseable {
 
    public User getUserWithRole(final Authority role) {
       Objects.requireNonNull(role, "role");
-      return users.values().stream().filter(user -> user.getAuthorities()
-               .contains(role)
-               && !User.ADMINISTRATOR_USERNAME.equals(user.getUsername()))
+      return users.values().stream()
+               .filter(user -> user.getAuthorities().contains(role)
+                        && !BasicUserDetails.ADMINISTRATOR_USERNAME
+                                 .equals(user.getUsername()))
                .findAny().get();
    }
 

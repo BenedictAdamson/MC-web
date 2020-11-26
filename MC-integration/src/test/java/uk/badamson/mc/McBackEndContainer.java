@@ -18,6 +18,8 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
@@ -74,6 +76,9 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    public static final String CONNECTION_MESSAGE = "successfully connected to server";
 
+   private static final UriTemplate USER_URI_TEMPLATE = new UriTemplate(
+            "/api/user/{user}");
+
    private static final UriTemplate GAME_URI_TEMPLATE = new UriTemplate(
             "/api/scenario/{scenario}/game/{game}");
 
@@ -110,7 +115,8 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       return new Game.Identifier(scenario, created);
    }
 
-   static void secure(final RequestBodySpec request, final User user,
+   static void secure(final RequestBodySpec request,
+            final BasicUserDetails user,
             final MultiValueMap<String, HttpCookie> cookies) {
       Objects.requireNonNull(request, "request");
       Objects.requireNonNull(cookies, "cookies");
@@ -141,19 +147,25 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       withCommand("--spring.data.mongodb.host=" + mongoDbHost);
    }
 
-   public void addUser(final User user) {
+   public UUID addUser(final BasicUserDetails userDetails) {
       try {
-         Objects.requireNonNull(user, "user");
+         Objects.requireNonNull(userDetails, "userDetails");
 
          final var cookies = login(administrator);
          final var headers = connectWebTestClient("/api/user").post()
                   .contentType(MediaType.APPLICATION_JSON);
          secure(headers, administrator, cookies);
-         final var request = headers.bodyValue(encodeAsJson(user));
+         final var request = headers.bodyValue(encodeAsJson(userDetails));
 
          final var response = request.exchange();
          response.expectStatus().is2xxSuccessful();
+         final var location = response.returnResult(Void.class)
+                  .getRequestHeaders().getLocation();
+         assertNotNull(location, "response has Location header");// guard
+         final var id = UUID.fromString(
+                  USER_URI_TEMPLATE.match(location.toString()).get("user"));
          logout(administrator, cookies);
+         return id;
       } catch (final Exception e) {
          throw new RuntimeException("Failed to add user", e);
       }
@@ -268,7 +280,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
                .getResponseBody().toStream();
    }
 
-   MultiValueMap<String, HttpCookie> login(final User user) {
+   MultiValueMap<String, HttpCookie> login(final BasicUserDetails user) {
       final var request = createGetSelfRequest(user.getUsername(),
                user.getPassword());
 
