@@ -85,6 +85,11 @@ public class UserSteps extends Steps {
       navigateToUsersPage();
    }
 
+   @Given("Viewing the list of users")
+   public void given_viewing_list_of_users() {
+      navigateToUsersPage();
+   }
+
    @Then("the list of users includes a user named {string}")
    public void list_of_users_includes(final String name) {
       Objects.requireNonNull(name, "name");
@@ -296,8 +301,8 @@ public class UserSteps extends Steps {
       world.getAndAssertExpectedPage(UserPage.class).assertListsRolesOfUser();
    }
 
-   @Given("Viewing the list of users")
-   public void viewing_list_of_users() {
+   @When("Viewing the list of users")
+   public void when_viewing_list_of_users() {
       navigateToUsersPage();
    }
 }
