@@ -1,5 +1,6 @@
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
+import { v4 as uuid } from 'uuid';
 
 import { FormsModule } from '@angular/forms';
 
@@ -28,7 +29,7 @@ class MockUserService {
 		for (let present of this.users) {
 			if (present.username == userDetails.username) return of(null);
 		}
-		const user: User = new User(userDetails);
+		const user: User = new User(uuid(), userDetails);
 		this.users.push(user);
 		return of(user);
 	}
@@ -37,8 +38,8 @@ class MockUserService {
 describe('AddUserComponent', () => {
 	const USER_DETAILS_A: UserDetails = { username: 'Administrator', password: 'letmein', authorities: [] };
 	const USER_DETAILS_B: UserDetails = { username: 'Benedict', password: 'pasword123', authorities: [] };
-	const USER_A: User = new User(USER_DETAILS_A);
-	const USER_B: User = new User(USER_DETAILS_B);
+	const USER_A: User = new User(uuid(), USER_DETAILS_A);
+	const USER_B: User = new User(uuid(), USER_DETAILS_B);
 
 	let routerSpy: any;
 	let userService: MockUserService;

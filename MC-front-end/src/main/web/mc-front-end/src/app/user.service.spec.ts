@@ -1,3 +1,5 @@
+import { v4 as uuid } from 'uuid';
+
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { HttpClient } from '@angular/common/http';
@@ -11,9 +13,9 @@ describe('UserService', () => {
 	let httpTestingController: HttpTestingController;
 
 	const USER_DETAILS_A: UserDetails = { username: 'Benedict', password: 'letmein', authorities: [] };
-	const USER_A: User = new User(USER_DETAILS_A);
+	const USER_A: User = new User(new uuid(), USER_DETAILS_A);
 	const USER_DETAILS_B: UserDetails = { username: 'jeff', password: 'secret', authorities: [] };
-	const USER_B: User = new User(USER_DETAILS_B);
+	const USER_B: User = new User(new uuid(), USER_DETAILS_B);
 
 	beforeEach(() => {
 		TestBed.configureTestingModule({

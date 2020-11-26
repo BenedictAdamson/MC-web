@@ -1,4 +1,5 @@
 import { Observable, of } from 'rxjs';
+import { v4 as uuid } from 'uuid';
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -27,8 +28,8 @@ describe('UsersComponent', () => {
 	let component: UsersComponent;
 	let fixture: ComponentFixture<UsersComponent>;
 
-	const USER_ADMIN = { username: 'Administrator', password: null, authorities: ['ROLE_MANAGE_USERS'] };
-	const USER_NORMAL = { username: 'Benedict', password: null, authorities: [] };
+	const USER_ADMIN: User = { id: uuid(), username: 'Administrator', password: null, authorities: ['ROLE_MANAGE_USERS'] };
+	const USER_NORMAL: User = { id: uuid(), username: 'Benedict', password: null, authorities: [] };
 
 	const setUp = (self: User, testUsers: User[]) => {
 		const userServiceStub = jasmine.createSpyObj('UserService', ['getUsers']);

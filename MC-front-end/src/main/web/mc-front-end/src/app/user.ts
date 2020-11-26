@@ -1,3 +1,5 @@
+import { v4 as uuid } from 'uuid';
+
 import { UserDetails } from './user-details';
 
 /**
@@ -9,8 +11,11 @@ import { UserDetails } from './user-details';
  * </p>
  */
 export class User extends UserDetails {
+	
+	id: uuid;
 
-	constructor(userDetails: UserDetails) {
+	constructor(id: uuid, userDetails: UserDetails) {
 		super(userDetails);
+		this.id = id;
 	}
 }
