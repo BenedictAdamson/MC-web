@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.util.List;
 import java.util.Objects;
 
 import javax.annotation.concurrent.Immutable;
@@ -39,6 +40,8 @@ import org.openqa.selenium.WebElement;
  */
 @Immutable
 public final class UsersPage extends Page {
+
+   private static final By USER_LINK_LOCATOR = By.tagName("a");
 
    private static final By USER_LIST_LOCATOR = By.tagName("ul");
 
@@ -106,6 +109,18 @@ public final class UsersPage extends Page {
                () -> assertHasListOfUsers(body));
    }
 
+   private List<WebElement> findUserListEntries() {
+      final var list = getBody().findElement(USER_LIST_LOCATOR);
+      return list.findElements(By.tagName("li"));
+   }
+
+   public int getNumberOfUserLinks() {
+      requireIsReady();
+      return (int) findUserListEntries().stream().filter(
+               entry -> !entry.findElements(USER_LINK_LOCATOR).isEmpty())
+               .count();
+   }
+
    public boolean hasAddUserLink() {
       return !getBody().findElements(ADD_USER_LINK_LOCATOR).isEmpty();
    }
@@ -130,15 +145,14 @@ public final class UsersPage extends Page {
          throw new IllegalArgumentException("negative index");
       }
       requireIsReady();
-      final var list = getBody().findElement(USER_LIST_LOCATOR);
-      final var entries = list.findElements(By.tagName("li"));
+      final var entries = findUserListEntries();
       final WebElement entry;
       try {
          entry = entries.get(index);
       } catch (final IndexOutOfBoundsException e) {
          throw new IllegalArgumentException("index too large", e);
       }
-      final var link = entry.findElement(By.tagName("a"));
+      final var link = entry.findElement(USER_LINK_LOCATOR);
       final var displayName = link.getText();
       link.click();
       final var userPage = new UserPage(this, displayName);

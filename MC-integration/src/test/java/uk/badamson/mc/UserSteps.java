@@ -19,6 +19,7 @@ package uk.badamson.mc;
  */
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -160,6 +161,13 @@ public class UserSteps extends Steps {
    public void mc_allows_logout() {
       final var homePage = world.getAndAssertExpectedPage(HomePage.class);
       assertTrue(homePage.isLogoutEnabled());
+   }
+
+   @Then("MC does not allow navigating to a user page")
+   public void mc_does_not_alllow_navigating_to_user_page() {
+      final var usersPage = world.getAndAssertExpectedPage(UsersPage.class);
+      assertEquals(0, usersPage.getNumberOfUserLinks(),
+               "No links to user pages");
    }
 
    @Then("MC does not allow examining the current user")
