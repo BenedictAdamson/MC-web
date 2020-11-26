@@ -33,8 +33,8 @@ describe('GamesComponent', () => {
 	let component: GamesComponent;
 	let fixture: ComponentFixture<GamesComponent>;
 
-	const USER_ADMIN = { username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
-	const USER_NORMAL = { username: 'Benedict', password: null, authorities: [] };
+	const USER_ADMIN = { id: new uuid(), username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
+	const USER_NORMAL = { id: new uuid(), username: 'Benedict', password: null, authorities: [] };
 
 	const SCENARIO_A: uuid = uuid();
 	const SCENARIO_B: uuid = uuid();

@@ -1,3 +1,5 @@
+import { v4 as uuid } from 'uuid';
+
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { TestBed } from '@angular/core/testing';
@@ -35,8 +37,8 @@ describe('SelfService', () => {
 		expect(!authenticated && 0 < authorities.length).withContext('A user that has not been authenticated has no authorities').toEqual(false);
 	};
 
-	const USER_A: User = { username: 'Administrator', password: 'letmein', authorities: ['ROLE_ADMIN'] };
-	const USER_B: User = { username: 'Benedict', password: 'pasword123', authorities: [] };
+	const USER_A: User = { id: new uuid(), username: 'Administrator', password: 'letmein', authorities: ['ROLE_ADMIN'] };
+	const USER_B: User = { id: new uuid(), username: 'Benedict', password: 'pasword123', authorities: [] };
 
 	let httpClient: HttpClient;
 	let httpTestingController: HttpTestingController;
@@ -228,7 +230,7 @@ describe('SelfService', () => {
 
 
 	const checkForCurrentAuthenticationWithSesson = function(done: any, serverUserDetails: User) {
-		const expectedFinalUserDetails: User = { username: serverUserDetails.username, password: null, authorities: serverUserDetails.authorities };
+		const expectedFinalUserDetails: User = { id: serverUserDetails.id, username: serverUserDetails.username, password: null, authorities: serverUserDetails.authorities };
 		service.checkForCurrentAuthentication().subscribe({
 			next: () => { },
 			error: (err) => { fail(err); done() },
@@ -273,6 +275,7 @@ describe('SelfService', () => {
 
 	const testServerAmendingUsername = function(done: any, username: string, password: string, serverUserDetails: User) {
 		const expectedResultingUserDetails: User = {
+			id: serverUserDetails.id,
 			username: serverUserDetails.username,
 			password: password,// the server will probably resturn null or the encrypted password
 			authorities: serverUserDetails.authorities
@@ -294,14 +297,14 @@ describe('SelfService', () => {
 	it('handles server amending user name [A]', (done) => {
 		const username: string = 'benedict';
 		const password: string = 'letmein';
-		const serverUserDetails: User = { username: 'Benedict', password: null, authorities: ['ROLE_ADMIN'] };
+		const serverUserDetails: User = { id: new uuid(), username: 'Benedict', password: null, authorities: ['ROLE_ADMIN'] };
 		testServerAmendingUsername(done, username, password, serverUserDetails);
 	});
 
 	it('handles server amending user name [B]', (done) => {
 		const username: string = 'user1234';
 		const password: string = 'password123';
-		const serverUserDetails: User = { username: 'Allan', password: '0123456789', authorities: [] };
+		const serverUserDetails: User = { id: new uuid(), username: 'Allan', password: '0123456789', authorities: [] };
 		testServerAmendingUsername(done, username, password, serverUserDetails);
 	});
 });
