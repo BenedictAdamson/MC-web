@@ -33,10 +33,9 @@ export class SelfService {
     /**
      * @description
      * Initial state:
-     * * null username
-     * * null password
-     * * not ##authenticated$
-     * * no ##authorities$
+     * * null [[username]]
+     * * null [[password]]
+     * * not [[authenticated$]]
      *
      * Instancing this class does not trigger a login request or any network traffic.
      */
@@ -133,10 +132,9 @@ export class SelfService {
 	 * so this is a cold Observable too.
 	 * That is, the expensive HTTP request will not be made until something subscribes to this Observable.
 	 *
-	 * Iff the authentication is sucessful, {@link authenticated$} will provide true.
+	 * Iff the authentication is successful, {@link authenticated$} will provide true.
 	 * The method however updates the {@link username} and {@link password} attributes even if authentication fails.
-	 * The #authorities$ Observable will provide the authorities of the authenticated user,
-	 * if authentication is successful.
+	 * The authorities of the current user will be updated, if authentication is successful.
      *
      * The server may indicate that the user should use a different, canonical username,
      * in which case the method sets the {@link username} attribute to that canonical username,
@@ -163,7 +161,7 @@ export class SelfService {
      * It returns an Observable that indicates when communication with the server has completed.
      *
      * On completion of the returned Observable, the #username and #password of this service are null,
-     * and #authorities$ provides an empty array of authorities.
+     * and the current user has no authorisation.
 	 */
 	logout(): Observable<null> {
 		return this.endServerSession().pipe(
@@ -187,8 +185,8 @@ export class SelfService {
 	 * so this is a cold Observable too.
 	 * That is, the expensive HTTP request will not be made until something subscribes to this Observable.
 	 *
-	 * The method updates the #username and #password attributes
-     * and the values of the #authorities$ and #authenticated$ Observables.
+	 * The method updates the #username and #password attributes, the #authenticated$ Observable,
+	 * and the authorisations of the current user.
      *
      * The method makes use of the `/api/self` endpoint of the server,
      * to get the current user details.
@@ -259,7 +257,7 @@ export class SelfService {
      * Whether the current user is authorised to manage games.
      *
      * A user that has not been authenticated is not authorised to manage games.
-     * The current user must have `ROLE_MANAGE_GAMES` as one of its [[authorities$]]
+     * The current user must have `ROLE_MANAGE_GAMES` as one of its authorities
      * to be authorised to manage games.
      */
 	get mayManageGames$(): Observable<boolean> {
@@ -271,7 +269,7 @@ export class SelfService {
      * Whether the current user is authorised to play games.
      *
      * A user that has not been authenticated is not authorised to play games.
-     * The current user must have `ROLE_PLAYER` as one of its [[authorities$]]
+     * The current user must have `ROLE_PLAYER` as one of its authorities
      * to be authorised to play games.
      */
 	get mayPlay$(): Observable<boolean> {
@@ -283,7 +281,7 @@ export class SelfService {
      * Whether the current user is authorised to manage users.
      *
      * A user that has not been authenticated is not authorised to manage users.
-     * The current user must have `ROLE_MANAGE_USERS` as one of its [[authorities$]]
+     * The current user must have `ROLE_MANAGE_USERS` as one of its authorities
      * to be authorised to manage users.
      */
 	get mayManageUsers$(): Observable<boolean> {
