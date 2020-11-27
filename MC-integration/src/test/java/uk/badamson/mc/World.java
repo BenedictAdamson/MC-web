@@ -24,12 +24,12 @@ import java.net.ProtocolException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -125,9 +125,12 @@ public final class World implements AutoCloseable {
 
    private final McContainers containers;
 
-   private final Map<UUID, User> users = new HashMap<>();
-
-   private final Map<String, User> unknownUsers = new HashMap<>();
+   /*
+    * Use Maps sorted by username, to ensure repeatable tests, despite UUIDs
+    * changing.
+    */
+   private final SortedMap<String, User> users = new TreeMap<>();
+   private final SortedMap<String, User> unknownUsers = new TreeMap<>();
 
    private RemoteWebDriver webDriver;
 
@@ -154,7 +157,7 @@ public final class World implements AutoCloseable {
    private void addUser(final BasicUserDetails userDetails) {
       // records the user in the DB, through the BE
       final var id = containers.addUser(userDetails);
-      users.put(id, new User(id, userDetails));
+      users.put(userDetails.getUsername(), new User(id, userDetails));
 
    }
 
@@ -243,7 +246,7 @@ public final class World implements AutoCloseable {
    }
 
    private void createUsers() {
-      users.put(User.ADMINISTRATOR_ID,
+      users.put(BasicUserDetails.ADMINISTRATOR_USERNAME,
                User.createAdministrator(McContainers.ADMINISTARTOR_PASSWORD));
 
       addUser(new BasicUserDetails("jeff", "password1", Authority.ALL, true,
@@ -282,7 +285,7 @@ public final class World implements AutoCloseable {
    }
 
    public User getAdministratorUser() {
-      return users.get(User.ADMINISTRATOR_ID);
+      return users.get(BasicUserDetails.ADMINISTRATOR_USERNAME);
    }
 
    /**
