@@ -62,8 +62,8 @@ describe('AppComponent', () => {
 		}).compileComponents();
 	};
 
-	it('can be constructed', () => {
-		setUp(false);
+	const testSetUp = function(mayListUsers: boolean) {
+		setUp(mayListUsers);
 		const fixture = TestBed.createComponent(AppComponent);
 		const app = fixture.debugElement.componentInstance;
 		fixture.detectChanges();
@@ -75,9 +75,19 @@ describe('AppComponent', () => {
 		expect(mockSelfService.checkForCurrentAuthentication_calls).withContext('Checked the server for current authentication information').toBe(1);
 
 		expect(html.querySelector('h1').textContent).withContext('h1 text').toContain('Mission Command');
-		expect(usersLink).withContext('users link element').not.toBeNull();
-		expect(usersLink.textContent).withContext('users link text').toContain('Users');
+		expect(usersLink != null).withContext('has users link element').toBe(mayListUsers);
+		if (usersLink != null) {
+			expect(usersLink.textContent).withContext('users link text').toContain('Users');
+		}
 		expect(scenariosLink).withContext('scenarios link element').not.toBeNull();
 		expect(scenariosLink.textContent).withContext('scenarios link text').toContain('Scenarios');
+	};
+
+	it('can be constructed [!mayListUsers]', () => {
+		testSetUp(false);
+	});
+
+	it('can be constructed [mayListUsers]', () => {
+		testSetUp(true);
 	});
 });
