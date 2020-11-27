@@ -77,7 +77,7 @@ public class UserSteps extends Steps {
 
    @Then("MC does not allow adding a user")
    public void does_not_allow_adding_user() {
-      final UsersPage usersPage = navigateToUsersPage();
+      final var usersPage = navigateToUsersPage();
       assertFalse(usersPage.hasAddUserLink(), "Add user link is absent");
    }
 
@@ -251,6 +251,11 @@ public class UserSteps extends Steps {
    public void try_to_login() {
       world.getHomePage();
       tryToLogin();
+   }
+
+   @When("Trying to navigate to a user page")
+   public void trying_to_navigate_to_user_page() {
+      world.getExpectedPage(UsersPage.class).requireIsReady();
    }
 
    private void tryToLogin() {
