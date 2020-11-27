@@ -29,6 +29,7 @@ import javax.annotation.concurrent.Immutable;
 
 import org.hamcrest.Matcher;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -161,8 +162,15 @@ public final class HomePage extends Page {
    }
 
    public UsersPage navigateToUsersPage() {
-      requireIsReady();
-      getBody().findElement(USERS_LINK_LOCATOR).click();
+      final WebElement usersLink;
+      try {
+         requireIsReady();
+         usersLink = getBody().findElement(USERS_LINK_LOCATOR);
+      } catch (IllegalStateException | NoSuchElementException e) {
+         throw new IllegalStateException("Not ready to navigate to users page",
+                  e);
+      }
+      usersLink.click();
       final var usersPage = new UsersPage(this);
       usersPage.awaitIsReady();
       return usersPage;

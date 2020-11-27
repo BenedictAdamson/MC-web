@@ -77,7 +77,7 @@ public class UserSteps extends Steps {
 
    @Then("MC does not allow adding a user")
    public void does_not_allow_adding_user() {
-      final var usersPage = navigateToUsersPage();
+      final UsersPage usersPage = navigateToUsersPage();
       assertFalse(usersPage.hasAddUserLink(), "Add user link is absent");
    }
 
