@@ -295,6 +295,9 @@ public class UserSteps extends Steps {
       }
 
       user = world.getUserWithRoles(Set.of(includedRole), Set.of(excludedRole));
+
+      assert user != null && user.getAuthorities().contains(includedRole)
+               && !user.getAuthorities().contains(excludedRole);
    }
 
    @Given("user is the administrator")
