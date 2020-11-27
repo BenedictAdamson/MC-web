@@ -120,7 +120,8 @@ public final class World implements AutoCloseable {
 
    private static <TYPE> boolean intersects(final Set<TYPE> set1,
             final Set<TYPE> set2) {
-      return !set1.stream().filter(x -> set2.contains(x)).findAny().isEmpty();
+      /* The sets intersect if we can find any element in both. */
+      return set1.stream().filter(x -> set2.contains(x)).findAny().isPresent();
    }
 
    private final McContainers containers;
