@@ -22,9 +22,8 @@ class MockSelfService {
 		return this.self.username;
 	}
 
-
-	get authorities$(): Observable<string[]> {
-		return of(this.self.authorities);
+	get mayManageGames$(): Observable<boolean> {
+		return of(this.self.authorities.includes('ROLE_MANAGE_GAMES'));
 	}
 }
 

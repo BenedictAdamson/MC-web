@@ -43,8 +43,8 @@ export class GamesComponent implements OnInit {
      * A user that has not been authenticated does not have that permission.
 	 */
 	get isDisabledCreateGame$(): Observable<boolean> {
-		return this.selfService.authorities$.pipe(
-			map(authorities => !authorities.includes('ROLE_MANAGE_GAMES'))
+		return this.selfService.mayManageGames$.pipe(
+			map(mayManage => !mayManage)
 		);
 	}
 

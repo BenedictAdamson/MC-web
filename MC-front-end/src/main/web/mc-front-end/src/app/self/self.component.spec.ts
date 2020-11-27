@@ -16,10 +16,6 @@ class MockSelfService {
 		return this.self ? this.self.username : null;
 	}
 
-	get authorities$(): Observable<string[]> {
-		return of(this.self ? this.self.authorities : []);
-	}
-
 	get authenticated$(): Observable<boolean> {
 		return of(this.self != null);
 	}

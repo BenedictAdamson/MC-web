@@ -19,10 +19,6 @@ class MockSelfService {
 		return null;
 	}
 
-	get authorities$(): Observable<string[]> {
-		return of([]);
-	}
-
 	get authenticated$(): Observable<boolean> {
 		return of(false);
 	}

@@ -48,8 +48,8 @@ export class GameComponent implements OnInit {
 	}
 
 	isEndRecruitmentDisabled$(): Observable<boolean> {
-		return this.selfService.authorities$.pipe(
-			map(authorities => !this.game.recruiting || !authorities.includes('ROLE_MANAGE_GAMES'))
+		return this.selfService.mayManageGames$.pipe(
+			map(mayManage => !this.game.recruiting || !mayManage)
 		);
 	}
 

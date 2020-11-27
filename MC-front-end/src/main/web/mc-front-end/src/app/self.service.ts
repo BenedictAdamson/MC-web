@@ -242,7 +242,7 @@ export class SelfService {
      * A user that has not been authenticated has no authorities.
      * An authenticated user could have no authorities, although that is unlikely in practice. 
 	 */
-	get authorities$(): Observable<string[]> {
+	private get authorities$(): Observable<string[]> {
 		return this.authoritiesRS$.pipe(
 			map(a => a ? a : [])
 		);
