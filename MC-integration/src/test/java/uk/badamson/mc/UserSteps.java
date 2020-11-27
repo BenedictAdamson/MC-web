@@ -210,6 +210,14 @@ public class UserSteps extends Steps {
    }
 
    private UsersPage navigateToUsersPage() {
+      Objects.requireNonNull(user, "user");
+      final var authorities = user.getAuthorities();
+      if (!(authorities.contains(Authority.ROLE_MANAGE_USERS)
+               || authorities.contains(Authority.ROLE_PLAYER))) {
+         throw new IllegalStateException(
+                  "Current user not authorised (" + authorities + ")");
+      }
+
       final var homePage = world.getExpectedPage(HomePage.class);
       final var usersPage = homePage.navigateToUsersPage();
       world.setExpectedPage(usersPage);
