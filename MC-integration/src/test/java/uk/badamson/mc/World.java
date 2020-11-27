@@ -480,9 +480,13 @@ public final class World implements AutoCloseable {
 
    public User getUserWithoutRole(final Authority role) {
       Objects.requireNonNull(role, "role");
+
+      /*
+       * Return the first matching user to ensure repeatable tests.
+       */
       return users.values().stream()
-               .filter(user -> !user.getAuthorities().contains(role)).findAny()
-               .get();
+               .filter(user -> !user.getAuthorities().contains(role))
+               .findFirst().get();
    }
 
    public User getUserWithRoles(final Set<Authority> included,
@@ -493,12 +497,15 @@ public final class World implements AutoCloseable {
          throw new IllegalArgumentException("Contradictory role constraints");
       }
 
+      /*
+       * Return the first matching user to ensure repeatable tests.
+       */
       return users.values().stream()
                .filter(user -> !BasicUserDetails.ADMINISTRATOR_USERNAME
                         .equals(user.getUsername()))
                .filter(user -> user.getAuthorities().containsAll(included))
                .filter(user -> !intersects(user.getAuthorities(), excluded))
-               .findAny().get();
+               .findFirst().get();
    }
 
    public WebDriver getWebDriver() {
