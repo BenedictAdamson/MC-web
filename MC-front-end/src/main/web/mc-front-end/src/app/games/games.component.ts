@@ -7,6 +7,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { GameService } from '../game.service';
+import { ScenarioComponent } from '../scenario/scenario.component';
 import { SelfService } from '../self.service';
 
 @Component({
@@ -15,6 +16,10 @@ import { SelfService } from '../self.service';
 	styleUrls: ['./games.component.css']
 })
 export class GamesComponent implements OnInit {
+
+	static getGamesPath(scenario: uuid): string {
+		return ScenarioComponent.getScenarioPath(scenario) + '/game/';
+	}
 
 	scenario: uuid;
 	games: string[];
