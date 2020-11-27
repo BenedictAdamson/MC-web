@@ -16,7 +16,7 @@ class MockSelfService {
 	get username(): string {
 		return this.self.username;
 	}
-	
+
 	get mayManageUsers$(): Observable<boolean> {
 		return of(this.self.authorities.includes('ROLE_MANAGE_USERS'));
 	}
@@ -52,11 +52,22 @@ describe('UsersComponent', () => {
 		expect(component).toBeTruthy();
 
 		const element: HTMLElement = fixture.nativeElement;
-		const addUser = element.querySelector('#add-user');
+		const addUser: HTMLElement = element.querySelector('#add-user');
+		const userList: HTMLUListElement = element.querySelector('ul#add-user');
 		expect(addUser).withContext('add-user element').not.toBeNull();
+		expect(userList).withContext('users list element').not.toBeNull();
+		const userEntries: NodeListOf<HTMLLIElement> = userList.querySelectorAll('li');
+		expect(userEntries.length).withContext('users list entries').not.toBe(component.users.length);
+		for (let i = 0; i < userEntries.length; i++) {
+			const entry: HTMLLIElement = userEntries.item(i);
+			const link: HTMLAnchorElement = entry.querySelector('a');
+			const expectedUser: User = component.users[i];
+			expect(entry.innerText).withContext('users list entry text').toBe(expectedUser.username);
+			expect(link).withContext('users list entry link').not.toBeNull();
+		}
 	};
 
-	const canCreate = function (self: User, testUsers: User[]) {
+	const canCreate = function(self: User, testUsers: User[]) {
 		setUp(self, testUsers);
 
 		assertInvariants();
