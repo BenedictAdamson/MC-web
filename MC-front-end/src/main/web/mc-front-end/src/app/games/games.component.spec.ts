@@ -3,10 +3,10 @@ import { v4 as uuid } from 'uuid';
 
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 
-import { AppRoutingModule } from '../app-routing.module';
 import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
 import { GameService } from '../game.service';
+import { GameComponent } from '../game/game.component';
 import { GamesComponent } from './games.component';
 import { SelfService } from '../self.service';
 import { User } from '../user';
@@ -154,7 +154,7 @@ describe('GamesComponent', () => {
 		fixture.detectChanges();
 	};
 	const testCreateGame = function(game: Game) {
-		const expectedPath: string = AppRoutingModule.getGamePath(game.identifier);
+		const expectedPath: string = GameComponent.getGamePath(game.identifier);
 		setUpForCreateGame(game);
 
 		component.createGame();
