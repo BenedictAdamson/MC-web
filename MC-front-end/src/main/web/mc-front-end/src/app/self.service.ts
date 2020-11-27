@@ -247,4 +247,46 @@ export class SelfService {
 			map(a => a ? a : [])
 		);
 	}
+
+	private hasRole$(role: string): Observable<boolean> {
+		return this.authorities$.pipe(
+			map(authorities => authorities.includes(role))
+		);
+	}
+
+	/**
+     * @description
+     * Whether the current user is authorised to manage games.
+     *
+     * A user that has not been authenticated is not authorised to manage games.
+     * The current user must have `ROLE_MANAGE_GAMES` as one of its [[authorities$]]
+     * to be authorised to manage games.
+     */
+	get mayManageGames$(): Observable<boolean> {
+		return this.hasRole$('ROLE_MANAGE_GAMES');
+	}
+
+	/**
+     * @description
+     * Whether the current user is authorised to play games.
+     *
+     * A user that has not been authenticated is not authorised to play games.
+     * The current user must have `ROLE_PLAYER` as one of its [[authorities$]]
+     * to be authorised to play games.
+     */
+	get mayPlay$(): Observable<boolean> {
+		return this.hasRole$('ROLE_PLAYER');
+	}
+
+	/**
+     * @description
+     * Whether the current user is authorised to manage users.
+     *
+     * A user that has not been authenticated is not authorised to manage users.
+     * The current user must have `ROLE_MANAGE_USERS` as one of its [[authorities$]]
+     * to be authorised to manage users.
+     */
+	get mayManageUsers$(): Observable<boolean> {
+		return this.hasRole$('ROLE_MANAGE_USERS');
+	}
 }

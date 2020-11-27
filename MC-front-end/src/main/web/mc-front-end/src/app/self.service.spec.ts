@@ -10,7 +10,7 @@ import { User } from './user';
 
 describe('SelfService', () => {
 
-	let getAuthenticated = function(service: SelfService): boolean {
+	const getAuthenticated = function(service: SelfService): boolean {
 		var authenticated: boolean = null;
 		service.authenticated$.subscribe({
 			next: (a) => authenticated = a,
@@ -20,7 +20,7 @@ describe('SelfService', () => {
 		return authenticated;
 	};
 
-	let getAuthorities = function(service: SelfService): string[] {
+	const getAuthorities = function(service: SelfService): string[] {
 		var authorities: string[] = null;
 		service.authorities$.subscribe({
 			next: (a) => authorities = a,
@@ -30,11 +30,48 @@ describe('SelfService', () => {
 		return authorities;
 	};
 
-	let assertInvariants: CallableFunction = (s: SelfService) => {
-		var authenticated: boolean = getAuthenticated(s);
-		var authorities: string[] = getAuthorities(s);
+	const mayManageGames = function(service: SelfService): boolean {
+		var may: boolean = null;
+		service.mayManageGames$.subscribe({
+			next: (m) => may = m,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return may;
+	};
+
+	const mayPlay = function(service: SelfService): boolean {
+		var may: boolean = null;
+		service.mayPlay$.subscribe({
+			next: (m) => may = m,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return may;
+	};
+
+	const mayManageUsers = function(service: SelfService): boolean {
+		var may: boolean = null;
+		service.mayManageUsers$.subscribe({
+			next: (m) => may = m,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return may;
+	};
+
+	const assertInvariants: CallableFunction = (s: SelfService) => {
+		const authenticated: boolean = getAuthenticated(s); s
+		const authorities: string[] = getAuthorities(s);
+		const manageGames: boolean = mayManageGames(s);
+		const play: boolean = mayPlay(s);
+		const manageUsers: boolean = mayManageUsers(s);
+
 		expect(authenticated && s.username == null).withContext('Not authenticated if username is null').toEqual(false);
 		expect(!authenticated && 0 < authorities.length).withContext('A user that has not been authenticated has no authorities').toEqual(false);
+		expect(manageGames).withContext('manageGames').toEqual(authorities.includes('ROLE_MANAGE_GAMES'));
+		expect(play).withContext('play').toEqual(authorities.includes('ROLE_PLAYER'));
+		expect(manageUsers).withContext('manageUsers').toEqual(authorities.includes('ROLE_MANAGE_USERS'));
 	};
 
 	const USER_A: User = { id: new uuid(), username: 'Administrator', password: 'letmein', authorities: ['ROLE_ADMIN'] };
@@ -147,7 +184,7 @@ describe('SelfService', () => {
 		expect(authenticated).withContext('authenticated').toEqual(true, 'authenticated');
 	}
 
-	let testAuthenticationSuccess = (done: any, user: User) => {
+	const testAuthenticationSuccess = function(done: any, user: User) {
 		service.authenticate(user.username, user.password).subscribe({
 			next: (success) => {
 				expect(success).withContext('success').toBeTrue();
@@ -168,6 +205,23 @@ describe('SelfService', () => {
 
 	it('handles authentication success [B]', (done) => {
 		testAuthenticationSuccess(done, USER_B);
+	});
+
+	const testAuthenticationSuccessForUserWithRole = function(done: any, role: string) {
+		const user: User = { id: new uuid(), username: 'Administrator', password: 'letmein', authorities: [role] };
+		testAuthenticationSuccess(done, user);
+	};
+
+	it('handles authentication success for user with role [ROLE_PLAYER]', (done) => {
+		testAuthenticationSuccessForUserWithRole(done, 'ROLE_PLAYER');
+	});
+
+	it('handles authentication success for user with role [ROLE_MANAGE_USERS]', (done) => {
+		testAuthenticationSuccessForUserWithRole(done, 'ROLE_MANAGE_USERS');
+	});
+
+	it('handles authentication success for user with role [ROLE_MANAGE_GAMES]', (done) => {
+		testAuthenticationSuccessForUserWithRole(done, 'ROLE_MANAGE_GAMES');
 	});
 
 	const mockHttpLogout = function() {
