@@ -287,4 +287,18 @@ export class SelfService {
 	get mayManageUsers$(): Observable<boolean> {
 		return this.hasRole$('ROLE_MANAGE_USERS');
 	}
+
+	/**
+     * @description
+     * Whether the current user is authorised to list users.
+     *
+     * A user that has not been authenticated is not authorised to list users.
+     * The current user must have `ROLE_MANAGE_USERS` or `ROLE_PLAYER` as one of its authorities
+     * to be authorised to manage users.
+     */
+	get mayListUsers$(): Observable<boolean> {
+		return this.authorities$.pipe(
+			map(authorities => authorities.includes('ROLE_PLAYER') || authorities.includes('ROLE_MANAGE_USERS'))
+		);
+	}
 }
