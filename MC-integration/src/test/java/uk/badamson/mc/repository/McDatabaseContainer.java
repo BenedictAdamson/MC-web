@@ -64,13 +64,7 @@ public final class McDatabaseContainer
    private static final Duration STARTUP_TIME = Duration.ofSeconds(45);
 
    private static final WaitStrategy WAIT_STRATEGY = new WaitAllStrategy()
-            .withStrategy(Wait.forLogMessage(".*MongoDB starting.*", 1))
             .withStrategy(Wait.forListeningPort())
-            .withStrategy(Wait.forLogMessage(
-                     ".*[Ii]nitiali[sz]ation of mc db complete.*", 1))
-            .withStrategy(Wait.forLogMessage(".*init process complete.*", 1))
-            .withStrategy(
-                     Wait.forLogMessage(".*[Ww]aiting for connection.*", 1))
             .withStartupTimeout(STARTUP_TIME);
 
    public final MongoCredential userCredentials;
