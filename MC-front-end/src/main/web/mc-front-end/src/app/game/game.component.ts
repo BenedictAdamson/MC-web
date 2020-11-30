@@ -8,6 +8,7 @@ import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
 import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
 import { GameService } from '../game.service';
+import { GamesComponent } from '../games/games.component';
 import { SelfService } from '../self.service';
 
 @Component({
@@ -16,6 +17,11 @@ import { SelfService } from '../self.service';
 	styleUrls: ['./game.component.css']
 })
 export class GameComponent implements OnInit {
+
+
+	static getGamePath(id: GameIdentifier): string {
+		return GamesComponent.getGamesPath(id.scenario) + id.created;
+	}
 
 	identifier: GameIdentifier;
 	game: Game;
@@ -48,8 +54,8 @@ export class GameComponent implements OnInit {
 	}
 
 	isEndRecruitmentDisabled$(): Observable<boolean> {
-		return this.selfService.authorities$.pipe(
-			map(authorities => !this.game.recruiting || !authorities.includes('ROLE_MANAGE_GAMES'))
+		return this.selfService.mayManageGames$.pipe(
+			map(mayManage => !this.game.recruiting || !mayManage)
 		);
 	}
 

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { User } from '../user';
+import { UserDetails } from '../user-details';
 import { UserService } from '../user.service';
 
 @Component({
@@ -17,13 +17,10 @@ export class AddUserComponent implements OnInit {
 	) { }
 
 	ngOnInit(): void {
-		this.username = "";
-		this.password = "";
+		this.userDetails = { username: "", password: "", authorities: [] };
 	}
 
-	username: string = "";
-
-	password: string = "";
+	userDetails: UserDetails = { username: "", password: "", authorities: [] };
 
 	/**
 	 * Whether this user have been explicitly rejected by the server.
@@ -37,11 +34,10 @@ export class AddUserComponent implements OnInit {
      * through the UserService associated with this component.
      */
 	add(): void {
-		const user: User = { username: this.username, password: this.password, authorities: [] };
-		this.service.add(user).subscribe(
-			ok => {
-				this.rejected = !ok;
-				if (ok) {
+		this.service.add(this.userDetails).subscribe(
+			user => {
+				this.rejected = (user == null);
+				if (!this.rejected) {
 					this.router.navigateByUrl('/user')
 				}
 			}

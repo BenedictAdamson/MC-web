@@ -1,5 +1,7 @@
-import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { of } from 'rxjs';
+import { v4 as uuid } from 'uuid';
+
+import { ActivatedRoute, convertToParamMap } from '@angular/router';
 
 import { User } from '../user';
 import { UserComponent } from './user.component';
@@ -11,8 +13,8 @@ describe('UserComponent', () => {
 	let component: UserComponent;
 	let fixture: ComponentFixture<UserComponent>;
 
-	const USER_A: User = { username: 'Administrator', password: null, authorities: ['ROLE_PLAYER', 'ROLE_MANAGE_USERS', 'ROLE_MANAGE_GAMES'] };
-	const USER_B: User = { username: 'Benedict', password: null, authorities: [] };
+	const USER_A: User = { id: uuid(), username: 'Administrator', password: null, authorities: ['ROLE_PLAYER', 'ROLE_MANAGE_USERS', 'ROLE_MANAGE_GAMES'] };
+	const USER_B: User = { id: uuid(), username: 'Benedict', password: null, authorities: [] };
 	const EXPECTED_ROLE_NAMES_A: string[] = ['player', 'manage users', 'manage games'];
 	const EXPECTED_ROLE_NAMES_B: string[] = [];
 
@@ -25,9 +27,9 @@ describe('UserComponent', () => {
 			providers: [{
 				provide: ActivatedRoute,
 				useValue: {
-					params: of({ username: testUser.username }),
+					params: of({ id: testUser.id }),
 					snapshot: {
-						paramMap: convertToParamMap({ username: testUser.username })
+						paramMap: convertToParamMap({ id: testUser.id })
 					}
 				}
 			},

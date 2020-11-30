@@ -1,9 +1,12 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { v4 as uuid } from 'uuid';
+
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 import { User } from './user';
+import { UserDetails } from './user-details';
 
 @Injectable({
 	providedIn: 'root'
@@ -22,25 +25,27 @@ export class UserService {
 			);
 	}
 
-	getUser(username: string): Observable<User> {
-		const url = `${this.userUrl}/${username}`;
+	getUser(id: uuid): Observable<User> {
+		const url = `${this.userUrl}/${id}`;
 		return this.http.get<User>(url)
 			.pipe(
-				catchError(this.handleError<User>(`getUser id=${username}`))
+				catchError(this.handleError<User>(`getUser id=${id}`))
 			);
 	}
 
 	/**@description
-	 * Add a given user as a new user.
+	 * Add a user with given details as a new user.
      *
      * @returns
-     * An observable that provides a value indicating whether addition was successful.
+     * An observable that provides the added user, or null or there is an error.
 	 */
-	add(user: User): Observable<boolean> {
-		return this.http.post(this.userUrl, user)
+	add(userDetails: UserDetails): Observable<User> {
+		/* The server actually replies to the POST with a 302 (Found) redirect to the resource of the created user.
+		 * The HttpClient or browser itself handles that redirect for us.
+	     */
+		return this.http.post<User>(this.userUrl, userDetails)
 			.pipe(
-				catchError(this.handleError<boolean>(`add id=${user.username}`, false)),
-				map(() => true)
+				catchError(this.handleError<User>(`add username=${userDetails.username}`, null))
 			);
 	}
 

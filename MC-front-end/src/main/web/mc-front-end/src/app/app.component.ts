@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs';
+
 import { Component } from '@angular/core';
 
 import { SelfService } from './self.service';
@@ -24,5 +26,10 @@ export class AppComponent {
 
 	private checkForCurrentAuthentication(): void {
 		this.selfService.checkForCurrentAuthentication().subscribe();
+	}
+
+
+	get mayListUsers$(): Observable<boolean> {
+		return this.selfService.mayListUsers$;
 	}
 }

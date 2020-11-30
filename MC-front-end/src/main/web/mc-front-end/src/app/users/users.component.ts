@@ -20,7 +20,7 @@ export class UsersComponent implements OnInit {
 	ngOnInit() {
 		this.userService.getUsers().subscribe(users => this.users = users);
 	}
-	
+
 	/**
 	 * @description
      * Whether the current user has permission to manage (add and remove) users.
@@ -28,9 +28,7 @@ export class UsersComponent implements OnInit {
      * A user that has not been authenticated does not have that permission.
 	 */
 	get mayManageUsers$(): Observable<boolean> {
-		return this.selfService.authorities$.pipe(
-			map(authorities => authorities.includes('ROLE_MANAGE_USERS'))
-		);
+		return this.selfService.mayManageUsers$;
 	}
 
 }

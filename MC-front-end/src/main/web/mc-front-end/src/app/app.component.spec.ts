@@ -13,14 +13,14 @@ import { SelfService } from './self.service';
 
 class MockSelfService {
 
+	constructor(private mayListUsers: boolean) {
+
+	}
+
 	checkForCurrentAuthentication_calls: number = 0;
 
 	get username(): string {
 		return null;
-	}
-
-	get authorities$(): Observable<string[]> {
-		return of([]);
 	}
 
 	get authenticated$(): Observable<boolean> {
@@ -37,12 +37,18 @@ class MockSelfService {
 		this.checkForCurrentAuthentication_calls++;
 		return of(null);
 	}
+
+
+	get mayListUsers$(): Observable<boolean> {
+		return of(this.mayListUsers);
+	}
 }// class
 
 describe('AppComponent', () => {
-	let mockSelfService;
-	beforeEach(waitForAsync(() => {
-		mockSelfService = new MockSelfService();
+	let mockSelfService: any;
+
+	const setUp = function(mayListUsers: boolean) {
+		mockSelfService = new MockSelfService(mayListUsers);
 		TestBed.configureTestingModule({
 			declarations: [
 				AppComponent, SelfComponent
@@ -54,37 +60,34 @@ describe('AppComponent', () => {
 			],
 			providers: [{ provide: SelfService, useValue: mockSelfService }]
 		}).compileComponents();
-	}));
+	};
 
-	it('can be constructed', () => {
+	const testSetUp = function(mayListUsers: boolean) {
+		setUp(mayListUsers);
 		const fixture = TestBed.createComponent(AppComponent);
 		const app = fixture.debugElement.componentInstance;
+		fixture.detectChanges();
+		const html = fixture.debugElement.nativeElement;
+		const usersLink = html.querySelector('a[id="users"]');
+		const scenariosLink = html.querySelector('a[id="scenarios"]');
+
 		expect(app).toBeTruthy();
 		expect(mockSelfService.checkForCurrentAuthentication_calls).withContext('Checked the server for current authentication information').toBe(1);
+
+		expect(html.querySelector('h1').textContent).withContext('h1 text').toContain('Mission Command');
+		expect(usersLink != null).withContext('has users link element').toBe(mayListUsers);
+		if (usersLink != null) {
+			expect(usersLink.textContent).withContext('users link text').toContain('Users');
+		}
+		expect(scenariosLink).withContext('scenarios link element').not.toBeNull();
+		expect(scenariosLink.textContent).withContext('scenarios link text').toContain('Scenarios');
+	};
+
+	it('can be constructed [!mayListUsers]', () => {
+		testSetUp(false);
 	});
 
-	it('renders title in a h1 tag', () => {
-		const fixture = TestBed.createComponent(AppComponent);
-		fixture.detectChanges();
-		const html = fixture.debugElement.nativeElement;
-		expect(html.querySelector('h1').textContent).toContain('Mission Command');
-	});
-
-	it('has a Users link', () => {
-		const fixture = TestBed.createComponent(AppComponent);
-		fixture.detectChanges();
-		const html = fixture.debugElement.nativeElement;
-		const link = html.querySelector('a[id="users"]');
-		expect(link).withContext('link element').not.toBeNull();
-		expect(link.textContent).withContext('link text').toContain('Users');
-	});
-
-	it('has a Scenarios link', () => {
-		const fixture = TestBed.createComponent(AppComponent);
-		fixture.detectChanges();
-		const html = fixture.debugElement.nativeElement;
-		const link = html.querySelector('a[id="scenarios"]');
-		expect(link).withContext('link element').not.toBeNull();
-		expect(link.textContent).withContext('link text').toContain('Scenarios');
+	it('can be constructed [mayListUsers]', () => {
+		testSetUp(true);
 	});
 });

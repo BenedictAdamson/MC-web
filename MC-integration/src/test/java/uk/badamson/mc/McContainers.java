@@ -142,15 +142,16 @@ public class McContainers
     * test-cases.
     * </p>
     *
-    * @param user
-    *           The user to add.
+    * @param userDetails
+    *           The details of the user to add.
+    * @return the unique ID of the added user
     * @throws NullPointerException
-    *            If {@code user} is null
+    *            If {@code userDetails} is null
     * @throws RuntimeException
     *            If the addition was rejected by the back-end.
     */
-   public void addUser(final User user) {
-      be.addUser(user);
+   public UUID addUser(final BasicUserDetails userDetails) {
+      return be.addUser(userDetails);
    }
 
    /**

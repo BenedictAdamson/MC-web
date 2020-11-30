@@ -1,11 +1,13 @@
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
+import { v4 as uuid } from 'uuid';
 
 import { FormsModule } from '@angular/forms';
 
 import { ComponentFixture, TestBed, waitForAsync, fakeAsync, tick } from '@angular/core/testing';
 
 import { AddUserComponent } from './add-user.component';
+import { UserDetails } from '../user-details';
 import { UserService } from '../user.service';
 import { User } from '../user';
 
@@ -23,18 +25,21 @@ class MockUserService {
 		return of(null);
 	}
 
-	add(user: User): Observable<boolean> {
+	add(userDetails: UserDetails): Observable<User> {
 		for (let present of this.users) {
-			if (present.username == user.username) return of(false);
+			if (present.username == userDetails.username) return of(null);
 		}
+		const user: User = new User(uuid(), userDetails);
 		this.users.push(user);
-		return of(true);
+		return of(user);
 	}
 }
 
 describe('AddUserComponent', () => {
-	const USER_A: User = { username: 'Administrator', password: 'letmein', authorities: [] };
-	const USER_B: User = { username: 'Benedict', password: 'pasword123', authorities: [] };
+	const USER_DETAILS_A: UserDetails = { username: 'Administrator', password: 'letmein', authorities: [] };
+	const USER_DETAILS_B: UserDetails = { username: 'Benedict', password: 'pasword123', authorities: [] };
+	const USER_A: User = new User(uuid(), USER_DETAILS_A);
+	const USER_B: User = new User(uuid(), USER_DETAILS_B);
 
 	let routerSpy: any;
 	let userService: MockUserService;
@@ -62,57 +67,33 @@ describe('AddUserComponent', () => {
 		fixture.detectChanges();
 	});
 
-	it('should create', () => {
+	it('can be created', () => {
 		expect(component).toBeTruthy();
-	});
-
-	it('should create with empty password', () => {
-		expect(component.password).toEqual('');
-	});
-
-	it('should create with rejected flag clear', () => {
-		expect(component.rejected).toBeFalse();
-	});
-
-	it('should initilize to empty', () => {
-		component.ngOnInit();
-
-		expect(component.username).withContext('username').toEqual('');
-		expect(component.password).withContext('password').toEqual('');
+		expect(component.userDetails.username).withContext('username').toEqual('');
+		expect(component.userDetails.password).withContext('password').toEqual('');
 		expect(component.rejected).withContext('rejected').toBeFalse();
-	});
 
-	it('should have a username field', () => {
 		const element: HTMLElement = fixture.nativeElement;
-		const field = element.querySelector('input[name="username"]');
-		expect(field).not.toBeNull();
-	});
-
-	it('should have a password field', () => {
-		const element: HTMLElement = fixture.nativeElement;
-		const field = element.querySelector('input[name="password"]');
-		expect(field).not.toBeNull('has <input name="password">');
-		expect(field.getAttribute('type')).toBe('password', '<input name="password"> is type="password"');
-	});
-
-	it('should have a submit button', () => {
-		const element: HTMLElement = fixture.nativeElement;
-		const field = element.querySelector('button[type="submit"]');
-		expect(field).not.toBeNull('has <button type="submit">');
+		const usernameElement: HTMLInputElement = element.querySelector('input[name="username"]');
+		const passwordElement: HTMLInputElement = element.querySelector('input[name="password"]');
+		const submitButton: HTMLButtonElement = element.querySelector('button[type="submit"]');
+		expect(usernameElement).withContext('username element').not.toBeNull();
+		expect(passwordElement).not.toBeNull('password element');
+		expect(passwordElement.getAttribute('type')).withContext('password element type').toBe('password',);
+		expect(submitButton).withContext('submit button').not.toBeNull();
 	});
 
 
 	const testAddFailure = function(user: User) {
 		userService.users.push(user);// will fail because a duplicate username
-		component.username = user.username;
-		component.password = user.password;
+		component.userDetails = new UserDetails(user);
 
 		component.add();
 		tick();
 		fixture.detectChanges();
 
-		expect(component.username).withContext('username').toEqual(user.username);
-		expect(component.password).withContext('password').toEqual(user.password);
+		expect(component.userDetails.username).withContext('username').toEqual(user.username);
+		expect(component.userDetails.password).withContext('password').toEqual(user.password);
 		expect(component.rejected).withContext('rejected').toBeTrue();
 		expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(0);
 	};
@@ -126,9 +107,8 @@ describe('AddUserComponent', () => {
 	}));
 
 
-	const testAddSuccess = function(userDetails: User) {
-		component.username = userDetails.username;
-		component.password = userDetails.password;
+	const testAddSuccess = function(userDetails: UserDetails) {
+		component.userDetails = userDetails;
 
 		component.add();
 		tick();

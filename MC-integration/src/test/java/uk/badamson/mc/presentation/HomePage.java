@@ -29,6 +29,7 @@ import javax.annotation.concurrent.Immutable;
 
 import org.hamcrest.Matcher;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -53,6 +54,8 @@ public final class HomePage extends Page {
    private static final By LOGIN_LINK_LOCATOR = By.id("login");
 
    private static final By SELF_LINK_LOCATOR = By.xpath("//a[@id='self']");
+
+   private static final By USERS_LINK_LOCATOR = By.xpath("//a[@id='users']");
 
    /**
     * <p>
@@ -114,6 +117,10 @@ public final class HomePage extends Page {
       return !getBody().findElements(SELF_LINK_LOCATOR).isEmpty();
    }
 
+   public boolean hasUsersLink() {
+      return !getBody().findElements(USERS_LINK_LOCATOR).isEmpty();
+   }
+
    public boolean isLoginEnabled() {
       return isEnabled(getBody().findElement(LOGIN_LINK_LOCATOR));
    }
@@ -155,8 +162,15 @@ public final class HomePage extends Page {
    }
 
    public UsersPage navigateToUsersPage() {
-      requireIsReady();
-      getBody().findElement(By.id("users")).click();
+      final WebElement usersLink;
+      try {
+         requireIsReady();
+         usersLink = getBody().findElement(USERS_LINK_LOCATOR);
+      } catch (IllegalStateException | NoSuchElementException e) {
+         throw new IllegalStateException("Not ready to navigate to users page",
+                  e);
+      }
+      usersLink.click();
       final var usersPage = new UsersPage(this);
       usersPage.awaitIsReady();
       return usersPage;

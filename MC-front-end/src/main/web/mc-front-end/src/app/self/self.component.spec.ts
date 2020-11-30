@@ -1,4 +1,5 @@
 import { Observable, defer, of } from 'rxjs';
+import { v4 as uuid } from 'uuid';
 
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -13,10 +14,6 @@ class MockSelfService {
 
 	get username(): string {
 		return this.self ? this.self.username : null;
-	}
-
-	get authorities$(): Observable<string[]> {
-		return of(this.self ? this.self.authorities : []);
 	}
 
 	get authenticated$(): Observable<boolean> {
@@ -45,8 +42,8 @@ describe('SelfComponent', () => {
 		return loggedIn;
 	};
 
-	const USER_A = { username: 'Allan', password: 'letmein', authorities: ['ROLE_MANAGE_GAMES'] };
-	const USER_B = { username: 'Benedict', password: 'password123', authorities: [] };
+	const USER_A: User = { id: new uuid(), username: 'Allan', password: 'letmein', authorities: ['ROLE_MANAGE_GAMES'] };
+	const USER_B: User = { id: new uuid(), username: 'Benedict', password: 'password123', authorities: [] };
 
 	const setup = function(self: User) {
 		TestBed.configureTestingModule({

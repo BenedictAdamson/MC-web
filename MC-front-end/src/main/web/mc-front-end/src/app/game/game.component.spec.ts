@@ -20,9 +20,8 @@ class MockSelfService {
 		return this.self.username;
 	}
 
-
-	get authorities$(): Observable<string[]> {
-		return of(this.self.authorities);
+	get mayManageGames$(): Observable<boolean> {
+		return of(this.self.authorities.includes('ROLE_MANAGE_GAMES'));
 	}
 }
 
@@ -40,8 +39,8 @@ describe('GameComponent', () => {
 	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A, recruiting: true };
 	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B, recruiting: false };
 
-	const USER_ADMIN = { username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
-	const USER_NORMAL = { username: 'Benedict', password: null, authorities: [] };
+	const USER_ADMIN = { id: new uuid(), username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
+	const USER_NORMAL = { id: new uuid(), username: 'Benedict', password: null, authorities: [] };
 
 
 

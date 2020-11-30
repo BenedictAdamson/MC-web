@@ -2,11 +2,12 @@ import { v4 as uuid, parse as parseUuid } from 'uuid';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { AppRoutingModule } from '../app-routing.module';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { GameComponent } from '../game/game.component';
 import { GameService } from '../game.service';
+import { ScenarioComponent } from '../scenario/scenario.component';
 import { SelfService } from '../self.service';
 
 @Component({
@@ -15,6 +16,10 @@ import { SelfService } from '../self.service';
 	styleUrls: ['./games.component.css']
 })
 export class GamesComponent implements OnInit {
+
+	static getGamesPath(scenario: uuid): string {
+		return ScenarioComponent.getScenarioPath(scenario) + '/game/';
+	}
 
 	scenario: uuid;
 	games: string[];
@@ -43,8 +48,8 @@ export class GamesComponent implements OnInit {
      * A user that has not been authenticated does not have that permission.
 	 */
 	get isDisabledCreateGame$(): Observable<boolean> {
-		return this.selfService.authorities$.pipe(
-			map(authorities => !authorities.includes('ROLE_MANAGE_GAMES'))
+		return this.selfService.mayManageGames$.pipe(
+			map(mayManage => !mayManage)
 		);
 	}
 
@@ -54,7 +59,7 @@ export class GamesComponent implements OnInit {
 	 */
 	createGame(): void {
 		this.gameService.createGame(this.scenario).subscribe(
-			game => this.router.navigateByUrl(AppRoutingModule.getGamePath(game.identifier))
+			game => this.router.navigateByUrl(GameComponent.getGamePath(game.identifier))
 		);
 	}
 }

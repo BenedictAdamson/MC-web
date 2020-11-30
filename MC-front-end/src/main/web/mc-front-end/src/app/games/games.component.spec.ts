@@ -3,10 +3,10 @@ import { v4 as uuid } from 'uuid';
 
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 
-import { AppRoutingModule } from '../app-routing.module';
 import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
 import { GameService } from '../game.service';
+import { GameComponent } from '../game/game.component';
 import { GamesComponent } from './games.component';
 import { SelfService } from '../self.service';
 import { User } from '../user';
@@ -22,9 +22,8 @@ class MockSelfService {
 		return this.self.username;
 	}
 
-
-	get authorities$(): Observable<string[]> {
-		return of(this.self.authorities);
+	get mayManageGames$(): Observable<boolean> {
+		return of(this.self.authorities.includes('ROLE_MANAGE_GAMES'));
 	}
 }
 
@@ -33,8 +32,8 @@ describe('GamesComponent', () => {
 	let component: GamesComponent;
 	let fixture: ComponentFixture<GamesComponent>;
 
-	const USER_ADMIN = { username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
-	const USER_NORMAL = { username: 'Benedict', password: null, authorities: [] };
+	const USER_ADMIN = { id: new uuid(), username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
+	const USER_NORMAL = { id: new uuid(), username: 'Benedict', password: null, authorities: [] };
 
 	const SCENARIO_A: uuid = uuid();
 	const SCENARIO_B: uuid = uuid();
@@ -155,7 +154,7 @@ describe('GamesComponent', () => {
 		fixture.detectChanges();
 	};
 	const testCreateGame = function(game: Game) {
-		const expectedPath: string = AppRoutingModule.getGamePath(game.identifier);
+		const expectedPath: string = GameComponent.getGamePath(game.identifier);
 		setUpForCreateGame(game);
 
 		component.createGame();

@@ -1,3 +1,5 @@
+import { v4 as uuid } from 'uuid';
+
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -10,8 +12,8 @@ import { SelfService } from '../self.service';
 import { User } from '../user';
 
 describe('LoginComponent', () => {
-	const USER_A: User = { username: 'Administrator', password: 'letmein', authorities: ['ROLE_ADMIN'] };
-	const USER_B: User = { username: 'Benedict', password: 'pasword123', authorities: [] };
+	const USER_A: User = { id: new uuid(), username: 'Administrator', password: 'letmein', authorities: ['ROLE_ADMIN'] };
+	const USER_B: User = { id: new uuid(), username: 'Benedict', password: 'pasword123', authorities: [] };
 
 	let routerSpy: any;
 	let httpTestingController: HttpTestingController;

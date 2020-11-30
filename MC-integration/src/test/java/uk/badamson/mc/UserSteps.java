@@ -19,11 +19,13 @@ package uk.badamson.mc;
  */
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 
@@ -156,11 +158,25 @@ public class UserSteps extends Steps {
       assertTrue(homePage.isLogoutEnabled());
    }
 
+   @Then("MC does not allow navigating to a user page")
+   public void mc_does_not_alllow_navigating_to_user_page() {
+      final var usersPage = world.getAndAssertExpectedPage(UsersPage.class);
+      assertEquals(0, usersPage.getNumberOfUserLinks(),
+               "No links to user pages");
+   }
+
    @Then("MC does not allow examining the current user")
-   public void mc_does_not_allow_examining_current_user_option() {
+   public void mc_does_not_allow_examining_current_user() {
       final var homePage = world.getAndAssertExpectedPage(HomePage.class);
       assertFalse(homePage.hasExamineCurrentUserLink(),
                "does not have link for examining the current user");
+   }
+
+   @Then("MC does not allow listing users")
+   public void mc_does_not_allow_listing_users() {
+      final var homePage = world.getAndAssertExpectedPage(HomePage.class);
+      assertFalse(homePage.hasUsersLink(),
+               "does not have link for listing users");
    }
 
    @Then("MC does not allow logout")
@@ -186,18 +202,31 @@ public class UserSteps extends Steps {
       world.getAndAssertExpectedPage(UsersPage.class).assertInvariants();
    }
 
-   @When("Navigate to one user")
-   public void navigate_to_one_user() {
+   @When("Navigate to one user page")
+   public void navigate_to_one_user_page() {
       final var usersPage = world.getExpectedPage(UsersPage.class);
       world.setExpectedPage(usersPage.navigateToUserPage(0));
 
    }
 
    private UsersPage navigateToUsersPage() {
+      Objects.requireNonNull(user, "user");
+      final var authorities = user.getAuthorities();
+      if (!(authorities.contains(Authority.ROLE_MANAGE_USERS)
+               || authorities.contains(Authority.ROLE_PLAYER))) {
+         throw new IllegalStateException("Current user (" + user.getUsername()
+                  + ") not authorised (" + authorities + ")");
+      }
+
       final var homePage = world.getExpectedPage(HomePage.class);
       final var usersPage = homePage.navigateToUsersPage();
       world.setExpectedPage(usersPage);
       return usersPage;
+   }
+
+   @Given("not logged in")
+   public void not_logged_in() {
+      world.getHomePage();
    }
 
    @Then("redirected to home-page")
@@ -224,6 +253,11 @@ public class UserSteps extends Steps {
       tryToLogin();
    }
 
+   @When("Trying to navigate to a user page")
+   public void trying_to_navigate_to_user_page() {
+      world.getExpectedPage(UsersPage.class).requireIsReady();
+   }
+
    private void tryToLogin() {
       Objects.requireNonNull(user, "user");
       final var homePage = world.getExpectedPage(HomePage.class);
@@ -248,12 +282,27 @@ public class UserSteps extends Steps {
 
    @Given("user has any role")
    public void user_has_any_role() {
-      user = world.getUserWithRole(Authority.values()[0]);
+      user = world.getUserWithRoles(Set.of(Authority.values()[0]), Set.of());
    }
 
    @Given("user has the {string} role")
    public void user_has_role(final String roleName) {
-      user = world.getUserWithRole(parseRole(roleName));
+      user = world.getUserWithRoles(Set.of(parseRole(roleName)), Set.of());
+   }
+
+   @When("user has the {string} role but not the {string} role")
+   public void user_has_role_but_not_role(final String included,
+            final String excluded) {
+      final var includedRole = parseRole(included);
+      final var excludedRole = parseRole(excluded);
+      if (includedRole == excludedRole) {
+         throw new IllegalArgumentException("Contradictory role constraints");
+      }
+
+      user = world.getUserWithRoles(Set.of(includedRole), Set.of(excludedRole));
+
+      assert user != null && user.getAuthorities().contains(includedRole)
+               && !user.getAuthorities().contains(excludedRole);
    }
 
    @Given("user is the administrator")

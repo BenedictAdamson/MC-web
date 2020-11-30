@@ -24,12 +24,12 @@ import java.net.ProtocolException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -118,11 +118,20 @@ public final class World implements AutoCloseable {
       return URI.create(url).getPath();
    }
 
+   private static <TYPE> boolean intersects(final Set<TYPE> set1,
+            final Set<TYPE> set2) {
+      /* The sets intersect if we can find any element in both. */
+      return set1.stream().filter(x -> set2.contains(x)).findAny().isPresent();
+   }
+
    private final McContainers containers;
 
-   private final Map<String, User> users = new HashMap<>();
-
-   private final Map<String, User> unknownUsers = new HashMap<>();
+   /*
+    * Use Maps sorted by username, to ensure repeatable tests, despite UUIDs
+    * changing.
+    */
+   private final SortedMap<String, User> users = new TreeMap<>();
+   private final SortedMap<String, User> unknownUsers = new TreeMap<>();
 
    private RemoteWebDriver webDriver;
 
@@ -146,9 +155,10 @@ public final class World implements AutoCloseable {
       unknownUsers.put(user.getUsername(), user);
    }
 
-   private void addUser(final User user) {
-      containers.addUser(user);// records the user in the DB, through the BE
-      users.put(user.getUsername(), user);
+   private void addUser(final BasicUserDetails userDetails) {
+      // records the user in the DB, through the BE
+      final var id = containers.addUser(userDetails);
+      users.put(userDetails.getUsername(), new User(id, userDetails));
 
    }
 
@@ -237,16 +247,20 @@ public final class World implements AutoCloseable {
    }
 
    private void createUsers() {
-      users.put(User.ADMINISTRATOR_USERNAME,
-               new User(User.ADMINISTRATOR_USERNAME,
-                        McContainers.ADMINISTARTOR_PASSWORD, Authority.ALL,
-                        true, true, true, true));
-      addUser(new User("jeff", "password1", Authority.ALL, true, true, true,
-               true));
-      addUser(new User("allan", "password2", Set.of(Authority.ROLE_PLAYER),
-               true, true, true, true));
-      addUnknownUser(new User("mark", "password3", Authority.ALL, true, true,
-               true, true));
+      users.put(BasicUserDetails.ADMINISTRATOR_USERNAME,
+               User.createAdministrator(McContainers.ADMINISTARTOR_PASSWORD));
+
+      addUser(new BasicUserDetails("jeff", "password1", Authority.ALL, true,
+               true, true, true));
+      addUser(new BasicUserDetails("allan", "password2",
+               Set.of(Authority.ROLE_PLAYER), true, true, true, true));
+      addUser(new BasicUserDetails("Bob", "password3",
+               Set.of(Authority.ROLE_MANAGE_USERS), true, true, true, true));
+      addUser(new BasicUserDetails("Alice", "password4",
+               Set.of(Authority.ROLE_MANAGE_GAMES), true, true, true, true));
+
+      addUnknownUser(new User(UUID.randomUUID(), "mark", "PasswordXXX",
+               Authority.ALL, true, true, true, true));
    }
 
    /**
@@ -272,7 +286,7 @@ public final class World implements AutoCloseable {
    }
 
    public User getAdministratorUser() {
-      return users.get(User.ADMINISTRATOR_USERNAME);
+      return users.get(BasicUserDetails.ADMINISTRATOR_USERNAME);
    }
 
    /**
@@ -362,6 +376,10 @@ public final class World implements AutoCloseable {
       }
    }
 
+   public Stream<Instant> getGameCreationTimes(final UUID scenario) {
+      return containers.getGameCreationTimes(scenario);
+   }
+
    public HomePage getHomePage() {
       final var homePage = new HomePage(getWebDriver());
       homePage.get();
@@ -408,10 +426,6 @@ public final class World implements AutoCloseable {
 
    public Stream<NamedUUID> getScenarios() {
       return containers.getScenarios();
-   }
-
-   public Stream<Instant> getGameCreationTimes(final UUID scenario) {
-      return containers.getGameCreationTimes(scenario);
    }
 
    public User getUnknownUser() {
@@ -467,17 +481,32 @@ public final class World implements AutoCloseable {
 
    public User getUserWithoutRole(final Authority role) {
       Objects.requireNonNull(role, "role");
+
+      /*
+       * Return the first matching user to ensure repeatable tests.
+       */
       return users.values().stream()
-               .filter(user -> !user.getAuthorities().contains(role)).findAny()
-               .get();
+               .filter(user -> !user.getAuthorities().contains(role))
+               .findFirst().get();
    }
 
-   public User getUserWithRole(final Authority role) {
-      Objects.requireNonNull(role, "role");
-      return users.values().stream().filter(user -> user.getAuthorities()
-               .contains(role)
-               && !User.ADMINISTRATOR_USERNAME.equals(user.getUsername()))
-               .findAny().get();
+   public User getUserWithRoles(final Set<Authority> included,
+            final Set<Authority> excluded) {
+      Objects.requireNonNull(included, "included");
+      Objects.requireNonNull(excluded, "excluded");
+      if (intersects(included, excluded)) {
+         throw new IllegalArgumentException("Contradictory role constraints");
+      }
+
+      /*
+       * Return the first matching user to ensure repeatable tests.
+       */
+      return users.values().stream()
+               .filter(user -> !BasicUserDetails.ADMINISTRATOR_USERNAME
+                        .equals(user.getUsername()))
+               .filter(user -> user.getAuthorities().containsAll(included))
+               .filter(user -> !intersects(user.getAuthorities(), excluded))
+               .findFirst().get();
    }
 
    public WebDriver getWebDriver() {

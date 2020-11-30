@@ -9,11 +9,12 @@
   </ng-template>
 </nav>
 	
-<ul class="users">
+<ul id="users">
     <li *ngFor="let user of users">
-        <a [routerLink]="['/user',user.username]">
-            {{user.username}}
-        </a>
+        <a [routerLink]="['/user',user.id]" *ngIf="mayManageUsers$ | async; else noLink">{{user.username}}</a>
+        <ng-template #noLink>
+        <span>{{user.username}}</span>
+        </ng-template>
     </li>
 </ul>
 <section>

@@ -1,6 +1,6 @@
 <section class="self">
   <p *ngIf="authenticated$ | async; else notLoggedIn">
-    Logged in as <a id="self" [routerLink]="['/user',username]">{{username}}</a>
+    Logged in as <a id="self" [routerLink]="['/user',id]">{{username}}</a>
   </p>
   <ng-template #notLoggedIn>
   <p>
