@@ -214,8 +214,8 @@ public class UserSteps extends Steps {
       final var authorities = user.getAuthorities();
       if (!(authorities.contains(Authority.ROLE_MANAGE_USERS)
                || authorities.contains(Authority.ROLE_PLAYER))) {
-         throw new IllegalStateException(
-                  "Current user not authorised (" + authorities + ")");
+         throw new IllegalStateException("Current user (" + user.getUsername()
+                  + ") not authorised (" + authorities + ")");
       }
 
       final var homePage = world.getExpectedPage(HomePage.class);
