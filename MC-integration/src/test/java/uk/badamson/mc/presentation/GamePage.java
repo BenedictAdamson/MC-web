@@ -48,6 +48,7 @@ public final class GamePage extends Page {
 
    private static final UriTemplate URI_TEMPLATE = new UriTemplate(
             "/scenario/{scenario}/game/{created}");
+
    private static final Matcher<String> INDICATES_IS_A_GAME = containsString(
             "Game");
    private static final Matcher<String> INDICATES_WHETHER_RECRUITING_PLAYERS = containsString(
@@ -58,6 +59,9 @@ public final class GamePage extends Page {
             "This game is not recruiting players");
    private static final Matcher<String> INDICATES_IS_NOT_JOINABLE = containsString(
             "You may not join this game");
+   private static final Matcher<String> INDICATES_HAS_NO_PLAYERS = containsString(
+            "This game has no players");
+
    private static final By SCENARIO_LINK_LOCATOR = By.id("scenario");
    private static final By RECRUITING_ELEMENT_LOCATOR = By.id("recruiting");
    private static final By PLAYERS_ELEMENT_LOCATOR = By.id("players");
@@ -122,6 +126,11 @@ public final class GamePage extends Page {
    public void assertIncludesScenarioTitle() {
       assertThat("includes scenario title", getBody().getText(),
                includesScenarioTitile);
+   }
+
+   public void assertIndicatesGameHasNoPlayers() {
+      final var element = assertHasElement(getBody(), PLAYERS_ELEMENT_LOCATOR);
+      assertThat(element.getText(), INDICATES_HAS_NO_PLAYERS);
    }
 
    public void assertIndicatesIsNotRecruitingPlayers() {
