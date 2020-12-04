@@ -141,6 +141,33 @@ public final class World implements AutoCloseable {
 
    private Page expectedPage;
 
+   private User loggedInUser;
+
+   /**
+    * <p>
+    * The currently logged-in user.
+    * </p>
+    * <p>
+    * Or null if no user is currently logged-in.</li>
+    * 
+    * @return the user
+    */
+   public User getLoggedInUser() {
+      return loggedInUser;
+   }
+
+   /**
+    * <p>
+    * Change the {@linkplain #getLoggedInUser() currently logged-in user}.
+    * </p>
+    * 
+    * @param loggedInUser
+    *           The currently logged-in user.
+    */
+   public void setLoggedInUser(User loggedInUser) {
+      this.loggedInUser = loggedInUser;
+   }
+
    /**
     * @param failureRecordingDirectory
     *           The location of a directory in which to store files holding
@@ -219,6 +246,7 @@ public final class World implements AutoCloseable {
        */
       containers.beforeTest(createTestDescription(scenario));
       webDriver = containers.getWebDriver();
+      setLoggedInUser(null);
       /*
        * The previous test might have left us deep in the page hierarchy, so
        * reset to the top location, and must not use the old webDriver.

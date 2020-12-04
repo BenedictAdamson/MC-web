@@ -227,6 +227,7 @@ public class UserSteps extends Steps {
    @Given("not logged in")
    public void not_logged_in() {
       world.getHomePage();
+      world.setLoggedInUser(null);
    }
 
    @Then("redirected to home-page")
@@ -265,8 +266,11 @@ public class UserSteps extends Steps {
       world.setExpectedPage(loginPage);
       loginPage.submitLoginForm(user.getUsername(), user.getPassword());
       homePage.awaitIsReadyOrErrorMessage();
-      if (homePage.isCurrentPath()) {
+      if (homePage.isCurrentPath()) {// success
          world.setExpectedPage(homePage);
+         world.setLoggedInUser(user);
+      } else {
+         world.setLoggedInUser(null);
       }
    }
 
