@@ -21,6 +21,7 @@ package uk.badamson.mc.presentation;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.any;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
@@ -59,6 +60,13 @@ public final class GamePage extends Page {
             "This game is not recruiting players");
    private static final Matcher<String> INDICATES_IS_NOT_JOINABLE = containsString(
             "You may not join this game");
+   private static final Matcher<String> INDICATES_IS_JOINABLE = containsString(
+            "You may join this game");
+   private static final Matcher<String> INDICATES_HAS_JOINED = containsString(
+            "You have joined this game");
+   private static final Matcher<String> INDICATES_JOINING_NFORMATION = anyOf(
+            INDICATES_HAS_JOINED, INDICATES_IS_JOINABLE,
+            INDICATES_IS_NOT_JOINABLE);
    private static final Matcher<String> INDICATES_HAS_NO_PLAYERS = containsString(
             "This game has no players");
 
@@ -145,6 +153,13 @@ public final class GamePage extends Page {
       assertThat(element.getText(), INDICATES_IS_RECRUITING_PLAYERS);
    }
 
+   public void assertIndicatesUserMayJoinGame() {
+      final var joinable = assertHasElement(getBody(),
+               JOINABLE_ELEMENT_LOCATOR);
+      assertThat("Indicates may join game", joinable.getText(),
+               INDICATES_IS_JOINABLE);
+   }
+
    public void assertIndicatesUserMayNotJoinGame() {
       final var element = assertHasElement(getBody(), JOINABLE_ELEMENT_LOCATOR);
       assertThat(element.getText(), INDICATES_IS_NOT_JOINABLE);
@@ -171,8 +186,9 @@ public final class GamePage extends Page {
    }
 
    private void assertIndicatesWhetherUserMayJoinGame(final WebElement body) {
-      assertHasElement("Indicates whether the user may join the game", body,
-               JOINABLE_ELEMENT_LOCATOR);
+      final var joinable = assertHasElement(body, JOINABLE_ELEMENT_LOCATOR);
+      assertThat("Indicates whether the user may join this game",
+               joinable.getText(), INDICATES_JOINING_NFORMATION);
    }
 
    public void assertListsPlayersOfGame() {
@@ -189,7 +205,8 @@ public final class GamePage extends Page {
    private void assertValidBodyText(final WebElement body,
             final String bodyText) throws MultipleFailuresError {
       final var universalConstraints = allOf(INDICATES_IS_A_GAME,
-               INDICATES_WHETHER_RECRUITING_PLAYERS, includesScenarioTitile);
+               INDICATES_WHETHER_RECRUITING_PLAYERS,
+               INDICATES_JOINING_NFORMATION, includesScenarioTitile);
       final var optionalConstraints = includesCreationTime == null
                ? any(String.class)
                : includesCreationTime;

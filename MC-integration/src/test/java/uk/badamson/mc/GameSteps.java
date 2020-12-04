@@ -66,6 +66,12 @@ public class GameSteps extends Steps {
       world.setExpectedPage(scenarioPage.createGame());
    }
 
+   @Given("examining a game recruiting players")
+   public void examining_game_recruiting_players() {
+      /* We can ensure this by creating a new game */
+      throw new io.cucumber.java.PendingException();
+   }
+
    @Then("The game page does not indicate whether the game is recruiting players")
    public void game_page_does_not_indicate_whether_game_recruiting_players() {
       world.getAndAssertExpectedPage(GamePage.class)
@@ -111,6 +117,12 @@ public class GameSteps extends Steps {
    public void game_page_indicates_that_game_recuiring_players() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesIsRecruitingPlayers();
+   }
+
+   @Then("the game page indicates that the user may join the game")
+   public void game_page_indicates_user_may_join_game() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertIndicatesUserMayJoinGame();
    }
 
    @Then("The game page indicates that the user may not join the game")
@@ -198,6 +210,11 @@ public class GameSteps extends Steps {
       world.getExpectedPage(GamePage.class).endRecruitement();
    }
 
+   @Given("user is not playing any games")
+   public void user_not_playing_games() {
+      throw new io.cucumber.java.PendingException();
+   }
+
    @Given("viewing a game that is recruiting players")
    public void viewing_game_recuiting_players() {
       scenarioIndex = 0;
@@ -216,5 +233,4 @@ public class GameSteps extends Steps {
    public void viewing_games_of_scenario() {
       navigateToScenario().requireIsReady();
    }
-
 }
