@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Objects;
@@ -55,8 +56,12 @@ public final class GamePage extends Page {
             "This game is recruiting players");
    private static final Matcher<String> INDICATES_IS_NOT_RECRUITING_PLAYERS = containsString(
             "This game is not recruiting players");
+   private static final Matcher<String> INDICATES_IS_NOT_JOINABLE = containsString(
+            "You may not join this game");
    private static final By SCENARIO_LINK_LOCATOR = By.id("scenario");
    private static final By RECRUITING_ELEMENT_LOCATOR = By.id("recruiting");
+   private static final By PLAYERS_ELEMENT_LOCATOR = By.id("players");
+   private static final By JOINABLE_ELEMENT_LOCATOR = By.id("joinable");
    private static final By END_RECRUITMENT_BUTTON_LOCATOR = By
             .id("end-recruitment");
 
@@ -87,6 +92,25 @@ public final class GamePage extends Page {
       includesScenarioTitile = containsString(scenarioPage.getScenarioTitle());
    }
 
+   public void assertDoesNotIndicateWhetherRecruitingPlayers() {
+      assertDoesNotIndicateWhetherRecruitingPlayers(getBody());
+   }
+
+   private void assertDoesNotIndicateWhetherRecruitingPlayers(
+            final WebElement body) {
+      assertThat("Does not have recruiting element",
+               body.findElements(RECRUITING_ELEMENT_LOCATOR), empty());
+   }
+
+   public void assertDoesNotListPlayersOfGame() {
+      assertDoesNotListPlayersOfGame(getBody());
+   }
+
+   private void assertDoesNotListPlayersOfGame(final WebElement body) {
+      assertThat("Does not have players element",
+               body.findElements(PLAYERS_ELEMENT_LOCATOR), empty());
+   }
+
    public void assertIncludesCreationTime() {
       if (includesCreationTime != null) {
          assertThat("includes creation time", getBody().getText(),
@@ -110,6 +134,11 @@ public final class GamePage extends Page {
       final var element = assertHasElement(getBody(),
                RECRUITING_ELEMENT_LOCATOR);
       assertThat(element.getText(), INDICATES_IS_RECRUITING_PLAYERS);
+   }
+
+   public void assertIndicatesUserMayNotJoinGame() {
+      final var element = assertHasElement(getBody(), JOINABLE_ELEMENT_LOCATOR);
+      assertThat(element.getText(), INDICATES_IS_NOT_JOINABLE);
    }
 
    public void assertIndicatesWhetherRecruitingPlayers() {

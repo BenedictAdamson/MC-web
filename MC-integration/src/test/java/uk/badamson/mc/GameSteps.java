@@ -66,6 +66,18 @@ public class GameSteps extends Steps {
       world.setExpectedPage(scenarioPage.createGame());
    }
 
+   @Then("The game page does not indicate whether the game is recruiting players")
+   public void game_page_does_not_indicate_whether_game_recruiting_players() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertDoesNotIndicateWhetherRecruitingPlayers();
+   }
+
+   @Then("The game page does not list the players of the game")
+   public void game_page_does_not_list_players_of_game() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertDoesNotListPlayersOfGame();
+   }
+
    @Then("The game page includes the scenario description")
    public void game_page_includes_scenario_description() {
       // hard to test
@@ -93,6 +105,12 @@ public class GameSteps extends Steps {
    public void game_page_indicates_that_game_recuiring_players() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesIsRecruitingPlayers();
+   }
+
+   @Then("The game page indicates that the user may not join the game")
+   public void game_page_indicates_user_may_not_join_game() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertIndicatesUserMayNotJoinGame();
    }
 
    @Then("The game page indicates whether the game is recruiting players")
@@ -181,4 +199,5 @@ public class GameSteps extends Steps {
    public void viewing_games_of_scenario() {
       navigateToScenario().requireIsReady();
    }
+
 }
