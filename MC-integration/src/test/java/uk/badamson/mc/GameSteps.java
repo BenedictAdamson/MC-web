@@ -22,8 +22,11 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import java.util.Objects;
+
 import javax.annotation.Nonnull;
 
+import org.opentest4j.MultipleFailuresError;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.cucumber.java.en.Given;
@@ -44,6 +47,8 @@ public class GameSteps extends Steps {
    private int gameIndex;
 
    private int nGames0;
+
+   private int nPlayers0;
 
    @Autowired
    public GameSteps(@Nonnull final World world) {
@@ -148,6 +153,14 @@ public class GameSteps extends Steps {
       world.getAndAssertExpectedPage(GamePage.class).assertListsPlayersOfGame();
    }
 
+   @Then("The game page indicates that the game has one more player")
+   public void game_page_indicates_game_has_one_more_player() {
+      final var nPlayers = world.getAndAssertExpectedPage(GamePage.class)
+               .getNumberOfPlayersListed();
+      assertEquals(nPlayers0 + 1, nPlayers,
+               "Added a player to the list of games");
+   }
+
    @Then("the list of games includes the new game")
    public void list_of_games_includes_new_game() {
       final var nGames = world.getExpectedPage(ScenarioPage.class)
@@ -157,11 +170,20 @@ public class GameSteps extends Steps {
 
    @Then("MC accepts the creation of the game")
    public void mc_accepts_creation_of_game() {
-      world.getAndAssertExpectedPage(GamePage.class).assertInvariants();
+      assertIsOkGamePage();
+   }
+
+   @Then("MC accepts joining the game")
+   public void mc_accepts_joining_game() {
+      assertIsOkGamePage();
    }
 
    @Then("MC accepts ending recruitment for the game")
    public void mc_accepts_ending_recuitment_for_game() {
+      assertIsOkGamePage();
+   }
+
+   private void assertIsOkGamePage() throws MultipleFailuresError {
       final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
       assertAll(() -> gamePage.assertInvariants(),
                () -> gamePage.assertNoErrorMessages());
@@ -210,6 +232,13 @@ public class GameSteps extends Steps {
       world.getExpectedPage(GamePage.class).endRecruitement();
    }
 
+   @When("the user joins the game")
+   public void user_joins_game() {
+      final var gamePage = world.getExpectedPage(GamePage.class);
+      nPlayers0 = gamePage.getNumberOfPlayersListed();
+      gamePage.joinGame();
+   }
+
    @Given("user is not playing any games")
    public void user_not_playing_games() {
       throw new io.cucumber.java.PendingException();
@@ -232,5 +261,13 @@ public class GameSteps extends Steps {
    @When("Viewing the games of the scenario")
    public void viewing_games_of_scenario() {
       navigateToScenario().requireIsReady();
+   }
+
+   @Then("The game page lists the user as a player of the game")
+   public void game_page_lists_user_as_player_of_game() {
+      final var loggedInUser = world.getLoggedInUser();
+      Objects.requireNonNull(loggedInUser, "loggedInUser");
+      final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
+      gamePage.assertListOfPlayersIncludes(loggedInUser);
    }
 }

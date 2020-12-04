@@ -39,6 +39,8 @@ import org.openqa.selenium.WebElement;
 import org.opentest4j.MultipleFailuresError;
 import org.springframework.web.util.UriTemplate;
 
+import uk.badamson.mc.User;
+
 /**
  * <p>
  * A <i>page object</i> for a game page.
@@ -76,6 +78,7 @@ public final class GamePage extends Page {
    private static final By JOINABLE_ELEMENT_LOCATOR = By.id("joinable");
    private static final By END_RECRUITMENT_BUTTON_LOCATOR = By
             .id("end-recruitment");
+   private static final By JOIN_BUTTON_LOCATOR = By.id("join");
 
    private final ScenarioPage scenarioPage;
    private final Matcher<String> includesCreationTime;
@@ -191,6 +194,14 @@ public final class GamePage extends Page {
                joinable.getText(), INDICATES_JOINING_NFORMATION);
    }
 
+   public void assertListOfPlayersIncludes(final User user) {
+      Objects.requireNonNull(user, "user");
+      final var players = assertHasElement(getBody(), PLAYERS_ELEMENT_LOCATOR);
+      final var playersList = assertHasElement(players, By.tagName("ul"));
+      assertThat("Players list includes user", playersList.getText(),
+               containsString(user.getUsername()));
+   }
+
    public void assertListsPlayersOfGame() {
       final var players = assertHasElement(getBody(), PLAYERS_ELEMENT_LOCATOR);
       assertHasElement(players, By.tagName("ul"));
@@ -227,6 +238,15 @@ public final class GamePage extends Page {
       awaitIsReady();
    }
 
+   public int getNumberOfPlayersListed() {
+      final var players = getBody().findElements(PLAYERS_ELEMENT_LOCATOR);
+      if (players.isEmpty()) {
+         return 0;
+      } else {
+         return players.get(0).findElements(By.tagName("li")).size();
+      }
+   }
+
    public boolean isEndRecruitmentEnabled() {
       requireIsReady();
       return isEnabled(getBody().findElement(END_RECRUITMENT_BUTTON_LOCATOR));
@@ -242,6 +262,17 @@ public final class GamePage extends Page {
    protected boolean isValidPath(@Nonnull final String path) {
       Objects.requireNonNull(path, "path");
       return URI_TEMPLATE.matches(path);
+   }
+
+   public void joinGame() {
+      requireIsReady();
+      final var button = getBody().findElement(JOIN_BUTTON_LOCATOR);
+      if (!isEnabled(button)) {
+         throw new IllegalStateException(
+                  "Button [" + button + "] is not enabled");
+      }
+      button.click();
+      awaitIsReady();
    }
 
    public ScenarioPage navigateToScenarioPage() {
