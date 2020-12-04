@@ -132,13 +132,13 @@ public class GameSteps extends Steps {
       assertFalse(gamePage.isEndRecruitmentEnabled());
    }
 
-   @Then("MC serves the game page")
-   public void mc_serves_game_page() {
+   @Then("MC provides a game page")
+   public void mc_provides_game_page() {
       world.getAndAssertExpectedPage(GamePage.class).assertInvariants();
    }
 
-   @When("Navigate to one game of the scenario")
-   public void navigate_to_game_of_scenario() {
+   @When("Navigate to one game page")
+   public void navigate_to_one_game_page() {
       final var scenarioPage = world.getExpectedPage(ScenarioPage.class);
       gameIndex = 0;
       world.setExpectedPage(scenarioPage.navigateToGamePage(gameIndex));
