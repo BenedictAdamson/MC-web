@@ -125,6 +125,17 @@ public class GameSteps extends Steps {
                .assertIndicatesWhetherRecruitingPlayers();
    }
 
+   @Then("The game page indicates whether the user may join the game")
+   public void game_page_indicates_whether_user_may_join_game() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertIndicatesWhetherUserMayJoinGame();
+   }
+
+   @Then("The game page lists the players of the game")
+   public void game_page_lists_players_of_game() {
+      world.getAndAssertExpectedPage(GamePage.class).assertListsPlayersOfGame();
+   }
+
    @Then("the list of games includes the new game")
    public void list_of_games_includes_new_game() {
       final var nGames = world.getExpectedPage(ScenarioPage.class)

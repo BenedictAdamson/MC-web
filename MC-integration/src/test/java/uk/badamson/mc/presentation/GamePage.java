@@ -166,8 +166,28 @@ public final class GamePage extends Page {
                                  .or(INDICATES_IS_NOT_RECRUITING_PLAYERS)));
    }
 
+   public void assertIndicatesWhetherUserMayJoinGame() {
+      assertIndicatesWhetherUserMayJoinGame(getBody());
+   }
+
+   private void assertIndicatesWhetherUserMayJoinGame(final WebElement body) {
+      assertHasElement("Indicates whether the user may join the game", body,
+               JOINABLE_ELEMENT_LOCATOR);
+   }
+
+   public void assertListsPlayersOfGame() {
+      final var players = assertHasElement(getBody(), PLAYERS_ELEMENT_LOCATOR);
+      assertHasElement(players, By.tagName("ul"));
+   }
+
    @Override
    protected void assertValidBody(@Nonnull final WebElement body) {
+      assertAll(() -> assertIndicatesWhetherUserMayJoinGame(body),
+               () -> assertValidBodyText(body, body.getText()));
+   }
+
+   private void assertValidBodyText(final WebElement body,
+            final String bodyText) throws MultipleFailuresError {
       final var universalConstraints = allOf(INDICATES_IS_A_GAME,
                INDICATES_WHETHER_RECRUITING_PLAYERS, includesScenarioTitile);
       final var optionalConstraints = includesCreationTime == null
@@ -175,7 +195,7 @@ public final class GamePage extends Page {
                : includesCreationTime;
       final var textConstraints = both(universalConstraints)
                .and(optionalConstraints);
-      assertAll(() -> assertThat("Body text", body.getText(), textConstraints),
+      assertAll(() -> assertThat("Body text", bodyText, textConstraints),
                () -> assertIndicatesWhetherRecruitingPlayers(body));
    }
 
