@@ -220,7 +220,8 @@ public class GameSteps extends Steps {
 
    @Given("user is not playing any games")
    public void user_not_playing_games() {
-      throw new io.cucumber.java.PendingException();
+      /* Create each test user afresh, so this is guaranteed to be true. */
+      Objects.requireNonNull(world.getLoggedInUser(), "loggedInUser");
    }
 
    @Given("viewing a game that is recruiting players")
