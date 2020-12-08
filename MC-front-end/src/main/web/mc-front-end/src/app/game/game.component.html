@@ -1,12 +1,4 @@
 <section>
 <h3><a id="game" [routerLink]="['/scenario/',game.identifier.scenario,'game',game.identifier.created]">Game created {{game.identifier.created}}</a></h3>
-
-<div>
-   <p id="recruiting" *ngIf="game.recruiting; else notRecruiting">This game is recruiting players.</p>
-   <ng-template #notRecruiting>
-   <p id="recruiting" >This game is not recruiting players.</p>
-   </ng-template>
-   <button id="end-recruitment" [disabled]="isEndRecruitmentDisabled$() | async" (click)="endRecuitment()">End recuitment</button>
-</div>
-
+<router-outlet></router-outlet>
 </section>
