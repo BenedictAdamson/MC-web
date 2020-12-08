@@ -76,8 +76,15 @@ public class GameSteps extends Steps {
 
    @Given("examining a game recruiting players")
    public void examining_game_recruiting_players() {
-      /* We can ensure this by creating a new game */
-      throw new io.cucumber.java.PendingException();
+      final var scenario = world.getScenarios().findFirst().get().getId();
+      final var scenarioIndex = 0;
+      final var scenarioPage = world.getHomePage().navigateToScenariosPage()
+               .navigateToScenario(scenarioIndex);
+      world.setExpectedPage(scenarioPage);
+      nGames0 = scenarioPage.getNumberOfGamesListed();
+      world.createGame(scenario);
+      final var gamePage = scenarioPage.navigateToGamePage(nGames0);
+      world.setExpectedPage(gamePage);
    }
 
    @Then("The game page includes the scenario description")
