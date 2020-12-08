@@ -13,10 +13,10 @@ import { SelfService } from '../self.service';
 
 @Component({
 	selector: 'app-game',
-	templateUrl: './game.component.html',
-	styleUrls: ['./game.component.css']
+	templateUrl: './game-players.component.html',
+	styleUrls: ['./game-players.component.css']
 })
-export class GameComponent implements OnInit {
+export class GamePlayersComponent implements OnInit {
 
 
 	static getGamePath(id: GameIdentifier): string {

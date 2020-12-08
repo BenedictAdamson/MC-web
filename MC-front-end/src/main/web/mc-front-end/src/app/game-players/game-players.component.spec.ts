@@ -8,7 +8,7 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { Game } from '../game'
 import { GameIdentifier } from '../game-identifier'
 import { GameService } from '../game.service';
-import { GameComponent } from './game.component';
+import { GamePlayersComponent } from './game-players.component';
 import { SelfService } from '../self.service';
 import { User } from '../user';
 
@@ -26,9 +26,9 @@ class MockSelfService {
 }
 
 
-describe('GameComponent', () => {
-	let component: GameComponent;
-	let fixture: ComponentFixture<GameComponent>;
+describe('GamePlayersComponent', () => {
+	let component: GamePlayersComponent;
+	let fixture: ComponentFixture<GamePlayersComponent>;
 
 	const SCENARIO_ID_A: uuid = uuid();
 	const SCENARIO_ID_B: uuid = uuid();
@@ -50,7 +50,7 @@ describe('GameComponent', () => {
 
 		const identifier: GameIdentifier = game.identifier;
 		TestBed.configureTestingModule({
-			declarations: [GameComponent],
+			declarations: [GamePlayersComponent],
 			providers: [{
 				provide: ActivatedRoute,
 				useValue: {
@@ -67,7 +67,7 @@ describe('GameComponent', () => {
 			{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }]
 		});
 
-		fixture = TestBed.createComponent(GameComponent);
+		fixture = TestBed.createComponent(GamePlayersComponent);
 		component = fixture.componentInstance;
 		fixture.detectChanges();
 	};
@@ -142,7 +142,7 @@ describe('GameComponent', () => {
 		gameServiceStub.endRecuitment.and.returnValue(of(game1));
 
 		TestBed.configureTestingModule({
-			declarations: [GameComponent],
+			declarations: [GamePlayersComponent],
 			providers: [{
 				provide: ActivatedRoute,
 				useValue: {
@@ -159,7 +159,7 @@ describe('GameComponent', () => {
 			{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }]
 		});
 
-		fixture = TestBed.createComponent(GameComponent);
+		fixture = TestBed.createComponent(GamePlayersComponent);
 		component = fixture.componentInstance;
 		fixture.detectChanges();
 	};
