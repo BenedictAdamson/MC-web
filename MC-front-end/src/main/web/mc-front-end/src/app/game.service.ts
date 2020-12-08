@@ -1,5 +1,5 @@
 import { Observable, of } from 'rxjs';
-import { catchError, flatMap, map } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 
 import { Injectable } from '@angular/core';
@@ -62,33 +62,6 @@ export class GameService {
 		return this.http.post<Game>(GameService.getApiGamesPath(scenario), "");
 	}
 
-
-	private putGame(game: Game): Observable<boolean> {
-		return this.http.put<Game>(GameService.getApiGamePath(game.identifier), game, { observe: "body", responseType: "json" })
-			.pipe(
-				map(() => true),
-				catchError(this.handleError<boolean>('putGame', false))
-			);
-	}
-
-	/**
-	 * Change a game so it is no longer [[Game.recruiting|recruiting]] players.
-
-     * @param id
-     * The unique ID of the game for which to end recuitment.
-     * @returns
-     * An [[Observable]] that provides the updated state of the game.
-     * The provided game is null if the given {@code id} is not recognized.
-     * The provided game is null or its [[Game.identifier]] is equal to the given {@code id}.
-     * The provided game is not [[Game.recruiting|recruiting]] players.
-	 */
-	endRecuitment(id: GameIdentifier): Observable<Game> {
-		return this.getGame(id).pipe(
-			map(game => { game.recruiting = false; return game }),
-			flatMap(game => this.putGame(game)),
-			flatMap(() => this.getGame(id))
-		);
-	}
 
     /**
      * Handle Http operation that failed.

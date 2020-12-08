@@ -23,8 +23,8 @@ describe('GameService', () => {
 	const CREATEDS_2: string[] = [CREATED_A, CREATED_B];
 	const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_A, created: CREATED_A };
 	const GAME_IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_B, created: CREATED_B };
-	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A, recruiting: true };
-	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B, recruiting: false };
+	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A };
+	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B };
 
 	beforeEach(() => {
 		TestBed.configureTestingModule({
@@ -111,44 +111,4 @@ describe('GameService', () => {
 		testCreateGame(GAME_B);
 	})
 
-	const testEndRecuitment = function(game: Game, replyRecruiting: boolean) {
-		const identifier: GameIdentifier = game.identifier;
-		const path: string = GameService.getApiGamePath(identifier);
-		const service: GameService = TestBed.get(GameService);
-		const gameReply: Game = { identifier: identifier, recruiting: replyRecruiting }
-
-		service.endRecuitment(identifier).subscribe(g => expect(g).toEqual(gameReply));
-
-		const getRequest1 = httpTestingController.expectOne(path);
-		expect(getRequest1.request.method).toEqual('GET');
-		getRequest1.flush(game);
-		const putRequest = httpTestingController.expectOne(path);
-		expect(putRequest.request.method).toEqual('PUT');
-		putRequest.flush(null);
-		const putBody: Game = putRequest.request.body;
-		const getRequest2 = httpTestingController.expectOne(path);
-		expect(getRequest2.request.method).toEqual('GET');
-		getRequest2.flush(gameReply);
-		httpTestingController.verify();
-
-		expect(putBody).withContext('body of PUT').not.toBeNull();
-		expect(putBody.identifier).withContext('PUT Game.identifier').toEqual(identifier);
-		expect(putBody.recruiting).withContext('PUT Game.recruiting').toBeFalse();
-	}
-
-	it('can end recuitment [A]', () => {
-		testEndRecuitment(GAME_A, false);
-	})
-
-	it('can end recuitment [B]', () => {
-		testEndRecuitment(GAME_A, true);
-	})
-
-	it('can end recuitment [C]', () => {
-		testEndRecuitment(GAME_B, false);
-	})
-
-	it('can end recuitment [D]', () => {
-		testEndRecuitment(GAME_B, true);
-	})
 });
