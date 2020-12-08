@@ -182,19 +182,20 @@ public final class GamePage extends Page {
                containsString(user.getUsername()));
    }
 
-   public void assertListsPlayersOfGame() {
-      assertListsPlayersOfGame(getBody());
+   public void assertListsPlayersOfGameOrReportsNoPlayers() {
+      assertListsPlayersOfGameOrReportsNoPlayers(getBody());
    }
 
-   private void assertListsPlayersOfGame(final WebElement body) {
-      final var players = assertHasElement(body, PLAYERS_ELEMENT_LOCATOR);
-      assertHasElement("players element has a list", players, By.tagName("ul"));
+   private void assertListsPlayersOfGameOrReportsNoPlayers(
+            final WebElement body) {
+      assertHasElement("lists players or reports has no players", body,
+               PLAYERS_ELEMENT_LOCATOR);
    }
 
    @Override
    protected void assertValidBody(@Nonnull final WebElement body) {
       assertAll(() -> assertIndicatesWhetherUserMayJoinGame(body),
-               () -> assertListsPlayersOfGame(body),
+               () -> assertListsPlayersOfGameOrReportsNoPlayers(body),
                () -> assertValidBodyText(body, body.getText()));
    }
 

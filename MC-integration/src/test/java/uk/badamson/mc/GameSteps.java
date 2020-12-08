@@ -147,9 +147,10 @@ public class GameSteps extends Steps {
                .assertIndicatesWhetherUserMayJoinGame();
    }
 
-   @Then("The game page lists the players of the game")
-   public void game_page_lists_players_of_game() {
-      world.getAndAssertExpectedPage(GamePage.class).assertListsPlayersOfGame();
+   @Then("The game page lists the players of the game or reports it has no players")
+   public void game_page_lists_players_of_game_or_reports_no_players() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertListsPlayersOfGameOrReportsNoPlayers();
    }
 
    @Then("The game page lists the user as a player of the game")
