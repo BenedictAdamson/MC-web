@@ -34,9 +34,16 @@ import uk.badamson.mc.presentation.ScenariosPage;
  */
 public class ScenarioSteps extends Steps {
 
+   private int scenarioIndex;
+
    @Autowired
    public ScenarioSteps(@Nonnull final World world) {
       super(world);
+   }
+
+   @When("examining scenario")
+   public void examining_scenario() {
+      navigateToScenario().requireIsReady();
    }
 
    @When("getting the scenarios")
@@ -54,11 +61,18 @@ public class ScenarioSteps extends Steps {
       world.getAndAssertExpectedPage(ScenariosPage.class).assertInvariants();
    }
 
-   @When("Navigate to one scenario")
-   public void navigate_to_one_scenario() {
+   @When("Navigate to a scenario with games")
+   public void navigate_to_scenario_with_games() {
       final var scenariosPage = world.getExpectedPage(ScenariosPage.class);
       final var index = 0;
       world.setExpectedPage(scenariosPage.navigateToScenario(index));
+   }
+
+   private ScenarioPage navigateToScenario() {
+      final var scenarioPage = world.getHomePage().navigateToScenariosPage()
+               .navigateToScenario(scenarioIndex);
+      world.setExpectedPage(scenarioPage);
+      return scenarioPage;
    }
 
    private void navigateToScenariosPage() {
@@ -71,6 +85,26 @@ public class ScenarioSteps extends Steps {
                .assertHasListOfScenarios();
    }
 
+   @When("A scenario has games")
+   public void scenario_has_games() {
+      final var scenario = world.getScenarios().findFirst().get().getId();
+      scenarioIndex = 0;
+      world.createGame(scenario);
+   }
+
+   @Then("The scenario page allows navigation to game pages")
+   public void scenario_page_allows_navigation_to_game_pages()
+            throws Exception {
+      // FIXME
+
+   }
+
+   @Then("The scenario page does not allow navigation to game pages")
+   public void scenario_page_does_not_allow_navigation_to_game_pages()
+            throws Exception {
+      // FIXME
+   }
+
    @Then("The scenario page includes the list of games of that scenario")
    public void scenario_page_includes_list_of_games_of_scenario() {
       world.getAndAssertExpectedPage(ScenarioPage.class).assertHasListOfGames();
@@ -79,6 +113,11 @@ public class ScenarioSteps extends Steps {
    @Then("The scenario page includes the scenario description")
    public void scenario_page_includes_scenario_description() {
       // Hard to test
+   }
+
+   @When("Viewing the games of the scenario")
+   public void viewing_games_of_scenario() {
+      navigateToScenario().requireIsReady();
    }
 
    @When("Viewing the scenarios")

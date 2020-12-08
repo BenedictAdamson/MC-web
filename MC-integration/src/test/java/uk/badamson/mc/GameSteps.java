@@ -42,8 +42,6 @@ import uk.badamson.mc.presentation.ScenarioPage;
  */
 public class GameSteps extends Steps {
 
-   private int scenarioIndex;
-
    private int gameIndex;
 
    private int nGames0;
@@ -71,8 +69,7 @@ public class GameSteps extends Steps {
 
    @When("creating a game")
    public void creating_game() {
-      scenarioIndex = 0;
-      final var scenarioPage = navigateToScenario();
+      final var scenarioPage = world.getExpectedPage(ScenarioPage.class);
       nGames0 = scenarioPage.getNumberOfGamesListed();
       world.setExpectedPage(scenarioPage.createGame());
    }
@@ -187,7 +184,7 @@ public class GameSteps extends Steps {
 
    @Then("MC does not allow creating a game")
    public void mc_does_not_allow_creating_a_game() {
-      final var scenarioPage = navigateToScenario();
+      final var scenarioPage = world.getExpectedPage(ScenarioPage.class);
       assertFalse(scenarioPage.isGameButtonEnabled());
    }
 
@@ -209,20 +206,6 @@ public class GameSteps extends Steps {
       world.setExpectedPage(scenarioPage.navigateToGamePage(gameIndex));
    }
 
-   private ScenarioPage navigateToScenario() {
-      final var scenarioPage = world.getHomePage().navigateToScenariosPage()
-               .navigateToScenario(scenarioIndex);
-      world.setExpectedPage(scenarioPage);
-      return scenarioPage;
-   }
-
-   @When("A scenario has games")
-   public void scenario_has_games() {
-      final var scenario = world.getScenarios().findFirst().get().getId();
-      scenarioIndex = 0;
-      world.createGame(scenario);
-   }
-
    @When("user ends recruitment for the game")
    public void user_ends_recuitement_for_game() {
       world.getExpectedPage(GamePage.class).endRecruitement();
@@ -242,20 +225,19 @@ public class GameSteps extends Steps {
 
    @Given("viewing a game that is recruiting players")
    public void viewing_game_recuiting_players() {
-      scenarioIndex = 0;
       final var scenario = world.getScenarios().map(namedId -> namedId.getId())
                .findFirst().get();
+      final var scenarioIndex = 0;
       world.createGame(scenario);
       nGames0 = (int) world.getGameCreationTimes(scenario).count();
-      final var scenarioPage = navigateToScenario();
+
+      final var scenarioPage = world.getHomePage().navigateToScenariosPage()
+               .navigateToScenario(scenarioIndex);
+      world.setExpectedPage(scenarioPage);
       final var gamePage = scenarioPage.navigateToGamePage(nGames0 - 1);
       gamePage.requireIsReady();
       gamePage.requireIndicatesIsRecruitingPlayers();
       world.setExpectedPage(gamePage);
    }
 
-   @When("Viewing the games of the scenario")
-   public void viewing_games_of_scenario() {
-      navigateToScenario().requireIsReady();
-   }
 }
