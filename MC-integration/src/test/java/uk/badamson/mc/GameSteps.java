@@ -55,7 +55,7 @@ public class GameSteps extends Steps {
 
    private void assertIsOkGamePage() throws MultipleFailuresError {
       final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
-      assertAll(() -> gamePage.assertInvariants(),
+      assertAll("valid game page", () -> gamePage.assertInvariants(),
                () -> gamePage.assertNoErrorMessages());
    }
 
