@@ -1,5 +1,3 @@
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 
 import { Component, OnInit } from '@angular/core';
