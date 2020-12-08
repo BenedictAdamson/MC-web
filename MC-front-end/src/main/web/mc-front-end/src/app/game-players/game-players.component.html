@@ -2,7 +2,7 @@
 <h4>Players</h4>
 
 <section>
-   <p id="recruiting" *ngIf="game.recruiting; else notRecruiting">This game is recruiting players.</p>
+   <p id="recruiting" *ngIf="gamePlayers.recruiting; else notRecruiting">This game is recruiting players.</p>
    <ng-template #notRecruiting>
    <p id="recruiting" >This game is not recruiting players.</p>
    </ng-template>

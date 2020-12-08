@@ -5,10 +5,9 @@ import { v4 as uuid } from 'uuid';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
 
-import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
-import { GameService } from '../game.service';
-import { GamesComponent } from '../games/games.component';
+import { GamePlayers } from '../game-players';
+import { GamePlayersService } from '../game-players.service';
 import { SelfService } from '../self.service';
 
 @Component({
@@ -18,49 +17,46 @@ import { SelfService } from '../self.service';
 })
 export class GamePlayersComponent implements OnInit {
 
-
-	static getGamePath(id: GameIdentifier): string {
-		return GamesComponent.getGamesPath(id.scenario) + id.created;
-	}
-
 	identifier: GameIdentifier;
-	game: Game;
+	gamePlayers: GamePlayers;
 
 	constructor(
 		private route: ActivatedRoute,
-		private gameService: GameService,
+		private gamePlayersService: GamePlayersService,
 		private selfService: SelfService
 	) { }
 
 	ngOnInit(): void {
 		this.identifier = this.getGameIdentifier();
-		this.subscribeToGame();
+		this.subscribeToGamePlayers();
 	}
 
 
 	private getGameIdentifier(): GameIdentifier {
 		const route: ActivatedRouteSnapshot = this.route.snapshot;
-		const scenario: uuid = route.parent.paramMap.get('scenario');
-		const created: string = route.paramMap.get('created');
-		if (scenario == null) throw new Error('null scenario');
-		if (created == null) throw new Error('null created');
+		const scenario: uuid = route.parent.parent.paramMap.get('scenario');
+		const created: string = route.parent.paramMap.get('created');
+		if (!scenario) throw new Error('unknown scenario');
+		if (!created) throw new Error('unknown created');
 		const gameId: GameIdentifier = { scenario: scenario, created: created };
 		return gameId;
 	}
 
-	private subscribeToGame(): void {
-		this.gameService.getGame(this.identifier)
-			.subscribe(game => this.game = game);
+	private subscribeToGamePlayers(): void {
+		if (!this.identifier) throw new Error('unknown this.identifier');
+		this.gamePlayersService.getGamePlayers(this.identifier)
+			.subscribe(gamePlayers => this.gamePlayers = gamePlayers);
 	}
 
 	isEndRecruitmentDisabled$(): Observable<boolean> {
 		return this.selfService.mayManageGames$.pipe(
-			map(mayManage => !this.game.recruiting || !mayManage)
+			map(mayManage => this.gamePlayers && (!this.gamePlayers.recruiting || !mayManage))
 		);
 	}
 
 	endRecuitment() {
-		this.gameService.endRecuitment(this.identifier).subscribe(game => this.game = game);
+		if (!this.identifier) throw new Error('unknown this.identifier');
+		this.gamePlayersService.endRecuitment(this.identifier).subscribe(gamePlayers => this.gamePlayers = gamePlayers);
 	}
 
 }
