@@ -188,7 +188,7 @@ public final class GamePage extends Page {
 
    private void assertListsPlayersOfGame(final WebElement body) {
       final var players = assertHasElement(body, PLAYERS_ELEMENT_LOCATOR);
-      assertHasElement(players, By.tagName("ul"));
+      assertHasElement("players element has a list", players, By.tagName("ul"));
    }
 
    @Override
