@@ -53,14 +53,4 @@ export class GameComponent implements OnInit {
 			.subscribe(game => this.game = game);
 	}
 
-	isEndRecruitmentDisabled$(): Observable<boolean> {
-		return this.selfService.mayManageGames$.pipe(
-			map(mayManage => !this.game.recruiting || !mayManage)
-		);
-	}
-
-	endRecuitment() {
-		this.gameService.endRecuitment(this.identifier).subscribe(game => this.game = game);
-	}
-
 }
