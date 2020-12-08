@@ -55,6 +55,12 @@ public class GameSteps extends Steps {
       super(world);
    }
 
+   private void assertIsOkGamePage() throws MultipleFailuresError {
+      final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
+      assertAll(() -> gamePage.assertInvariants(),
+               () -> gamePage.assertNoErrorMessages());
+   }
+
    @Then("can get the list of games")
    public void can_get_list_of_games() {
       final var scenarioPage = world.getExpectedPage(GamePage.class)
@@ -75,18 +81,6 @@ public class GameSteps extends Steps {
    public void examining_game_recruiting_players() {
       /* We can ensure this by creating a new game */
       throw new io.cucumber.java.PendingException();
-   }
-
-   @Then("The game page does not indicate whether the game is recruiting players")
-   public void game_page_does_not_indicate_whether_game_recruiting_players() {
-      world.getAndAssertExpectedPage(GamePage.class)
-               .assertDoesNotIndicateWhetherRecruitingPlayers();
-   }
-
-   @Then("The game page does not list the players of the game")
-   public void game_page_does_not_list_players_of_game() {
-      world.getAndAssertExpectedPage(GamePage.class)
-               .assertDoesNotListPlayersOfGame();
    }
 
    @Then("The game page includes the scenario description")
@@ -110,6 +104,14 @@ public class GameSteps extends Steps {
    public void game_page_indicates_game_has_no_players() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesGameHasNoPlayers();
+   }
+
+   @Then("The game page indicates that the game has one more player")
+   public void game_page_indicates_game_has_one_more_player() {
+      final var nPlayers = world.getAndAssertExpectedPage(GamePage.class)
+               .getNumberOfPlayersListed();
+      assertEquals(nPlayers0 + 1, nPlayers,
+               "Added a player to the list of games");
    }
 
    @Then("the game page indicates that the game is not recruiting players")
@@ -153,12 +155,12 @@ public class GameSteps extends Steps {
       world.getAndAssertExpectedPage(GamePage.class).assertListsPlayersOfGame();
    }
 
-   @Then("The game page indicates that the game has one more player")
-   public void game_page_indicates_game_has_one_more_player() {
-      final var nPlayers = world.getAndAssertExpectedPage(GamePage.class)
-               .getNumberOfPlayersListed();
-      assertEquals(nPlayers0 + 1, nPlayers,
-               "Added a player to the list of games");
+   @Then("The game page lists the user as a player of the game")
+   public void game_page_lists_user_as_player_of_game() {
+      final var loggedInUser = world.getLoggedInUser();
+      Objects.requireNonNull(loggedInUser, "loggedInUser");
+      final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
+      gamePage.assertListOfPlayersIncludes(loggedInUser);
    }
 
    @Then("the list of games includes the new game")
@@ -173,20 +175,14 @@ public class GameSteps extends Steps {
       assertIsOkGamePage();
    }
 
-   @Then("MC accepts joining the game")
-   public void mc_accepts_joining_game() {
-      assertIsOkGamePage();
-   }
-
    @Then("MC accepts ending recruitment for the game")
    public void mc_accepts_ending_recuitment_for_game() {
       assertIsOkGamePage();
    }
 
-   private void assertIsOkGamePage() throws MultipleFailuresError {
-      final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
-      assertAll(() -> gamePage.assertInvariants(),
-               () -> gamePage.assertNoErrorMessages());
+   @Then("MC accepts joining the game")
+   public void mc_accepts_joining_game() {
+      assertIsOkGamePage();
    }
 
    @Then("MC does not allow creating a game")
@@ -261,13 +257,5 @@ public class GameSteps extends Steps {
    @When("Viewing the games of the scenario")
    public void viewing_games_of_scenario() {
       navigateToScenario().requireIsReady();
-   }
-
-   @Then("The game page lists the user as a player of the game")
-   public void game_page_lists_user_as_player_of_game() {
-      final var loggedInUser = world.getLoggedInUser();
-      Objects.requireNonNull(loggedInUser, "loggedInUser");
-      final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
-      gamePage.assertListOfPlayersIncludes(loggedInUser);
    }
 }

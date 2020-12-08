@@ -25,7 +25,6 @@ import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Objects;
@@ -107,25 +106,6 @@ public final class GamePage extends Page {
       includesScenarioTitile = containsString(scenarioPage.getScenarioTitle());
    }
 
-   public void assertDoesNotIndicateWhetherRecruitingPlayers() {
-      assertDoesNotIndicateWhetherRecruitingPlayers(getBody());
-   }
-
-   private void assertDoesNotIndicateWhetherRecruitingPlayers(
-            final WebElement body) {
-      assertThat("Does not have recruiting element",
-               body.findElements(RECRUITING_ELEMENT_LOCATOR), empty());
-   }
-
-   public void assertDoesNotListPlayersOfGame() {
-      assertDoesNotListPlayersOfGame(getBody());
-   }
-
-   private void assertDoesNotListPlayersOfGame(final WebElement body) {
-      assertThat("Does not have players element",
-               body.findElements(PLAYERS_ELEMENT_LOCATOR), empty());
-   }
-
    public void assertIncludesCreationTime() {
       if (includesCreationTime != null) {
          assertThat("includes creation time", getBody().getText(),
@@ -203,13 +183,18 @@ public final class GamePage extends Page {
    }
 
    public void assertListsPlayersOfGame() {
-      final var players = assertHasElement(getBody(), PLAYERS_ELEMENT_LOCATOR);
+      assertListsPlayersOfGame(getBody());
+   }
+
+   private void assertListsPlayersOfGame(final WebElement body) {
+      final var players = assertHasElement(body, PLAYERS_ELEMENT_LOCATOR);
       assertHasElement(players, By.tagName("ul"));
    }
 
    @Override
    protected void assertValidBody(@Nonnull final WebElement body) {
       assertAll(() -> assertIndicatesWhetherUserMayJoinGame(body),
+               () -> assertListsPlayersOfGame(body),
                () -> assertValidBodyText(body, body.getText()));
    }
 
