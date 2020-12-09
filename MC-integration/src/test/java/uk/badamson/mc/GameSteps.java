@@ -76,14 +76,20 @@ public class GameSteps extends Steps {
 
    @Given("examining a game recruiting players")
    public void examining_game_recruiting_players() {
+      /*
+       * Must create the game before navigating to the scenario page, otherwise
+       * the page will not include it, because the front-end has no means for
+       * knowing that a change has been made on the back-end.
+       */
       final var scenario = world.getScenarios().findFirst().get().getId();
       final var scenarioIndex = 0;
+      world.createGame(scenario);
+
       final var scenarioPage = world.getHomePage().navigateToScenariosPage()
                .navigateToScenario(scenarioIndex);
       world.setExpectedPage(scenarioPage);
       nGames0 = scenarioPage.getNumberOfGamesListed();
-      world.createGame(scenario);
-      final var gamePage = scenarioPage.navigateToGamePage(nGames0);
+      final var gamePage = scenarioPage.navigateToGamePage(nGames0 - 1);
       world.setExpectedPage(gamePage);
    }
 
