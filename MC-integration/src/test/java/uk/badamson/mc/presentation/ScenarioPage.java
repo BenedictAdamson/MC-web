@@ -125,12 +125,14 @@ public final class ScenarioPage extends Page {
          throw new IndexOutOfBoundsException("Negative gameIndex");
       }
       requireIsReady();
+      final List<WebElement> gameElements = findGameElements();
       final WebElement listEntry;
       try {
-         listEntry = findGameElements().get(gameIndex);
+         listEntry = gameElements.get(gameIndex);
       } catch (final IndexOutOfBoundsException e) {
          throw new IllegalStateException(
-                  "Games list too short \n" + getBody().getText());
+                  "Games list too short [" + gameIndex + "] for length "
+                           + gameElements.size() + "\n" + getBody().getText());
       }
       final var title = listEntry.getText();
       final var link = listEntry.findElement(By.tagName("a"));
