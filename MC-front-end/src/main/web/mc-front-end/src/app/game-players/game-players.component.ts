@@ -54,6 +54,12 @@ export class GamePlayersComponent implements OnInit {
 		);
 	}
 
+	isJoinDisabled$(): Observable<boolean> {
+		return this.mayJoinGame$().pipe(
+			map(may => !may)
+		);
+	}
+
 	mayJoinGame$(): Observable<boolean> {
 		return this.gamePlayersService.mayJoinGame(this.identifier);
 	}

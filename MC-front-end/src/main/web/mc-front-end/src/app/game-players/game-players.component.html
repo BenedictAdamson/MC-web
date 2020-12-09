@@ -8,11 +8,10 @@
    </ng-template>
    <button id="end-recruitment" [disabled]="isEndRecruitmentDisabled$() | async" (click)="endRecuitment()">End recuitment</button>
    <p id="joinable"  *ngIf="mayJoinGame$() | async; else notJoinable">You may join this game.</p>
-   <button id="join" (click)="joinGame()">Join</button>
    <ng-template #notJoinable>
    <p id="joinable" >You may not join this game.</p>
-   <button id="join" disabled>Join</button>
    </ng-template>
+   <button id="join" [disabled]="isJoinDisabled$() | async" (click)="joinGame()">Join</button>
 </section>
 <section id="players">
    This game has no players.
