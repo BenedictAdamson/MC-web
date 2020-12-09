@@ -63,4 +63,9 @@ export class GamePlayersComponent implements OnInit {
 		this.gamePlayersService.endRecuitment(this.identifier).subscribe(gamePlayers => this.gamePlayers = gamePlayers);
 	}
 
+	joinGame() {
+		if (!this.identifier) throw new Error('unknown this.identifier');
+		this.gamePlayersService.joinGame(this.identifier).subscribe(gamePlayers => this.gamePlayers = gamePlayers);
+	}
+
 }

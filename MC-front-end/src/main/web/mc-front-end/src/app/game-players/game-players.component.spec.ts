@@ -208,4 +208,57 @@ describe('GamePlayersComponent', () => {
 	it('can end recuitment [B]', fakeAsync((() => {
 		testEndRecuitment(GAME_PLAYERS_B);
 	})));
+
+
+
+	const setUpForJoinGame = function(game: GameIdentifier, self: User) {
+		const gamePlayers0: GamePlayers = { identifier: game, recruiting: true, users: [] };
+		const gamePlayers1: GamePlayers = { identifier: game, recruiting: true, users: [self.id] };
+
+		const gamePlayersServiceStub = jasmine.createSpyObj('GamePlayersService', ['getGamePlayers', 'endRecuitment', 'mayJoinGame', 'joinGame']);
+		gamePlayersServiceStub.getGamePlayers.and.returnValue(of(gamePlayers0));
+		gamePlayersServiceStub.mayJoinGame.and.returnValue(of(true));
+		gamePlayersServiceStub.joinGame.and.returnValue(of(gamePlayers1));
+
+		TestBed.configureTestingModule({
+			declarations: [GamePlayersComponent],
+			providers: [{
+				provide: ActivatedRoute,
+				useValue: {
+					snapshot: {
+						parent: {
+							parent: {
+								paramMap: convertToParamMap({ scenario: game.scenario })
+							},
+							paramMap: convertToParamMap({ created: game.created })
+						}
+					}
+				}
+			},
+			{ provide: GamePlayersService, useValue: gamePlayersServiceStub },
+			{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }]
+		});
+
+		fixture = TestBed.createComponent(GamePlayersComponent);
+		component = fixture.componentInstance;
+		fixture.detectChanges();
+	};
+
+	const testJoinGame = function(game: GameIdentifier, self: User) {
+		setUpForJoinGame(game, self);
+		component.joinGame();
+		tick();
+		fixture.detectChanges();
+
+		assertInvariants();
+		expect(component.gamePlayers.users.includes(self.id)).withContext('gamePlayers.users includes self').toBeTrue();
+	};
+
+	it('can join game [A]', fakeAsync((() => {
+		testJoinGame(GAME_IDENTIFIER_A, USER_ADMIN);
+	})));
+
+	it('can join game [B]', fakeAsync((() => {
+		testJoinGame(GAME_IDENTIFIER_B, USER_NORMAL);
+	})));
 });
