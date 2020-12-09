@@ -31,6 +31,10 @@ export class GamePlayersService {
 		return GamePlayersService.getApiGamePlayersPath(game) + '?endRecruitment';
 	}
 
+	static getApiMayJoinGamePath(game: GameIdentifier): string {
+		return GamePlayersService.getApiGamePlayersPath(game) + '?mayJoin';
+	}
+
 
     /**
      * Get the players of the game that has a given ID.
@@ -75,6 +79,21 @@ export class GamePlayersService {
 		 * The HttpClient or browser itself handles that redirect for us.
 	     */
 		return this.http.post<GamePlayers>(GamePlayersService.getApiGameEndRecuitmentPath(game), "");
+	}
+
+    /**
+     * Ask whether the current user may join the game that has a given ID.
+     *
+     * @param game
+     * The unique ID of the game to join.
+     * @returns
+     * An [[Observable]] that indicates whether may join.
+     */
+	mayJoinGame(game: GameIdentifier): Observable<boolean> {
+		return this.http.get<boolean>(GamePlayersService.getApiMayJoinGamePath(game))
+			.pipe(
+				catchError(this.handleError<boolean>('mayJoinGame', false))
+			);
 	}
 
     /**

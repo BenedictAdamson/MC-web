@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import { Observable } from 'rxjs';
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
@@ -21,9 +21,6 @@ describe('GamePlayersService', () => {
 	const USER_B: uuid = uuid();
 	const CREATED_A: string = '1970-01-01T00:00:00.000Z';
 	const CREATED_B: string = '2020-12-31T23:59:59.999Z';
-	const CREATEDS_0: string[] = [];
-	const CREATEDS_1: string[] = [CREATED_A];
-	const CREATEDS_2: string[] = [CREATED_A, CREATED_B];
 	const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_A, created: CREATED_A };
 	const GAME_IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_B, created: CREATED_B };
 	const GAME_PLAYERS_A: GamePlayers = { identifier: GAME_IDENTIFIER_A, recruiting: true, users: [USER_A, USER_B] };
@@ -69,7 +66,7 @@ describe('GamePlayersService', () => {
 		const id: GameIdentifier = gamePlayers0.identifier;
 		var users: uuid[] = gamePlayers0.users;
 		users.push(user);
-		const gamePlayers: GamePlayers = {identifier: id, recruiting: gamePlayers0.recruiting, users:users};
+		const gamePlayers: GamePlayers = { identifier: id, recruiting: gamePlayers0.recruiting, users: users };
 		const service: GamePlayersService = TestBed.get(GamePlayersService);
 
 		const result: Observable<GamePlayers> = service.joinGame(id);
@@ -116,5 +113,31 @@ describe('GamePlayersService', () => {
 
 	it('can end recuitment [B]', () => {
 		testEndRecuitment(GAME_PLAYERS_B);
+	})
+
+
+
+	const testMayJoinGame = function(game: GameIdentifier, mayJoin: boolean) {
+		const service: GamePlayersService = TestBed.get(GamePlayersService);
+
+		const result: Observable<boolean> = service.mayJoinGame(game);
+
+		expect(result).withContext('result').not.toBeNull();// guard
+		result.subscribe(may => {
+			expect(may).withContext('result').toEqual(mayJoin);
+		});
+
+		const request = httpTestingController.expectOne(GamePlayersService.getApiMayJoinGamePath(game));
+		expect(request.request.method).toEqual('GET');
+		request.event(new HttpResponse<boolean>({ body: mayJoin }));
+		httpTestingController.verify();
+	}
+
+	it('can query whether may join game a [A]', () => {
+		testMayJoinGame(GAME_IDENTIFIER_A, true);
+	})
+
+	it('can query whether may join game a [B]', () => {
+		testMayJoinGame(GAME_IDENTIFIER_B, false);
 	})
 });
