@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 
@@ -52,6 +52,10 @@ export class GamePlayersComponent implements OnInit {
 		return this.selfService.mayManageGames$.pipe(
 			map(mayManage => this.gamePlayers && (!this.gamePlayers.recruiting || !mayManage))
 		);
+	}
+
+	mayJoinGame$(): Observable<boolean> {
+		return this.gamePlayersService.mayJoinGame(this.identifier);
 	}
 
 	endRecuitment() {
