@@ -84,12 +84,14 @@ describe('GamePlayersComponent', () => {
 		const recruitingElement: HTMLElement = html.querySelector('#recruiting');
 		const joinableElement: HTMLElement = html.querySelector('#joinable');
 		const endRecuitmentButton: HTMLButtonElement = html.querySelector('button#end-recruitment');
+		const joinButton: HTMLButtonElement = html.querySelector('button#join');
 
 		expect(recruitingElement).withContext("recruiting element").not.toBeNull();
 		expect(recruitingElement.innerText).withContext("recruiting element text mentions recruiting").toMatch('[Rr]ecruiting');
 		expect(joinableElement).withContext("joinable element").not.toBeNull();
 		expect(joinableElement.innerText).withContext("joinable element text mentions joining").toMatch('[Jj]oin');
 		expect(endRecuitmentButton).withContext('end-recuitment button').not.toBeNull();
+		expect(joinButton).withContext('join button').not.toBeNull();
 	};
 
 
@@ -118,6 +120,7 @@ describe('GamePlayersComponent', () => {
 		const recruitingElement: HTMLElement = html.querySelector('#recruiting');
 		const joinableElement: HTMLElement = html.querySelector('#joinable');
 		const endRecuitmentButton: HTMLButtonElement = html.querySelector('button#end-recruitment');
+		const joinButton: HTMLButtonElement = html.querySelector('button#join');
 
 		const recruitingText: string = recruitingElement.innerText;
 		const joinableText: string = joinableElement.innerText;
@@ -127,6 +130,7 @@ describe('GamePlayersComponent', () => {
 		expect(mayJoinGame || joinableText.includes('You may not join this game')).withContext("joinable element text can indicate that not joinable").toBeTrue();
 		expect(!mayJoinGame || joinableText.includes('You may join this game')).withContext("joinable element text can indicate that is joinable").toBeTrue();
 		expect(endRecuitmentButton.disabled).withContext('end-recuitment button is disabled').toEqual(!mayEndRecuitment);
+		expect(joinButton.disabled).withContext('join button is disabled').toEqual(!mayJoinGame);
 	};
 
 	it('can create [A]', fakeAsync(() => {
