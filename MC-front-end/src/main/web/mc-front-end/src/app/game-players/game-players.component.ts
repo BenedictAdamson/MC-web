@@ -48,6 +48,10 @@ export class GamePlayersComponent implements OnInit {
 			.subscribe(gamePlayers => this.gamePlayers = gamePlayers);
 	}
 
+	isPlaying(): boolean {
+		return this.selfService.id != null && this.gamePlayers.users.includes(this.selfService.id);
+	}
+
 	isEndRecruitmentDisabled$(): Observable<boolean> {
 		return this.selfService.mayManageGames$.pipe(
 			map(mayManage => this.gamePlayers && (!this.gamePlayers.recruiting || !mayManage))
