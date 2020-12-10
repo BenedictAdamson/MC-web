@@ -21,10 +21,12 @@ package uk.badamson.mc.presentation;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.any;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Objects;
 
@@ -47,6 +49,7 @@ public final class GamePage extends Page {
 
    private static final UriTemplate URI_TEMPLATE = new UriTemplate(
             "/scenario/{scenario}/game/{created}");
+
    private static final Matcher<String> INDICATES_IS_A_GAME = containsString(
             "Game");
    private static final Matcher<String> INDICATES_WHETHER_RECRUITING_PLAYERS = containsString(
@@ -55,10 +58,29 @@ public final class GamePage extends Page {
             "This game is recruiting players");
    private static final Matcher<String> INDICATES_IS_NOT_RECRUITING_PLAYERS = containsString(
             "This game is not recruiting players");
+   private static final Matcher<String> INDICATES_IS_NOT_JOINABLE = containsString(
+            "You may not join this game");
+   private static final Matcher<String> INDICATES_IS_JOINABLE = containsString(
+            "You may join this game");
+   private static final Matcher<String> INDICATES_IS_PLAYING = containsString(
+            "You are playing this game");
+   private static final Matcher<String> INDICATES_IS_NOT_PLAYING = containsString(
+            "You are not playing this game");
+   private static final Matcher<String> INDICATES_JOINING_NFORMATION = anyOf(
+            INDICATES_IS_JOINABLE, INDICATES_IS_NOT_JOINABLE);
+   private static final Matcher<String> INDICATES_HAS_NO_PLAYERS = containsString(
+            "This game has no players");
+   private static final Matcher<String> INDICATES_HAS_PLAYERS = containsString(
+            "This game has players");
+
    private static final By SCENARIO_LINK_LOCATOR = By.id("scenario");
    private static final By RECRUITING_ELEMENT_LOCATOR = By.id("recruiting");
+   private static final By PLAYERS_ELEMENT_LOCATOR = By.id("players");
+   private static final By PLAYING_ELEMENT_LOCATOR = By.id("playing");
+   private static final By JOINABLE_ELEMENT_LOCATOR = By.id("joinable");
    private static final By END_RECRUITMENT_BUTTON_LOCATOR = By
             .id("end-recruitment");
+   private static final By JOIN_BUTTON_LOCATOR = By.id("join");
 
    private final ScenarioPage scenarioPage;
    private final Matcher<String> includesCreationTime;
@@ -87,6 +109,20 @@ public final class GamePage extends Page {
       includesScenarioTitile = containsString(scenarioPage.getScenarioTitle());
    }
 
+   private WebElement assertHasJoinableElement(final WebElement body) {
+      return assertHasElement(body, JOINABLE_ELEMENT_LOCATOR);
+   }
+
+   private WebElement assertHasPlayersElement(final WebElement body) {
+      return assertHasElement("Has a players element", body,
+               PLAYERS_ELEMENT_LOCATOR);
+   }
+
+   private WebElement assertHasPlayingElement(final WebElement body) {
+      return assertHasElement("Has an element for reporting whether playing",
+               body, PLAYING_ELEMENT_LOCATOR);
+   }
+
    public void assertIncludesCreationTime() {
       if (includesCreationTime != null) {
          assertThat("includes creation time", getBody().getText(),
@@ -100,6 +136,18 @@ public final class GamePage extends Page {
                includesScenarioTitile);
    }
 
+   public void assertIndicatesGameHasNoPlayers() {
+      final var players = assertHasPlayersElement(getBody());
+      assertThat("Players element reports that has no players",
+               players.getText(), INDICATES_HAS_NO_PLAYERS);
+   }
+
+   public void assertIndicatesGameHasPlayers() {
+      final var players = assertHasPlayersElement(getBody());
+      assertThat("Players element reports that has players", players.getText(),
+               INDICATES_HAS_PLAYERS);
+   }
+
    public void assertIndicatesIsNotRecruitingPlayers() {
       final var element = assertHasElement(getBody(),
                RECRUITING_ELEMENT_LOCATOR);
@@ -110,6 +158,40 @@ public final class GamePage extends Page {
       final var element = assertHasElement(getBody(),
                RECRUITING_ELEMENT_LOCATOR);
       assertThat(element.getText(), INDICATES_IS_RECRUITING_PLAYERS);
+   }
+
+   public void assertIndicatesUserIsNotPlayingGame() {
+      final var playing = assertHasPlayingElement(getBody());
+      assertThat("Indicates is not playing the game", playing.getText(),
+               INDICATES_IS_NOT_PLAYING);
+   }
+
+   public void assertIndicatesUserIsPlayingGame() {
+      final var playing = assertHasPlayingElement(getBody());
+      assertThat("Indicates is playing the game", playing.getText(),
+               INDICATES_IS_PLAYING);
+   }
+
+   public void assertIndicatesUserMayJoinGame() {
+      final var joinable = assertHasElement(getBody(),
+               JOINABLE_ELEMENT_LOCATOR);
+      assertThat("Indicates may join game", joinable.getText(),
+               INDICATES_IS_JOINABLE);
+   }
+
+   public void assertIndicatesUserMayNotJoinGame() {
+      final var element = assertHasElement(getBody(), JOINABLE_ELEMENT_LOCATOR);
+      assertThat(element.getText(), INDICATES_IS_NOT_JOINABLE);
+   }
+
+   public void assertIndicatesWhetherGameHasPlayers() {
+
+   }
+
+   private void assertIndicatesWhetherGameHasPlayers(final WebElement body) {
+      final var players = assertHasPlayersElement(body);
+      assertThat("Players text provides information", players.getText(),
+               either(INDICATES_HAS_NO_PLAYERS).or(INDICATES_HAS_PLAYERS));
    }
 
    public void assertIndicatesWhetherRecruitingPlayers() {
@@ -128,16 +210,56 @@ public final class GamePage extends Page {
                                  .or(INDICATES_IS_NOT_RECRUITING_PLAYERS)));
    }
 
+   public void assertIndicatesWhetherUserIsPlayingGame() {
+      assertIndicatesWhetherUserIsPlayingGame(getBody());
+   }
+
+   private void assertIndicatesWhetherUserIsPlayingGame(final WebElement body) {
+      final var playing = assertHasPlayingElement(body);
+      assertThat("Indicates whether playing the game", playing.getText(),
+               either(INDICATES_IS_PLAYING).or(INDICATES_IS_NOT_PLAYING));
+   }
+
+   public void assertIndicatesWhetherUserMayJoinGame() {
+      assertIndicatesWhetherUserMayJoinGame(getBody());
+   }
+
+   private void assertIndicatesWhetherUserMayJoinGame(final WebElement body) {
+      final var joinable = assertHasJoinableElement(body);
+      assertThat("Indicates whether the user may join this game",
+               joinable.getText(), INDICATES_JOINING_NFORMATION);
+   }
+
+   private void assertJoinButtonConsistentWithJoinableText(
+            final WebElement body) {
+      final var button = assertHasElement("has a join button", body,
+               JOIN_BUTTON_LOCATOR);
+      final var description = assertHasJoinableElement(body);
+      assertEquals(isEnabled(button),
+               INDICATES_IS_JOINABLE.matches(description.getText()),
+               "join button is enabled iff joinable text indicates is joinable");
+   }
+
    @Override
    protected void assertValidBody(@Nonnull final WebElement body) {
+      assertAll(() -> assertIndicatesWhetherUserMayJoinGame(body),
+               () -> assertIndicatesWhetherGameHasPlayers(body),
+               () -> assertIndicatesWhetherUserIsPlayingGame(body),
+               () -> assertJoinButtonConsistentWithJoinableText(body),
+               () -> assertValidBodyText(body, body.getText()));
+   }
+
+   private void assertValidBodyText(final WebElement body,
+            final String bodyText) throws MultipleFailuresError {
       final var universalConstraints = allOf(INDICATES_IS_A_GAME,
-               INDICATES_WHETHER_RECRUITING_PLAYERS, includesScenarioTitile);
+               INDICATES_WHETHER_RECRUITING_PLAYERS,
+               INDICATES_JOINING_NFORMATION, includesScenarioTitile);
       final var optionalConstraints = includesCreationTime == null
                ? any(String.class)
                : includesCreationTime;
       final var textConstraints = both(universalConstraints)
                .and(optionalConstraints);
-      assertAll(() -> assertThat("Body text", body.getText(), textConstraints),
+      assertAll(() -> assertThat("Body text", bodyText, textConstraints),
                () -> assertIndicatesWhetherRecruitingPlayers(body));
    }
 
@@ -167,6 +289,17 @@ public final class GamePage extends Page {
    protected boolean isValidPath(@Nonnull final String path) {
       Objects.requireNonNull(path, "path");
       return URI_TEMPLATE.matches(path);
+   }
+
+   public void joinGame() {
+      requireIsReady();
+      final var button = getBody().findElement(JOIN_BUTTON_LOCATOR);
+      if (!isEnabled(button)) {
+         throw new IllegalStateException(
+                  "Button [" + button + "] is not enabled");
+      }
+      button.click();
+      awaitIsReady();
    }
 
    public ScenarioPage navigateToScenarioPage() {

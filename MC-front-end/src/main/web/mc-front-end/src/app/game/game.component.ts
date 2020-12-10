@@ -1,5 +1,3 @@
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 
 import { Component, OnInit } from '@angular/core';
@@ -51,16 +49,6 @@ export class GameComponent implements OnInit {
 	private subscribeToGame(): void {
 		this.gameService.getGame(this.identifier)
 			.subscribe(game => this.game = game);
-	}
-
-	isEndRecruitmentDisabled$(): Observable<boolean> {
-		return this.selfService.mayManageGames$.pipe(
-			map(mayManage => !this.game.recruiting || !mayManage)
-		);
-	}
-
-	endRecuitment() {
-		this.gameService.endRecuitment(this.identifier).subscribe(game => this.game = game);
 	}
 
 }

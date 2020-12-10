@@ -227,6 +227,7 @@ public class UserSteps extends Steps {
    @Given("not logged in")
    public void not_logged_in() {
       world.getHomePage();
+      world.setLoggedInUser(null);
    }
 
    @Then("redirected to home-page")
@@ -265,29 +266,32 @@ public class UserSteps extends Steps {
       world.setExpectedPage(loginPage);
       loginPage.submitLoginForm(user.getUsername(), user.getPassword());
       homePage.awaitIsReadyOrErrorMessage();
-      if (homePage.isCurrentPath()) {
+      if (homePage.isCurrentPath()) {// success
          world.setExpectedPage(homePage);
+         world.setLoggedInUser(user);
+      } else {
+         world.setLoggedInUser(null);
       }
    }
 
    @Given("unknown user")
    public void unknown_user() {
-      user = world.getUnknownUser();
+      user = world.createUnknownUser();
    }
 
    @Given("user does not have the {string} role")
    public void user_does_not_have_role(final String roleName) {
-      user = world.getUserWithoutRole(parseRole(roleName));
+      user = world.createUserWithoutRole(parseRole(roleName));
    }
 
    @Given("user has any role")
    public void user_has_any_role() {
-      user = world.getUserWithRoles(Set.of(Authority.values()[0]), Set.of());
+      user = world.createUserWithRoles(Set.of(Authority.values()[0]), Set.of());
    }
 
    @Given("user has the {string} role")
    public void user_has_role(final String roleName) {
-      user = world.getUserWithRoles(Set.of(parseRole(roleName)), Set.of());
+      user = world.createUserWithRoles(Set.of(parseRole(roleName)), Set.of());
    }
 
    @When("user has the {string} role but not the {string} role")
@@ -299,7 +303,8 @@ public class UserSteps extends Steps {
          throw new IllegalArgumentException("Contradictory role constraints");
       }
 
-      user = world.getUserWithRoles(Set.of(includedRole), Set.of(excludedRole));
+      user = world.createUserWithRoles(Set.of(includedRole),
+               Set.of(excludedRole));
 
       assert user != null && user.getAuthorities().contains(includedRole)
                && !user.getAuthorities().contains(excludedRole);

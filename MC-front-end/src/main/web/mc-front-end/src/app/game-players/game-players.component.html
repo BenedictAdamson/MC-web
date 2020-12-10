@@ -1,0 +1,29 @@
+<section>
+<h4>Players</h4>
+
+<section>
+   <p id="recruiting" *ngIf="gamePlayers.recruiting; else notRecruiting">This game is recruiting players.</p>
+   <ng-template #notRecruiting>
+   <p id="recruiting" >This game is not recruiting players.</p>
+   </ng-template>
+
+   <button id="end-recruitment" [disabled]="isEndRecruitmentDisabled$() | async" (click)="endRecuitment()">End recuitment</button>
+   <p id="joinable"  *ngIf="mayJoinGame$() | async; else notJoinable">You may join this game.</p>
+   <ng-template #notJoinable>
+   <p id="joinable" >You may not join this game.</p>
+   </ng-template>
+
+   <button id="join" [disabled]="isJoinDisabled$() | async" (click)="joinGame()">Join</button>
+
+   <p id="players" *ngIf="0 < nPlayers; else noPlayers">This game has players.</p>
+   <ng-template #noPlayers>
+   <p id="players" >This game has no players.</p>
+   </ng-template>
+
+   <p id="playing" *ngIf="isPlaying(); else notPlaying">You are playing this game.</p>
+   <ng-template #notPlaying>
+   <p id="playing" >You are not playing this game.</p>
+   </ng-template>
+</section>
+
+</section>

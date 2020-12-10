@@ -24,12 +24,11 @@ import java.net.ProtocolException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.EnumSet;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -126,12 +125,9 @@ public final class World implements AutoCloseable {
 
    private final McContainers containers;
 
-   /*
-    * Use Maps sorted by username, to ensure repeatable tests, despite UUIDs
-    * changing.
-    */
-   private final SortedMap<String, User> users = new TreeMap<>();
-   private final SortedMap<String, User> unknownUsers = new TreeMap<>();
+   private int nUsers;
+
+   private User administratorUser;
 
    private RemoteWebDriver webDriver;
 
@@ -141,6 +137,8 @@ public final class World implements AutoCloseable {
 
    private Page expectedPage;
 
+   private User loggedInUser;
+
    /**
     * @param failureRecordingDirectory
     *           The location of a directory in which to store files holding
@@ -149,17 +147,6 @@ public final class World implements AutoCloseable {
     */
    public World(final Path failureRecordingDirectory) {
       containers = new McContainers(failureRecordingDirectory);
-   }
-
-   private void addUnknownUser(final User user) {
-      unknownUsers.put(user.getUsername(), user);
-   }
-
-   private void addUser(final BasicUserDetails userDetails) {
-      // records the user in the DB, through the BE
-      final var id = containers.addUser(userDetails);
-      users.put(userDetails.getUsername(), new User(id, userDetails));
-
    }
 
    /**
@@ -219,6 +206,7 @@ public final class World implements AutoCloseable {
        */
       containers.beforeTest(createTestDescription(scenario));
       webDriver = containers.getWebDriver();
+      setLoggedInUser(null);
       /*
        * The previous test might have left us deep in the page hierarchy, so
        * reset to the top location, and must not use the old webDriver.
@@ -246,21 +234,33 @@ public final class World implements AutoCloseable {
       return containers.createGame(scenario);
    }
 
-   private void createUsers() {
-      users.put(BasicUserDetails.ADMINISTRATOR_USERNAME,
-               User.createAdministrator(McContainers.ADMINISTARTOR_PASSWORD));
+   public User createUnknownUser() {
+      return new User(UUID.randomUUID(),
+               generateBasicUserDetails(Authority.ALL));
+   }
 
-      addUser(new BasicUserDetails("jeff", "password1", Authority.ALL, true,
-               true, true, true));
-      addUser(new BasicUserDetails("allan", "password2",
-               Set.of(Authority.ROLE_PLAYER), true, true, true, true));
-      addUser(new BasicUserDetails("Bob", "password3",
-               Set.of(Authority.ROLE_MANAGE_USERS), true, true, true, true));
-      addUser(new BasicUserDetails("Alice", "password4",
-               Set.of(Authority.ROLE_MANAGE_GAMES), true, true, true, true));
+   private User createUser(final Set<Authority> authoritites) {
+      final var userDetails = generateBasicUserDetails(authoritites);
+      final var id = containers.addUser(userDetails);
+      return new User(id, userDetails);
+   }
 
-      addUnknownUser(new User(UUID.randomUUID(), "mark", "PasswordXXX",
-               Authority.ALL, true, true, true, true));
+   public User createUserWithoutRole(final Authority role) {
+      Objects.requireNonNull(role, "role");
+
+      final var authorities = EnumSet.complementOf(EnumSet.of(role));
+      return createUser(authorities);
+   }
+
+   public User createUserWithRoles(final Set<Authority> included,
+            final Set<Authority> excluded) {
+      Objects.requireNonNull(included, "included");
+      Objects.requireNonNull(excluded, "excluded");
+      if (intersects(included, excluded)) {
+         throw new IllegalArgumentException("Contradictory role constraints");
+      }
+
+      return createUser(included);
    }
 
    /**
@@ -285,8 +285,18 @@ public final class World implements AutoCloseable {
       webDriver = null;
    }
 
+   private BasicUserDetails generateBasicUserDetails(
+            final Set<Authority> authorities) {
+      final var sequenceId = ++nUsers;
+      final var username = "User " + sequenceId;
+      final var password = "password" + sequenceId;
+      return new BasicUserDetails(username, password, authorities, true, true,
+               true, true);
+   }
+
    public User getAdministratorUser() {
-      return users.get(BasicUserDetails.ADMINISTRATOR_USERNAME);
+      Objects.requireNonNull(administratorUser, "administratorUser");
+      return administratorUser;
    }
 
    /**
@@ -424,12 +434,21 @@ public final class World implements AutoCloseable {
       }
    }
 
-   public Stream<NamedUUID> getScenarios() {
-      return containers.getScenarios();
+   /**
+    * <p>
+    * The currently logged-in user.
+    * </p>
+    * <p>
+    * Or null if no user is currently logged-in.</li>
+    *
+    * @return the user
+    */
+   public User getLoggedInUser() {
+      return loggedInUser;
    }
 
-   public User getUnknownUser() {
-      return unknownUsers.values().stream().findAny().get();
+   public Stream<NamedUUID> getScenarios() {
+      return containers.getScenarios();
    }
 
    /**
@@ -479,36 +498,6 @@ public final class World implements AutoCloseable {
       getUrlUsingBrowser();
    }
 
-   public User getUserWithoutRole(final Authority role) {
-      Objects.requireNonNull(role, "role");
-
-      /*
-       * Return the first matching user to ensure repeatable tests.
-       */
-      return users.values().stream()
-               .filter(user -> !user.getAuthorities().contains(role))
-               .findFirst().get();
-   }
-
-   public User getUserWithRoles(final Set<Authority> included,
-            final Set<Authority> excluded) {
-      Objects.requireNonNull(included, "included");
-      Objects.requireNonNull(excluded, "excluded");
-      if (intersects(included, excluded)) {
-         throw new IllegalArgumentException("Contradictory role constraints");
-      }
-
-      /*
-       * Return the first matching user to ensure repeatable tests.
-       */
-      return users.values().stream()
-               .filter(user -> !BasicUserDetails.ADMINISTRATOR_USERNAME
-                        .equals(user.getUsername()))
-               .filter(user -> user.getAuthorities().containsAll(included))
-               .filter(user -> !intersects(user.getAuthorities(), excluded))
-               .findFirst().get();
-   }
-
    public WebDriver getWebDriver() {
       Objects.requireNonNull(webDriver, "webDriver");
       return webDriver;
@@ -526,7 +515,8 @@ public final class World implements AutoCloseable {
           * must roll-back ourself in that case. Important because this
           * allocates expensive resources.
           */
-         createUsers();
+         administratorUser = User
+                  .createAdministrator(McContainers.ADMINISTARTOR_PASSWORD);
       } catch (final Exception e) {
          close();
          throw e;
@@ -545,6 +535,18 @@ public final class World implements AutoCloseable {
     */
    public void setExpectedPage(@Nonnull final Page expectedPage) {
       this.expectedPage = Objects.requireNonNull(expectedPage, "expectedPage");
+   }
+
+   /**
+    * <p>
+    * Change the {@linkplain #getLoggedInUser() currently logged-in user}.
+    * </p>
+    *
+    * @param loggedInUser
+    *           The currently logged-in user.
+    */
+   public void setLoggedInUser(final User loggedInUser) {
+      this.loggedInUser = loggedInUser;
    }
 
    /**

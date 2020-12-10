@@ -4,6 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AddUserComponent } from './add-user/add-user.component';
 import { GameComponent } from './game/game.component';
 import { GamesComponent } from './games/games.component';
+import { GamePlayersComponent } from './game-players/game-players.component';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
 import { ScenarioComponent } from './scenario/scenario.component';
@@ -21,7 +22,14 @@ const routes: Routes = [
 				children: [
 					{
 						path: 'game/:created',
-						component: GameComponent
+						component: GameComponent,
+						children: [
+							{
+								path: '',
+								pathMatch: 'full',
+								component: GamePlayersComponent
+							}
+						]
 					},
 					{
 						path: '',

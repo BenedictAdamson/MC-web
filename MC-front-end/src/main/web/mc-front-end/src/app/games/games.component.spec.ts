@@ -43,8 +43,8 @@ describe('GamesComponent', () => {
 	const GAMES_2: string[] = [CREATED_A, CREATED_B];
 	const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_A, created: CREATED_A };
 	const GAME_IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_B, created: CREATED_B };
-	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A, recruiting: true };
-	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B, recruiting: false };
+	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A };
+	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B };
 
 	const setUpForNgInit = function(self: User, scenario: uuid, gamesOfScenario: string[]) {
 		const gameServiceStub = jasmine.createSpyObj('GameService', ['getGamesOfScenario']);

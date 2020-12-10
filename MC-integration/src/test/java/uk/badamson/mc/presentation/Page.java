@@ -80,24 +80,55 @@ public abstract class Page {
     * Require that a parent element contains an element.
     * </p>
     *
+    * @param message
+    *           An assertion message to use if reporting that this assertino
+    *           failed
     * @param parent
     *           The element to search
     * @param by
     *           A matcher for the required element
     * @throws NullPointerException
-    *            if {@code by} is null
+    *            <ul>
+    *            <li>if {@code message} is null</li>
+    *            <li>if {@code parent} is null</li>
+    *            <li>if {@code by} is null</li>
+    *            </ul>
+    * @throws AssertionFailedError
+    *            if no such element is present.
+    */
+   protected static final WebElement assertHasElement(final String message,
+            final WebElement parent, final By by) {
+      Objects.requireNonNull(message, "message");
+      Objects.requireNonNull(parent, "parent");
+      Objects.requireNonNull(by, "by");
+
+      try {
+         return parent.findElement(by);
+      } catch (final NoSuchElementException e) {
+         throw new AssertionFailedError(message, e);
+      }
+   }
+
+   /**
+    * <p>
+    * Require that a parent element contains an element.
+    * </p>
+    *
+    * @param parent
+    *           The element to search
+    * @param by
+    *           A matcher for the required element
+    * @throws NullPointerException
+    *            <ul>
+    *            <li>if {@code parent} is null</li>
+    *            <li>if {@code by} is null</li>
+    *            </ul>
     * @throws AssertionFailedError
     *            if no such element is present.
     */
    protected static final WebElement assertHasElement(final WebElement parent,
             final By by) {
-      Objects.requireNonNull(parent, "parent");
-      Objects.requireNonNull(by, "by");
-      try {
-         return parent.findElement(by);
-      } catch (final NoSuchElementException e) {
-         throw new AssertionFailedError("Has element " + by, e);
-      }
+      return assertHasElement("Has element " + by, parent, by);
    }
 
    private static URI createUrl(final String path) {
