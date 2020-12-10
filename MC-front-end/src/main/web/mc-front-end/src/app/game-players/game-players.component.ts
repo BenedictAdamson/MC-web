@@ -64,6 +64,22 @@ export class GamePlayersComponent implements OnInit {
 		return this.gamePlayersService.mayJoinGame(this.identifier);
 	}
 
+	get nPlayers(): number {
+		if (this.gamePlayers) {
+			return this.gamePlayers.users.length;
+		} else {
+			return 0;
+		}
+	}
+
+	get players(): string[] {
+		if (this.gamePlayers) {
+			return this.gamePlayers.users.map(id => id);// TODO provide names
+		} else {
+			return [];
+		}
+	}
+
 	endRecuitment() {
 		if (!this.identifier) throw new Error('unknown this.identifier');
 		this.gamePlayersService.endRecuitment(this.identifier).subscribe(gamePlayers => this.gamePlayers = gamePlayers);

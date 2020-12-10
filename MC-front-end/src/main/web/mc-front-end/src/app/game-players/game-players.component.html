@@ -14,7 +14,12 @@
    <button id="join" [disabled]="isJoinDisabled$() | async" (click)="joinGame()">Join</button>
 </section>
 <section id="players">
-   This game has no players.
+   <ul *ngIf="0 < nPlayers; else noPlayers">
+      <li *ngFor="let player of players">{{player}}</li>
+   </ul>
+   <ng-template #noPlayers>
+   <p>This game has no players.</p>
+   </ng-template>
 </section>
 
 </section>

@@ -83,6 +83,7 @@ describe('GamePlayersComponent', () => {
 		const html: HTMLElement = fixture.nativeElement;
 		const recruitingElement: HTMLElement = html.querySelector('#recruiting');
 		const joinableElement: HTMLElement = html.querySelector('#joinable');
+		const playersElement: HTMLElement = html.querySelector('#players');
 		const endRecuitmentButton: HTMLButtonElement = html.querySelector('button#end-recruitment');
 		const joinButton: HTMLButtonElement = html.querySelector('button#join');
 
@@ -90,6 +91,7 @@ describe('GamePlayersComponent', () => {
 		expect(recruitingElement.innerText).withContext("recruiting element text mentions recruiting").toMatch('[Rr]ecruiting');
 		expect(joinableElement).withContext("joinable element").not.toBeNull();
 		expect(joinableElement.innerText).withContext("joinable element text mentions joining").toMatch('[Jj]oin');
+		expect(playersElement).withContext("players element").not.toBeNull();
 		expect(endRecuitmentButton).withContext('end-recuitment button').not.toBeNull();
 		expect(joinButton).withContext('join button').not.toBeNull();
 	};
@@ -99,6 +101,7 @@ describe('GamePlayersComponent', () => {
 		const recruiting: boolean = gamePlayers.recruiting;
 		const manager: boolean = self.authorities.includes('ROLE_MANAGE_GAMES');
 		const mayEndRecuitment: boolean = recruiting && manager;
+		const nPlayers: number = gamePlayers.users.length;
 
 		setUpForNgInit(gamePlayers, self, mayJoinGame);
 		tick();
@@ -119,18 +122,28 @@ describe('GamePlayersComponent', () => {
 		const html: HTMLElement = fixture.nativeElement;
 		const recruitingElement: HTMLElement = html.querySelector('#recruiting');
 		const joinableElement: HTMLElement = html.querySelector('#joinable');
+		const playersElement: HTMLElement = html.querySelector('#players');
+		const playersList: HTMLUListElement = playersElement.querySelector('ul');
 		const endRecuitmentButton: HTMLButtonElement = html.querySelector('button#end-recruitment');
 		const joinButton: HTMLButtonElement = html.querySelector('button#join');
 
 		const recruitingText: string = recruitingElement.innerText;
 		const joinableText: string = joinableElement.innerText;
+		const playersText: string = playersElement.innerText;
 
 		expect(recruiting || recruitingText.includes('This game is not recruiting players')).withContext("recruiting element text can indicate that not recruiting").toBeTrue();
 		expect(!recruiting || recruitingText.includes('This game is recruiting players')).withContext("recruiting element text can indicate that is recruiting").toBeTrue();
 		expect(mayJoinGame || joinableText.includes('You may not join this game')).withContext("joinable element text can indicate that not joinable").toBeTrue();
 		expect(!mayJoinGame || joinableText.includes('You may join this game')).withContext("joinable element text can indicate that is joinable").toBeTrue();
+		expect(0 < nPlayers || playersText.includes('This game has no players')).withContext("players element text can indicate that has no players").toBeTrue();
+		expect((0 == nPlayers) == (playersList == null)).withContext("players element has a list iff have players").toBeTrue();
 		expect(endRecuitmentButton.disabled).withContext('end-recuitment button is disabled').toEqual(!mayEndRecuitment);
 		expect(joinButton.disabled).withContext('join button is disabled').toEqual(!mayJoinGame);
+
+		if (playersList) {
+			const playersEntries: NodeListOf<HTMLLIElement> = playersList.querySelectorAll('li');
+			expect(playersEntries.length).withContext('number of players listed').toEqual(gamePlayers.users.length);
+		}
 	};
 
 	it('can create [A]', fakeAsync(() => {
