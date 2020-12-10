@@ -16,8 +16,12 @@ class MockSelfService {
 
 	constructor(private self: User) { };
 
-	get username(): string {
-		return this.self.username;
+	get id$(): Observable<uuid> {
+		return of(this.self.id);
+	}
+
+	get username$(): Observable<string> {
+		return of(this.self.username);
 	}
 
 	get mayManageGames$(): Observable<boolean> {
@@ -99,6 +103,18 @@ describe('GamePlayersComponent', () => {
 	};
 
 
+
+	const isPlaying = function(component: GamePlayersComponent): boolean {
+		var playing: boolean = null;
+		component.playing$.subscribe({
+			next: (p) => playing = p,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return playing;
+	};
+
+
 	const canCreate = function(gamePlayers: GamePlayers, self: User, mayJoinGame: boolean) {
 		const recruiting: boolean = gamePlayers.recruiting;
 		const manager: boolean = self.authorities.includes('ROLE_MANAGE_GAMES');
@@ -112,7 +128,7 @@ describe('GamePlayersComponent', () => {
 		assertInvariants();
 
 		expect(component.gamePlayers).withContext('gamePlayers').toBe(gamePlayers);
-		expect(component.isPlaying()).withContext('playing').toEqual(playing);
+		expect(isPlaying(component)).withContext('playing').toEqual(playing);
 
 		component.isEndRecruitmentDisabled$().subscribe(may => {
 			expect(may).withContext('end recuitment disabled if game is not recuiting or user is not authorised').toEqual(!mayEndRecuitment);

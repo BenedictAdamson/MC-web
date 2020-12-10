@@ -53,8 +53,8 @@ export class SelfService {
      * which includes the case that the user is not logged in.
      * The current user ID can be known even if that user has not been authenticated.
      */
-	get id(): uuid {
-		return this.id_;
+	get id$(): Observable<uuid> {
+		return of(this.id_);
 	}
 
     /**
@@ -65,8 +65,8 @@ export class SelfService {
      * which includes the case that the user is not logged in.
      * The current user name can be known even if that user has not been authenticated.
      */
-	get username(): string {
-		return this.username_;
+	get username$(): Observable<string> {
+		return of(this.username_);
 	}
 
     /**
@@ -78,8 +78,8 @@ export class SelfService {
      * The current password name can be known even if that user has not been authenticated,
      * or if authentication has been tried but failed (which includes the case that the password is invalid).
      */
-	get password(): string {
-		return this.password_;
+	get password$(): Observable<string> {
+		return of(this.password_);
 	}
 
 	private handleUserDetailsHttpError() {

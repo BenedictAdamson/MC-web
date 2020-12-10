@@ -12,8 +12,8 @@ class MockSelfService {
 
 	constructor(private self: User) { };
 
-	get username(): string {
-		return this.self ? this.self.username : null;
+	get username$(): Observable<string> {
+		return of(this.self ? this.self.username : null);
 	}
 
 	get authenticated$(): Observable<boolean> {
@@ -60,6 +60,16 @@ describe('SelfComponent', () => {
 		fixture.detectChanges();
 	};
 
+	const getUsername = function(component: SelfComponent): string {
+		var username: string = null;
+		component.username$.subscribe({
+			next: (u) => username = u,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return username;
+	};
+
 	const assertInvariants = function() {
 		expect(component).toBeDefined();
 		const element: HTMLElement = fixture.nativeElement;
@@ -71,7 +81,7 @@ describe('SelfComponent', () => {
 
 	const assertNotLoggedIn = function() {
 		expect(getAuthenticated(component)).withContext('authenticated').toBeFalse();
-		expect(component.username).withContext('username').toBeNull();
+		expect(getUsername(component)).withContext('username').toBeNull();
 		const element: HTMLElement = fixture.nativeElement;
 		const loginLink: HTMLAnchorElement = element.querySelector('a[id="login"]');
 		const logoutButton: HTMLButtonElement = element.querySelector('button[id="logout"]');
@@ -93,7 +103,7 @@ describe('SelfComponent', () => {
 		setup(self);
 		assertInvariants();
 		expect(getAuthenticated(component)).withContext('authenticated').toBeTrue();
-		expect(component.username).withContext('username').toEqual(self.username);
+		expect(getUsername(component)).withContext('username').toEqual(self.username);
 		const element: HTMLElement = fixture.nativeElement;
 		const loginLink: HTMLAnchorElement = element.querySelector('a[id="login"]');
 		const logoutButton: HTMLButtonElement = element.querySelector('button[id="logout"]');

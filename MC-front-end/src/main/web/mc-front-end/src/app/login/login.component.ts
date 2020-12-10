@@ -18,8 +18,8 @@ export class LoginComponent implements OnInit {
 	) { }
 
 	ngOnInit(): void {
-		this.username = this.service.username;
-		this.password = this.service.password;
+		this.service.username$.subscribe(u => this.username = u);
+		this.service.password$.subscribe(p => this.password = p);
 	}
 
 	username: string = null;

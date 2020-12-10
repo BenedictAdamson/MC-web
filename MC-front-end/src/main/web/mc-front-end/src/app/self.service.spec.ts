@@ -60,15 +60,46 @@ describe('SelfService', () => {
 		return may;
 	};
 
+	const getUsername = function(service: SelfService): string {
+		var username: string = null;
+		service.username$.subscribe({
+			next: (u) => username = u,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return username;
+	};
+
+	const getPassword = function(service: SelfService): string {
+		var password: string = null;
+		service.password$.subscribe({
+			next: (p) => password = p,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return password;
+	};
+
+	const getId = function(service: SelfService): uuid {
+		var id: uuid = null;
+		service.id$.subscribe({
+			next: (i) => id = i,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return id;
+	};
+
 	const assertInvariants: CallableFunction = (s: SelfService) => {
 		const authenticated: boolean = getAuthenticated(s);
+		const username: string = getUsername(s);
 		const manageGames: boolean = mayManageGames(s);
 		const play: boolean = mayPlay(s);
 		const manageUsers: boolean = mayManageUsers(s);
 		const listUsers: boolean = mayListUsers(s);
 		const anyAuthority = manageGames || play || manageUsers || listUsers;
 
-		expect(authenticated && s.username == null).withContext('Not authenticated if username is null').toEqual(false);
+		expect(authenticated && username == null).withContext('Not authenticated if username is null').toEqual(false);
 		expect(!authenticated && anyAuthority).withContext('A user that has not been authenticated has no authorities').toEqual(false);
 	};
 
@@ -99,10 +130,10 @@ describe('SelfService', () => {
 
 	const assertNotAuthenticated = function() {
 		const authenticated: boolean = getAuthenticated(service);
-		expect(service.username).withContext('username').toBeNull();
-		expect(service.password).withContext('password').toBeNull();
+		expect(getUsername(service)).withContext('username').toBeNull();
+		expect(getPassword(service)).withContext('password').toBeNull();
 		expect(authenticated).withContext('authenticated').toEqual(false);
-		expect(service.id).withContext('id').toBeNull();
+		expect(getId(service)).withContext('id').toBeNull();
 	}
 
 	it('constructs the initial state', () => {
@@ -147,9 +178,9 @@ describe('SelfService', () => {
 			complete: () => {
 				assertInvariants(service);
 				expect(getAuthenticated(service)).toEqual(false, 'not authenticated');
-				expect(service.username).toEqual(username, 'updated username');
-				expect(service.password).toEqual(password, 'updated password');
-				expect(service.id).withContext('id').toBeNull();
+				expect(getUsername(service)).toEqual(username, 'updated username');
+				expect(getPassword(service)).toEqual(password, 'updated password');
+				expect(getId(service)).withContext('id').toBeNull();
 				done()
 			}
 		});
@@ -171,11 +202,10 @@ describe('SelfService', () => {
 	};
 
 	const assertAuthenticated = function(user: User) {
-		var authenticated: boolean = getAuthenticated(service);
-		expect(service.username).withContext('username').toEqual(user.username);
-		expect(service.password).withContext('password').toEqual(user.password);
-		expect(service.id).withContext('id').toBe(user.id);
-		expect(authenticated).withContext('authenticated').toEqual(true, 'authenticated');
+		expect(getUsername(service)).withContext('username').toEqual(user.username);
+		expect(getPassword(service)).withContext('password').toEqual(user.password);
+		expect(getId(service)).withContext('id').toBe(user.id);
+		expect(getAuthenticated(service)).withContext('authenticated').toEqual(true, 'authenticated');
 	}
 
 	const testAuthenticationSuccess = function(done: any, user: User) {

@@ -20,7 +20,7 @@
    <p id="players" >This game has no players.</p>
    </ng-template>
 
-   <p id="playing" *ngIf="isPlaying(); else notPlaying">You are playing this game.</p>
+   <p id="playing" *ngIf="playing$ | async; else notPlaying">You are playing this game.</p>
    <ng-template #notPlaying>
    <p id="playing" >You are not playing this game.</p>
    </ng-template>

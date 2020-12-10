@@ -21,9 +21,9 @@ export class SelfComponent implements OnInit {
 		// Do nothing
 	}
 
-	get id(): uuid { return this.service.id; };
-	
-	get username(): string { return this.service.username; };
+	get id$(): Observable<uuid> { return this.service.id$; };
+
+	get username$(): Observable<string> { return this.service.username$; };
 
 	get authenticated$(): Observable<boolean> { return this.service.authenticated$; };
 

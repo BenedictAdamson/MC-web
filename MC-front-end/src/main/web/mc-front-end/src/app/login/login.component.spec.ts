@@ -61,17 +61,14 @@ describe('LoginComponent', () => {
 
 	const testNgOnInit = function() {
 		component.ngOnInit();
-
-		const expectedUsername: string = selfService.username;
-		const expectedPassword: string = selfService.password;
-
-		expect(component.username).withContext('username').toEqual(expectedUsername);
-		expect(component.password).withContext('password').toEqual(expectedPassword);
 		expect(component.rejected).withContext('rejected').toBeFalse();
 	}
 
 	it('should initilize from the service [null]', () => {
 		testNgOnInit();
+
+		expect(component.username).withContext('username').toBeNull();
+		expect(component.password).withContext('password').toBeNull();
 	});
 
 	const mockAuthenticationSuccess = function(userDetails: User) {
@@ -91,6 +88,9 @@ describe('LoginComponent', () => {
 			}
 		});
 		mockAuthenticationSuccess(userDetails);
+
+		expect(component.username).withContext('username').toEqual(userDetails.username);
+		expect(component.password).withContext('password').toEqual(userDetails.password);
 	}
 
 	it('should initialize from the service [A]', (done) => {
@@ -134,8 +134,8 @@ describe('LoginComponent', () => {
 		component.password = userDetails.password;
 		component.login();
 		mockHttpAuthorizationFailure();
-		expect(component.username).withContext('username').toEqual(selfService.username);
-		expect(component.password).withContext('password').toEqual(selfService.password);
+		expect(component.username).withContext('username').toEqual(userDetails.username);
+		expect(component.password).withContext('password').toEqual(userDetails.password);
 		expect(component.rejected).withContext('rejected').toBeTrue();
 		expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(0);
 		done()
@@ -155,8 +155,8 @@ describe('LoginComponent', () => {
 		component.password = userDetails.password;
 		component.login();
 		mockAuthenticationSuccess(userDetails);
-		expect(component.username).withContext('username').toEqual(selfService.username);
-		expect(component.password).withContext('password').toEqual(selfService.password);
+		expect(component.username).withContext('username').toEqual(userDetails.username);
+		expect(component.password).withContext('password').toEqual(userDetails.password);
 		expect(component.rejected).withContext('rejected').toBeFalse();
 		expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(1);
 		expect(routerSpy.navigateByUrl.calls.argsFor(0)).withContext('router.navigateByUrl args').toEqual(['/']);

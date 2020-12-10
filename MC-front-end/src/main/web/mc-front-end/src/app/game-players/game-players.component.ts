@@ -51,8 +51,10 @@ export class GamePlayersComponent implements OnInit {
 		return gameId;
 	}
 
-	isPlaying(): boolean {
-		return this.selfService.id != null && this.gamePlayers.users.includes(this.selfService.id);
+	get playing$(): Observable<boolean> {
+		return this.selfService.id$.pipe(
+			map(id => id != null && this.gamePlayers.users.includes(id))
+		);
 	}
 
 	isEndRecruitmentDisabled$(): Observable<boolean> {
