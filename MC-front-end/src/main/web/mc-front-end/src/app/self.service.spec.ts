@@ -145,8 +145,8 @@ describe('SelfService', () => {
 	const expectAuthorizationRequestHeaders = function(expectAuthorizationHeader: boolean): TestRequest {
 		const request: TestRequest = httpTestingController.expectOne('/api/self');
 		expect(request.request.method).toEqual('GET');
-		expect(request.request.headers.has("Authorization")).withContext('has Authorization header').toEqual(expectAuthorizationHeader);
 		expect(request.request.headers.get("X-Requested-With")).withContext('X-Requested-With header').toEqual('XMLHttpRequest');
+		expect(request.request.headers.has("Authorization")).withContext('has Authorization header').toEqual(expectAuthorizationHeader);
 		return request;
 	};
 
@@ -332,23 +332,14 @@ describe('SelfService', () => {
 		mockHttpAuthorizationSuccess(serverUser, false);
 	}
 
-	const setUpAuthenticated = function(done: any, user: User) {
-		service.authenticate(user.username, user.password).subscribe({
-			next: () => { },
-			error: (err) => { fail(err); done() },
-			complete: () => {
-				done();
-			}
-		});
-		mockHttpAuthorizationSuccess(user, true);
+	const setUpAuthenticated = function(user: User) {
+		service.setUser(user, true);
 	};
 
 
 	const testCheckForCurrentAuthenticationWithSesson = function(done: any, user: User) {
-		setUpAuthenticated(
-			() => checkForCurrentAuthenticationWithSesson(done, user),
-			user
-		);
+		setUpAuthenticated(user);
+		checkForCurrentAuthenticationWithSesson(done, user);
 	}
 
 
