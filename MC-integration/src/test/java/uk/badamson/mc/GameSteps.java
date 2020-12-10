@@ -46,8 +46,6 @@ public class GameSteps extends Steps {
 
    private int nGames0;
 
-   private int nPlayers0;
-
    @Autowired
    public GameSteps(@Nonnull final World world) {
       super(world);
@@ -111,12 +109,10 @@ public class GameSteps extends Steps {
                .assertIncludesCreationTime();
    }
 
-   @Then("The game page indicates that the game has one more player")
-   public void game_page_indicates_game_has_one_more_player() {
-      final var nPlayers = world.getAndAssertExpectedPage(GamePage.class)
-               .getNumberOfPlayersListed();
-      assertEquals(nPlayers0 + 1, nPlayers,
-               "Added a player to the list of games");
+   @Then("The game page indicates that the game has no players")
+   public void game_page_indicates_game_has_no_players() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertIndicatesGameHasNoPlayers();
    }
 
    @Then("The game page indicates that the game has a player")
@@ -238,9 +234,7 @@ public class GameSteps extends Steps {
 
    @When("the user joins the game")
    public void user_joins_game() {
-      final var gamePage = world.getExpectedPage(GamePage.class);
-      nPlayers0 = gamePage.getNumberOfPlayersListed();
-      gamePage.joinGame();
+      world.getExpectedPage(GamePage.class).joinGame();
    }
 
    @Given("user is not playing any games")

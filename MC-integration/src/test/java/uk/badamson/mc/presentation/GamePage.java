@@ -108,12 +108,12 @@ public final class GamePage extends Page {
       includesScenarioTitile = containsString(scenarioPage.getScenarioTitle());
    }
 
-   private WebElement assertHasPlayersElement(WebElement body) {
+   private WebElement assertHasPlayersElement(final WebElement body) {
       return assertHasElement("Has a players element", body,
                PLAYERS_ELEMENT_LOCATOR);
    }
 
-   private WebElement assertHasPlayingElement(WebElement body) {
+   private WebElement assertHasPlayingElement(final WebElement body) {
       return assertHasElement("Has an element for reporting whether playing",
                body, PLAYING_ELEMENT_LOCATOR);
    }
@@ -183,7 +183,7 @@ public final class GamePage extends Page {
 
    }
 
-   private void assertIndicatesWhetherGameHasPlayers(WebElement body) {
+   private void assertIndicatesWhetherGameHasPlayers(final WebElement body) {
       final var players = assertHasPlayersElement(body);
       assertThat("Players text provides information", players.getText(),
                either(INDICATES_HAS_NO_PLAYERS).or(INDICATES_HAS_PLAYERS));
@@ -256,15 +256,6 @@ public final class GamePage extends Page {
       }
       button.click();
       awaitIsReady();
-   }
-
-   public int getNumberOfPlayersListed() {
-      final var players = getBody().findElements(PLAYERS_ELEMENT_LOCATOR);
-      if (players.isEmpty()) {
-         return 0;
-      } else {
-         return players.get(0).findElements(By.tagName("li")).size();
-      }
    }
 
    public boolean isEndRecruitmentEnabled() {
