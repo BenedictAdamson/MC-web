@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Objects;
 
@@ -106,6 +107,10 @@ public final class GamePage extends Page {
       includesCreationTime = creationTime == null ? null
                : containsString(creationTime);
       includesScenarioTitile = containsString(scenarioPage.getScenarioTitle());
+   }
+
+   private WebElement assertHasJoinableElement(final WebElement body) {
+      return assertHasElement(body, JOINABLE_ELEMENT_LOCATOR);
    }
 
    private WebElement assertHasPlayersElement(final WebElement body) {
@@ -220,9 +225,19 @@ public final class GamePage extends Page {
    }
 
    private void assertIndicatesWhetherUserMayJoinGame(final WebElement body) {
-      final var joinable = assertHasElement(body, JOINABLE_ELEMENT_LOCATOR);
+      final var joinable = assertHasJoinableElement(body);
       assertThat("Indicates whether the user may join this game",
                joinable.getText(), INDICATES_JOINING_NFORMATION);
+   }
+
+   private void assertJoinButtonConsistentWithJoinableText(
+            final WebElement body) {
+      final var button = assertHasElement("has a join button", body,
+               JOIN_BUTTON_LOCATOR);
+      final var description = assertHasJoinableElement(body);
+      assertEquals(isEnabled(button),
+               INDICATES_IS_JOINABLE.matches(description.getText()),
+               "join button is enabled iff joinable text indicates is joinable");
    }
 
    @Override
@@ -230,6 +245,7 @@ public final class GamePage extends Page {
       assertAll(() -> assertIndicatesWhetherUserMayJoinGame(body),
                () -> assertIndicatesWhetherGameHasPlayers(body),
                () -> assertIndicatesWhetherUserIsPlayingGame(body),
+               () -> assertJoinButtonConsistentWithJoinableText(body),
                () -> assertValidBodyText(body, body.getText()));
    }
 
