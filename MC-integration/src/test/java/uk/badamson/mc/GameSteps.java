@@ -90,6 +90,7 @@ public class GameSteps extends Steps {
       world.setExpectedPage(scenarioPage);
       nGames0 = scenarioPage.getNumberOfGamesListed();
       final var gamePage = scenarioPage.navigateToGamePage(nGames0 - 1);
+      gamePage.requireIndicatesIsRecruitingPlayers();
       world.setExpectedPage(gamePage);
    }
 
