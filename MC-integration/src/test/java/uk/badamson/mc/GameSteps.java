@@ -111,18 +111,18 @@ public class GameSteps extends Steps {
                .assertIncludesCreationTime();
    }
 
-   @Then("The game page indicates that the game has no players")
-   public void game_page_indicates_game_has_no_players() {
-      world.getAndAssertExpectedPage(GamePage.class)
-               .assertIndicatesGameHasNoPlayers();
-   }
-
    @Then("The game page indicates that the game has one more player")
    public void game_page_indicates_game_has_one_more_player() {
       final var nPlayers = world.getAndAssertExpectedPage(GamePage.class)
                .getNumberOfPlayersListed();
       assertEquals(nPlayers0 + 1, nPlayers,
                "Added a player to the list of games");
+   }
+
+   @Then("The game page indicates that the game has a player")
+   public void game_page_indicates_game_has_player() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertIndicatesGameHasPlayers();
    }
 
    @Then("the game page indicates that the game is not recruiting players")
@@ -137,6 +137,18 @@ public class GameSteps extends Steps {
                .assertIndicatesIsRecruitingPlayers();
    }
 
+   @Then("The game page indicates that the user is not playing the game")
+   public void game_page_indicates_user_is_not_playing_game() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertIndicatesUserIsNotPlayingGame();
+   }
+
+   @Then("The game page indicates that the user is playing the game")
+   public void game_page_indicates_user_is_playing_game() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertIndicatesUserIsPlayingGame();
+   }
+
    @Then("the game page indicates that the user may join the game")
    public void game_page_indicates_user_may_join_game() {
       world.getAndAssertExpectedPage(GamePage.class)
@@ -149,30 +161,28 @@ public class GameSteps extends Steps {
                .assertIndicatesUserMayNotJoinGame();
    }
 
+   @Then("The game page indicates whether the game has players")
+   public void game_page_indicates_whether_game_has_players() {
+      final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
+      gamePage.assertIndicatesWhetherGameHasPlayers();
+   }
+
    @Then("The game page indicates whether the game is recruiting players")
    public void game_page_indicates_whether_game_recuiting_players() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesWhetherRecruitingPlayers();
    }
 
+   @Then("The game page indicates whether the user is playing the game")
+   public void game_page_indicates_whether_user_is_playing_game() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertIndicatesWhetherUserIsPlayingGame();
+   }
+
    @Then("The game page indicates whether the user may join the game")
    public void game_page_indicates_whether_user_may_join_game() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesWhetherUserMayJoinGame();
-   }
-
-   @Then("The game page lists the players of the game or reports it has no players")
-   public void game_page_lists_players_of_game_or_reports_no_players() {
-      world.getAndAssertExpectedPage(GamePage.class)
-               .assertListsPlayersOfGameOrReportsNoPlayers();
-   }
-
-   @Then("The game page lists the user as a player of the game")
-   public void game_page_lists_user_as_player_of_game() {
-      final var loggedInUser = world.getLoggedInUser();
-      Objects.requireNonNull(loggedInUser, "loggedInUser");
-      final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
-      gamePage.assertListOfPlayersIncludes(loggedInUser);
    }
 
    @Then("the list of games includes the new game")

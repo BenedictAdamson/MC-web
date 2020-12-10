@@ -38,8 +38,6 @@ import org.openqa.selenium.WebElement;
 import org.opentest4j.MultipleFailuresError;
 import org.springframework.web.util.UriTemplate;
 
-import uk.badamson.mc.User;
-
 /**
  * <p>
  * A <i>page object</i> for a game page.
@@ -63,17 +61,21 @@ public final class GamePage extends Page {
             "You may not join this game");
    private static final Matcher<String> INDICATES_IS_JOINABLE = containsString(
             "You may join this game");
-   private static final Matcher<String> INDICATES_HAS_JOINED = containsString(
-            "You have joined this game");
+   private static final Matcher<String> INDICATES_IS_PLAYING = containsString(
+            "You are playing this game");
+   private static final Matcher<String> INDICATES_IS_NOT_PLAYING = containsString(
+            "You are not playing this game");
    private static final Matcher<String> INDICATES_JOINING_NFORMATION = anyOf(
-            INDICATES_HAS_JOINED, INDICATES_IS_JOINABLE,
-            INDICATES_IS_NOT_JOINABLE);
+            INDICATES_IS_JOINABLE, INDICATES_IS_NOT_JOINABLE);
    private static final Matcher<String> INDICATES_HAS_NO_PLAYERS = containsString(
             "This game has no players");
+   private static final Matcher<String> INDICATES_HAS_PLAYERS = containsString(
+            "This game has players");
 
    private static final By SCENARIO_LINK_LOCATOR = By.id("scenario");
    private static final By RECRUITING_ELEMENT_LOCATOR = By.id("recruiting");
    private static final By PLAYERS_ELEMENT_LOCATOR = By.id("players");
+   private static final By PLAYING_ELEMENT_LOCATOR = By.id("playing");
    private static final By JOINABLE_ELEMENT_LOCATOR = By.id("joinable");
    private static final By END_RECRUITMENT_BUTTON_LOCATOR = By
             .id("end-recruitment");
@@ -120,8 +122,15 @@ public final class GamePage extends Page {
    }
 
    public void assertIndicatesGameHasNoPlayers() {
-      final var element = assertHasElement(getBody(), PLAYERS_ELEMENT_LOCATOR);
-      assertThat(element.getText(), INDICATES_HAS_NO_PLAYERS);
+      final var players = assertHasPlayersElement(getBody());
+      assertThat("Players element reports that has no players",
+               players.getText(), INDICATES_HAS_NO_PLAYERS);
+   }
+
+   public void assertIndicatesGameHasPlayers() {
+      final var players = assertHasPlayersElement(getBody());
+      assertThat("Players element reports that has players", players.getText(),
+               INDICATES_HAS_PLAYERS);
    }
 
    public void assertIndicatesIsNotRecruitingPlayers() {
@@ -174,28 +183,26 @@ public final class GamePage extends Page {
                joinable.getText(), INDICATES_JOINING_NFORMATION);
    }
 
-   public void assertListOfPlayersIncludes(final User user) {
-      Objects.requireNonNull(user, "user");
-      final var players = assertHasElement(getBody(), PLAYERS_ELEMENT_LOCATOR);
-      final var playersList = assertHasElement(players, By.tagName("ul"));
-      assertThat("Players list includes user", playersList.getText(),
-               containsString(user.getUsername()));
+   public void assertIndicatesWhetherGameHasPlayers() {
+
    }
 
-   public void assertListsPlayersOfGameOrReportsNoPlayers() {
-      assertListsPlayersOfGameOrReportsNoPlayers(getBody());
+   private void assertIndicatesWhetherGameHasPlayers(WebElement body) {
+      final var players = assertHasPlayersElement(body);
+      assertThat("Players text provides information", players.getText(),
+               either(INDICATES_HAS_NO_PLAYERS).or(INDICATES_HAS_PLAYERS));
    }
 
-   private void assertListsPlayersOfGameOrReportsNoPlayers(
-            final WebElement body) {
-      assertHasElement("lists players or reports has no players", body,
+   private WebElement assertHasPlayersElement(WebElement body) {
+      return assertHasElement("Has a players element", body,
                PLAYERS_ELEMENT_LOCATOR);
    }
 
    @Override
    protected void assertValidBody(@Nonnull final WebElement body) {
       assertAll(() -> assertIndicatesWhetherUserMayJoinGame(body),
-               () -> assertListsPlayersOfGameOrReportsNoPlayers(body),
+               () -> assertIndicatesWhetherGameHasPlayers(body),
+               () -> assertIndicatesWhetherUserIsPlayingGame(body),
                () -> assertValidBodyText(body, body.getText()));
    }
 
@@ -283,5 +290,32 @@ public final class GamePage extends Page {
       if (!INDICATES_IS_RECRUITING_PLAYERS.matches(text)) {
          throw new IllegalStateException("Wrong text (" + text + ")");
       }
+   }
+
+   public void assertIndicatesUserIsPlayingGame() {
+      final var playing = assertHasPlayingElement(getBody());
+      assertThat("Indicates is playing the game", playing.getText(),
+               INDICATES_IS_PLAYING);
+   }
+
+   public void assertIndicatesUserIsNotPlayingGame() {
+      final var playing = assertHasPlayingElement(getBody());
+      assertThat("Indicates is not playing the game", playing.getText(),
+               INDICATES_IS_NOT_PLAYING);
+   }
+
+   private WebElement assertHasPlayingElement(WebElement body) {
+      return assertHasElement("Has an element for reporting whether playing",
+               body, PLAYING_ELEMENT_LOCATOR);
+   }
+
+   public void assertIndicatesWhetherUserIsPlayingGame() {
+      assertIndicatesWhetherUserIsPlayingGame(getBody());
+   }
+
+   private void assertIndicatesWhetherUserIsPlayingGame(final WebElement body) {
+      final var playing = assertHasPlayingElement(body);
+      assertThat("Indicates whether playing the game", playing.getText(),
+               either(INDICATES_IS_PLAYING).or(INDICATES_IS_NOT_PLAYING));
    }
 }
