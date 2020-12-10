@@ -1,4 +1,4 @@
-import { Observable, of } from 'rxjs';
+import { Observable, ReplaySubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 
@@ -17,6 +17,8 @@ import { SelfService } from '../self.service';
 })
 export class GamePlayersComponent implements OnInit {
 
+	private mayJoinGameRS$: ReplaySubject<boolean> = new ReplaySubject(1);
+
 	identifier: GameIdentifier;
 	gamePlayers: GamePlayers;
 
@@ -24,11 +26,18 @@ export class GamePlayersComponent implements OnInit {
 		private route: ActivatedRoute,
 		private gamePlayersService: GamePlayersService,
 		private selfService: SelfService
-	) { }
+	) {
+		this.mayJoinGameRS$.next(false);
+	}
 
 	ngOnInit(): void {
 		this.identifier = this.getGameIdentifier();
-		this.subscribeToGamePlayers();
+		if (!this.identifier) throw new Error('unknown this.identifier');
+		this.gamePlayersService.getGamePlayers(this.identifier)
+			.subscribe(gamePlayers => this.gamePlayers = gamePlayers);
+		this.gamePlayersService.mayJoinGame(this.identifier).subscribe(
+			may => this.mayJoinGameRS$.next(may)
+		);
 	}
 
 
@@ -40,12 +49,6 @@ export class GamePlayersComponent implements OnInit {
 		if (!created) throw new Error('unknown created');
 		const gameId: GameIdentifier = { scenario: scenario, created: created };
 		return gameId;
-	}
-
-	private subscribeToGamePlayers(): void {
-		if (!this.identifier) throw new Error('unknown this.identifier');
-		this.gamePlayersService.getGamePlayers(this.identifier)
-			.subscribe(gamePlayers => this.gamePlayers = gamePlayers);
 	}
 
 	isPlaying(): boolean {
@@ -65,7 +68,7 @@ export class GamePlayersComponent implements OnInit {
 	}
 
 	mayJoinGame$(): Observable<boolean> {
-		return this.gamePlayersService.mayJoinGame(this.identifier);
+		return this.mayJoinGameRS$.asObservable();
 	}
 
 	get nPlayers(): number {
