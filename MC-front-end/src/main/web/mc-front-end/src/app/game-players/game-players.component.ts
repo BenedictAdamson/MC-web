@@ -1,4 +1,4 @@
-import { Observable, ReplaySubject } from 'rxjs';
+import { Observable, ReplaySubject, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 
@@ -20,6 +20,26 @@ export class GamePlayersComponent implements OnInit {
 	private mayJoinGameRS$: ReplaySubject<boolean> = new ReplaySubject(1);
 
 	identifier: GameIdentifier;
+
+	private get scenario$(): Observable<uuid> {
+		return this.route.parent.parent.paramMap.pipe(
+			map(params => params.get('scenario'))
+		);
+	};
+
+	private get created$(): Observable<string> {
+		return this.route.parent.paramMap.pipe(
+			map(params => params.get('created'))
+		);
+	};
+
+	private static createIdentifier(scenario: uuid, created: string) {
+		return { scenario: scenario, created: created };
+	}
+
+	get identifier$(): Observable<GameIdentifier> {
+		return combineLatest([this.scenario$, this.created$], GamePlayersComponent.createIdentifier);
+	};
 	gamePlayers: GamePlayers;
 
 	constructor(

@@ -47,6 +47,26 @@ describe('GamePlayersComponent', () => {
 	const GAME_PLAYERS_A: GamePlayers = { identifier: GAME_IDENTIFIER_A, recruiting: true, users: [USER_ID_A, USER_ID_B] };
 	const GAME_PLAYERS_B: GamePlayers = { identifier: GAME_IDENTIFIER_B, recruiting: false, users: [] };
 
+	const getIdentifier = function(component: GamePlayersComponent): GameIdentifier {
+		var identifier: GameIdentifier = null;
+		component.identifier$.subscribe({
+			next: (i) => identifier = i,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return identifier;
+	};
+
+	const isPlaying = function(component: GamePlayersComponent): boolean {
+		var playing: boolean = null;
+		component.playing$.subscribe({
+			next: (p) => playing = p,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return playing;
+	};
+
 
 
 	const setUpForNgInit = function(gamePlayers: GamePlayers, self: User, mayJoinGame: boolean) {
@@ -61,6 +81,12 @@ describe('GamePlayersComponent', () => {
 			providers: [{
 				provide: ActivatedRoute,
 				useValue: {
+					parent: {
+						parent: {
+							paramMap: of(convertToParamMap({ scenario: identifier.scenario }))
+						},
+						paramMap: of(convertToParamMap({ created: identifier.created }))
+					},
 					snapshot: {
 						parent: {
 							parent: {
@@ -103,18 +129,6 @@ describe('GamePlayersComponent', () => {
 	};
 
 
-
-	const isPlaying = function(component: GamePlayersComponent): boolean {
-		var playing: boolean = null;
-		component.playing$.subscribe({
-			next: (p) => playing = p,
-			error: (err) => fail(err),
-			complete: () => { }
-		});
-		return playing;
-	};
-
-
 	const canCreate = function(gamePlayers: GamePlayers, self: User, mayJoinGame: boolean) {
 		const recruiting: boolean = gamePlayers.recruiting;
 		const manager: boolean = self.authorities.includes('ROLE_MANAGE_GAMES');
@@ -127,6 +141,7 @@ describe('GamePlayersComponent', () => {
 
 		assertInvariants();
 
+		expect(getIdentifier(component)).withContext('identifier$').toEqual(gamePlayers.identifier);
 		expect(component.gamePlayers).withContext('gamePlayers').toBe(gamePlayers);
 		expect(isPlaying(component)).withContext('playing').toEqual(playing);
 
@@ -191,6 +206,12 @@ describe('GamePlayersComponent', () => {
 			providers: [{
 				provide: ActivatedRoute,
 				useValue: {
+					parent: {
+						parent: {
+							paramMap: of(convertToParamMap({ scenario: identifier.scenario }))
+						},
+						paramMap: of(convertToParamMap({ created: identifier.created }))
+					},
 					snapshot: {
 						parent: {
 							parent: {
@@ -253,6 +274,12 @@ describe('GamePlayersComponent', () => {
 			providers: [{
 				provide: ActivatedRoute,
 				useValue: {
+					parent: {
+						parent: {
+							paramMap: of(convertToParamMap({ scenario: game.scenario }))
+						},
+						paramMap: of(convertToParamMap({ created: game.created }))
+					},
 					snapshot: {
 						parent: {
 							parent: {
