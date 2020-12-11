@@ -46,6 +46,16 @@ describe('GamesComponent', () => {
 	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A };
 	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B };
 
+	const getScenario = function(component: GamesComponent): uuid {
+		var scenario: uuid = null;
+		component.scenario$.subscribe({
+			next: (s) => scenario = s,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return scenario;
+	};
+
 	const setUpForNgInit = function(self: User, scenario: uuid, gamesOfScenario: string[]) {
 		const gameServiceStub = jasmine.createSpyObj('GameService', ['getGamesOfScenario']);
 		gameServiceStub.getGamesOfScenario.and.returnValue(of(gamesOfScenario));
@@ -56,7 +66,9 @@ describe('GamesComponent', () => {
 			providers: [{
 				provide: ActivatedRoute,
 				useValue: {
-					params: of({ scenario: scenario }),
+					parent: {
+						paramMap: of(convertToParamMap({ scenario: scenario })),
+					},
 					snapshot: {
 						parent: {
 							paramMap: convertToParamMap({ scenario: scenario })
@@ -76,6 +88,8 @@ describe('GamesComponent', () => {
 
 	const assertInvariants = function() {
 		expect(component).toBeTruthy();
+
+		expect(component.scenario$).withContext('scenario$').toBeTruthy();
 
 		const html: HTMLElement = fixture.nativeElement;
 		const gamesList: HTMLUListElement = html.querySelector('#games');
@@ -99,6 +113,7 @@ describe('GamesComponent', () => {
 
 		assertInvariants();
 		expect(component.scenario).toBe(scenario);
+		expect(getScenario(component)).withContext('scenario$').toEqual(scenario);
 		expect(component.games).toBe(gamesOfScenario);
 
 		const html: HTMLElement = fixture.nativeElement;
@@ -136,7 +151,9 @@ describe('GamesComponent', () => {
 			providers: [{
 				provide: ActivatedRoute,
 				useValue: {
-					params: of({ scenario: scenario }),
+					parent: {
+						paramMap: of(convertToParamMap({ scenario: scenario })),
+					},
 					snapshot: {
 						parent: {
 							paramMap: convertToParamMap({ scenario: scenario })

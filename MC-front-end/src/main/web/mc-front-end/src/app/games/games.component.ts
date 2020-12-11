@@ -1,5 +1,5 @@
 import { v4 as uuid, parse as parseUuid } from 'uuid';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { Component, OnInit } from '@angular/core';
@@ -22,6 +22,11 @@ export class GamesComponent implements OnInit {
 	}
 
 	scenario: uuid;
+	get scenario$(): Observable<uuid> {
+		return this.route.parent.paramMap.pipe(
+			map(params => params.get('scenario'))
+		);
+	}
 	games: string[];
 
 	constructor(
