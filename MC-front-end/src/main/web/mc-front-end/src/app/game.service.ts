@@ -29,6 +29,14 @@ export class GameService {
 
     /**
      * Get the creation times (instance IDs) of the games of a scenario.
+     *
+     * The service might have to request the server for this information.
+     * However, it caches responses, so the value provided by the returned [[Observable]]
+     * could be an immediately available cached value that does not require contacting the server.
+     *
+     * The  [[Observable]] returned by this method does not normally immediately ens
+     * once it has provided one value for the games of the scenario. It will provide additional values
+     * (after the first) as updated values if it has been asked to [[updateGamesOfScenario]].
      */
 	getGamesOfScenario(scenario: uuid): Observable<string[]> {
 		var rs: ReplaySubject<string[]> = this.gamesOfScenarios.get(scenario);
@@ -47,6 +55,18 @@ export class GameService {
 			.pipe(
 				catchError(this.handleError<string[]>('getGamesOfScenario', []))
 			);
+	}
+	
+	
+    /**
+     * Ask the service to update its cached value for the creation times (instance IDs) of the games of a scenario.
+     *
+     * The method dpes nt block, but instead performs the update asynchronously.
+     * The updated value will eventually become available through the [[Observable]]
+     * returned by [[getGamesOfScenario]].
+     */
+	updateGamesOfScenario(scenario: uuid): void {
+		//FIXME
 	}
 
     /**

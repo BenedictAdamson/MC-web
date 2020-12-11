@@ -43,7 +43,7 @@ describe('GameService', () => {
 		expect(service).toBeTruthy();
 	});
 
-	let testGetGamesOfScenario = function(scenario: uuid, identifiers: string[]) {
+	const testGetGamesOfScenario = function(scenario: uuid, identifiers: string[]) {
 		const service: GameService = TestBed.get(GameService);
 
 		service.getGamesOfScenario(scenario).subscribe(ids => expect(ids).toEqual(identifiers));
@@ -110,5 +110,27 @@ describe('GameService', () => {
 	it('can create game [B]', () => {
 		testCreateGame(GAME_B);
 	})
+
+
+
+	const testGetGamesOfScenarioAfterUpdateGamesOfScenario = function(scenario: uuid, identifiers: string[]) {
+		const service: GameService = TestBed.get(GameService);
+
+		service.updateGamesOfScenario(scenario);
+		service.getGamesOfScenario(scenario).subscribe(ids => expect(ids).toEqual(identifiers));
+
+		const request = httpTestingController.expectOne(GameService.getApiGamesPath(scenario));
+		expect(request.request.method).toEqual('GET');
+		request.flush(identifiers);
+		httpTestingController.verify();
+	};
+
+	it('can update games of scenario before asking for the games of the scenario[0]', () => {
+		testGetGamesOfScenarioAfterUpdateGamesOfScenario(SCENARIO_A, CREATEDS_0);
+	});
+
+	it('can update games of scenario before asking for the games of the scenario[1]', () => {
+		testGetGamesOfScenarioAfterUpdateGamesOfScenario(SCENARIO_B, CREATEDS_1);
+	});
 
 });
