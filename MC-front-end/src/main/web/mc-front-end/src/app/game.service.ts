@@ -56,8 +56,8 @@ export class GameService {
 				catchError(this.handleError<string[]>('getGamesOfScenario', []))
 			);
 	}
-	
-	
+
+
     /**
      * Ask the service to update its cached value for the creation times (instance IDs) of the games of a scenario.
      *
@@ -66,7 +66,12 @@ export class GameService {
      * returned by [[getGamesOfScenario]].
      */
 	updateGamesOfScenario(scenario: uuid): void {
-		//FIXME
+		var rs: ReplaySubject<string[]> = this.gamesOfScenarios.get(scenario);
+		if (!rs) {
+			rs = new ReplaySubject<string[]>(1);
+			this.gamesOfScenarios.set(scenario, rs);
+		}
+		this.fetchGamesOfScenario(scenario).subscribe(games => rs.next(games));
 	}
 
     /**

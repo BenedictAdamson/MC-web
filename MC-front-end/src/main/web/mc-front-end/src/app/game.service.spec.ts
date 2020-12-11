@@ -133,4 +133,30 @@ describe('GameService', () => {
 		testGetGamesOfScenarioAfterUpdateGamesOfScenario(SCENARIO_B, CREATEDS_1);
 	});
 
+
+
+	const testUpdateGamesOfScenarioAfterGetGamesOfScenario = function(scenario: uuid, identifiers: string[]) {
+		const service: GameService = TestBed.get(GameService);
+		const expectedPath: string = GameService.getApiGamesPath(scenario);
+
+		service.getGamesOfScenario(scenario).subscribe(ids => expect(ids).toEqual(identifiers));
+		service.updateGamesOfScenario(scenario);
+
+		const requests: TestRequest[] = httpTestingController.match(expectedPath);
+		expect(requests.length).withContext('number of requests').toEqual(2);
+		expect(requests[0].request.method).toEqual('GET');
+		requests[0].flush(identifiers);
+		expect(requests[1].request.method).toEqual('GET');
+		requests[1].flush(identifiers);
+		httpTestingController.verify();
+	};
+
+	it('can update games of scenario after asking for the games of the scenario[0]', () => {
+		testUpdateGamesOfScenarioAfterGetGamesOfScenario(SCENARIO_A, CREATEDS_0);
+	});
+
+	it('can update games of scenario after asking for the games of the scenario[1]', () => {
+		testUpdateGamesOfScenarioAfterGetGamesOfScenario(SCENARIO_B, CREATEDS_1);
+	});
+
 });
