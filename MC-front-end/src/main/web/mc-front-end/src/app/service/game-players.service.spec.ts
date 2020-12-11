@@ -191,4 +191,47 @@ describe('GamePlayersService', () => {
 	it('can update game players after get game players [B]', () => {
 		testUpdateGamePlayersAfterGetGamePlayers(GAME_PLAYERS_B);
 	})
+
+
+
+	const testGetGamePlayersForChangingValue = function(
+		done: any,
+		identifier: GameIdentifier,
+		recruiting1: boolean,
+		users1: uuid[],
+		recruiting2: boolean,
+		users2: uuid[]
+	) {
+		const gamePlayers1: GamePlayers = { identifier: identifier, recruiting: recruiting1, users: users1 };
+		const gamePlayers2: GamePlayers = { identifier: identifier, recruiting: recruiting2, users: users2 };
+		const expectedPath: string = GamePlayersService.getApiGamePlayersPath(identifier);
+		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		var n: number = 0;
+
+		service.getGamePlayers(identifier).subscribe(
+			gamePlayers => {
+				expect(0 != n || gamePlayers1 == gamePlayers).withContext('provides the first value').toBeTrue();
+				expect(1 != n || gamePlayers2 == gamePlayers).withContext('provides the second value').toBeTrue();
+				n++;
+				if (n == 2) done();
+			}
+		);
+		service.updateGamePlayers(identifier);
+
+		const requests: TestRequest[] = httpTestingController.match(expectedPath);
+		expect(requests.length).withContext('number of requests').toEqual(2);
+		expect(requests[0].request.method).toEqual('GET');
+		requests[0].flush(gamePlayers1);
+		expect(requests[1].request.method).toEqual('GET');
+		requests[1].flush(gamePlayers2);
+		httpTestingController.verify();
+	};
+
+	it('provides updated game players [A]', (done) => {
+		testGetGamePlayersForChangingValue(done, GAME_IDENTIFIER_A, true, [], false, [USER_A]);
+	})
+
+	it('provides updated game players [B]', (done) => {
+		testGetGamePlayersForChangingValue(done, GAME_IDENTIFIER_B, true, [USER_A], true, [USER_B]);
+	})
 });
