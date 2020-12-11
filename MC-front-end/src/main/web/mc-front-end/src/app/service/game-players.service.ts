@@ -38,11 +38,36 @@ export class GamePlayersService {
     /**
      * Get the players of the game that has a given ID.
      */
+
+    /**
+     * Get the players of the game that has a given ID.
+     *
+     * The service might have to request the server for this information.
+     * However, it caches responses, so the value emitted by the returned [[Observable]]
+     * could be an immediately available cached value that does not require contacting the server.
+     *
+     * The  [[Observable]] returned by this method does not normally immediately end
+     * once it has emitted one value. It will emit additional values
+     * (after the first) as updated values if it has been asked to [[updateGamePlayers]].
+     *
+     * The  [[Observable]] returned by this method emits only distinct values.
+     */
 	getGamePlayers(game: GameIdentifier): Observable<GamePlayers> {
 		return this.http.get<GamePlayers>(GamePlayersService.getApiGamePlayersPath(game))
 			.pipe(
 				catchError(this.handleError<GamePlayers>('getGamePlayers', null))
 			);
+	}
+
+    /**
+     * Ask the service to update its cached value for the players of a game.
+     *
+     * The method does nt block, but instead performs the update asynchronously.
+     * The updated value will eventually become available through the [[Observable]]
+     * returned by [[getGamePlayers]].
+     */
+	updateGamePlayers(game: GameIdentifier): void {
+		//FIXME
 	}
 
     /**

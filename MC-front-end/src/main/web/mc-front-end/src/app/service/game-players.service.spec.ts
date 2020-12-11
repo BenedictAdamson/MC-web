@@ -140,4 +140,28 @@ describe('GamePlayersService', () => {
 	it('can query whether may join game a [B]', () => {
 		testMayJoinGame(GAME_IDENTIFIER_B, false);
 	})
+
+
+
+	const testGetGamePlayersAfterUpdateGamePlayers = function(gamePlayers: GamePlayers) {
+		const game: GameIdentifier = gamePlayers.identifier;
+		const expectedPath: string = GamePlayersService.getApiGamePlayersPath(game);
+		const service: GamePlayersService = TestBed.get(GamePlayersService);
+
+		service.updateGamePlayers(game);
+		service.getGamePlayers(game).subscribe(g => expect(g).toEqual(gamePlayers));
+
+		const request = httpTestingController.expectOne(expectedPath);
+		expect(request.request.method).toEqual('GET');
+		request.flush(gamePlayers);
+		httpTestingController.verify();
+	};
+
+	it('can get game players after update game players [A]', () => {
+		testGetGamePlayersAfterUpdateGamePlayers(GAME_PLAYERS_A);
+	})
+
+	it('can get game players after update game players [B]', () => {
+		testGetGamePlayersAfterUpdateGamePlayers(GAME_PLAYERS_B);
+	})
 });
