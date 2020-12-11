@@ -1,7 +1,8 @@
 import { v4 as uuid } from 'uuid';
 import { Observable } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
@@ -157,6 +158,40 @@ describe('GameService', () => {
 
 	it('can update games of scenario after asking for the games of the scenario[1]', () => {
 		testUpdateGamesOfScenarioAfterGetGamesOfScenario(SCENARIO_B, CREATEDS_1);
+	});
+
+
+
+	const testGetGamesOfScenarioForChangingValue = function(done: any, scenario: uuid, identifiers1: string[], identifiers2: string[]) {
+		const service: GameService = TestBed.get(GameService);
+		const expectedPath: string = GameService.getApiGamesPath(scenario);
+		var n: number = 0;
+
+		service.getGamesOfScenario(scenario).subscribe(
+			ids => {
+				expect(0 != n || identifiers1 == ids).withContext('provides the first identifiers').toBeTrue();
+				expect(1 != n || identifiers2 == ids).withContext('provides the second identifiers').toBeTrue();
+				n++;
+				if (n == 2) done();
+			}
+		);
+		service.updateGamesOfScenario(scenario);
+
+		const requests: TestRequest[] = httpTestingController.match(expectedPath);
+		expect(requests.length).withContext('number of requests').toEqual(2);
+		expect(requests[0].request.method).toEqual('GET');
+		requests[0].flush(identifiers1);
+		expect(requests[1].request.method).toEqual('GET');
+		requests[1].flush(identifiers2);
+		httpTestingController.verify();
+	};
+
+	it('provides updated games of scenario [A]', (done) => {
+		testGetGamesOfScenarioForChangingValue(done, SCENARIO_A, CREATEDS_0, CREATEDS_1);
+	});
+
+	it('provides updated games of scenario [B]', (done) => {
+		testGetGamesOfScenarioForChangingValue(done, SCENARIO_B, CREATEDS_2, CREATEDS_1);
 	});
 
 });
