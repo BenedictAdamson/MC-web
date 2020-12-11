@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 
 import { GamePlayers } from '../game-players'
 import { GameIdentifier } from '../game-identifier'
@@ -163,5 +163,32 @@ describe('GamePlayersService', () => {
 
 	it('can get game players after update game players [B]', () => {
 		testGetGamePlayersAfterUpdateGamePlayers(GAME_PLAYERS_B);
+	})
+
+
+
+	const testUpdateGamePlayersAfterGetGamePlayers = function(gamePlayers: GamePlayers) {
+		const game: GameIdentifier = gamePlayers.identifier;
+		const expectedPath: string = GamePlayersService.getApiGamePlayersPath(game);
+		const service: GamePlayersService = TestBed.get(GamePlayersService);
+
+		service.getGamePlayers(game).subscribe(g => expect(g).toEqual(gamePlayers));
+		service.updateGamePlayers(game);
+
+		const requests: TestRequest[] = httpTestingController.match(expectedPath);
+		expect(requests.length).withContext('number of requests').toEqual(2);
+		expect(requests[0].request.method).toEqual('GET');
+		requests[0].flush(gamePlayers);
+		expect(requests[1].request.method).toEqual('GET');
+		requests[1].flush(gamePlayers);
+		httpTestingController.verify();
+	};
+
+	it('can update game players after get game players [A]', () => {
+		testUpdateGamePlayersAfterGetGamePlayers(GAME_PLAYERS_A);
+	})
+
+	it('can update game players after get game players [B]', () => {
+		testUpdateGamePlayersAfterGetGamePlayers(GAME_PLAYERS_B);
 	})
 });

@@ -1,4 +1,4 @@
-import { Observable, of } from 'rxjs';
+import { Observable, ReplaySubject, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 import { Injectable } from '@angular/core';
@@ -13,6 +13,8 @@ import { GameService } from './game.service'
 	providedIn: 'root'
 })
 export class GamePlayersService {
+
+	private gamesPlayers: Map<GameIdentifier, ReplaySubject<GamePlayers>> = new Map();
 
 	constructor(
 		private http: HttpClient
@@ -35,9 +37,23 @@ export class GamePlayersService {
 	}
 
 
-    /**
-     * Get the players of the game that has a given ID.
-     */
+
+	private createCacheForGamePlayers(game: GameIdentifier): ReplaySubject<GamePlayers> {
+		const rs: ReplaySubject<GamePlayers> = new ReplaySubject<GamePlayers>(1);
+		this.gamesPlayers.set(game, rs);
+		return rs;
+	}
+
+	private fetchGamePlayers(game: GameIdentifier): Observable<GamePlayers> {
+		return this.http.get<GamePlayers>(GamePlayersService.getApiGamePlayersPath(game))
+			.pipe(
+				catchError(this.handleError<GamePlayers>('fetchGamePlayers', null))
+			);
+	}
+
+	private updateCachedGamePlayers(game: GameIdentifier, rs: ReplaySubject<GamePlayers>): void {
+		this.fetchGamePlayers(game).subscribe(gamePlayers => rs.next(gamePlayers));
+	}
 
     /**
      * Get the players of the game that has a given ID.
@@ -53,10 +69,12 @@ export class GamePlayersService {
      * The  [[Observable]] returned by this method emits only distinct values.
      */
 	getGamePlayers(game: GameIdentifier): Observable<GamePlayers> {
-		return this.http.get<GamePlayers>(GamePlayersService.getApiGamePlayersPath(game))
-			.pipe(
-				catchError(this.handleError<GamePlayers>('getGamePlayers', null))
-			);
+		var rs: ReplaySubject<GamePlayers> = this.gamesPlayers.get(game);
+		if (!rs) {
+			rs = this.createCacheForGamePlayers(game);
+			this.updateCachedGamePlayers(game, rs);
+		}
+		return rs.asObservable();
 	}
 
     /**
@@ -67,7 +85,11 @@ export class GamePlayersService {
      * returned by [[getGamePlayers]].
      */
 	updateGamePlayers(game: GameIdentifier): void {
-		//FIXME
+		var rs: ReplaySubject<GamePlayers> = this.gamesPlayers.get(game);
+		if (!rs) {
+			rs = this.createCacheForGamePlayers(game);
+		}
+		this.updateCachedGamePlayers(game, rs);
 	}
 
     /**
