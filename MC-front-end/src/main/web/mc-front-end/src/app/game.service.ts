@@ -43,16 +43,21 @@ export class GameService {
 		if (rs) {// use existing entry
 			return rs.asObservable();
 		} else {
-			rs = new ReplaySubject<string[]>(1);
-			this.gamesOfScenarios.set(scenario, rs);
+			rs = this.createCacheForGamesOfScenario(scenario);
 			this.updateCachedGamesOfScenario(scenario, rs);
 			return rs;
 		}
 	}
-	
-	
+
+
+	private createCacheForGamesOfScenario(scenario: uuid): ReplaySubject<string[]> {
+		const rs: ReplaySubject<string[]> = new ReplaySubject<string[]>(1);
+		this.gamesOfScenarios.set(scenario, rs);
+		return rs;
+	}
+
 	private updateCachedGamesOfScenario(scenario: uuid, rs: ReplaySubject<string[]>): void {
-	   this.fetchGamesOfScenario(scenario).subscribe(games => rs.next(games));
+		this.fetchGamesOfScenario(scenario).subscribe(games => rs.next(games));
 	}
 
 	private fetchGamesOfScenario(scenario: uuid): Observable<string[]> {
@@ -73,10 +78,9 @@ export class GameService {
 	updateGamesOfScenario(scenario: uuid): void {
 		var rs: ReplaySubject<string[]> = this.gamesOfScenarios.get(scenario);
 		if (!rs) {
-			rs = new ReplaySubject<string[]>(1);
-			this.gamesOfScenarios.set(scenario, rs);
+			rs = this.createCacheForGamesOfScenario(scenario);
 		}
-	    this.updateCachedGamesOfScenario(scenario, rs);
+		this.updateCachedGamesOfScenario(scenario, rs);
 	}
 
     /**
