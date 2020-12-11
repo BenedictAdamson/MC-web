@@ -1,4 +1,4 @@
-import { Observable, of } from 'rxjs';
+import { Observable, ReplaySubject, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 
@@ -13,6 +13,8 @@ import { GameIdentifier } from './game-identifier'
 	providedIn: 'root'
 })
 export class GameService {
+
+	private gamesOfScenarios: Map<uuid, ReplaySubject<string[]>> = new Map();
 
 	constructor(
 		private http: HttpClient) { }
@@ -29,6 +31,18 @@ export class GameService {
      * Get the creation times (instance IDs) of the games of a scenario.
      */
 	getGamesOfScenario(scenario: uuid): Observable<string[]> {
+		var rs: ReplaySubject<string[]> = this.gamesOfScenarios.get(scenario);
+		if (rs) {// use existing entry
+			return rs.asObservable();
+		} else {
+			rs = new ReplaySubject<string[]>(1);
+			this.gamesOfScenarios.set(scenario, rs);
+			this.fetchGamesOfScenario(scenario).subscribe(games => rs.next(games));
+			return rs;
+		}
+	}
+
+	private fetchGamesOfScenario(scenario: uuid): Observable<string[]> {
 		return this.http.get<string[]>(GameService.getApiGamesPath(scenario))
 			.pipe(
 				catchError(this.handleError<string[]>('getGamesOfScenario', []))
