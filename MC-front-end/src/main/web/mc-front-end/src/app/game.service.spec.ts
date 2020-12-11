@@ -194,4 +194,39 @@ describe('GameService', () => {
 		testGetGamesOfScenarioForChangingValue(done, SCENARIO_B, CREATEDS_2, CREATEDS_1);
 	});
 
+
+
+
+
+	const testGetGamesOfScenarioForUnchangedUpdate = function(scenario: uuid, identifiers: string[]) {
+		const service: GameService = TestBed.get(GameService);
+		const expectedPath: string = GameService.getApiGamesPath(scenario);
+		var n: number = 0;
+
+		service.getGamesOfScenario(scenario).subscribe(
+			ids => {
+				expect(identifiers == ids).withContext('provides the expected identifiers').toBeTrue();
+				n++;
+				expect(n).withContext('number emitted').toEqual(1);
+			}
+		);
+		service.updateGamesOfScenario(scenario);
+
+		const requests: TestRequest[] = httpTestingController.match(expectedPath);
+		expect(requests.length).withContext('number of requests').toEqual(2);
+		expect(requests[0].request.method).toEqual('GET');
+		requests[0].flush(identifiers);
+		expect(requests[1].request.method).toEqual('GET');
+		requests[1].flush(identifiers);
+		httpTestingController.verify();
+	};
+
+	it('provides distinct games of scenario [A]', () => {
+		testGetGamesOfScenarioForUnchangedUpdate(SCENARIO_A, CREATEDS_0);
+	});
+
+	it('provides distinct games of scenario [B]', () => {
+		testGetGamesOfScenarioForUnchangedUpdate(SCENARIO_B, CREATEDS_2);
+	});
+
 });

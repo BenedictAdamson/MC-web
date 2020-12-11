@@ -1,5 +1,5 @@
 import { Observable, ReplaySubject, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, distinctUntilChanged } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 
 import { Injectable } from '@angular/core';
@@ -34,19 +34,21 @@ export class GameService {
      * However, it caches responses, so the value provided by the returned [[Observable]]
      * could be an immediately available cached value that does not require contacting the server.
      *
-     * The  [[Observable]] returned by this method does not normally immediately ens
+     * The  [[Observable]] returned by this method does not normally immediately end
      * once it has provided one value for the games of the scenario. It will provide additional values
      * (after the first) as updated values if it has been asked to [[updateGamesOfScenario]].
+     *
+     * The  [[Observable]] returned by this method emits only distinct values.
      */
 	getGamesOfScenario(scenario: uuid): Observable<string[]> {
 		var rs: ReplaySubject<string[]> = this.gamesOfScenarios.get(scenario);
-		if (rs) {// use existing entry
-			return rs.asObservable();
-		} else {
+		if (!rs) {
 			rs = this.createCacheForGamesOfScenario(scenario);
 			this.updateCachedGamesOfScenario(scenario, rs);
-			return rs;
 		}
+		return rs.pipe(
+			distinctUntilChanged()
+		);
 	}
 
 
