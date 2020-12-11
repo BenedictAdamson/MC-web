@@ -45,15 +45,20 @@ export class GameService {
 		} else {
 			rs = new ReplaySubject<string[]>(1);
 			this.gamesOfScenarios.set(scenario, rs);
-			this.fetchGamesOfScenario(scenario).subscribe(games => rs.next(games));
+			this.updateCachedGamesOfScenario(scenario, rs);
 			return rs;
 		}
+	}
+	
+	
+	private updateCachedGamesOfScenario(scenario: uuid, rs: ReplaySubject<string[]>): void {
+	   this.fetchGamesOfScenario(scenario).subscribe(games => rs.next(games));
 	}
 
 	private fetchGamesOfScenario(scenario: uuid): Observable<string[]> {
 		return this.http.get<string[]>(GameService.getApiGamesPath(scenario))
 			.pipe(
-				catchError(this.handleError<string[]>('getGamesOfScenario', []))
+				catchError(this.handleError<string[]>('fetchGamesOfScenario', []))
 			);
 	}
 
@@ -71,7 +76,7 @@ export class GameService {
 			rs = new ReplaySubject<string[]>(1);
 			this.gamesOfScenarios.set(scenario, rs);
 		}
-		this.fetchGamesOfScenario(scenario).subscribe(games => rs.next(games));
+	    this.updateCachedGamesOfScenario(scenario, rs);
 	}
 
     /**
