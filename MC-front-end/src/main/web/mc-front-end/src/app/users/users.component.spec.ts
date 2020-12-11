@@ -4,10 +4,10 @@ import { v4 as uuid } from 'uuid';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { SelfService } from '../self.service';
+import { SelfService } from '../service/self.service';
 import { User } from '../user';
 import { UsersComponent } from './users.component';
-import { UserService } from '../user.service';
+import { UserService } from '../service/user.service';
 
 class MockSelfService {
 

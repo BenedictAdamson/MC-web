@@ -5,8 +5,8 @@ import { v4 as uuid } from 'uuid';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { User } from './user';
-import { UserDetails } from './user-details';
+import { User } from '../user';
+import { UserDetails } from '../user-details';
 
 @Injectable({
 	providedIn: 'root'

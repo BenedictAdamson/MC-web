@@ -5,9 +5,9 @@ import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
 
 import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
-import { GameService } from '../game.service';
+import { GameService } from '../service/game.service';
 import { GamesComponent } from '../games/games.component';
-import { SelfService } from '../self.service';
+import { SelfService } from '../service/self.service';
 
 @Component({
 	selector: 'app-game',

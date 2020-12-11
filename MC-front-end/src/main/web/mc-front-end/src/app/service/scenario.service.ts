@@ -5,8 +5,8 @@ import { v4 as uuid } from 'uuid';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { NamedUUID } from './named-uuid';
-import { Scenario } from './scenario';
+import { NamedUUID } from '../named-uuid';
+import { Scenario } from '../scenario';
 
 @Injectable({
 	providedIn: 'root'

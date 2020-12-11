@@ -7,9 +7,9 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 
 import { Game } from '../game'
 import { GameIdentifier } from '../game-identifier'
-import { GameService } from '../game.service';
+import { GameService } from '../service/game.service';
 import { GameComponent } from './game.component';
-import { SelfService } from '../self.service';
+import { SelfService } from '../service/self.service';
 import { User } from '../user';
 
 class MockSelfService {

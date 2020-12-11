@@ -4,7 +4,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { Scenario } from '../scenario';
-import { ScenarioService } from '../scenario.service';
+import { ScenarioService } from '../service/scenario.service';
 
 @Component({
 	selector: 'app-scenario',

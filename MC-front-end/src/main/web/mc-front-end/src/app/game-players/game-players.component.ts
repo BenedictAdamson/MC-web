@@ -7,8 +7,8 @@ import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
 
 import { GameIdentifier } from '../game-identifier';
 import { GamePlayers } from '../game-players';
-import { GamePlayersService } from '../game-players.service';
-import { SelfService } from '../self.service';
+import { GamePlayersService } from '../service/game-players.service';
+import { SelfService } from '../service/self.service';
 
 @Component({
 	selector: 'app-game',

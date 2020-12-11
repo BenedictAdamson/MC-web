@@ -5,7 +5,7 @@ import { ActivatedRoute, convertToParamMap } from '@angular/router';
 
 import { User } from '../user';
 import { UserComponent } from './user.component';
-import { UserService } from '../user.service';
+import { UserService } from '../service/user.service';
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 

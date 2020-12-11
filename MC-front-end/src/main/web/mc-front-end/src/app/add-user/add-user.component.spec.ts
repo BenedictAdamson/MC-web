@@ -8,7 +8,7 @@ import { ComponentFixture, TestBed, waitForAsync, fakeAsync, tick } from '@angul
 
 import { AddUserComponent } from './add-user.component';
 import { UserDetails } from '../user-details';
-import { UserService } from '../user.service';
+import { UserService } from '../service/user.service';
 import { User } from '../user';
 
 class MockUserService {

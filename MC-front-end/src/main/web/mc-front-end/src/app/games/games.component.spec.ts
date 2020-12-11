@@ -5,10 +5,10 @@ import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 
 import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
-import { GameService } from '../game.service';
+import { GameService } from '../service/game.service';
 import { GameComponent } from '../game/game.component';
 import { GamesComponent } from './games.component';
-import { SelfService } from '../self.service';
+import { SelfService } from '../service/self.service';
 import { User } from '../user';
 
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';

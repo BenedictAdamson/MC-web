@@ -4,7 +4,7 @@ import { v4 as uuid } from 'uuid';
 
 import { Component, OnInit } from '@angular/core';
 
-import { SelfService } from '../self.service';
+import { SelfService } from '../service/self.service';
 
 @Component({
 	selector: 'app-self',

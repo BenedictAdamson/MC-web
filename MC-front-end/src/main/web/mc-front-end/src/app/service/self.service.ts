@@ -6,7 +6,7 @@ import { flatMap, map, tap } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { User } from './user';
+import { User } from '../user';
 
 const selfUrl: string = '/api/self';
 const logoutUrl: string = '/logout';

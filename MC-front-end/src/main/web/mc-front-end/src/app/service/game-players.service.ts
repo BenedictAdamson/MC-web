@@ -5,8 +5,8 @@ import { v4 as uuid } from 'uuid';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { GameIdentifier } from './game-identifier'
-import { GamePlayers } from './game-players'
+import { GameIdentifier } from '../game-identifier'
+import { GamePlayers } from '../game-players'
 import { GameService } from './game.service'
 
 

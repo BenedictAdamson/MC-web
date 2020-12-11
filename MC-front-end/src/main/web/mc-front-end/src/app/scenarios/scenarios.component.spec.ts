@@ -6,7 +6,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { NamedUUID } from '../named-uuid';
 import { ScenariosComponent } from './scenarios.component';
-import { ScenarioService } from '../scenario.service';
+import { ScenarioService } from '../service/scenario.service';
 
 
 describe('ScenariosComponent', () => {

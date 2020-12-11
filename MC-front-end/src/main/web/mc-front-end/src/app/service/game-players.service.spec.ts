@@ -6,10 +6,10 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
-import { GamePlayers } from './game-players'
-import { GameIdentifier } from './game-identifier'
+import { GamePlayers } from '../game-players'
+import { GameIdentifier } from '../game-identifier'
 import { GamePlayersService } from './game-players.service';
-import { User } from './user'
+import { User } from '../user'
 
 
 describe('GamePlayersService', () => {

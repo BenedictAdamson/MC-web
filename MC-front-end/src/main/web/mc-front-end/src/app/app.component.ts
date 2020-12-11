@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 
 import { Component } from '@angular/core';
 
-import { SelfService } from './self.service';
+import { SelfService } from './service/self.service';
 
 @Component({
 	selector: 'app-root',

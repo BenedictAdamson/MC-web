@@ -7,7 +7,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { SelfComponent } from './self/self.component';
-import { SelfService } from './self.service';
+import { SelfService } from './service/self.service';
 
 
 

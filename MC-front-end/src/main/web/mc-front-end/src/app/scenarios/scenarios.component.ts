@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { NamedUUID } from '../named-uuid';
-import { ScenarioService } from '../scenario.service';
+import { ScenarioService } from '../service/scenario.service';
 
 @Component({
 	selector: 'app-scenarios',

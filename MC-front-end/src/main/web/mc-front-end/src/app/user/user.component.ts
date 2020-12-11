@@ -3,7 +3,7 @@ import { v4 as uuid } from 'uuid';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { UserService } from '../user.service';
+import { UserService } from '../service/user.service';
 import { User } from '../user';
 
 @Component({

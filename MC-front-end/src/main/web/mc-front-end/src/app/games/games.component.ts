@@ -6,9 +6,9 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { GameComponent } from '../game/game.component';
-import { GameService } from '../game.service';
+import { GameService } from '../service/game.service';
 import { ScenarioComponent } from '../scenario/scenario.component';
-import { SelfService } from '../self.service';
+import { SelfService } from '../service/self.service';
 
 @Component({
 	selector: 'app-scenario',

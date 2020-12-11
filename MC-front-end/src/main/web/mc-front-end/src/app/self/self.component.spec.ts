@@ -5,7 +5,7 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { SelfComponent } from './self.component';
-import { SelfService } from '../self.service';
+import { SelfService } from '../service/self.service';
 import { User } from '../user';
 
 class MockSelfService {

@@ -4,9 +4,9 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { HttpClient } from '@angular/common/http';
 
-import { UserDetails } from './user-details';
+import { UserDetails } from '../user-details';
 import { UserService } from './user.service';
-import { User } from './user';
+import { User } from '../user';
 
 
 describe('UserService', () => {

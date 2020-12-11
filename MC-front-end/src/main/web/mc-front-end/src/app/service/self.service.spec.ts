@@ -6,7 +6,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 
 import { SelfService } from './self.service';
-import { User } from './user';
+import { User } from '../user';
 
 describe('SelfService', () => {
 

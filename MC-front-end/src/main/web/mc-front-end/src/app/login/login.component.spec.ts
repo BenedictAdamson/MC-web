@@ -8,7 +8,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
 import { LoginComponent } from './login.component';
-import { SelfService } from '../self.service';
+import { SelfService } from '../service/self.service';
 import { User } from '../user';
 
 describe('LoginComponent', () => {

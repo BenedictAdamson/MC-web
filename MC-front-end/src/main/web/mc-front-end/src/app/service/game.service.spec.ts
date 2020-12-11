@@ -7,8 +7,8 @@ import { HttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 
-import { Game } from './game'
-import { GameIdentifier } from './game-identifier'
+import { Game } from '../game'
+import { GameIdentifier } from '../game-identifier'
 import { GameService } from './game.service';
 
 

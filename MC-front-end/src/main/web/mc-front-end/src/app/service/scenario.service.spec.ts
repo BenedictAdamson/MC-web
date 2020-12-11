@@ -5,9 +5,9 @@ import { v4 as uuid } from 'uuid';
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
-import { NamedUUID } from './named-uuid';
+import { NamedUUID } from '../named-uuid';
 import { ScenarioService } from './scenario.service';
-import { Scenario } from './scenario';
+import { Scenario } from '../scenario';
 
 
 describe('ScenarioService', () => {
