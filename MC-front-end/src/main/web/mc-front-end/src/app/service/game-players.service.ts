@@ -1,6 +1,5 @@
 import { Observable, of } from 'rxjs';
-import { catchError, flatMap, map } from 'rxjs/operators';
-import { v4 as uuid } from 'uuid';
+import { catchError } from 'rxjs/operators';
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
