@@ -41,7 +41,9 @@ export class GamesComponent implements OnInit {
 	) { }
 
 	ngOnInit() {
-		// Do nothing
+		this.scenario$.pipe(
+			tap(scenario => this.gameService.updateGamesOfScenario(scenario))
+		).subscribe();
 	}
 
 	/**

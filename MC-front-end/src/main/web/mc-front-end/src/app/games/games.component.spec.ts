@@ -68,8 +68,9 @@ describe('GamesComponent', () => {
 	};
 
 	const setUpForNgInit = function(self: User, scenario: uuid, gamesOfScenario: string[]) {
-		gameServiceSpy = jasmine.createSpyObj('GameService', ['getGamesOfScenario']);
+		gameServiceSpy = jasmine.createSpyObj('GameService', ['getGamesOfScenario', 'updateGamesOfScenario']);
 		gameServiceSpy.getGamesOfScenario.and.returnValue(of(gamesOfScenario));
+		gameServiceSpy.updateGamesOfScenario.and.returnValue(null);
 
 		TestBed.configureTestingModule({
 			imports: [RouterTestingModule],
@@ -126,6 +127,8 @@ describe('GamesComponent', () => {
 		assertInvariants();
 		expect(getScenario(component)).withContext('scenario$').toEqual(scenario);
 		expect(getGames(component)).withContext('games$').toEqual(gamesOfScenario);
+		expect(gameServiceSpy.updateGamesOfScenario.calls.count()).withContext('gameService.updateGamesOfScenario calls').toEqual(1);
+		expect(gameServiceSpy.updateGamesOfScenario.calls.argsFor(0)).withContext('gameService.updateGamesOfScenario args').toEqual([scenario]);
 
 		const html: HTMLElement = fixture.nativeElement;
 		const gamesList: HTMLUListElement = html.querySelector('#games');
@@ -195,8 +198,8 @@ describe('GamesComponent', () => {
 		assertInvariants();
 		expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(1);
 		expect(routerSpy.navigateByUrl.calls.argsFor(0)).withContext('router.navigateByUrl args').toEqual([expectedPath]);
-		expect(gameServiceSpy.updateGamesOfScenario.calls.count()).withContext('gameService.updateGamesOfScenario calls').toEqual(1);
-		expect(gameServiceSpy.updateGamesOfScenario.calls.argsFor(0)).withContext('gameService.updateGamesOfScenario args').toEqual([game.identifier.scenario]);
+		expect(gameServiceSpy.updateGamesOfScenario.calls.count()).withContext('gameService.updateGamesOfScenario calls').toEqual(2);
+		expect(gameServiceSpy.updateGamesOfScenario.calls.argsFor(1)).withContext('gameService.updateGamesOfScenario args').toEqual([game.identifier.scenario]);
 	};
 
 	it('can create game [A]', fakeAsync(() => {
