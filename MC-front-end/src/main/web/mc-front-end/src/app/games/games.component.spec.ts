@@ -56,6 +56,16 @@ describe('GamesComponent', () => {
 		return scenario;
 	};
 
+	const getGames = function(component: GamesComponent): string[] {
+		var games: string[] = null;
+		component.games$.subscribe({
+			next: (g) => games = g,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return games;
+	};
+
 	const setUpForNgInit = function(self: User, scenario: uuid, gamesOfScenario: string[]) {
 		const gameServiceStub = jasmine.createSpyObj('GameService', ['getGamesOfScenario']);
 		gameServiceStub.getGamesOfScenario.and.returnValue(of(gamesOfScenario));
@@ -90,6 +100,7 @@ describe('GamesComponent', () => {
 		expect(component).toBeTruthy();
 
 		expect(component.scenario$).withContext('scenario$').toBeTruthy();
+		expect(component.games$).withContext('games$').toBeTruthy();
 
 		const html: HTMLElement = fixture.nativeElement;
 		const gamesList: HTMLUListElement = html.querySelector('#games');
@@ -114,6 +125,7 @@ describe('GamesComponent', () => {
 		assertInvariants();
 		expect(component.scenario).toBe(scenario);
 		expect(getScenario(component)).withContext('scenario$').toEqual(scenario);
+		expect(getGames(component)).withContext('games$').toEqual(gamesOfScenario);
 		expect(component.games).toBe(gamesOfScenario);
 
 		const html: HTMLElement = fixture.nativeElement;

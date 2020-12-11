@@ -1,6 +1,6 @@
 import { v4 as uuid, parse as parseUuid } from 'uuid';
 import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { flatMap, map } from 'rxjs/operators';
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -25,6 +25,11 @@ export class GamesComponent implements OnInit {
 	get scenario$(): Observable<uuid> {
 		return this.route.parent.paramMap.pipe(
 			map(params => params.get('scenario'))
+		);
+	}
+	get games$(): Observable<string[]> {
+		return this.scenario$.pipe(
+			flatMap(scenario => this.gameService.getGamesOfScenario(scenario))
 		);
 	}
 	games: string[];
