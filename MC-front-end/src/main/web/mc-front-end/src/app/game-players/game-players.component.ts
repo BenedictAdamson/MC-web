@@ -1,5 +1,5 @@
 import { Observable, ReplaySubject, combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { flatMap, map } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 
 import { Component, OnInit } from '@angular/core';
@@ -40,6 +40,12 @@ export class GamePlayersComponent implements OnInit {
 	get identifier$(): Observable<GameIdentifier> {
 		return combineLatest([this.scenario$, this.created$], GamePlayersComponent.createIdentifier);
 	};
+
+	get gamePlayers$(): Observable<GamePlayers> {
+		return this.identifier$.pipe(
+			flatMap(identifier => this.gamePlayersService.getGamePlayers(this.identifier))
+		);
+	}
 	gamePlayers: GamePlayers;
 
 	constructor(

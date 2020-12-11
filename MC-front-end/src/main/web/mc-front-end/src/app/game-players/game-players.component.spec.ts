@@ -57,6 +57,16 @@ describe('GamePlayersComponent', () => {
 		return identifier;
 	};
 
+	const getGamePlayers = function(component: GamePlayersComponent): GamePlayers {
+		var gamePlayers: GamePlayers = null;
+		component.gamePlayers$.subscribe({
+			next: (gps) => gamePlayers = gps,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return gamePlayers;
+	};
+
 	const isPlaying = function(component: GamePlayersComponent): boolean {
 		var playing: boolean = null;
 		component.playing$.subscribe({
@@ -142,6 +152,7 @@ describe('GamePlayersComponent', () => {
 		assertInvariants();
 
 		expect(getIdentifier(component)).withContext('identifier$').toEqual(gamePlayers.identifier);
+		expect(getGamePlayers(component)).withContext('gamePlayers$').toEqual(gamePlayers);
 		expect(component.gamePlayers).withContext('gamePlayers').toBe(gamePlayers);
 		expect(isPlaying(component)).withContext('playing').toEqual(playing);
 
