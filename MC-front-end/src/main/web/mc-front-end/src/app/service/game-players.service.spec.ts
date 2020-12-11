@@ -234,4 +234,38 @@ describe('GamePlayersService', () => {
 	it('provides updated game players [B]', (done) => {
 		testGetGamePlayersForChangingValue(done, GAME_IDENTIFIER_B, true, [USER_A], true, [USER_B]);
 	})
+
+
+
+	const testGetGamePlayersForUnchangedUpdate = function(gamePlayers: GamePlayers) {
+		const game: GameIdentifier = gamePlayers.identifier;
+		const expectedPath: string = GamePlayersService.getApiGamePlayersPath(game);
+		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		var n: number = 0;
+
+		service.getGamePlayers(game).subscribe(
+			gps => {
+				expect(gamePlayers == gps).withContext('provides the expected value').toBeTrue();
+				n++;
+				expect(n).withContext('number emitted').toEqual(1);
+			}
+		);
+		service.updateGamePlayers(game);
+
+		const requests: TestRequest[] = httpTestingController.match(expectedPath);
+		expect(requests.length).withContext('number of requests').toEqual(2);
+		expect(requests[0].request.method).toEqual('GET');
+		requests[0].flush(gamePlayers);
+		expect(requests[1].request.method).toEqual('GET');
+		requests[1].flush(gamePlayers);
+		httpTestingController.verify();
+	};
+
+	it('provides distinct game players [A]', () => {
+		testGetGamePlayersForUnchangedUpdate(GAME_PLAYERS_A);
+	})
+
+	it('provides distinct game players [B]', () => {
+		testGetGamePlayersForUnchangedUpdate(GAME_PLAYERS_B);
+	})
 });
