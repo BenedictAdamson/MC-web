@@ -43,7 +43,7 @@ export class GamePlayersComponent implements OnInit {
 
 	get gamePlayers$(): Observable<GamePlayers> {
 		return this.identifier$.pipe(
-			flatMap(identifier => this.gamePlayersService.getGamePlayers(this.identifier))
+			flatMap(identifier => this.gamePlayersService.getGamePlayers(identifier))
 		);
 	}
 	gamePlayers: GamePlayers;
