@@ -1,5 +1,5 @@
 import { Observable, combineLatest } from 'rxjs';
-import { distinctUntilChanged, first, flatMap, map, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, flatMap, map, tap } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 
 import { Component, OnInit } from '@angular/core';
@@ -19,13 +19,15 @@ export class GamePlayersComponent implements OnInit {
 
 	private get scenario$(): Observable<uuid> {
 		return this.route.parent.parent.paramMap.pipe(
-			map(params => params.get('scenario'))
+			map(params => params.get('scenario')),
+			filter(scenario => !!scenario)
 		);
 	};
 
 	private get created$(): Observable<string> {
 		return this.route.parent.paramMap.pipe(
-			map(params => params.get('created'))
+			map(params => params.get('created')),
+			filter(created => !!created)
 		);
 	};
 
