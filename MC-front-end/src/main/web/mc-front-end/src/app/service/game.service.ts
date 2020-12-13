@@ -41,7 +41,7 @@ export class GameService {
      * The  [[Observable]] returned by this method emits only distinct values.
      */
 	getGamesOfScenario(scenario: uuid): Observable<string[]> {
-		var rs: ReplaySubject<string[]> = this.gamesOfScenarios.get(scenario);
+		var rs: ReplaySubject<string[]> | undefined = this.gamesOfScenarios.get(scenario);
 		if (!rs) {
 			rs = this.createCacheForGamesOfScenario(scenario);
 			this.updateCachedGamesOfScenario(scenario, rs);
@@ -78,7 +78,7 @@ export class GameService {
      * returned by [[getGamesOfScenario]].
      */
 	updateGamesOfScenario(scenario: uuid): void {
-		var rs: ReplaySubject<string[]> = this.gamesOfScenarios.get(scenario);
+		var rs: ReplaySubject<string[]> | undefined = this.gamesOfScenarios.get(scenario);
 		if (!rs) {
 			rs = this.createCacheForGamesOfScenario(scenario);
 		}
@@ -88,10 +88,10 @@ export class GameService {
     /**
      * Get the game that has a given ID.
      */
-	getGame(id: GameIdentifier): Observable<Game> {
+	getGame(id: GameIdentifier): Observable<Game | null> {
 		return this.http.get<Game>(GameService.getApiGamePath(id))
 			.pipe(
-				catchError(this.handleError<Game>('getGame', null))
+				catchError(this.handleError<Game | null>('getGame', null))
 			);
 	}
 

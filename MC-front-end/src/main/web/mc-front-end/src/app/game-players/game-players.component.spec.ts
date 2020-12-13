@@ -105,8 +105,8 @@ describe('GamePlayersComponent', () => {
 	const GAME_PLAYERS_A: GamePlayers = { identifier: GAME_IDENTIFIER_A, recruiting: true, users: [USER_ID_A, USER_ID_B] };
 	const GAME_PLAYERS_B: GamePlayers = { identifier: GAME_IDENTIFIER_B, recruiting: false, users: [] };
 
-	const getIdentifier = function(component: GamePlayersComponent): GameIdentifier {
-		var identifier: GameIdentifier = null;
+	const getIdentifier = function(component: GamePlayersComponent): GameIdentifier | null {
+		var identifier: GameIdentifier | null = null;
 		component.identifier$.subscribe({
 			next: (i) => identifier = i,
 			error: (err) => fail(err),
@@ -115,8 +115,8 @@ describe('GamePlayersComponent', () => {
 		return identifier;
 	};
 
-	const getGamePlayers = function(component: GamePlayersComponent): GamePlayers {
-		var gamePlayers: GamePlayers = null;
+	const getGamePlayers = function(component: GamePlayersComponent): GamePlayers | null {
+		var gamePlayers: GamePlayers | null = null;
 		component.gamePlayers$.subscribe({
 			next: (gps) => gamePlayers = gps,
 			error: (err) => fail(err),
@@ -125,8 +125,8 @@ describe('GamePlayersComponent', () => {
 		return gamePlayers;
 	};
 
-	const isPlaying = function(component: GamePlayersComponent): boolean {
-		var playing: boolean = null;
+	const isPlaying = function(component: GamePlayersComponent): boolean | null {
+		var playing: boolean | null = null;
 		component.playing$.subscribe({
 			next: (p) => playing = p,
 			error: (err) => fail(err),
@@ -176,21 +176,26 @@ describe('GamePlayersComponent', () => {
 		expect(component).toBeTruthy();
 
 		const html: HTMLElement = fixture.nativeElement;
-		const recruitingElement: HTMLElement = html.querySelector('#recruiting');
-		const joinableElement: HTMLElement = html.querySelector('#joinable');
-		const playersElement: HTMLElement = html.querySelector('#players');
-		const playingElement: HTMLElement = html.querySelector('#playing');
-		const endRecuitmentButton: HTMLButtonElement = html.querySelector('button#end-recruitment');
-		const joinButton: HTMLButtonElement = html.querySelector('button#join');
+		const recruitingElement: HTMLElement | null = html.querySelector('#recruiting');
+		const joinableElement: HTMLElement | null = html.querySelector('#joinable');
+		const playersElement: HTMLElement | null = html.querySelector('#players');
+		const playingElement: HTMLElement | null = html.querySelector('#playing');
+		const endRecuitmentButton: HTMLButtonElement | null = html.querySelector('button#end-recruitment');
+		const joinButton: HTMLButtonElement | null = html.querySelector('button#join');
 
 		expect(recruitingElement).withContext("recruiting element").not.toBeNull();
-		expect(recruitingElement.innerText).withContext("recruiting element text mentions recruiting").toMatch('[Rr]ecruiting');
 		expect(joinableElement).withContext("joinable element").not.toBeNull();
-		expect(joinableElement.innerText).withContext("joinable element text mentions joining").toMatch('[Jj]oin');
 		expect(playersElement).withContext("players element").not.toBeNull();
 		expect(playingElement).withContext("playing element").not.toBeNull();
 		expect(endRecuitmentButton).withContext('end-recuitment button').not.toBeNull();
 		expect(joinButton).withContext('join button').not.toBeNull();
+
+		if (recruitingElement) {
+			expect(recruitingElement.innerText).withContext("recruiting element text mentions recruiting").toMatch('[Rr]ecruiting');
+		}
+		if (joinableElement) {
+			expect(joinableElement.innerText).withContext("joinable element text mentions joining").toMatch('[Jj]oin');
+		}
 	};
 
 
@@ -219,15 +224,15 @@ describe('GamePlayersComponent', () => {
 		});
 
 		const html: HTMLElement = fixture.nativeElement;
-		const recruitingElement: HTMLElement = html.querySelector('#recruiting');
-		const joinableElement: HTMLElement = html.querySelector('#joinable');
-		const playingElement: HTMLElement = html.querySelector('#playing');
-		const endRecuitmentButton: HTMLButtonElement = html.querySelector('button#end-recruitment');
-		const joinButton: HTMLButtonElement = html.querySelector('button#join');
+		const recruitingElement: HTMLElement | null = html.querySelector('#recruiting');
+		const joinableElement: HTMLElement | null = html.querySelector('#joinable');
+		const playingElement: HTMLElement | null = html.querySelector('#playing');
+		const endRecuitmentButton: HTMLButtonElement | null = html.querySelector('button#end-recruitment');
+		const joinButton: HTMLButtonElement | null = html.querySelector('button#join');
 
-		const recruitingText: string = recruitingElement.innerText;
-		const joinableText: string = joinableElement.innerText;
-		const playingText: string = playingElement.innerText;
+		const recruitingText: string = recruitingElement ? recruitingElement.innerText : "";
+		const joinableText: string = joinableElement ? joinableElement.innerText : "";
+		const playingText: string = playingElement ? playingElement.innerText : "";
 
 		expect(recruiting || recruitingText.includes('This game is not recruiting players')).withContext("recruiting element text can indicate that not recruiting").toBeTrue();
 		expect(!recruiting || recruitingText.includes('This game is recruiting players')).withContext("recruiting element text can indicate that is recruiting").toBeTrue();
@@ -235,8 +240,12 @@ describe('GamePlayersComponent', () => {
 		expect(!mayJoinGame || joinableText.includes('You may join this game')).withContext("joinable element text can indicate that is joinable").toBeTrue();
 		expect(playing || playingText.includes('You are not playing this game')).withContext("playing element text can indicate that not playing").toBeTrue();
 		expect(!playing || playingText.includes('You are playing this game')).withContext("playing element text can indicate that playing").toBeTrue();
-		expect(endRecuitmentButton.disabled).withContext('end-recuitment button is disabled').toEqual(!mayEndRecuitment);
-		expect(joinButton.disabled).withContext('join button is disabled').toEqual(!mayJoinGame);
+		if (endRecuitmentButton) {
+			expect(endRecuitmentButton.disabled).withContext('end-recuitment button is disabled').toEqual(!mayEndRecuitment);
+		}
+		if (joinButton) {
+			expect(joinButton.disabled).withContext('join button is disabled').toEqual(!mayJoinGame);
+		}
 	};
 
 	it('can create [A]', fakeAsync(() => {
@@ -267,12 +276,14 @@ describe('GamePlayersComponent', () => {
 
 		assertInvariants();
 		const html: HTMLElement = fixture.nativeElement;
-		const recruitingElement: HTMLElement = html.querySelector('#recruiting');
-		const endRecuitmentButton: HTMLButtonElement = html.querySelector('button#end-recruitment');
+		const recruitingElement: HTMLElement | null = html.querySelector('#recruiting');
+		const endRecuitmentButton: HTMLButtonElement | null = html.querySelector('button#end-recruitment');
 
-		const recruitingText: string = recruitingElement.innerText;
+		const recruitingText: string = recruitingElement ? recruitingElement.innerText : "";
 		expect(recruitingText.includes('This game is not recruiting players')).withContext("recruiting element text indicates that not recruiting").toBeTrue();
-		expect(endRecuitmentButton.disabled).withContext('end-recuitment button is disabled').toBeTrue();
+		if (endRecuitmentButton) {
+			expect(endRecuitmentButton.disabled).withContext('end-recuitment button is disabled').toBeTrue();
+		}
 	};
 
 	it('can end recuitment [A]', fakeAsync((() => {
@@ -283,14 +294,18 @@ describe('GamePlayersComponent', () => {
 		testEndRecuitment(GAME_PLAYERS_B);
 	})));
 
-	const testJoinGame = function(gamePlayers: GamePlayers, self: User) {
-		setUp(gamePlayers, self, true);
+	const testJoinGame = function(gamePlayers0: GamePlayers, self: User) {
+		setUp(gamePlayers0, self, true);
 		component.joinGame();
 		tick();
 		fixture.detectChanges();
 
 		assertInvariants();
-		expect(getGamePlayers(component).users.includes(self.id)).withContext('gamePlayers.users includes self').toBeTrue();
+		const gamePlayers1: GamePlayers | null = getGamePlayers(component);
+		expect(gamePlayers1).withContext('gamePlayers').not.toBeNull();
+		if (gamePlayers1) {
+			expect(gamePlayers1.users.includes(self.id)).withContext('gamePlayers.users includes self').toBeTrue();
+		}
 	};
 
 	it('can join game [A]', fakeAsync((() => {

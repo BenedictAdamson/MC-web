@@ -24,7 +24,7 @@ export class SelfService {
 	/**
 	 * provides null if credentials unknown
 	 */
-	private userRS$: ReplaySubject<User> = new ReplaySubject(1);
+	private userRS$: ReplaySubject<User | null> = new ReplaySubject(1);
 
 	private authenticatedRS$: ReplaySubject<boolean> = new ReplaySubject(1);
 
@@ -51,7 +51,7 @@ export class SelfService {
      * null if the user ID is unknown,
      * which includes the case that the user is not logged in.
      */
-	get id$(): Observable<uuid> {
+	get id$(): Observable<uuid | null> {
 		return this.userRS$.pipe(
 			map(u => u ? u.id : null)
 		);
@@ -65,7 +65,7 @@ export class SelfService {
      * which includes the case that the user is not logged in.
      * The current user name can be known even if that user has not been authenticated.
      */
-	get username$(): Observable<string> {
+	get username$(): Observable<string | null> {
 		return this.userRS$.pipe(
 			map(u => u ? u.username : null)
 		);
@@ -80,20 +80,20 @@ export class SelfService {
      * The current password name can be known even if that user has not been authenticated,
      * or if authentication has been tried but failed (which includes the case that the password is invalid).
      */
-	get password$(): Observable<string> {
+	get password$(): Observable<string | null> {
 		return this.userRS$.pipe(
 			map(u => u ? u.password : null)
 		);
 	}
 
 	private handleUserDetailsHttpError() {
-		return (error: any): Observable<User> => {
+		return (error: any): Observable<User | null> => {
 			// Do not log errors, all are equivalent to authentication failure.
-			return of(null as User);
+			return of(null);
 		};
 	}
 
-	private static createHeaders(username: string, password: string): HttpHeaders {
+	private static createHeaders(username: string | null, password: string | null): HttpHeaders {
 		var headers: HttpHeaders = new HttpHeaders();
 		headers = headers.set('X-Requested-With', 'XMLHttpRequest');
 		if (username && password) {
@@ -102,23 +102,25 @@ export class SelfService {
 		return headers;
 	}
 
-	private getUserDetails(username: string, password: string): Observable<User> {
+	private getUserDetails(username: string | null, password: string | null): Observable<User | null> {
 		const headers: HttpHeaders = SelfService.createHeaders(username, password);
 
-		return this.http.get<User>(selfUrl, { headers: headers })
+		return this.http.get<User | null>(selfUrl, { headers: headers })
 			.pipe(
 				catchError(this.handleUserDetailsHttpError())
 			);
 	}
 
-	private processResponse(username: string, password: string, details: User): boolean {
+	private processResponse(username: string | null, password: string | null, details: User | null): boolean {
 		var authenticated: boolean;
 		if (details) {
-		    details = new User(details.id, details);
+			details = new User(details.id, details);
 			details.password = password;
 			authenticated = true;
-		} else {
+		} else if (username) {
 			details = { id: null, username: username, password: password, authorities: [] };
+			authenticated = false;
+		} else {
 			authenticated = false;
 		}
 		this.setUser(details, authenticated);
@@ -133,7 +135,7 @@ export class SelfService {
 	 * The method does not communicate with the server.
 	 * It intended only for testing.
 	 */
-	setUser(user: User, authenticated: boolean) {
+	setUser(user: User | null, authenticated: boolean) {
 		this.userRS$.next(user);
 		this.authenticatedRS$.next(authenticated);
 	}
@@ -159,8 +161,14 @@ export class SelfService {
      * The method makes use of the `/api/self` endpoint of the server,
      * to check that the username and password are valid,
      * and to get the authorities of the user.
+     *
+     * @param username
+     * The name of the user to authenticate as, or `null` if attempting to resume a session.
+     *
+     * @param password
+     * The password of the user to authenticate as, or `null` if attempting to resume a session.
 	 */
-	authenticate(username: string, password: string): Observable<boolean> {
+	authenticate(username: string | null, password: string | null): Observable<boolean> {
 		return this.getUserDetails(username, password).pipe(
 			map(ud => this.processResponse(username, password, ud))
 		);

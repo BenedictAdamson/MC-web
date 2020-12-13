@@ -26,8 +26,9 @@ export class ScenarioComponent implements OnInit {
 	) { }
 
 	ngOnInit() {
-		const id: string = this.route.snapshot.paramMap.get('scenario');
-		this.getScenario(id);
+		const scenario: string | null = this.route.snapshot.paramMap.get('scenario');
+		if (!scenario) throw new Error('missing scenario')
+		this.getScenario(scenario);
 	}
 
 

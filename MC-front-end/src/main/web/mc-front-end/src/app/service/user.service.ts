@@ -25,7 +25,7 @@ export class UserService {
 			);
 	}
 
-	getUser(id: uuid): Observable<User> {
+	getUser(id: uuid): Observable<User | null> {
 		const url = `${this.userUrl}/${id}`;
 		return this.http.get<User>(url)
 			.pipe(
@@ -39,13 +39,13 @@ export class UserService {
      * @returns
      * An observable that provides the added user, or null or there is an error.
 	 */
-	add(userDetails: UserDetails): Observable<User> {
+	add(userDetails: UserDetails): Observable<User | null> {
 		/* The server actually replies to the POST with a 302 (Found) redirect to the resource of the created user.
 		 * The HttpClient or browser itself handles that redirect for us.
 	     */
 		return this.http.post<User>(this.userUrl, userDetails)
 			.pipe(
-				catchError(this.handleError<User>(`add username=${userDetails.username}`, null))
+				catchError(this.handleError<User | null>(`add username=${userDetails.username}`, null))
 			);
 	}
 

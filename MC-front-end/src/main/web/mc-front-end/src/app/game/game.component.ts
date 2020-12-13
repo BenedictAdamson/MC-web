@@ -1,4 +1,5 @@
 import { v4 as uuid } from 'uuid';
+import { filter, map } from 'rxjs/operators';
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
@@ -38,8 +39,9 @@ export class GameComponent implements OnInit {
 
 	private getGameIdentifier(): GameIdentifier {
 		const route: ActivatedRouteSnapshot = this.route.snapshot;
+		if (!route.parent) throw new Error('missing this.route.parent');
 		const scenario: uuid = route.parent.paramMap.get('scenario');
-		const created: string = route.paramMap.get('created');
+		const created: string | null = route.paramMap.get('created');
 		if (scenario == null) throw new Error('null scenario');
 		if (created == null) throw new Error('null created');
 		const gameId: GameIdentifier = { scenario: scenario, created: created };
@@ -47,8 +49,10 @@ export class GameComponent implements OnInit {
 	}
 
 	private subscribeToGame(): void {
-		this.gameService.getGame(this.identifier)
-			.subscribe(game => this.game = game);
+		this.gameService.getGame(this.identifier).pipe(
+			filter(game => !!game),
+			map((game: Game | null) => game as Game)
+		).subscribe(game => this.game = game);
 	}
 
 }

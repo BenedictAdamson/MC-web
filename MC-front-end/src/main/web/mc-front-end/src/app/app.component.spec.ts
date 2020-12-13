@@ -19,7 +19,7 @@ class MockSelfService {
 
 	checkForCurrentAuthentication_calls: number = 0;
 
-	get username(): string {
+	get username(): string | null {
 		return null;
 	}
 

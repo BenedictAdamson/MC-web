@@ -57,8 +57,8 @@ describe('GamesComponent', () => {
 		return scenario;
 	};
 
-	const getGames = function(component: GamesComponent): string[] {
-		var games: string[] = null;
+	const getGames = function(component: GamesComponent): string[] | null {
+		var games: string[] | null = null;
 		component.games$.subscribe({
 			next: (g) => games = g,
 			error: (err) => fail(err),
@@ -105,18 +105,22 @@ describe('GamesComponent', () => {
 		expect(component.games$).withContext('games$').toBeTruthy();
 
 		const html: HTMLElement = fixture.nativeElement;
-		const gamesList: HTMLUListElement = html.querySelector('#games');
-		const createGameButton: HTMLButtonElement = html.querySelector('button#create-game');
+		const gamesList: HTMLUListElement | null = html.querySelector('#games');
+		const createGameButton: HTMLButtonElement | null = html.querySelector('button#create-game');
+
+		const createGameButtonText: string = createGameButton ? createGameButton.innerText : "";
 
 		expect(createGameButton).withContext('#create-game button').not.toBeNull();
-		expect(createGameButton.innerText).withContext('#create-game button text').toEqual('Create game');
+		expect(createGameButtonText).withContext('#create-game button text').toEqual('Create game');
 
 		expect(gamesList).withContext('games list').not.toBeNull();
-		const gameEntries: NodeListOf<HTMLLIElement> = gamesList.querySelectorAll('li');
-		for (let i = 0; i < gameEntries.length; i++) {
-			const entry: HTMLLIElement = gameEntries.item(i);
-			const link: HTMLAnchorElement = entry.querySelector('a');
-			expect(link).withContext('entry has link').not.toBeNull();
+		if (gamesList) {
+			const gameEntries: NodeListOf<HTMLLIElement> = gamesList.querySelectorAll('li');
+			for (let i = 0; i < gameEntries.length; i++) {
+				const entry: HTMLLIElement = gameEntries.item(i);
+				const link: HTMLAnchorElement | null = entry.querySelector('a');
+				expect(link).withContext('entry has link').not.toBeNull();
+			}
 		}
 	};
 
@@ -131,15 +135,18 @@ describe('GamesComponent', () => {
 		expect(gameServiceSpy.updateGamesOfScenario.calls.argsFor(0)).withContext('gameService.updateGamesOfScenario args').toEqual([scenario]);
 
 		const html: HTMLElement = fixture.nativeElement;
-		const gamesList: HTMLUListElement = html.querySelector('#games');
+		const gamesList: HTMLUListElement | null = html.querySelector('#games');
 
-		const gameEntries: NodeListOf<HTMLLIElement> = gamesList.querySelectorAll('li');
-		expect(gameEntries.length).withContext('number of game entries').toBe(gamesOfScenario.length);
-		for (let i = 0; i < gameEntries.length; i++) {
-			const expectedGame: string = gamesOfScenario[i];
-			const entry: HTMLLIElement = gameEntries.item(i);
-			const link: HTMLAnchorElement = entry.querySelector('a');
-			expect(link.textContent).withContext('entry link text contains game title').toContain(expectedGame);
+		if (gamesList) {
+			const gameEntries: NodeListOf<HTMLLIElement> = gamesList.querySelectorAll('li');
+			expect(gameEntries.length).withContext('number of game entries').toBe(gamesOfScenario.length);
+			for (let i = 0; i < gameEntries.length; i++) {
+				const expectedGame: string = gamesOfScenario[i];
+				const entry: HTMLLIElement = gameEntries.item(i);
+				const link: HTMLAnchorElement | null = entry.querySelector('a');
+				const linkText: string | null = link ? link.textContent : null;
+				expect(linkText).withContext('entry link text contains game title').toContain(expectedGame);
+			}
 		}
 	};
 	it('can initialize [a]', () => {
@@ -215,8 +222,10 @@ describe('GamesComponent', () => {
 
 		assertInvariants();
 		const html: HTMLElement = fixture.nativeElement;
-		const createGameButton: HTMLButtonElement = html.querySelector('button#create-game');
-		expect(createGameButton.disabled).withContext('create game button is disabled').toBeTrue();
+		const createGameButton: HTMLButtonElement | null = html.querySelector('button#create-game');
+		if (createGameButton) {
+			expect(createGameButton.disabled).withContext('create game button is disabled').toBeTrue();
+		}
 	});
 
 	it('enables create game button for an administrator', () => {
@@ -224,7 +233,9 @@ describe('GamesComponent', () => {
 
 		assertInvariants();
 		const html: HTMLElement = fixture.nativeElement;
-		const createGameButton: HTMLButtonElement = html.querySelector('button#create-game');
-		expect(createGameButton.disabled).withContext('create game button is disabled').toBeFalse();
+		const createGameButton: HTMLButtonElement | null = html.querySelector('button#create-game');
+		if (createGameButton) {
+			expect(createGameButton.disabled).withContext('create game button is disabled').toBeFalse();
+		}
 	});
 });

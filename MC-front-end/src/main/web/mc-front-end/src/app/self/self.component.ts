@@ -23,7 +23,7 @@ export class SelfComponent implements OnInit {
 
 	get id$(): Observable<uuid> { return this.service.id$; };
 
-	get username$(): Observable<string> { return this.service.username$; };
+	get username$(): Observable<string | null> { return this.service.username$; };
 
 	get authenticated$(): Observable<boolean> { return this.service.authenticated$; };
 

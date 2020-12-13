@@ -52,7 +52,7 @@ describe('LoginComponent', () => {
 	});
 
 	it('should create with null password', () => {
-		expect(component.password).toBeNull();
+		expect(component.password).toEqual('');
 	});
 
 	it('should create with rejected flag clear', () => {
@@ -67,8 +67,8 @@ describe('LoginComponent', () => {
 	it('should initilize from the service [null]', () => {
 		testNgOnInit();
 
-		expect(component.username).withContext('username').toBeNull();
-		expect(component.password).withContext('password').toBeNull();
+		expect(component.username).withContext('username').toEqual('');
+		expect(component.password).withContext('password').toEqual('');
 	});
 
 	const mockAuthenticationSuccess = function(userDetails: User) {
@@ -79,6 +79,8 @@ describe('LoginComponent', () => {
 	}
 
 	const testNgOnInitAlreadyLoggedIn = function(done: any, userDetails: User) {
+		if (!userDetails.password) throw new Error('null userDetails.password');
+
 		selfService.authenticate(userDetails.username, userDetails.password).subscribe({
 			next: () => { },
 			error: (err) => { fail(err); done() },
@@ -109,9 +111,11 @@ describe('LoginComponent', () => {
 
 	it('should have a password field', () => {
 		const element: HTMLElement = fixture.nativeElement;
-		const field = element.querySelector('input[name="password"]');
+		const field: HTMLElement | null = element.querySelector('input[name="password"]');
 		expect(field).not.toBeNull('has <input name="password">');
-		expect(field.getAttribute('type')).toBe('password', '<input name="password"> is type="password"');
+		if (field) {
+			expect(field.getAttribute('type')).toBe('password', '<input name="password"> is type="password"');
+		}
 	});
 
 	it('should have a submit button', () => {
@@ -130,6 +134,8 @@ describe('LoginComponent', () => {
 
 
 	const testLoginFailure = function(done: any, userDetails: User) {
+		if (!userDetails.password) throw new Error('null userDetails.password');
+
 		component.username = userDetails.username;
 		component.password = userDetails.password;
 		component.login();
@@ -151,6 +157,8 @@ describe('LoginComponent', () => {
 
 
 	const testLoginSuccess = function(done: any, userDetails: User) {
+		if (!userDetails.password) throw new Error('null userDetails.password');
+
 		component.username = userDetails.username;
 		component.password = userDetails.password;
 		component.login();

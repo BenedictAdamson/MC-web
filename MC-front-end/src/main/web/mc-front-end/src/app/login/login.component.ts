@@ -18,13 +18,13 @@ export class LoginComponent implements OnInit {
 	) { }
 
 	ngOnInit(): void {
-		this.service.username$.subscribe(u => this.username = u);
-		this.service.password$.subscribe(p => this.password = p);
+		this.service.username$.subscribe(u => this.username = u ? u : "");
+		this.service.password$.subscribe(p => this.password = p ? p : "");
 	}
 
-	username: string = null;
+	username: string = "";
 
-	password: string = null;
+	password: string = "";
 
 	/**
 	 * Whether these credentials have been explicitly rejected by the server.

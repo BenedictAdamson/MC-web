@@ -10,8 +10,8 @@ import { User } from '../user';
 
 describe('SelfService', () => {
 
-	const getAuthenticated = function(service: SelfService): boolean {
-		var authenticated: boolean = null;
+	const getAuthenticated = function(service: SelfService): boolean | null {
+		var authenticated: boolean | null = null;
 		service.authenticated$.subscribe({
 			next: (a) => authenticated = a,
 			error: (err) => fail(err),
@@ -20,8 +20,8 @@ describe('SelfService', () => {
 		return authenticated;
 	};
 
-	const mayManageGames = function(service: SelfService): boolean {
-		var may: boolean = null;
+	const mayManageGames = function(service: SelfService): boolean | null {
+		var may: boolean | null = null;
 		service.mayManageGames$.subscribe({
 			next: (m) => may = m,
 			error: (err) => fail(err),
@@ -30,8 +30,8 @@ describe('SelfService', () => {
 		return may;
 	};
 
-	const mayPlay = function(service: SelfService): boolean {
-		var may: boolean = null;
+	const mayPlay = function(service: SelfService): boolean | null {
+		var may: boolean | null = null;
 		service.mayPlay$.subscribe({
 			next: (m) => may = m,
 			error: (err) => fail(err),
@@ -40,8 +40,8 @@ describe('SelfService', () => {
 		return may;
 	};
 
-	const mayManageUsers = function(service: SelfService): boolean {
-		var may: boolean = null;
+	const mayManageUsers = function(service: SelfService): boolean | null {
+		var may: boolean | null = null;
 		service.mayManageUsers$.subscribe({
 			next: (m) => may = m,
 			error: (err) => fail(err),
@@ -50,8 +50,8 @@ describe('SelfService', () => {
 		return may;
 	};
 
-	const mayListUsers = function(service: SelfService): boolean {
-		var may: boolean = null;
+	const mayListUsers = function(service: SelfService): boolean | null {
+		var may: boolean | null = null;
 		service.mayListUsers$.subscribe({
 			next: (m) => may = m,
 			error: (err) => fail(err),
@@ -60,8 +60,8 @@ describe('SelfService', () => {
 		return may;
 	};
 
-	const getUsername = function(service: SelfService): string {
-		var username: string = null;
+	const getUsername = function(service: SelfService): string | null {
+		var username: string | null = null;
 		service.username$.subscribe({
 			next: (u) => username = u,
 			error: (err) => fail(err),
@@ -70,8 +70,8 @@ describe('SelfService', () => {
 		return username;
 	};
 
-	const getPassword = function(service: SelfService): string {
-		var password: string = null;
+	const getPassword = function(service: SelfService): string | null {
+		var password: string | null = null;
 		service.password$.subscribe({
 			next: (p) => password = p,
 			error: (err) => fail(err),
@@ -91,12 +91,12 @@ describe('SelfService', () => {
 	};
 
 	const assertInvariants: CallableFunction = (s: SelfService) => {
-		const authenticated: boolean = getAuthenticated(s);
-		const username: string = getUsername(s);
-		const manageGames: boolean = mayManageGames(s);
-		const play: boolean = mayPlay(s);
-		const manageUsers: boolean = mayManageUsers(s);
-		const listUsers: boolean = mayListUsers(s);
+		const authenticated: boolean | null = getAuthenticated(s);
+		const username: string | null = getUsername(s);
+		const manageGames: boolean | null = mayManageGames(s);
+		const play: boolean | null = mayPlay(s);
+		const manageUsers: boolean | null = mayManageUsers(s);
+		const listUsers: boolean | null = mayListUsers(s);
 		const anyAuthority = manageGames || play || manageUsers || listUsers;
 
 		expect(authenticated && username == null).withContext('Not authenticated if username is null').toEqual(false);
@@ -129,7 +129,7 @@ describe('SelfService', () => {
 
 
 	const assertNotAuthenticated = function() {
-		const authenticated: boolean = getAuthenticated(service);
+		const authenticated: boolean | null = getAuthenticated(service);
 		expect(getUsername(service)).withContext('username').toBeNull();
 		expect(getPassword(service)).withContext('password').toBeNull();
 		expect(authenticated).withContext('authenticated').toEqual(false);
@@ -188,10 +188,12 @@ describe('SelfService', () => {
 	};
 
 	it('handles authentication failure [A]', (done) => {
+		if (!USER_A.password) throw new Error('invalid test fixture');
 		testAuthenticationFailure(done, USER_A.username, USER_A.password);
 	});
 
 	it('handles authentication failure [B]', (done) => {
+		if (!USER_B.password) throw new Error('invalid test fixture');
 		testAuthenticationFailure(done, USER_B.username, USER_B.password);
 	});
 
@@ -236,10 +238,10 @@ describe('SelfService', () => {
 
 		testAuthenticationSuccess(done, user);
 
-		const manageGames: boolean = mayManageGames(service);
-		const play: boolean = mayPlay(service);
-		const manageUsers: boolean = mayManageUsers(service);
-		const listUsers: boolean = mayListUsers(service);
+		const manageGames: boolean | null = mayManageGames(service);
+		const play: boolean | null = mayPlay(service);
+		const manageUsers: boolean | null = mayManageUsers(service);
+		const listUsers: boolean | null = mayListUsers(service);
 		expect(manageGames).withContext('manageGames').toBe(expectManageGames);
 		expect(play).withContext('play').toBe(expectPlay);
 		expect(manageUsers).withContext('manageUsers').toBe(expectManageUsers);

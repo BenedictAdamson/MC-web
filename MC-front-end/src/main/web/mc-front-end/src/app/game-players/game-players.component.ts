@@ -18,6 +18,8 @@ import { SelfService } from '../service/self.service';
 export class GamePlayersComponent implements OnInit {
 
 	private get scenario$(): Observable<uuid> {
+		if (!this.route.parent) throw new Error('missing this.route.parent');
+		if (!this.route.parent.parent) throw new Error('missing this.route.parent.parent');
 		return this.route.parent.parent.paramMap.pipe(
 			map(params => params.get('scenario')),
 			filter(scenario => !!scenario)
@@ -25,9 +27,11 @@ export class GamePlayersComponent implements OnInit {
 	};
 
 	private get created$(): Observable<string> {
+		if (!this.route.parent) throw new Error('missing this.route.parent');
 		return this.route.parent.paramMap.pipe(
 			map(params => params.get('created')),
-			filter(created => !!created)
+			filter(created => !!created),
+			map((created: string | null) => created as string)
 		);
 	};
 
@@ -43,7 +47,9 @@ export class GamePlayersComponent implements OnInit {
 
 	get gamePlayers$(): Observable<GamePlayers> {
 		return this.identifier$.pipe(
-			flatMap(identifier => this.gamePlayersService.getGamePlayers(identifier))
+			flatMap(identifier => this.gamePlayersService.getGamePlayers(identifier)),
+			filter(gps => !!gps),
+			map((gps: GamePlayers | null) => gps as GamePlayers)
 		);
 	}
 

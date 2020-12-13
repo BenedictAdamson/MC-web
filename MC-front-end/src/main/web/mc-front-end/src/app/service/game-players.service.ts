@@ -14,7 +14,7 @@ import { GameService } from './game.service'
 })
 export class GamePlayersService {
 
-	private gamesPlayers: Map<GameIdentifier, ReplaySubject<GamePlayers>> = new Map();
+	private gamesPlayers: Map<GameIdentifier, ReplaySubject<GamePlayers | null>> = new Map();
 
 	constructor(
 		private http: HttpClient
@@ -44,14 +44,14 @@ export class GamePlayersService {
 		return rs;
 	}
 
-	private fetchGamePlayers(game: GameIdentifier): Observable<GamePlayers> {
+	private fetchGamePlayers(game: GameIdentifier): Observable<GamePlayers | null> {
 		return this.http.get<GamePlayers>(GamePlayersService.getApiGamePlayersPath(game))
 			.pipe(
-				catchError(this.handleError<GamePlayers>('fetchGamePlayers', null))
+				catchError(this.handleError<GamePlayers | null>('fetchGamePlayers', null))
 			);
 	}
 
-	private updateCachedGamePlayers(game: GameIdentifier, rs: ReplaySubject<GamePlayers>): void {
+	private updateCachedGamePlayers(game: GameIdentifier, rs: ReplaySubject<GamePlayers | null>): void {
 		this.fetchGamePlayers(game).subscribe(gamePlayers => rs.next(gamePlayers));
 	}
 
@@ -68,8 +68,8 @@ export class GamePlayersService {
      *
      * The  [[Observable]] returned by this method emits only distinct values.
      */
-	getGamePlayers(game: GameIdentifier): Observable<GamePlayers> {
-		var rs: ReplaySubject<GamePlayers> = this.gamesPlayers.get(game);
+	getGamePlayers(game: GameIdentifier): Observable<GamePlayers | null> {
+		var rs: ReplaySubject<GamePlayers | null> | undefined = this.gamesPlayers.get(game);
 		if (!rs) {
 			rs = this.createCacheForGamePlayers(game);
 			this.updateCachedGamePlayers(game, rs);
@@ -87,7 +87,7 @@ export class GamePlayersService {
      * returned by [[getGamePlayers]].
      */
 	updateGamePlayers(game: GameIdentifier): void {
-		var rs: ReplaySubject<GamePlayers> = this.gamesPlayers.get(game);
+		var rs: ReplaySubject<GamePlayers | null> | undefined = this.gamesPlayers.get(game);
 		if (!rs) {
 			rs = this.createCacheForGamePlayers(game);
 		}

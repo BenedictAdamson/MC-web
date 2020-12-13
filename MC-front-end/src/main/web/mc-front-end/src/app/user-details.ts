@@ -9,7 +9,7 @@
  */
 export class UserDetails {
 	username: string;// a unique ID
-	password: string;// often null
+	password: string | null;// often null, indicating that the password is hidden or unknown
 	authorities: string[];
 	
 	constructor (userDetails: UserDetails)

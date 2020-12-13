@@ -13,7 +13,7 @@ import { User } from '../user';
 })
 export class UserComponent implements OnInit {
 
-	user: User;
+	user: User | null;
 
 	constructor(
 		private route: ActivatedRoute,

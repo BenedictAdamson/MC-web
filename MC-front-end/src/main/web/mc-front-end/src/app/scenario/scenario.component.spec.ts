@@ -49,7 +49,7 @@ describe('ScenarioComponent', () => {
 
 		const html: HTMLElement = fixture.nativeElement;
 		const displayText: string = html.innerText;
-		const selfLink: HTMLAnchorElement = html.querySelector('a#scenario');
+		const selfLink: HTMLAnchorElement | null = html.querySelector('a#scenario');
 		expect(displayText.includes(testScenario.title)).withContext("displayed text includes title").toBeTrue();
 		expect(displayText.includes(testScenario.description)).withContext("displayed text includes description").toBeTrue();
 		expect(selfLink).withContext("self link").not.toBeNull();

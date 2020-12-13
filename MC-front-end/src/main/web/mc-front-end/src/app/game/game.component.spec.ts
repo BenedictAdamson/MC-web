@@ -77,7 +77,7 @@ describe('GameComponent', () => {
 		expect(component).toBeTruthy();
 
 		const html: HTMLElement = fixture.nativeElement;
-		const selfLink: HTMLAnchorElement = html.querySelector('a#game');
+		const selfLink: HTMLAnchorElement | null = html.querySelector('a#game');
 
 		expect(selfLink).withContext("self link").not.toBeNull();
 	};

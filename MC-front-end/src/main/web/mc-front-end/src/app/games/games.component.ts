@@ -22,6 +22,7 @@ export class GamesComponent implements OnInit {
 	}
 
 	get scenario$(): Observable<uuid> {
+		if (!this.route.parent) throw new Error('missing this.route.parent');
 		return this.route.parent.paramMap.pipe(
 			map(params => params.get('scenario'))
 		);
