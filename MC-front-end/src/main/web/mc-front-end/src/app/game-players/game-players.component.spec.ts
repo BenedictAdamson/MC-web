@@ -1,4 +1,5 @@
-import { Observable, of } from 'rxjs';
+import { Observable, ReplaySubject, of } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
@@ -29,10 +30,67 @@ class MockSelfService {
 	}
 }
 
+class MockGamePlayersService {
+
+	private rs$: ReplaySubject<GamePlayers> = new ReplaySubject(1);
+	private serverGamePlayers: GamePlayers;
+	private identifier: GameIdentifier;
+
+	constructor(
+		gamePlayers: GamePlayers,
+		private mayJoin: boolean,
+		private self: uuid
+	) {
+		this.identifier = gamePlayers.identifier;
+		this.rs$.next(gamePlayers);
+		this.serverGamePlayers = gamePlayers;
+	};
+
+	private expectGameIdentifier(game: GameIdentifier, method: string): void {
+		expect(game).withContext('GamePlayersService.' + method + '(game)').toEqual(this.identifier);
+	}
+
+	private copy(): Observable<GamePlayers> {
+		return of({ identifier: this.serverGamePlayers.identifier, recruiting: this.serverGamePlayers.recruiting, users: this.serverGamePlayers.users });
+	}
+
+	getGamePlayers(game: GameIdentifier): Observable<GamePlayers> {
+		this.expectGameIdentifier(game, 'getGamePlayers');
+		return this.rs$.pipe(
+			distinctUntilChanged()
+		);
+	}
+
+	mayJoinGame(game: GameIdentifier): Observable<boolean> {
+		this.expectGameIdentifier(game, 'mayJoinGame');
+		return of(this.mayJoin);
+	}
+
+	endRecuitment(game: GameIdentifier): Observable<GamePlayers> {
+		this.expectGameIdentifier(game, 'endRecuitment');
+		this.serverGamePlayers.recruiting = false;
+		return this.copy();
+	}
+
+	updateGamePlayers(game: GameIdentifier): void {
+		this.expectGameIdentifier(game, 'updateGamePlayers');
+		this.rs$.next(this.serverGamePlayers);
+	}
+
+	joinGame(game: GameIdentifier): Observable<GamePlayers> {
+		this.expectGameIdentifier(game, 'joinGame');
+		if (!this.serverGamePlayers.users.includes(this.self)) {
+			this.serverGamePlayers.users.push(this.self);
+		}
+		return this.copy();
+	}
+}
+
 
 describe('GamePlayersComponent', () => {
 	let component: GamePlayersComponent;
 	let fixture: ComponentFixture<GamePlayersComponent>;
+	let gamePlayersServiceSpy: MockGamePlayersService;
 
 	const SCENARIO_ID_A: uuid = uuid();
 	const SCENARIO_ID_B: uuid = uuid();
@@ -79,12 +137,9 @@ describe('GamePlayersComponent', () => {
 
 
 
-	const setUpForNgInit = function(gamePlayers: GamePlayers, self: User, mayJoinGame: boolean) {
+	const setUp = function(gamePlayers: GamePlayers, self: User, mayJoinGame: boolean) {
 		const identifier: GameIdentifier = gamePlayers.identifier;
-
-		const gamePlayersServiceStub = jasmine.createSpyObj('GamePlayersService', ['getGamePlayers', 'mayJoinGame']);
-		gamePlayersServiceStub.getGamePlayers.and.returnValue(of(gamePlayers));
-		gamePlayersServiceStub.mayJoinGame.and.returnValue(of(mayJoinGame));
+		gamePlayersServiceSpy = new MockGamePlayersService(gamePlayers, mayJoinGame, self.id);
 
 		TestBed.configureTestingModule({
 			declarations: [GamePlayersComponent],
@@ -107,7 +162,7 @@ describe('GamePlayersComponent', () => {
 					}
 				}
 			},
-			{ provide: GamePlayersService, useValue: gamePlayersServiceStub },
+			{ provide: GamePlayersService, useValue: gamePlayersServiceSpy },
 			{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }]
 		});
 
@@ -145,7 +200,7 @@ describe('GamePlayersComponent', () => {
 		const mayEndRecuitment: boolean = recruiting && manager;
 		const playing: boolean = gamePlayers.users.includes(self.id);
 
-		setUpForNgInit(gamePlayers, self, mayJoinGame);
+		setUp(gamePlayers, self, mayJoinGame);
 		tick();
 		fixture.detectChanges();
 
@@ -153,7 +208,6 @@ describe('GamePlayersComponent', () => {
 
 		expect(getIdentifier(component)).withContext('identifier$').toEqual(gamePlayers.identifier);
 		expect(getGamePlayers(component)).withContext('gamePlayers$').toEqual(gamePlayers);
-		expect(component.gamePlayers).withContext('gamePlayers').toBe(gamePlayers);
 		expect(isPlaying(component)).withContext('playing').toEqual(playing);
 
 		component.isEndRecruitmentDisabled$().subscribe(may => {
@@ -167,14 +221,12 @@ describe('GamePlayersComponent', () => {
 		const html: HTMLElement = fixture.nativeElement;
 		const recruitingElement: HTMLElement = html.querySelector('#recruiting');
 		const joinableElement: HTMLElement = html.querySelector('#joinable');
-		const playersElement: HTMLElement = html.querySelector('#players');
 		const playingElement: HTMLElement = html.querySelector('#playing');
 		const endRecuitmentButton: HTMLButtonElement = html.querySelector('button#end-recruitment');
 		const joinButton: HTMLButtonElement = html.querySelector('button#join');
 
 		const recruitingText: string = recruitingElement.innerText;
 		const joinableText: string = joinableElement.innerText;
-		const playersText: string = playersElement.innerText;
 		const playingText: string = playingElement.innerText;
 
 		expect(recruiting || recruitingText.includes('This game is not recruiting players')).withContext("recruiting element text can indicate that not recruiting").toBeTrue();
@@ -203,51 +255,13 @@ describe('GamePlayersComponent', () => {
 		canCreate(GAME_PLAYERS_B, USER_NORMAL, false);
 	}));
 
-	const setUpForEndRecuitment = function(gamePlayers0: GamePlayers, self: User) {
-		const identifier: GameIdentifier = gamePlayers0.identifier;
-		const gamePlayers1: GamePlayers = { identifier: identifier, recruiting: false, users: gamePlayers0.users };
-
-		const gamePlayersServiceStub = jasmine.createSpyObj('GamePlayersService', ['getGamePlayers', 'endRecuitment', 'mayJoinGame']);
-		gamePlayersServiceStub.getGamePlayers.and.returnValue(of(gamePlayers0));
-		gamePlayersServiceStub.endRecuitment.and.returnValue(of(gamePlayers1));
-		gamePlayersServiceStub.mayJoinGame.and.returnValue(of(false));
-
-		TestBed.configureTestingModule({
-			declarations: [GamePlayersComponent],
-			providers: [{
-				provide: ActivatedRoute,
-				useValue: {
-					parent: {
-						parent: {
-							paramMap: of(convertToParamMap({ scenario: identifier.scenario }))
-						},
-						paramMap: of(convertToParamMap({ created: identifier.created }))
-					},
-					snapshot: {
-						parent: {
-							parent: {
-								paramMap: convertToParamMap({ scenario: identifier.scenario })
-							},
-							paramMap: convertToParamMap({ created: identifier.created })
-						}
-					}
-				}
-			},
-			{ provide: GamePlayersService, useValue: gamePlayersServiceStub },
-			{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }]
-		});
-
-		fixture = TestBed.createComponent(GamePlayersComponent);
-		component = fixture.componentInstance;
-		fixture.detectChanges();
-	};
-
 
 	const testEndRecuitment = function(gamePlayers0: GamePlayers) {
 		const self: User = USER_ADMIN;
 
-		setUpForEndRecuitment(gamePlayers0, self);
+		setUp(gamePlayers0, self, true);
 		component.endRecuitment();
+		tick();
 		tick();
 		fixture.detectChanges();
 
@@ -269,62 +283,21 @@ describe('GamePlayersComponent', () => {
 		testEndRecuitment(GAME_PLAYERS_B);
 	})));
 
-
-
-	const setUpForJoinGame = function(game: GameIdentifier, self: User) {
-		const gamePlayers0: GamePlayers = { identifier: game, recruiting: true, users: [] };
-		const gamePlayers1: GamePlayers = { identifier: game, recruiting: true, users: [self.id] };
-
-		const gamePlayersServiceStub = jasmine.createSpyObj('GamePlayersService', ['getGamePlayers', 'endRecuitment', 'mayJoinGame', 'joinGame']);
-		gamePlayersServiceStub.getGamePlayers.and.returnValue(of(gamePlayers0));
-		gamePlayersServiceStub.mayJoinGame.and.returnValue(of(true));
-		gamePlayersServiceStub.joinGame.and.returnValue(of(gamePlayers1));
-
-		TestBed.configureTestingModule({
-			declarations: [GamePlayersComponent],
-			providers: [{
-				provide: ActivatedRoute,
-				useValue: {
-					parent: {
-						parent: {
-							paramMap: of(convertToParamMap({ scenario: game.scenario }))
-						},
-						paramMap: of(convertToParamMap({ created: game.created }))
-					},
-					snapshot: {
-						parent: {
-							parent: {
-								paramMap: convertToParamMap({ scenario: game.scenario })
-							},
-							paramMap: convertToParamMap({ created: game.created })
-						}
-					}
-				}
-			},
-			{ provide: GamePlayersService, useValue: gamePlayersServiceStub },
-			{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }]
-		});
-
-		fixture = TestBed.createComponent(GamePlayersComponent);
-		component = fixture.componentInstance;
-		fixture.detectChanges();
-	};
-
-	const testJoinGame = function(game: GameIdentifier, self: User) {
-		setUpForJoinGame(game, self);
+	const testJoinGame = function(gamePlayers: GamePlayers, self: User) {
+		setUp(gamePlayers, self, true);
 		component.joinGame();
 		tick();
 		fixture.detectChanges();
 
 		assertInvariants();
-		expect(component.gamePlayers.users.includes(self.id)).withContext('gamePlayers.users includes self').toBeTrue();
+		expect(getGamePlayers(component).users.includes(self.id)).withContext('gamePlayers.users includes self').toBeTrue();
 	};
 
 	it('can join game [A]', fakeAsync((() => {
-		testJoinGame(GAME_IDENTIFIER_A, USER_ADMIN);
+		testJoinGame(GAME_PLAYERS_A, USER_ADMIN);
 	})));
 
 	it('can join game [B]', fakeAsync((() => {
-		testJoinGame(GAME_IDENTIFIER_B, USER_NORMAL);
+		testJoinGame(GAME_PLAYERS_B, USER_NORMAL);
 	})));
 });
