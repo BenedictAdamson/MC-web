@@ -1,5 +1,5 @@
 import { Observable, combineLatest } from 'rxjs';
-import { first, flatMap, map, tap } from 'rxjs/operators';
+import { distinctUntilChanged, first, flatMap, map, tap } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 
 import { Component, OnInit } from '@angular/core';
@@ -34,7 +34,9 @@ export class GamePlayersComponent implements OnInit {
 	}
 
 	get identifier$(): Observable<GameIdentifier> {
-		return combineLatest([this.scenario$, this.created$], GamePlayersComponent.createIdentifier);
+		return combineLatest([this.scenario$, this.created$], GamePlayersComponent.createIdentifier).pipe(
+			distinctUntilChanged() // don't spam identical values
+		);
 	};
 
 	get gamePlayers$(): Observable<GamePlayers> {
