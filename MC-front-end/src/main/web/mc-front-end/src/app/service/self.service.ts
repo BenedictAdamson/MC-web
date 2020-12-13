@@ -1,8 +1,7 @@
-import { Observable, ReplaySubject, defer, of } from 'rxjs';
+import { Observable, ReplaySubject, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { v4 as uuid } from 'uuid';
 
-import { flatMap, map, tap } from 'rxjs/operators';
+import { flatMap, map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
@@ -51,7 +50,7 @@ export class SelfService {
      * null if the user ID is unknown,
      * which includes the case that the user is not logged in.
      */
-	get id$(): Observable<uuid | null> {
+	get id$(): Observable<string | null> {
 		return this.userRS$.pipe(
 			map(u => u ? u.id : null)
 		);
@@ -87,7 +86,7 @@ export class SelfService {
 	}
 
 	private handleUserDetailsHttpError() {
-		return (error: any): Observable<User | null> => {
+		return (): Observable<User | null> => {
 			// Do not log errors, all are equivalent to authentication failure.
 			return of(null);
 		};
@@ -111,15 +110,12 @@ export class SelfService {
 			);
 	}
 
-	private processResponse(username: string | null, password: string | null, details: User | null): boolean {
+	private processResponse(password: string | null, details: User | null): boolean {
 		var authenticated: boolean;
 		if (details) {
 			details = new User(details.id, details);
 			details.password = password;
 			authenticated = true;
-		} else if (username) {
-			details = { id: null, username: username, password: password, authorities: [] };
-			authenticated = false;
 		} else {
 			authenticated = false;
 		}
@@ -170,7 +166,7 @@ export class SelfService {
 	 */
 	authenticate(username: string | null, password: string | null): Observable<boolean> {
 		return this.getUserDetails(username, password).pipe(
-			map(ud => this.processResponse(username, password, ud))
+			map(ud => this.processResponse(password, ud))
 		);
 	}
 
@@ -232,7 +228,7 @@ export class SelfService {
 	}
 
 	private handleLogoutHttpError() {
-		return (error: any): Observable<null> => {
+		return (): Observable<null> => {
 			// Do not log errors, all are equivalent to authentication failure.
 			return of(null);
 		};

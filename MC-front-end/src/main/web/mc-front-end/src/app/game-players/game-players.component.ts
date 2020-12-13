@@ -1,6 +1,5 @@
 import { Observable, combineLatest } from 'rxjs';
 import { distinctUntilChanged, filter, first, flatMap, map, tap } from 'rxjs/operators';
-import { v4 as uuid } from 'uuid';
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -17,12 +16,13 @@ import { SelfService } from '../service/self.service';
 })
 export class GamePlayersComponent implements OnInit {
 
-	private get scenario$(): Observable<uuid> {
+	private get scenario$(): Observable<string> {
 		if (!this.route.parent) throw new Error('missing this.route.parent');
 		if (!this.route.parent.parent) throw new Error('missing this.route.parent.parent');
 		return this.route.parent.parent.paramMap.pipe(
 			map(params => params.get('scenario')),
-			filter(scenario => !!scenario)
+			filter(scenario => !!scenario),
+			map((id: string | null) => id as string)
 		);
 	};
 
@@ -35,7 +35,7 @@ export class GamePlayersComponent implements OnInit {
 		);
 	};
 
-	private static createIdentifier(scenario: uuid, created: string) {
+	private static createIdentifier(scenario: string, created: string) {
 		return { scenario: scenario, created: created };
 	}
 
@@ -66,8 +66,8 @@ export class GamePlayersComponent implements OnInit {
 
 
 	get playing$(): Observable<boolean> {
-		return combineLatest([this.selfService.id$, this.gamePlayers$], (id: uuid, gamePlayers: GamePlayers) => {
-			return id && gamePlayers.users.includes(id)
+		return combineLatest([this.selfService.id$, this.gamePlayers$], (id: string, gamePlayers: GamePlayers) => {
+			return gamePlayers.users.includes(id)
 		});
 	}
 
@@ -104,8 +104,8 @@ export class GamePlayersComponent implements OnInit {
 
 	get players$(): Observable<string[]> {
 		return this.gamePlayers$.pipe(
-			map(gp => gp.users),
-			map((ids: uuid[]) => ids.map(id => id)) // TODO provide names
+			map(gp => gp.users)
+            // TODO provide names
 		);
 	}
 

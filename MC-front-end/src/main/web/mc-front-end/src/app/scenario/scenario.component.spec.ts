@@ -13,8 +13,8 @@ describe('ScenarioComponent', () => {
 	let component: ScenarioComponent;
 	let fixture: ComponentFixture<ScenarioComponent>;
 
-	const IDENTIFIER_A: uuid = uuid();
-	const IDENTIFIER_B: uuid = uuid();
+	const IDENTIFIER_A: string = uuid();
+	const IDENTIFIER_B: string = uuid();
 	const SCENARIO_A: Scenario = { identifier: IDENTIFIER_A, title: 'Section Attack', description: 'Basic fire-and-movement tactical training.' };
 	const SCENARIO_B: Scenario = { identifier: IDENTIFIER_B, title: 'Beach Assault', description: 'Fast and deadly.' };
 

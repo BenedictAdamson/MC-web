@@ -33,11 +33,11 @@ describe('GamesComponent', () => {
 	let component: GamesComponent;
 	let fixture: ComponentFixture<GamesComponent>;
 
-	const USER_ADMIN = { id: new uuid(), username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
-	const USER_NORMAL = { id: new uuid(), username: 'Benedict', password: null, authorities: [] };
+	const USER_ADMIN: User = { id: uuid(), username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
+	const USER_NORMAL: User = { id: uuid(), username: 'Benedict', password: null, authorities: [] };
 
-	const SCENARIO_A: uuid = uuid();
-	const SCENARIO_B: uuid = uuid();
+	const SCENARIO_A: string = uuid();
+	const SCENARIO_B: string = uuid();
 	const CREATED_A: string = '1970-01-01T00:00:00.000Z';
 	const CREATED_B: string = '2020-12-31T23:59:59.999Z';
 	const GAMES_0: string[] = [];
@@ -47,8 +47,8 @@ describe('GamesComponent', () => {
 	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A };
 	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B };
 
-	const getScenario = function(component: GamesComponent): uuid {
-		var scenario: uuid = null;
+	const getScenario = function(component: GamesComponent): string | null {
+		var scenario: string | null = null;
 		component.scenario$.subscribe({
 			next: (s) => scenario = s,
 			error: (err) => fail(err),
@@ -67,7 +67,7 @@ describe('GamesComponent', () => {
 		return games;
 	};
 
-	const setUpForNgInit = function(self: User, scenario: uuid, gamesOfScenario: string[]) {
+	const setUpForNgInit = function(self: User, scenario: string, gamesOfScenario: string[]) {
 		gameServiceSpy = jasmine.createSpyObj('GameService', ['getGamesOfScenario', 'updateGamesOfScenario']);
 		gameServiceSpy.getGamesOfScenario.and.returnValue(of(gamesOfScenario));
 		gameServiceSpy.updateGamesOfScenario.and.returnValue(null);
@@ -125,7 +125,7 @@ describe('GamesComponent', () => {
 	};
 
 
-	const testNgInit = function(self: User, scenario: uuid, gamesOfScenario: string[]) {
+	const testNgInit = function(self: User, scenario: string, gamesOfScenario: string[]) {
 		setUpForNgInit(self, scenario, gamesOfScenario);
 
 		assertInvariants();
@@ -159,7 +159,7 @@ describe('GamesComponent', () => {
 
 
 	const setUpForCreateGame = function(game: Game) {
-		const scenario: uuid = game.identifier.scenario;
+		const scenario: string = game.identifier.scenario;
 		gameServiceSpy = jasmine.createSpyObj('GameService', ['getGamesOfScenario', 'createGame', 'updateGamesOfScenario']);
 		gameServiceSpy.getGamesOfScenario.and.returnValue(of([]));
 		gameServiceSpy.createGame.and.returnValue(of(game));

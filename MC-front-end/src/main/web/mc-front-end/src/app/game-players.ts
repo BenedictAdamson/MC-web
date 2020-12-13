@@ -1,4 +1,3 @@
-import { v4 as uuid } from 'uuid';
 import { GameIdentifier } from './game-identifier'
 
 /**
@@ -14,5 +13,5 @@ import { GameIdentifier } from './game-identifier'
 export class GamePlayers {
 	identifier: GameIdentifier;
 	recruiting: boolean;
-	users: uuid[];
+	users: string[];
 }

@@ -1,6 +1,5 @@
 import { Observable, ReplaySubject, of } from 'rxjs';
 import { catchError, distinctUntilChanged } from 'rxjs/operators';
-import { v4 as uuid } from 'uuid';
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
@@ -14,12 +13,12 @@ import { GameIdentifier } from '../game-identifier'
 })
 export class GameService {
 
-	private gamesOfScenarios: Map<uuid, ReplaySubject<string[]>> = new Map();
+	private gamesOfScenarios: Map<string, ReplaySubject<string[]>> = new Map();
 
 	constructor(
 		private http: HttpClient) { }
 
-	static getApiGamesPath(scenario: uuid): string {
+	static getApiGamesPath(scenario: string): string {
 		return '/api/scenario/' + scenario + '/game/';
 	}
 
@@ -40,7 +39,7 @@ export class GameService {
      *
      * The  [[Observable]] returned by this method emits only distinct values.
      */
-	getGamesOfScenario(scenario: uuid): Observable<string[]> {
+	getGamesOfScenario(scenario: string): Observable<string[]> {
 		var rs: ReplaySubject<string[]> | undefined = this.gamesOfScenarios.get(scenario);
 		if (!rs) {
 			rs = this.createCacheForGamesOfScenario(scenario);
@@ -52,17 +51,17 @@ export class GameService {
 	}
 
 
-	private createCacheForGamesOfScenario(scenario: uuid): ReplaySubject<string[]> {
+	private createCacheForGamesOfScenario(scenario: string): ReplaySubject<string[]> {
 		const rs: ReplaySubject<string[]> = new ReplaySubject<string[]>(1);
 		this.gamesOfScenarios.set(scenario, rs);
 		return rs;
 	}
 
-	private updateCachedGamesOfScenario(scenario: uuid, rs: ReplaySubject<string[]>): void {
+	private updateCachedGamesOfScenario(scenario: string, rs: ReplaySubject<string[]>): void {
 		this.fetchGamesOfScenario(scenario).subscribe(games => rs.next(games));
 	}
 
-	private fetchGamesOfScenario(scenario: uuid): Observable<string[]> {
+	private fetchGamesOfScenario(scenario: string): Observable<string[]> {
 		return this.http.get<string[]>(GameService.getApiGamesPath(scenario))
 			.pipe(
 				catchError(this.handleError<string[]>('fetchGamesOfScenario', []))
@@ -77,7 +76,7 @@ export class GameService {
      * The updated value will eventually become available through the [[Observable]]
      * returned by [[getGamesOfScenario]].
      */
-	updateGamesOfScenario(scenario: uuid): void {
+	updateGamesOfScenario(scenario: string): void {
 		var rs: ReplaySubject<string[]> | undefined = this.gamesOfScenarios.get(scenario);
 		if (!rs) {
 			rs = this.createCacheForGamesOfScenario(scenario);
@@ -105,7 +104,7 @@ export class GameService {
      * The [[GameIdentifier.scenario]] of the [[Game.identifier]] of the created game
      * is equal to the given {@code scenario}.
      */
-	createGame(scenario: uuid): Observable<Game> {
+	createGame(scenario: string): Observable<Game> {
 		/* The server actually replies to the POST with a 302 (Found) redirect to the resource of the created game.
 		 * The HttpClient or browser itself handles that redirect for us.
 	     */

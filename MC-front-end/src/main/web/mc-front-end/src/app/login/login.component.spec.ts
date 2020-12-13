@@ -12,8 +12,8 @@ import { SelfService } from '../service/self.service';
 import { User } from '../user';
 
 describe('LoginComponent', () => {
-	const USER_A: User = { id: new uuid(), username: 'Administrator', password: 'letmein', authorities: ['ROLE_ADMIN'] };
-	const USER_B: User = { id: new uuid(), username: 'Benedict', password: 'pasword123', authorities: [] };
+	const USER_A: User = { id: uuid(), username: 'Administrator', password: 'letmein', authorities: ['ROLE_ADMIN'] };
+	const USER_B: User = { id: uuid(), username: 'Benedict', password: 'pasword123', authorities: [] };
 
 	let routerSpy: any;
 	let httpTestingController: HttpTestingController;

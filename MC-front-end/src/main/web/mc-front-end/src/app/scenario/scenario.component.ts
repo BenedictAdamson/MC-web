@@ -1,5 +1,3 @@
-import { v4 as uuid } from 'uuid';
-
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
@@ -14,7 +12,7 @@ import { ScenarioService } from '../service/scenario.service';
 export class ScenarioComponent implements OnInit {
 
 
-	static getScenarioPath(scenario: uuid): string {
+	static getScenarioPath(scenario: string): string {
 		return '/scenario/' + scenario;
 	}
 

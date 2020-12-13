@@ -30,8 +30,8 @@ describe('GameComponent', () => {
 	let component: GameComponent;
 	let fixture: ComponentFixture<GameComponent>;
 
-	const SCENARIO_ID_A: uuid = uuid();
-	const SCENARIO_ID_B: uuid = uuid();
+	const SCENARIO_ID_A: string = uuid();
+	const SCENARIO_ID_B: string = uuid();
 	const CREATED_A: string = '1970-01-01T00:00:00.000Z';
 	const CREATED_B: string = '2020-12-31T23:59:59.999Z';
 	const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_ID_A, created: CREATED_A };
@@ -39,8 +39,8 @@ describe('GameComponent', () => {
 	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A };
 	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B };
 
-	const USER_ADMIN = { id: new uuid(), username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
-	const USER_NORMAL = { id: new uuid(), username: 'Benedict', password: null, authorities: [] };
+	const USER_ADMIN = { id: uuid(), username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
+	const USER_NORMAL = { id: uuid(), username: 'Benedict', password: null, authorities: [] };
 
 
 

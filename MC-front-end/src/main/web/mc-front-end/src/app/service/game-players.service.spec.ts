@@ -9,21 +9,20 @@ import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@an
 import { GamePlayers } from '../game-players'
 import { GameIdentifier } from '../game-identifier'
 import { GamePlayersService } from './game-players.service';
-import { User } from '../user'
 
 
 describe('GamePlayersService', () => {
 	let httpTestingController: HttpTestingController;
 
-	const SCENARIO_A: uuid = uuid();
-	const SCENARIO_B: uuid = uuid();
-	const USER_A: uuid = uuid();
-	const USER_B: uuid = uuid();
+	const SCENARIO_A: string = uuid();
+	const SCENARIO_B: string = uuid();
+	const USER_ID_A: string = uuid();
+	const USER_ID_B: string = uuid();
 	const CREATED_A: string = '1970-01-01T00:00:00.000Z';
 	const CREATED_B: string = '2020-12-31T23:59:59.999Z';
 	const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_A, created: CREATED_A };
 	const GAME_IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_B, created: CREATED_B };
-	const GAME_PLAYERS_A: GamePlayers = { identifier: GAME_IDENTIFIER_A, recruiting: true, users: [USER_A, USER_B] };
+	const GAME_PLAYERS_A: GamePlayers = { identifier: GAME_IDENTIFIER_A, recruiting: true, users: [USER_ID_A, USER_ID_B] };
 	const GAME_PLAYERS_B: GamePlayers = { identifier: GAME_IDENTIFIER_B, recruiting: false, users: [] };
 
 	beforeEach(() => {
@@ -62,9 +61,9 @@ describe('GamePlayersService', () => {
 		testGetGamePlayers(GAME_PLAYERS_B);
 	})
 
-	const testJoinGame = function(gamePlayers0: GamePlayers, user: User) {
+	const testJoinGame = function(gamePlayers0: GamePlayers, user: string) {
 		const id: GameIdentifier = gamePlayers0.identifier;
-		var users: uuid[] = gamePlayers0.users;
+		var users: string[] = gamePlayers0.users;
 		users.push(user);
 		const gamePlayers: GamePlayers = { identifier: id, recruiting: gamePlayers0.recruiting, users: users };
 		const service: GamePlayersService = TestBed.get(GamePlayersService);
@@ -86,11 +85,11 @@ describe('GamePlayersService', () => {
 	}
 
 	it('can join game [A]', () => {
-		testJoinGame(GAME_PLAYERS_A, USER_A);
+		testJoinGame(GAME_PLAYERS_A, USER_ID_A);
 	})
 
 	it('can join game [B]', () => {
-		testJoinGame(GAME_PLAYERS_B, USER_B);
+		testJoinGame(GAME_PLAYERS_B, USER_ID_B);
 	})
 
 	const testEndRecuitment = function(gamePlayers0: GamePlayers) {
@@ -198,9 +197,9 @@ describe('GamePlayersService', () => {
 		done: any,
 		identifier: GameIdentifier,
 		recruiting1: boolean,
-		users1: uuid[],
+		users1: string[],
 		recruiting2: boolean,
-		users2: uuid[]
+		users2: string[]
 	) {
 		const gamePlayers1: GamePlayers = { identifier: identifier, recruiting: recruiting1, users: users1 };
 		const gamePlayers2: GamePlayers = { identifier: identifier, recruiting: recruiting2, users: users2 };
@@ -228,11 +227,11 @@ describe('GamePlayersService', () => {
 	};
 
 	it('provides updated game players [A]', (done) => {
-		testGetGamePlayersForChangingValue(done, GAME_IDENTIFIER_A, true, [], false, [USER_A]);
+		testGetGamePlayersForChangingValue(done, GAME_IDENTIFIER_A, true, [], false, [USER_ID_A]);
 	})
 
 	it('provides updated game players [B]', (done) => {
-		testGetGamePlayersForChangingValue(done, GAME_IDENTIFIER_B, true, [USER_A], true, [USER_B]);
+		testGetGamePlayersForChangingValue(done, GAME_IDENTIFIER_B, true, [USER_ID_A], true, [USER_ID_B]);
 	})
 
 

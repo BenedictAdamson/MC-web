@@ -17,7 +17,7 @@ class MockSelfService {
 
 	constructor(private self: User) { };
 
-	get id$(): Observable<uuid> {
+	get id$(): Observable<string> {
 		return of(this.self.id);
 	}
 
@@ -39,7 +39,7 @@ class MockGamePlayersService {
 	constructor(
 		gamePlayers: GamePlayers,
 		private mayJoin: boolean,
-		private self: uuid
+		private self: string
 	) {
 		this.identifier = gamePlayers.identifier;
 		this.rs$.next(gamePlayers);
@@ -92,14 +92,14 @@ describe('GamePlayersComponent', () => {
 	let fixture: ComponentFixture<GamePlayersComponent>;
 	let gamePlayersServiceSpy: MockGamePlayersService;
 
-	const SCENARIO_ID_A: uuid = uuid();
-	const SCENARIO_ID_B: uuid = uuid();
+	const SCENARIO_ID_A: string = uuid();
+	const SCENARIO_ID_B: string = uuid();
 	const CREATED_A: string = '1970-01-01T00:00:00.000Z';
 	const CREATED_B: string = '2020-12-31T23:59:59.999Z';
-	const USER_ID_A: uuid = uuid();
-	const USER_ID_B: uuid = uuid();
-	const USER_ADMIN: User = { id: new uuid(), username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
-	const USER_NORMAL: User = { id: new uuid(), username: 'Benedict', password: null, authorities: [] };
+	const USER_ID_A: string = uuid();
+	const USER_ID_B: string = uuid();
+	const USER_ADMIN: User = { id: uuid(), username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
+	const USER_NORMAL: User = { id: uuid(), username: 'Benedict', password: null, authorities: [] };
 	const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_ID_A, created: CREATED_A };
 	const GAME_IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_ID_B, created: CREATED_B };
 	const GAME_PLAYERS_A: GamePlayers = { identifier: GAME_IDENTIFIER_A, recruiting: true, users: [USER_ID_A, USER_ID_B] };

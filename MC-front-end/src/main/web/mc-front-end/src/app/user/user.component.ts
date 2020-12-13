@@ -1,5 +1,3 @@
-import { v4 as uuid } from 'uuid';
-
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
@@ -38,7 +36,8 @@ export class UserComponent implements OnInit {
 	}
 
 	getUser(): void {
-		const id: uuid = this.route.snapshot.paramMap.get('id');
+		const id: string | null = this.route.snapshot.paramMap.get('id');
+		if (!id) throw new Error('missing id');
 		this.userService.getUser(id)
 			.subscribe(user => this.user = user);
 	}

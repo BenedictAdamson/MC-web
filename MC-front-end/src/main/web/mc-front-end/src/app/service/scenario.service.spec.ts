@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { v4 as uuid } from 'uuid';
 
-
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
@@ -13,8 +12,8 @@ import { Scenario } from '../scenario';
 describe('ScenarioService', () => {
 	let httpTestingController: HttpTestingController;
 
-	const IDENTIFIER_A: uuid = uuid();
-	const IDENTIFIER_B: uuid = uuid();
+	const IDENTIFIER_A: string = uuid();
+	const IDENTIFIER_B: string = uuid();
 	const SCENARIO_A: Scenario = { identifier: IDENTIFIER_A, title: 'Section Attack', description: 'Basic fire-and-movement tactical training.' };
 	const SCENARIO_B: Scenario = { identifier: IDENTIFIER_B, title: 'Beach Assault', description: 'Fast and deadly.' };
 
@@ -37,7 +36,7 @@ describe('ScenarioService', () => {
 
 	it('can get scenario identifiers', () => {
 		const scenarios: Scenario[] = [SCENARIO_A, SCENARIO_B];
-		const identifiers: NamedUUID[] = scenarios.map(s => s.identifier);
+		const identifiers: NamedUUID[] = scenarios.map(scenario => { return { id: scenario.identifier, title: scenario.title }; });
 		const service: ScenarioService = TestBed.get(ScenarioService);
 
 		service.getScenarioIdentifiers().subscribe(ids => expect(ids).toEqual(identifiers));
@@ -50,7 +49,7 @@ describe('ScenarioService', () => {
 
 	let canGetScenario: CallableFunction;
 	canGetScenario = (testScenario: Scenario) => {
-		const id: uuid = testScenario.identifier;
+		const id: string = testScenario.identifier;
 		const service: ScenarioService = TestBed.get(ScenarioService);
 
 		service.getScenario(id).subscribe(scenario => expect(scenario).toEqual(testScenario));

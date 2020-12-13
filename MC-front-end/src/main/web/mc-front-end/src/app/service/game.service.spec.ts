@@ -1,6 +1,5 @@
 import { v4 as uuid } from 'uuid';
 import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
 
 import { HttpClient } from '@angular/common/http';
 
@@ -15,8 +14,8 @@ import { GameService } from './game.service';
 describe('GameService', () => {
 	let httpTestingController: HttpTestingController;
 
-	const SCENARIO_A: uuid = uuid();
-	const SCENARIO_B: uuid = uuid();
+	const SCENARIO_A: string = uuid();
+	const SCENARIO_B: string = uuid();
 	const CREATED_A: string = '1970-01-01T00:00:00.000Z';
 	const CREATED_B: string = '2020-12-31T23:59:59.999Z';
 	const CREATEDS_0: string[] = [];
@@ -44,7 +43,7 @@ describe('GameService', () => {
 		expect(service).toBeTruthy();
 	});
 
-	const testGetGamesOfScenario = function(scenario: uuid, identifiers: string[]) {
+	const testGetGamesOfScenario = function(scenario: string, identifiers: string[]) {
 		const service: GameService = TestBed.get(GameService);
 
 		service.getGamesOfScenario(scenario).subscribe(ids => expect(ids).toEqual(identifiers));
@@ -87,7 +86,7 @@ describe('GameService', () => {
 	})
 
 	const testCreateGame = function(createdGame: Game) {
-		const scenario: uuid = createdGame.identifier.scenario;
+		const scenario: string = createdGame.identifier.scenario;
 		const service: GameService = TestBed.get(GameService);
 
 		const result: Observable<Game> = service.createGame(scenario);
@@ -114,7 +113,7 @@ describe('GameService', () => {
 
 
 
-	const testGetGamesOfScenarioAfterUpdateGamesOfScenario = function(scenario: uuid, identifiers: string[]) {
+	const testGetGamesOfScenarioAfterUpdateGamesOfScenario = function(scenario: string, identifiers: string[]) {
 		const service: GameService = TestBed.get(GameService);
 
 		service.updateGamesOfScenario(scenario);
@@ -136,7 +135,7 @@ describe('GameService', () => {
 
 
 
-	const testUpdateGamesOfScenarioAfterGetGamesOfScenario = function(scenario: uuid, identifiers: string[]) {
+	const testUpdateGamesOfScenarioAfterGetGamesOfScenario = function(scenario: string, identifiers: string[]) {
 		const service: GameService = TestBed.get(GameService);
 		const expectedPath: string = GameService.getApiGamesPath(scenario);
 
@@ -162,7 +161,7 @@ describe('GameService', () => {
 
 
 
-	const testGetGamesOfScenarioForChangingValue = function(done: any, scenario: uuid, identifiers1: string[], identifiers2: string[]) {
+	const testGetGamesOfScenarioForChangingValue = function(done: any, scenario: string, identifiers1: string[], identifiers2: string[]) {
 		const service: GameService = TestBed.get(GameService);
 		const expectedPath: string = GameService.getApiGamesPath(scenario);
 		var n: number = 0;
@@ -198,7 +197,7 @@ describe('GameService', () => {
 
 
 
-	const testGetGamesOfScenarioForUnchangedUpdate = function(scenario: uuid, identifiers: string[]) {
+	const testGetGamesOfScenarioForUnchangedUpdate = function(scenario: string, identifiers: string[]) {
 		const service: GameService = TestBed.get(GameService);
 		const expectedPath: string = GameService.getApiGamesPath(scenario);
 		var n: number = 0;

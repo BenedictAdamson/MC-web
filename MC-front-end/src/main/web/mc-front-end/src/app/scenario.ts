@@ -1,5 +1,3 @@
-import { v4 as uuid } from 'uuid';
-
 /**
  * <p>
  * A scenario of the Mission Command game.
@@ -9,7 +7,7 @@ import { v4 as uuid } from 'uuid';
  * </p>
  */
 export class Scenario {
-	identifier: uuid;
+	identifier: string;// typically a UUID
 	title: string;
 	description: string;
 }

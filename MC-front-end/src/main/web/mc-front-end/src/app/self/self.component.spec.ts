@@ -42,8 +42,8 @@ describe('SelfComponent', () => {
 		return loggedIn;
 	};
 
-	const USER_A: User = { id: new uuid(), username: 'Allan', password: 'letmein', authorities: ['ROLE_MANAGE_GAMES'] };
-	const USER_B: User = { id: new uuid(), username: 'Benedict', password: 'password123', authorities: [] };
+	const USER_A: User = { id: uuid(), username: 'Allan', password: 'letmein', authorities: ['ROLE_MANAGE_GAMES'] };
+	const USER_B: User = { id: uuid(), username: 'Benedict', password: 'password123', authorities: [] };
 
 	const setup = function(self: User | null) {
 		TestBed.configureTestingModule({

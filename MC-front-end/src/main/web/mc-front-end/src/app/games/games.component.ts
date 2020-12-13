@@ -1,6 +1,5 @@
-import { v4 as uuid, parse as parseUuid } from 'uuid';
-import { Observable, of } from 'rxjs';
-import { first, flatMap, map, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { filter, first, flatMap, map, tap } from 'rxjs/operators';
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -17,14 +16,16 @@ import { SelfService } from '../service/self.service';
 })
 export class GamesComponent implements OnInit {
 
-	static getGamesPath(scenario: uuid): string {
+	static getGamesPath(scenario: string): string {
 		return ScenarioComponent.getScenarioPath(scenario) + '/game/';
 	}
 
-	get scenario$(): Observable<uuid> {
+	get scenario$(): Observable<string> {
 		if (!this.route.parent) throw new Error('missing this.route.parent');
 		return this.route.parent.paramMap.pipe(
-			map(params => params.get('scenario'))
+			map(params => params.get('scenario')),
+			filter(scenario => !!scenario),
+			map((scenario: string | null) => scenario as string)
 		);
 	}
 

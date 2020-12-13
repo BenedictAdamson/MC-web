@@ -1,6 +1,5 @@
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { v4 as uuid } from 'uuid';
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
@@ -25,7 +24,7 @@ export class ScenarioService {
 			);
 	}
 
-	getScenario(id: uuid): Observable<Scenario> {
+	getScenario(id: string): Observable<Scenario> {
 		const url = `${this.scenarioUrl}/${id}`;
 		return this.http.get<Scenario>(url)
 			.pipe(

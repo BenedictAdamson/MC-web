@@ -1,5 +1,3 @@
-import { v4 as uuid } from 'uuid';
-
 /**
  * <p>
  * A UUID associated with a human-readable title or name.
@@ -9,6 +7,6 @@ import { v4 as uuid } from 'uuid';
  * </p>
  */
 export class NamedUUID {
-	id: uuid;
+	id: string;// a UUID
 	title: string;
 }

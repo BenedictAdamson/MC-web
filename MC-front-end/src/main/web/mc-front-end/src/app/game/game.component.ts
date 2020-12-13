@@ -1,4 +1,3 @@
-import { v4 as uuid } from 'uuid';
 import { filter, map } from 'rxjs/operators';
 
 import { Component, OnInit } from '@angular/core';
@@ -40,7 +39,7 @@ export class GameComponent implements OnInit {
 	private getGameIdentifier(): GameIdentifier {
 		const route: ActivatedRouteSnapshot = this.route.snapshot;
 		if (!route.parent) throw new Error('missing this.route.parent');
-		const scenario: uuid = route.parent.paramMap.get('scenario');
+		const scenario: string | null = route.parent.paramMap.get('scenario');
 		const created: string | null = route.paramMap.get('created');
 		if (scenario == null) throw new Error('null scenario');
 		if (created == null) throw new Error('null created');
