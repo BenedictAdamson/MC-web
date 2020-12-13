@@ -18,8 +18,8 @@ export class LoginComponent implements OnInit {
 	) { }
 
 	ngOnInit(): void {
-		this.service.username$.subscribe(u => this.username = u ? u : "");
-		this.service.password$.subscribe(p => this.password = p ? p : "");
+		this.service.username$.subscribe(u => this.username = u ? u : this.username);
+		this.service.password$.subscribe(p => this.password = p ? p : this.password);
 	}
 
 	username: string = "";

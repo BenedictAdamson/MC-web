@@ -80,8 +80,8 @@ describe('SelfService', () => {
 		return password;
 	};
 
-	const getId = function(service: SelfService): string|null {
-		var id: string|null = null;
+	const getId = function(service: SelfService): string | null {
+		var id: string | null = null;
 		service.id$.subscribe({
 			next: (i) => id = i,
 			error: (err) => fail(err),
@@ -178,8 +178,8 @@ describe('SelfService', () => {
 			complete: () => {
 				assertInvariants(service);
 				expect(getAuthenticated(service)).toEqual(false, 'not authenticated');
-				expect(getUsername(service)).toEqual(username, 'updated username');
-				expect(getPassword(service)).toEqual(password, 'updated password');
+				expect(getUsername(service)).withContext('username').toBeNull();
+				expect(getPassword(service)).withContext('password').toBeNull();
 				expect(getId(service)).withContext('id').toBeNull();
 				done()
 			}

@@ -62,7 +62,6 @@ export class SelfService {
      *
      * null if the user name is unknown,
      * which includes the case that the user is not logged in.
-     * The current user name can be known even if that user has not been authenticated.
      */
 	get username$(): Observable<string | null> {
 		return this.userRS$.pipe(
@@ -74,9 +73,8 @@ export class SelfService {
      * @description
      * The password of the current user.
      *
-     * null if the password is unknown,
-     * which includes the case that the user is not logged in.
-     * The current password name can be known even if that user has not been authenticated,
+     * null if the correct password is unknown,
+     * which includes the case that the user is not logged in
      * or if authentication has been tried but failed (which includes the case that the password is invalid).
      */
 	get password$(): Observable<string | null> {
@@ -146,8 +144,7 @@ export class SelfService {
 	 * so this is a cold Observable too.
 	 * That is, the expensive HTTP request will not be made until something subscribes to this Observable.
 	 *
-	 * Iff the authentication is successful, {@link authenticated$} will provide true.
-	 * The method however updates the {@link username} and {@link password} attributes even if authentication fails.
+	 * Iff the authentication is successful, {@link authenticated$} will emit `true``.
 	 * The authorities of the current user will be updated, if authentication is successful.
      *
      * The server may indicate that the user should use a different, canonical username,
@@ -197,14 +194,12 @@ export class SelfService {
      * update the authentication information (the credentials of the current user)
      * to be the information of the current session.
      *
-	 * The method provides a value indicating whether authentication was successful.
-     * That is, whether there is a current session.
-	 * That indirectly makes use of an HTTP request, which is a cold Observable,
+	 * The method provides a value indicating whether authentication has finished.
+	 * It indirectly makes use of an HTTP request, which is a cold Observable,
 	 * so this is a cold Observable too.
 	 * That is, the expensive HTTP request will not be made until something subscribes to this Observable.
 	 *
-	 * The method updates the #username and #password attributes, the #authenticated$ Observable,
-	 * and the authorisations of the current user.
+	 * The method updates the `username$`, `password$`, `authenticated$`  and `authorities$` Observables.
      *
      * The method makes use of the `/api/self` endpoint of the server,
      * to get the current user details.
