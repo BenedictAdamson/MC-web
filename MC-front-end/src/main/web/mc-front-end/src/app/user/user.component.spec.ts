@@ -18,6 +18,16 @@ describe('UserComponent', () => {
 	const EXPECTED_ROLE_NAMES_A: string[] = ['player', 'manage users', 'manage games'];
 	const EXPECTED_ROLE_NAMES_B: string[] = [];
 
+	const getUser = function(component: UserComponent): User | null {
+		var user: User | null = null;
+		component.user$.subscribe({
+			next: (u) => user = u,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return user;
+	};
+
 	const setUp = (testUser: User) => {
 		const userServiceStub = jasmine.createSpyObj('UserService', ['getUser']);
 		userServiceStub.getUser.and.returnValue(of(testUser));
@@ -27,10 +37,7 @@ describe('UserComponent', () => {
 			providers: [{
 				provide: ActivatedRoute,
 				useValue: {
-					params: of({ id: testUser.id }),
-					snapshot: {
-						paramMap: convertToParamMap({ id: testUser.id })
-					}
+					paramMap: of(convertToParamMap({ id: testUser.id }))
 				}
 			},
 			{ provide: UserService, useValue: userServiceStub }]
@@ -44,7 +51,7 @@ describe('UserComponent', () => {
 		setUp(user);
 
 		expect(component).toBeTruthy();
-		expect(component.user).toBe(user);
+		expect(getUser(component)).toBe(user);
 
 		const html: HTMLElement = fixture.nativeElement;
 		const displayText: string = html.innerText;
