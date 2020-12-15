@@ -87,7 +87,7 @@ export class GamePlayersService {
     /**
      * Ask the service to update its cached value for the players of a game.
      *
-     * The method does nt block, but instead performs the update asynchronously.
+     * The method does not block, but instead performs the update asynchronously.
      * The updated value will eventually become available through the [[Observable]]
      * returned by [[getGamePlayers]].
      */
@@ -97,6 +97,17 @@ export class GamePlayersService {
 			rs = this.createCacheForGamePlayers(game);
 		}
 		this.updateCachedGamePlayers(game, rs);
+	}
+
+    /**
+     * Ask the service to update its cached value for whether the current user may join the game that has a given ID.
+     *
+     * The method does not block, but instead performs the update asynchronously.
+     * The updated value will eventually become available through the [[Observable]]
+     * returned by [[mayJoinGame]].
+     */
+	updateMayJoinGame(game: GameIdentifier): void {
+		// FIXME
 	}
 
     /**

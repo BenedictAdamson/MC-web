@@ -142,6 +142,40 @@ describe('GamePlayersService', () => {
 
 
 
+	const testMayJoinGameAfterUpdateMayJoinGame = function(game: GameIdentifier, mayJoin: boolean) {
+		// Tough test: use two identifiers that are semantically equivalent, but not the same object.
+		const game2: GameIdentifier = { scenario: game.scenario, created: game.created };
+		const expectedPath: string = GamePlayersService.getApiMayJoinGamePath(game);
+		const service: GamePlayersService = TestBed.get(GamePlayersService);
+
+		service.updateMayJoinGame(game);
+		service.mayJoinGame(game2).subscribe(may => expect(may).toEqual(mayJoin));
+
+		// Only one GET expected because should use the cached value.
+		const request = httpTestingController.expectOne(expectedPath);
+		expect(request.request.method).toEqual('GET');
+		request.event(new HttpResponse<boolean>({ body: mayJoin }));
+		httpTestingController.verify();
+	};
+
+	it('can query whether may join game after update whether may join game [A]', () => {
+		testMayJoinGameAfterUpdateMayJoinGame(GAME_IDENTIFIER_A, true);
+	})
+
+	it('can query whether may join game after update whether may join game [B]', () => {
+		testMayJoinGameAfterUpdateMayJoinGame(GAME_IDENTIFIER_A, false);
+	})
+
+	it('can query whether may join game after update whether may join game [C]', () => {
+		testMayJoinGameAfterUpdateMayJoinGame(GAME_IDENTIFIER_B, true);
+	})
+
+	it('can query whether may join game after update whether may join game [D]', () => {
+		testMayJoinGameAfterUpdateMayJoinGame(GAME_IDENTIFIER_B, false);
+	})
+
+
+
 	const testGetGamePlayersAfterUpdateGamePlayers = function(gamePlayers: GamePlayers) {
 		// Tough test: use two identifiers that are semantically equivalent, but not the same object.
 		const game1: GameIdentifier = gamePlayers.identifier;
