@@ -15,6 +15,7 @@ import { GameService } from './game.service'
 export class GamePlayersService {
 
 	private gamesPlayers: Map<string, ReplaySubject<GamePlayers | null>> = new Map();
+	private mayJoin: Map<string, ReplaySubject<boolean>> = new Map();
 
 	constructor(
 		private http: HttpClient
@@ -58,6 +59,24 @@ export class GamePlayersService {
 
 	private updateCachedGamePlayers(game: GameIdentifier, rs: ReplaySubject<GamePlayers | null>): void {
 		this.fetchGamePlayers(game).subscribe(gamePlayers => rs.next(gamePlayers));
+	}
+
+
+	private createCacheForMayJoin(game: GameIdentifier): ReplaySubject<boolean> {
+		const rs: ReplaySubject<boolean> = new ReplaySubject<boolean>(1);
+		this.mayJoin.set(GamePlayersService.createKey(game), rs);
+		return rs;
+	}
+
+	private fetchMayJoin(game: GameIdentifier): Observable<boolean> {
+		return this.http.get<boolean>(GamePlayersService.getApiMayJoinGamePath(game))
+			.pipe(
+				catchError(this.handleError<boolean>('mayJoinGame', false))
+			);
+	}
+
+	private updateCachedMayJoin(game: GameIdentifier, rs: ReplaySubject<boolean>): void {
+		this.fetchMayJoin(game).subscribe(may => rs.next(may));
 	}
 
     /**
@@ -107,7 +126,11 @@ export class GamePlayersService {
      * returned by [[mayJoinGame]].
      */
 	updateMayJoinGame(game: GameIdentifier): void {
-		// FIXME
+		var rs: ReplaySubject<boolean> | undefined = this.mayJoin.get(GamePlayersService.createKey(game));
+		if (!rs) {
+			rs = this.createCacheForMayJoin(game);
+		}
+		this.updateCachedMayJoin(game, rs);
 	}
 
     /**
@@ -154,10 +177,12 @@ export class GamePlayersService {
      * An [[Observable]] that indicates whether may join.
      */
 	mayJoinGame(game: GameIdentifier): Observable<boolean> {
-		return this.http.get<boolean>(GamePlayersService.getApiMayJoinGamePath(game))
-			.pipe(
-				catchError(this.handleError<boolean>('mayJoinGame', false))
-			);
+		var rs: ReplaySubject<boolean> | undefined = this.mayJoin.get(GamePlayersService.createKey(game));
+		if (!rs) {
+			rs = this.createCacheForMayJoin(game);
+			this.updateCachedMayJoin(game, rs);
+		}
+		return rs.asObservable();
 	}
 
     /**
