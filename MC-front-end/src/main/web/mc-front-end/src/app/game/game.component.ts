@@ -7,7 +7,6 @@ import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
 import { GameService } from '../service/game.service';
 import { GamesComponent } from '../games/games.component';
-import { SelfService } from '../service/self.service';
 
 @Component({
 	selector: 'app-game',
@@ -26,8 +25,7 @@ export class GameComponent implements OnInit {
 
 	constructor(
 		private route: ActivatedRoute,
-		private gameService: GameService,
-		private selfService: SelfService
+		private gameService: GameService
 	) { }
 
 	ngOnInit(): void {

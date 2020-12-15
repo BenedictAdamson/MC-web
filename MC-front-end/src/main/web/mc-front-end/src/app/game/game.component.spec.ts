@@ -1,4 +1,4 @@
-import { Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
@@ -9,21 +9,6 @@ import { Game } from '../game'
 import { GameIdentifier } from '../game-identifier'
 import { GameService } from '../service/game.service';
 import { GameComponent } from './game.component';
-import { SelfService } from '../service/self.service';
-import { User } from '../user';
-
-class MockSelfService {
-
-	constructor(private self: User) { };
-
-	get username(): string {
-		return this.self.username;
-	}
-
-	get mayManageGames$(): Observable<boolean> {
-		return of(this.self.authorities.includes('ROLE_MANAGE_GAMES'));
-	}
-}
 
 
 describe('GameComponent', () => {
@@ -39,12 +24,8 @@ describe('GameComponent', () => {
 	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A };
 	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B };
 
-	const USER_ADMIN = { id: uuid(), username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
-	const USER_NORMAL = { id: uuid(), username: 'Benedict', password: null, authorities: [] };
 
-
-
-	const setUpForNgInit = function(game: Game, self: User) {
+	const setUpForNgInit = function(game: Game) {
 		const gameServiceStub = jasmine.createSpyObj('GameService', ['getGame']);
 		gameServiceStub.getGame.and.returnValue(of(game));
 
@@ -63,8 +44,7 @@ describe('GameComponent', () => {
 					}
 				}
 			},
-			{ provide: GameService, useValue: gameServiceStub },
-			{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }]
+			{ provide: GameService, useValue: gameServiceStub }]
 		});
 
 		fixture = TestBed.createComponent(GameComponent);
@@ -83,8 +63,8 @@ describe('GameComponent', () => {
 	};
 
 
-	const canCreate = function(game: Game, self: User) {
-		setUpForNgInit(game, self);
+	const canCreate = function(game: Game) {
+		setUpForNgInit(game);
 		tick();
 		fixture.detectChanges();
 
@@ -99,19 +79,11 @@ describe('GameComponent', () => {
 	};
 
 	it('can create [A]', fakeAsync(() => {
-		canCreate(GAME_A, USER_ADMIN);
+		canCreate(GAME_A);
 	}));
 
 	it('can create [B]', fakeAsync(() => {
-		canCreate(GAME_A, USER_NORMAL);
-	}));
-
-	it('can create [C]', fakeAsync(() => {
-		canCreate(GAME_B, USER_ADMIN);
-	}));
-
-	it('can create [D]', fakeAsync(() => {
-		canCreate(GAME_B, USER_NORMAL);
+		canCreate(GAME_B);
 	}));
 
 });
