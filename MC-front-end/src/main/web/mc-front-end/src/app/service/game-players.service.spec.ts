@@ -210,6 +210,43 @@ describe('GamePlayersService', () => {
 
 
 
+	const testMayJoinGameForChangingValue = function(
+		done: any,
+		game: GameIdentifier,
+		may1: boolean
+	) {
+		const may2: boolean = !may1;
+		const expectedPath: string = GamePlayersService.getApiMayJoinGamePath(game);
+		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		var n: number = 0;
+
+		service.mayJoinGame(game).subscribe(
+			() => {
+				n++;
+				if (n == 2) done();
+			}
+		);
+		service.updateMayJoinGame(game);
+
+		const requests: TestRequest[] = httpTestingController.match(expectedPath);
+		expect(requests.length).withContext('number of requests').toEqual(2);
+		expect(requests[0].request.method).toEqual('GET');
+		requests[0].event(new HttpResponse<boolean>({ body: may1 }));
+		expect(requests[1].request.method).toEqual('GET');
+		requests[1].event(new HttpResponse<boolean>({ body: may2 }));
+		httpTestingController.verify();
+	};
+
+	it('provides updated game players [A]', (done) => {
+		testMayJoinGameForChangingValue(done, GAME_IDENTIFIER_A, true);
+	})
+
+	it('provides updated game players [B]', (done) => {
+		testMayJoinGameForChangingValue(done, GAME_IDENTIFIER_B, false);
+	})
+
+
+
 	const testGetGamePlayersAfterUpdateGamePlayers = function(gamePlayers: GamePlayers) {
 		// Tough test: use two identifiers that are semantically equivalent, but not the same object.
 		const game1: GameIdentifier = gamePlayers.identifier;
