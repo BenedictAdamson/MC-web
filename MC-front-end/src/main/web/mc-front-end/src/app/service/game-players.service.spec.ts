@@ -237,12 +237,44 @@ describe('GamePlayersService', () => {
 		httpTestingController.verify();
 	};
 
-	it('provides updated game players [A]', (done) => {
+	it('provides updated may join query results [A]', (done) => {
 		testMayJoinGameForChangingValue(done, GAME_IDENTIFIER_A, true);
 	})
 
-	it('provides updated game players [B]', (done) => {
+	it('provides updated may join query results [B]', (done) => {
 		testMayJoinGameForChangingValue(done, GAME_IDENTIFIER_B, false);
+	})
+
+
+
+	const testMayJoinGameForUnchangedUpdate = function(game: GameIdentifier, may: boolean) {
+		const expectedPath: string = GamePlayersService.getApiMayJoinGamePath(game);
+		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		var n: number = 0;
+
+		service.mayJoinGame(game).subscribe(
+			() => {
+				n++;
+				expect(n).withContext('number emitted').toEqual(1);
+			}
+		);
+		service.updateMayJoinGame(game);
+
+		const requests: TestRequest[] = httpTestingController.match(expectedPath);
+		expect(requests.length).withContext('number of requests').toEqual(2);
+		expect(requests[0].request.method).toEqual('GET');
+		requests[0].event(new HttpResponse<boolean>({ body: may }));
+		expect(requests[1].request.method).toEqual('GET');
+		requests[1].event(new HttpResponse<boolean>({ body: may }));
+		httpTestingController.verify();
+	};
+
+	it('provides distinct may join query results [A]', () => {
+		testMayJoinGameForUnchangedUpdate(GAME_IDENTIFIER_A, false);
+	})
+
+	it('provides distinct may join query results [B]', () => {
+		testMayJoinGameForUnchangedUpdate(GAME_IDENTIFIER_B, true);
 	})
 
 

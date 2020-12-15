@@ -182,7 +182,9 @@ export class GamePlayersService {
 			rs = this.createCacheForMayJoin(game);
 			this.updateCachedMayJoin(game, rs);
 		}
-		return rs.asObservable();
+		return rs.pipe(
+			distinctUntilChanged()
+		);
 	}
 
     /**
