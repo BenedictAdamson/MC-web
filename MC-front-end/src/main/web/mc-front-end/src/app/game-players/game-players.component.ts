@@ -86,7 +86,8 @@ export class GamePlayersComponent implements OnInit {
 
 	mayJoinGame$(): Observable<boolean> {
 		return this.identifier$.pipe(
-			flatMap(identifier => this.gamePlayersService.mayJoinGame(identifier))
+			flatMap(identifier => this.gamePlayersService.mayJoinGame(identifier)),
+			distinctUntilChanged() // don't spam identical values
 		);
 	}
 
@@ -105,7 +106,7 @@ export class GamePlayersComponent implements OnInit {
 	get players$(): Observable<string[]> {
 		return this.gamePlayers$.pipe(
 			map(gp => gp.users)
-            // TODO provide names
+			// TODO provide names
 		);
 	}
 
