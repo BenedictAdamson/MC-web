@@ -143,12 +143,14 @@ describe('GamePlayersService', () => {
 
 
 	const testGetGamePlayersAfterUpdateGamePlayers = function(gamePlayers: GamePlayers) {
-		const game: GameIdentifier = gamePlayers.identifier;
-		const expectedPath: string = GamePlayersService.getApiGamePlayersPath(game);
+		// Tough test: use two identifiers that are semantically equivalent, but not the same object.
+		const game1: GameIdentifier = gamePlayers.identifier;
+		const game2: GameIdentifier = { scenario: game1.scenario, created: game1.created };
+		const expectedPath: string = GamePlayersService.getApiGamePlayersPath(game1);
 		const service: GamePlayersService = TestBed.get(GamePlayersService);
 
-		service.updateGamePlayers(game);
-		service.getGamePlayers(game).subscribe(g => expect(g).toEqual(gamePlayers));
+		service.updateGamePlayers(game1);
+		service.getGamePlayers(game2).subscribe(g => expect(g).toEqual(gamePlayers));
 
 		// Only one GET expected because should use the cached value.
 		const request = httpTestingController.expectOne(expectedPath);

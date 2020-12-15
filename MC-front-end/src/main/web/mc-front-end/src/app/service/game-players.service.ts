@@ -14,7 +14,7 @@ import { GameService } from './game.service'
 })
 export class GamePlayersService {
 
-	private gamesPlayers: Map<GameIdentifier, ReplaySubject<GamePlayers | null>> = new Map();
+	private gamesPlayers: Map<string, ReplaySubject<GamePlayers | null>> = new Map();
 
 	constructor(
 		private http: HttpClient
@@ -36,11 +36,16 @@ export class GamePlayersService {
 		return GamePlayersService.getApiGamePlayersPath(game) + '?mayJoin';
 	}
 
+	private static createKey(game: GameIdentifier): string {
+		return game.scenario + '@' + game.created;
+	}
+
+
 
 
 	private createCacheForGamePlayers(game: GameIdentifier): ReplaySubject<GamePlayers> {
 		const rs: ReplaySubject<GamePlayers> = new ReplaySubject<GamePlayers>(1);
-		this.gamesPlayers.set(game, rs);
+		this.gamesPlayers.set(GamePlayersService.createKey(game), rs);
 		return rs;
 	}
 
@@ -69,7 +74,7 @@ export class GamePlayersService {
      * The  [[Observable]] returned by this method emits only distinct values.
      */
 	getGamePlayers(game: GameIdentifier): Observable<GamePlayers | null> {
-		var rs: ReplaySubject<GamePlayers | null> | undefined = this.gamesPlayers.get(game);
+		var rs: ReplaySubject<GamePlayers | null> | undefined = this.gamesPlayers.get(GamePlayersService.createKey(game));
 		if (!rs) {
 			rs = this.createCacheForGamePlayers(game);
 			this.updateCachedGamePlayers(game, rs);
@@ -87,7 +92,7 @@ export class GamePlayersService {
      * returned by [[getGamePlayers]].
      */
 	updateGamePlayers(game: GameIdentifier): void {
-		var rs: ReplaySubject<GamePlayers | null> | undefined = this.gamesPlayers.get(game);
+		var rs: ReplaySubject<GamePlayers | null> | undefined = this.gamesPlayers.get(GamePlayersService.createKey(game));
 		if (!rs) {
 			rs = this.createCacheForGamePlayers(game);
 		}
