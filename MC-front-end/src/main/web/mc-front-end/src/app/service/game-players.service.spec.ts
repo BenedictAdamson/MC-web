@@ -150,6 +150,7 @@ describe('GamePlayersService', () => {
 		service.updateGamePlayers(game);
 		service.getGamePlayers(game).subscribe(g => expect(g).toEqual(gamePlayers));
 
+		// Only one GET expected because should use the cached value.
 		const request = httpTestingController.expectOne(expectedPath);
 		expect(request.request.method).toEqual('GET');
 		request.flush(gamePlayers);

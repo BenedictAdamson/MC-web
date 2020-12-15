@@ -119,6 +119,7 @@ describe('GameService', () => {
 		service.updateGamesOfScenario(scenario);
 		service.getGamesOfScenario(scenario).subscribe(ids => expect(ids).toEqual(identifiers));
 
+        // Only one GET expected because should use the cached value.
 		const request = httpTestingController.expectOne(GameService.getApiGamesPath(scenario));
 		expect(request.request.method).toEqual('GET');
 		request.flush(identifiers);
