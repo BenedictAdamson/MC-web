@@ -183,6 +183,8 @@ describe('GamePlayersComponent', () => {
 		const endRecuitmentButton: HTMLButtonElement | null = html.querySelector('button#end-recruitment');
 		const joinButton: HTMLButtonElement | null = html.querySelector('button#join');
 
+		const joinableText: string = joinableElement ? joinableElement.innerText : "";
+
 		expect(recruitingElement).withContext("recruiting element").not.toBeNull();
 		expect(joinableElement).withContext("joinable element").not.toBeNull();
 		expect(playersElement).withContext("players element").not.toBeNull();
@@ -190,11 +192,16 @@ describe('GamePlayersComponent', () => {
 		expect(endRecuitmentButton).withContext('end-recuitment button').not.toBeNull();
 		expect(joinButton).withContext('join button').not.toBeNull();
 
+		expect(joinableText.includes('You may not join this game') || joinableText.includes('You may join this game')).withContext("joinable element text reports a recognized message").toBeTrue();
+
 		if (recruitingElement) {
 			expect(recruitingElement.innerText).withContext("recruiting element text mentions recruiting").toMatch('[Rr]ecruiting');
 		}
 		if (joinableElement) {
 			expect(joinableElement.innerText).withContext("joinable element text mentions joining").toMatch('[Jj]oin');
+		}
+		if (joinButton && joinableElement) {
+			expect(joinButton.disabled == joinableText.includes('You may not join this game')).withContext('whether join button is disabled is consistent with joinable text').toBeTrue();
 		}
 	};
 
