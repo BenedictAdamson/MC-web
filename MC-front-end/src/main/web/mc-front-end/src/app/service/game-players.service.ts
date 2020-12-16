@@ -156,16 +156,12 @@ export class GamePlayersService {
 
      * @param game
      * The unique ID of the game for which to end recuitment.
-     * @returns
-     * An [[Observable]] that provides the updated game players information.
-     * The [[GamePlayers.identifier]] of the returned game players information
-     * is equal to the given ``game``.
 	 */
-	endRecuitment(game: GameIdentifier): Observable<GamePlayers> {
+	endRecuitment(game: GameIdentifier): void {
 		/* The server actually replies to the POST with a 302 (Found) redirect to the resource of the altered game players resource.
 		 * The HttpClient or browser itself handles that redirect for us.
 	     */
-		return this.http.post<GamePlayers>(GamePlayersService.getApiGameEndRecuitmentPath(game), "");
+		this.http.post<GamePlayers>(GamePlayersService.getApiGameEndRecuitmentPath(game), "").subscribe();
 	}
 
     /**

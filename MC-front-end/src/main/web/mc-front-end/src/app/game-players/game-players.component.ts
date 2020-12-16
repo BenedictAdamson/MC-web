@@ -113,8 +113,7 @@ export class GamePlayersComponent implements OnInit {
 	endRecuitment() {
 		this.identifier$.pipe(
 			first(),// do the operation only once
-			flatMap(id => this.gamePlayersService.endRecuitment(id)),
-			tap((gp: GamePlayers) => this.gamePlayersService.updateGamePlayers(gp.identifier))
+			tap(id => this.gamePlayersService.endRecuitment(id))
 		).subscribe();
 	}
 
