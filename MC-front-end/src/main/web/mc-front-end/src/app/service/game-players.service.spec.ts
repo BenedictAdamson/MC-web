@@ -98,7 +98,7 @@ describe('GamePlayersService', () => {
 		const service: GamePlayersService = TestBed.get(GamePlayersService);
 		const gamePlayersReply: GamePlayers = { identifier: identifier, recruiting: false, users: gamePlayers0.users }
 
-		service.endRecuitment(identifier);
+		service.endRecruitment(identifier);
 
 		const request = httpTestingController.expectOne(path);
 		expect(request.request.method).toEqual('POST');

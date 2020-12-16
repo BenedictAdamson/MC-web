@@ -66,7 +66,7 @@ class MockGamePlayersService {
 		return of(this.mayJoin);
 	}
 
-	endRecuitment(game: GameIdentifier): Observable<GamePlayers> {
+	endRecruitment(game: GameIdentifier): Observable<GamePlayers> {
 		this.expectGameIdentifier(game, 'endRecuitment');
 		this.serverGamePlayers.recruiting = false;
 		return this.copy();
@@ -272,11 +272,11 @@ describe('GamePlayersComponent', () => {
 	}));
 
 
-	const testEndRecuitment = function(gamePlayers0: GamePlayers) {
+	const testEndRecruitment = function(gamePlayers0: GamePlayers) {
 		const self: User = USER_ADMIN;
 
 		setUp(gamePlayers0, self, true);
-		component.endRecuitment();
+		component.endRecruitment();
 		tick();
 		tick();
 		fixture.detectChanges();
@@ -294,11 +294,11 @@ describe('GamePlayersComponent', () => {
 	};
 
 	it('can end recuitment [A]', fakeAsync((() => {
-		testEndRecuitment(GAME_PLAYERS_A);
+		testEndRecruitment(GAME_PLAYERS_A);
 	})));
 
 	it('can end recuitment [B]', fakeAsync((() => {
-		testEndRecuitment(GAME_PLAYERS_B);
+		testEndRecruitment(GAME_PLAYERS_B);
 	})));
 
 	const testJoinGame = function(gamePlayers0: GamePlayers, self: User) {

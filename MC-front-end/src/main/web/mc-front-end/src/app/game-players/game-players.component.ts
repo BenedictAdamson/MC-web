@@ -110,10 +110,10 @@ export class GamePlayersComponent implements OnInit {
 		);
 	}
 
-	endRecuitment() {
+	endRecruitment() {
 		this.identifier$.pipe(
 			first(),// do the operation only once
-			tap(id => this.gamePlayersService.endRecuitment(id))
+			tap(id => this.gamePlayersService.endRecruitment(id))
 		).subscribe();
 	}
 
