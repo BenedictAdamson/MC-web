@@ -61,35 +61,36 @@ describe('GamePlayersService', () => {
 		testGetGamePlayers(GAME_PLAYERS_B);
 	})
 
-	const testJoinGame = function(gamePlayers0: GamePlayers, user: string) {
-		const id: GameIdentifier = gamePlayers0.identifier;
+	const testJoinGame = function(done: any, gamePlayers0: GamePlayers, user: string) {
+		const game: GameIdentifier = gamePlayers0.identifier;
+		const expectedPath: string = GamePlayersService.getApiJoinGamePath(game);
 		var users: string[] = gamePlayers0.users;
 		users.push(user);
-		const gamePlayers: GamePlayers = { identifier: id, recruiting: gamePlayers0.recruiting, users: users };
+		const gamePlayers1: GamePlayers = { identifier: game, recruiting: gamePlayers0.recruiting, users: users };
 		const service: GamePlayersService = TestBed.get(GamePlayersService);
 
-		const result: Observable<GamePlayers> = service.joinGame(id);
+		service.joinGame(game);
 
-		expect(result).withContext('result').not.toBeNull();// guard
-		result.subscribe(gp => {
-			expect(gp).withContext('GamePlayers').not.toBeNull();// guard
-			expect(gp.identifier).withContext('GamePlayers.identifier').toEqual(id);
-			expect(gp.recruiting).withContext('GamePlayers.recruiting').toEqual(gamePlayers0.recruiting);
-			expect(gp.users).withContext('GamePlayers.users').toEqual(users);
-		});
-
-		const request = httpTestingController.expectOne(GamePlayersService.getApiJoinGamePath(id));
+		const request = httpTestingController.expectOne(expectedPath);
 		expect(request.request.method).toEqual('POST');
-		request.flush(gamePlayers);
+		request.flush(gamePlayers1);
 		httpTestingController.verify();
+
+		service.getGamePlayers(game).subscribe({
+			next: (gps) => {
+				expect(gps).withContext('gamePlayers').not.toBeNull();
+				expect(gps).withContext('gamePlayers').toEqual(gamePlayers1);
+				done();
+			}, error: (e) => { fail(e); }, complete: () => { }
+		});
 	}
 
-	it('can join game [A]', () => {
-		testJoinGame(GAME_PLAYERS_A, USER_ID_A);
+	it('can join game [A]', (done) => {
+		testJoinGame(done, GAME_PLAYERS_A, USER_ID_A);
 	})
 
-	it('can join game [B]', () => {
-		testJoinGame(GAME_PLAYERS_B, USER_ID_B);
+	it('can join game [B]', (done) => {
+		testJoinGame(done, GAME_PLAYERS_B, USER_ID_B);
 	})
 
 	const testEndRecuitment = function(done: any, gamePlayers0: GamePlayers) {

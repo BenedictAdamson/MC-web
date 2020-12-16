@@ -145,18 +145,23 @@ export class GamePlayersService {
     /**
      * Ask that the current user joins the game that has a given ID.
      *
+     * Calling this method starts an asynchronous operation to cause the change on the server,
+     * which will result in the [[Observable]] returned by [[getGamePlayers(GameIdentifier)]]
+     * emitting an updated value for the game players of the given `game`,
+     * if server value has changed.
+     *
+     * The operation performs a POST.
+     * The server actually replies to the POST with a 302 (Found) redirect
+     * to the resource of the altered game players resource.
+	 * The HttpClient or browser itself handles that redirect for us.
+     *
      * @param game
      * The unique ID of the game to join.
-     * @returns
-     * An [[Observable]] that provides the updated game players information.
-     * The [[GamePlayers.identifier]] of the returned game players information
-     * is equal to the given ``game``.
      */
-	joinGame(game: GameIdentifier): Observable<GamePlayers> {
-		/* The server actually replies to the POST with a 302 (Found) redirect to the resource of the altered game players resource.
-		 * The HttpClient or browser itself handles that redirect for us.
-	     */
-		return this.http.post<GamePlayers>(GamePlayersService.getApiJoinGamePath(game), "");
+	joinGame(game: GameIdentifier): void {
+		this.http.post<GamePlayers>(GamePlayersService.getApiJoinGamePath(game), "").subscribe(
+			gps => this.setGamePlayers(game, gps)
+		);
 	}
 
 
@@ -172,7 +177,6 @@ export class GamePlayersService {
      * The server actually replies to the POST with a 302 (Found) redirect
      * to the resource of the altered game players resource.
 	 * The HttpClient or browser itself handles that redirect for us.
-	 *
      *
      * @param game
      * The unique ID of the game for which to end recuitment.

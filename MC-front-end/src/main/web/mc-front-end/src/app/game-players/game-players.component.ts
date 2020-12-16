@@ -120,8 +120,7 @@ export class GamePlayersComponent implements OnInit {
 	joinGame() {
 		this.identifier$.pipe(
 			first(),// do the operation only once
-			flatMap(id => this.gamePlayersService.joinGame(id)),
-			tap((gp: GamePlayers) => this.gamePlayersService.updateGamePlayers(gp.identifier))
+			tap(id => this.gamePlayersService.joinGame(id))
 		).subscribe();
 	}
 
