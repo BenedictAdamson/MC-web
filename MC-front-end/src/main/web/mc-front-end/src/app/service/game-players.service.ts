@@ -103,6 +103,15 @@ export class GamePlayersService {
 		);
 	}
 
+	private setGamePlayers(game: GameIdentifier, gamePlayers: GamePlayers | null): void {
+		if (gamePlayers && gamePlayers.identifier != game) throw new Error('inconsistent game.identifier');
+		var rs: ReplaySubject<GamePlayers | null> | undefined = this.gamesPlayers.get(GamePlayersService.createKey(game));
+		if (!rs) {
+			rs = this.createCacheForGamePlayers(game);
+		}
+		rs.next(gamePlayers);
+	}
+
     /**
      * Ask the service to update its cached value for the players of a game.
      *
@@ -153,15 +162,25 @@ export class GamePlayersService {
 
 	/**
 	 * Change a game so it is no longer [[Game.recruiting|recruiting]] players.
-
+     *
+     * Calling this method starts an asynchronous operation to cause the change on the server,
+     * which will result in the [[Observable]] returned by [[getGamePlayers(GameIdentifier)]]
+     * emitting an updated value for the game players of the given `game`,
+     * if server value has changed.
+     *
+     * The operation performs a POST.
+     * The server actually replies to the POST with a 302 (Found) redirect
+     * to the resource of the altered game players resource.
+	 * The HttpClient or browser itself handles that redirect for us.
+	 *
+     *
      * @param game
      * The unique ID of the game for which to end recuitment.
 	 */
 	endRecruitment(game: GameIdentifier): void {
-		/* The server actually replies to the POST with a 302 (Found) redirect to the resource of the altered game players resource.
-		 * The HttpClient or browser itself handles that redirect for us.
-	     */
-		this.http.post<GamePlayers>(GamePlayersService.getApiGameEndRecuitmentPath(game), "").subscribe();
+		this.http.post<GamePlayers>(GamePlayersService.getApiGameEndRecuitmentPath(game), "").subscribe(
+			gps => this.setGamePlayers(game, gps)
+		);
 	}
 
     /**

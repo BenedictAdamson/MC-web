@@ -92,26 +92,34 @@ describe('GamePlayersService', () => {
 		testJoinGame(GAME_PLAYERS_B, USER_ID_B);
 	})
 
-	const testEndRecuitment = function(gamePlayers0: GamePlayers) {
-		const identifier: GameIdentifier = gamePlayers0.identifier;
-		const path: string = GamePlayersService.getApiGameEndRecuitmentPath(identifier);
+	const testEndRecuitment = function(done: any, gamePlayers0: GamePlayers) {
+		const game: GameIdentifier = gamePlayers0.identifier;
+		const path: string = GamePlayersService.getApiGameEndRecuitmentPath(game);
 		const service: GamePlayersService = TestBed.get(GamePlayersService);
-		const gamePlayersReply: GamePlayers = { identifier: identifier, recruiting: false, users: gamePlayers0.users }
+		const gamePlayersReply: GamePlayers = { identifier: game, recruiting: false, users: gamePlayers0.users }
 
-		service.endRecruitment(identifier);
+		service.endRecruitment(game);
 
 		const request = httpTestingController.expectOne(path);
 		expect(request.request.method).toEqual('POST');
 		request.flush(gamePlayersReply);
 		httpTestingController.verify();
+
+		service.getGamePlayers(game).subscribe({
+			next: (gps) => {
+				expect(gps).withContext('gamePlayers').not.toBeNull();
+				expect(gps).withContext('gamePlayers').toEqual(gamePlayersReply);
+				done();
+			}, error: (e) => { fail(e); }, complete: () => { }
+		});
 	}
 
-	it('can end recuitment [A]', () => {
-		testEndRecuitment(GAME_PLAYERS_A);
+	it('can end recuitment [A]', (done) => {
+		testEndRecuitment(done, GAME_PLAYERS_A);
 	})
 
-	it('can end recuitment [B]', () => {
-		testEndRecuitment(GAME_PLAYERS_B);
+	it('can end recuitment [B]', (done) => {
+		testEndRecuitment(done, GAME_PLAYERS_B);
 	})
 
 
