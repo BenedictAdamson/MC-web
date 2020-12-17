@@ -279,8 +279,15 @@ public abstract class Page {
    }
 
    public final void awaitIsReady() throws IllegalStateException {
+      awaitIsReady(body -> true);
+   }
+
+   protected final void awaitIsReady(
+            @Nonnull final Predicate<WebElement> satisfiesAdditionalConstraints)
+            throws IllegalStateException {
       try {
-         new WebDriverWait(webDriver, 17).until(driver -> isReady(driver));
+         new WebDriverWait(webDriver, 17).until(
+                  driver -> isReady(driver, satisfiesAdditionalConstraints));
       } catch (final Exception e) {// give better diagnostics
          throw new NotReadyException(e);
       }
@@ -288,8 +295,9 @@ public abstract class Page {
 
    public final void awaitIsReadyOrErrorMessage() throws IllegalStateException {
       try {
-         new WebDriverWait(webDriver, 17).until(driver -> isReady(driver)
-                  || !driver.findElements(ERROR_LOCATOR).isEmpty());
+         new WebDriverWait(webDriver, 17)
+                  .until(driver -> isReady(driver, body -> true)
+                           || !driver.findElements(ERROR_LOCATOR).isEmpty());
       } catch (final Exception e) {// give better diagnostics
          throw new IllegalStateException(
                   "No indication of success or failure (awaiting "
@@ -405,9 +413,11 @@ public abstract class Page {
       return isValidPath(path);
    }
 
-   private boolean isReady(final WebDriver driver) {
+   private boolean isReady(final WebDriver driver,
+            final Predicate<WebElement> satisfiesAdditionalConstraints) {
+      final var body = driver.findElement(BODY_LOCATOR);
       return isReady(getPathOfUrl(driver.getCurrentUrl()), driver.getTitle(),
-               driver.findElement(BODY_LOCATOR));
+               body) && satisfiesAdditionalConstraints.test(body);
    }
 
    /**
@@ -426,7 +436,7 @@ public abstract class Page {
    protected abstract boolean isValidPath(@Nonnull String path);
 
    public final void requireIsReady() throws IllegalStateException {
-      if (!isReady(webDriver)) {
+      if (!isReady(webDriver, body -> true)) {
          throw new NotReadyException();
       }
    }

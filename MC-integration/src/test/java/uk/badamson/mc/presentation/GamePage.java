@@ -82,7 +82,20 @@ public final class GamePage extends Page {
             .id("end-recruitment");
    private static final By JOIN_BUTTON_LOCATOR = By.id("join");
 
+   private static boolean hasEndedRecruitment(final WebElement body) {
+      final var elements = body.findElements(RECRUITING_ELEMENT_LOCATOR);
+      return elements.size() == 1 && INDICATES_IS_NOT_RECRUITING_PLAYERS
+               .matches(elements.get(0).getText());
+   }
+
+   private static boolean hasJoinedGame(final WebElement body) {
+      final var elements = body.findElements(RECRUITING_ELEMENT_LOCATOR);
+      return elements.size() == 1 && INDICATES_IS_NOT_RECRUITING_PLAYERS
+               .matches(elements.get(0).getText());
+   }
+
    private final ScenarioPage scenarioPage;
+
    private final Matcher<String> includesCreationTime;
 
    private final Matcher<String> includesScenarioTitile;
@@ -271,7 +284,7 @@ public final class GamePage extends Page {
                   "Button [" + button + "] is not enabled");
       }
       button.click();
-      awaitIsReady();
+      awaitIsReady(GamePage::hasEndedRecruitment);
    }
 
    public boolean isEndRecruitmentEnabled() {
@@ -299,7 +312,7 @@ public final class GamePage extends Page {
                   "Button [" + button + "] is not enabled");
       }
       button.click();
-      awaitIsReady();
+      awaitIsReady(GamePage::hasJoinedGame);
    }
 
    public ScenarioPage navigateToScenarioPage() {
