@@ -79,19 +79,19 @@ export class GamePlayersService {
 		this.fetchMayJoin(game).subscribe(may => rs.next(may));
 	}
 
-    /**
-     * Get the players of the game that has a given ID.
-     *
-     * The service might have to request the server for this information.
-     * However, it caches responses, so the value emitted by the returned [[Observable]]
-     * could be an immediately available cached value that does not require contacting the server.
-     *
-     * The  [[Observable]] returned by this method does not normally immediately end
-     * once it has emitted one value. It will emit additional values
-     * (after the first) as updated values if it has been asked to [[updateGamePlayers]].
-     *
-     * The  [[Observable]] returned by this method emits only distinct values.
-     */
+	/**
+	 * Get the players of the game that has a given ID.
+	 *
+	 * The service might have to request the server for this information.
+	 * However, it caches responses, so the value emitted by the returned [[Observable]]
+	 * could be an immediately available cached value that does not require contacting the server.
+	 *
+	 * The  [[Observable]] returned by this method does not normally immediately end
+	 * once it has emitted one value. It will emit additional values
+	 * (after the first) as updated values if it has been asked to [[updateGamePlayers]].
+	 *
+	 * The  [[Observable]] returned by this method emits only distinct values.
+	 */
 	getGamePlayers(game: GameIdentifier): Observable<GamePlayers | null> {
 		var rs: ReplaySubject<GamePlayers | null> | undefined = this.gamesPlayers.get(GamePlayersService.createKey(game));
 		if (!rs) {
@@ -104,7 +104,7 @@ export class GamePlayersService {
 	}
 
 	private setGamePlayers(game: GameIdentifier, gamePlayers: GamePlayers | null): void {
-		if (gamePlayers && gamePlayers.identifier != game) throw new Error('inconsistent game.identifier');
+		if (gamePlayers) game = gamePlayers.identifier;
 		var rs: ReplaySubject<GamePlayers | null> | undefined = this.gamesPlayers.get(GamePlayersService.createKey(game));
 		if (!rs) {
 			rs = this.createCacheForGamePlayers(game);
@@ -112,13 +112,13 @@ export class GamePlayersService {
 		rs.next(gamePlayers);
 	}
 
-    /**
-     * Ask the service to update its cached value for the players of a game.
-     *
-     * The method does not block, but instead performs the update asynchronously.
-     * The updated value will eventually become available through the [[Observable]]
-     * returned by [[getGamePlayers]].
-     */
+	/**
+	 * Ask the service to update its cached value for the players of a game.
+	 *
+	 * The method does not block, but instead performs the update asynchronously.
+	 * The updated value will eventually become available through the [[Observable]]
+	 * returned by [[getGamePlayers]].
+	 */
 	updateGamePlayers(game: GameIdentifier): void {
 		var rs: ReplaySubject<GamePlayers | null> | undefined = this.gamesPlayers.get(GamePlayersService.createKey(game));
 		if (!rs) {
@@ -127,13 +127,13 @@ export class GamePlayersService {
 		this.updateCachedGamePlayers(game, rs);
 	}
 
-    /**
-     * Ask the service to update its cached value for whether the current user may join the game that has a given ID.
-     *
-     * The method does not block, but instead performs the update asynchronously.
-     * The updated value will eventually become available through the [[Observable]]
-     * returned by [[mayJoinGame]].
-     */
+	/**
+	 * Ask the service to update its cached value for whether the current user may join the game that has a given ID.
+	 *
+	 * The method does not block, but instead performs the update asynchronously.
+	 * The updated value will eventually become available through the [[Observable]]
+	 * returned by [[mayJoinGame]].
+	 */
 	updateMayJoinGame(game: GameIdentifier): void {
 		var rs: ReplaySubject<boolean> | undefined = this.mayJoin.get(GamePlayersService.createKey(game));
 		if (!rs) {
@@ -142,22 +142,22 @@ export class GamePlayersService {
 		this.updateCachedMayJoin(game, rs);
 	}
 
-    /**
-     * Ask that the current user joins the game that has a given ID.
-     *
-     * Calling this method starts an asynchronous operation to cause the change on the server,
-     * which will result in the [[Observable]] returned by [[getGamePlayers(GameIdentifier)]]
-     * emitting an updated value for the game players of the given `game`,
-     * if server value has changed.
-     *
-     * The operation performs a POST.
-     * The server actually replies to the POST with a 302 (Found) redirect
-     * to the resource of the altered game players resource.
+	/**
+	 * Ask that the current user joins the game that has a given ID.
+	 *
+	 * Calling this method starts an asynchronous operation to cause the change on the server,
+	 * which will result in the [[Observable]] returned by [[getGamePlayers(GameIdentifier)]]
+	 * emitting an updated value for the game players of the given `game`,
+	 * if server value has changed.
+	 *
+	 * The operation performs a POST.
+	 * The server actually replies to the POST with a 302 (Found) redirect
+	 * to the resource of the altered game players resource.
 	 * The HttpClient or browser itself handles that redirect for us.
-     *
-     * @param game
-     * The unique ID of the game to join.
-     */
+	 *
+	 * @param game
+	 * The unique ID of the game to join.
+	 */
 	joinGame(game: GameIdentifier): void {
 		this.http.post<GamePlayers>(GamePlayersService.getApiJoinGamePath(game), "").subscribe(
 			gps => this.setGamePlayers(game, gps)
@@ -167,19 +167,19 @@ export class GamePlayersService {
 
 	/**
 	 * Change a game so it is no longer [[Game.recruiting|recruiting]] players.
-     *
-     * Calling this method starts an asynchronous operation to cause the change on the server,
-     * which will result in the [[Observable]] returned by [[getGamePlayers(GameIdentifier)]]
-     * emitting an updated value for the game players of the given `game`,
-     * if server value has changed.
-     *
-     * The operation performs a POST.
-     * The server actually replies to the POST with a 302 (Found) redirect
-     * to the resource of the altered game players resource.
+	 *
+	 * Calling this method starts an asynchronous operation to cause the change on the server,
+	 * which will result in the [[Observable]] returned by [[getGamePlayers(GameIdentifier)]]
+	 * emitting an updated value for the game players of the given `game`,
+	 * if server value has changed.
+	 *
+	 * The operation performs a POST.
+	 * The server actually replies to the POST with a 302 (Found) redirect
+	 * to the resource of the altered game players resource.
 	 * The HttpClient or browser itself handles that redirect for us.
-     *
-     * @param game
-     * The unique ID of the game for which to end recuitment.
+	 *
+	 * @param game
+	 * The unique ID of the game for which to end recuitment.
 	 */
 	endRecruitment(game: GameIdentifier): void {
 		this.http.post<GamePlayers>(GamePlayersService.getApiGameEndRecuitmentPath(game), "").subscribe(
@@ -187,14 +187,14 @@ export class GamePlayersService {
 		);
 	}
 
-    /**
-     * Ask whether the current user may join the game that has a given ID.
-     *
-     * @param game
-     * The unique ID of the game to join.
-     * @returns
-     * An [[Observable]] that indicates whether may join.
-     */
+	/**
+	 * Ask whether the current user may join the game that has a given ID.
+	 *
+	 * @param game
+	 * The unique ID of the game to join.
+	 * @returns
+	 * An [[Observable]] that indicates whether may join.
+	 */
 	mayJoinGame(game: GameIdentifier): Observable<boolean> {
 		var rs: ReplaySubject<boolean> | undefined = this.mayJoin.get(GamePlayersService.createKey(game));
 		if (!rs) {
@@ -206,12 +206,12 @@ export class GamePlayersService {
 		);
 	}
 
-    /**
-     * Handle Http operation that failed.
-     * Let the app continue.
-     * @param operation - name of the operation that failed
-     * @param result - optional value to return as the observable result
-     */
+	/**
+	 * Handle Http operation that failed.
+	 * Let the app continue.
+	 * @param operation - name of the operation that failed
+	 * @param result - optional value to return as the observable result
+	 */
 	private handleError<T>(operation = 'operation', result?: T) {
 		return (error: any): Observable<T> => {
 

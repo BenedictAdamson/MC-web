@@ -30,9 +30,9 @@ describe('GamePlayersService', () => {
 			imports: [HttpClientTestingModule]
 		});
 
-        /* Inject for each test:
-         * HTTP requests will be handled by the mock back-end.
-          */
+		/* Inject for each test:
+		 * HTTP requests will be handled by the mock back-end.
+		  */
 		TestBed.get(HttpClient);
 		httpTestingController = TestBed.get(HttpTestingController);
 	});
@@ -97,7 +97,12 @@ describe('GamePlayersService', () => {
 		const game: GameIdentifier = gamePlayers0.identifier;
 		const path: string = GamePlayersService.getApiGameEndRecuitmentPath(game);
 		const service: GamePlayersService = TestBed.get(GamePlayersService);
-		const gamePlayersReply: GamePlayers = { identifier: game, recruiting: false, users: gamePlayers0.users }
+		// Toug test: the reply identifier is not the same object
+		const gamePlayersReply: GamePlayers = {
+			identifier: { scenario: game.scenario, created: game.created },
+			recruiting: false,
+			users: gamePlayers0.users
+		}
 
 		service.endRecruitment(game);
 
