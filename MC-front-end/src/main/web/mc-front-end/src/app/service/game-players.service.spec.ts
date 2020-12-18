@@ -22,8 +22,8 @@ describe('GamePlayersService', () => {
 	const CREATED_B: string = '2020-12-31T23:59:59.999Z';
 	const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_A, created: CREATED_A };
 	const GAME_IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_B, created: CREATED_B };
-	const GAME_PLAYERS_A: GamePlayers = { identifier: GAME_IDENTIFIER_A, recruiting: true, users: [USER_ID_A, USER_ID_B] };
-	const GAME_PLAYERS_B: GamePlayers = { identifier: GAME_IDENTIFIER_B, recruiting: false, users: [] };
+	const GAME_PLAYERS_A: GamePlayers = { game: GAME_IDENTIFIER_A, recruiting: true, users: [USER_ID_A, USER_ID_B] };
+	const GAME_PLAYERS_B: GamePlayers = { game: GAME_IDENTIFIER_B, recruiting: false, users: [] };
 
 	beforeEach(() => {
 		TestBed.configureTestingModule({
@@ -45,9 +45,9 @@ describe('GamePlayersService', () => {
 	const testGetGamePlayers = function(gamePlayers: GamePlayers) {
 		const service: GamePlayersService = TestBed.get(GamePlayersService);
 
-		service.getGamePlayers(gamePlayers.identifier).subscribe(g => expect(g).toEqual(gamePlayers));
+		service.getGamePlayers(gamePlayers.game).subscribe(g => expect(g).toEqual(gamePlayers));
 
-		const request = httpTestingController.expectOne(GamePlayersService.getApiGamePlayersPath(gamePlayers.identifier));
+		const request = httpTestingController.expectOne(GamePlayersService.getApiGamePlayersPath(gamePlayers.game));
 		expect(request.request.method).toEqual('GET');
 		request.flush(gamePlayers);
 		httpTestingController.verify();
@@ -62,13 +62,13 @@ describe('GamePlayersService', () => {
 	})
 
 	const testJoinGame = function(done: any, gamePlayers0: GamePlayers, user: string) {
-		const game: GameIdentifier = gamePlayers0.identifier;
+		const game: GameIdentifier = gamePlayers0.game;
 		const expectedPath: string = GamePlayersService.getApiJoinGamePath(game);
 		var users: string[] = gamePlayers0.users;
 		users.push(user);
 		// Tough test: the reply identifier is not the same object
 		const gamePlayers1: GamePlayers = {
-			identifier: { scenario: game.scenario, created: game.created },
+			game: { scenario: game.scenario, created: game.created },
 			recruiting: gamePlayers0.recruiting,
 			users: users
 		};
@@ -99,12 +99,12 @@ describe('GamePlayersService', () => {
 	})
 
 	const testEndRecuitment = function(done: any, gamePlayers0: GamePlayers) {
-		const game: GameIdentifier = gamePlayers0.identifier;
+		const game: GameIdentifier = gamePlayers0.game;
 		const path: string = GamePlayersService.getApiGameEndRecuitmentPath(game);
 		const service: GamePlayersService = TestBed.get(GamePlayersService);
 		// Tough test: the reply identifier is not the same object
 		const gamePlayersReply: GamePlayers = {
-			identifier: { scenario: game.scenario, created: game.created },
+			game: { scenario: game.scenario, created: game.created },
 			recruiting: false,
 			users: gamePlayers0.users
 		}
@@ -300,7 +300,7 @@ describe('GamePlayersService', () => {
 
 	const testGetGamePlayersAfterUpdateGamePlayers = function(gamePlayers: GamePlayers) {
 		// Tough test: use two identifiers that are semantically equivalent, but not the same object.
-		const game1: GameIdentifier = gamePlayers.identifier;
+		const game1: GameIdentifier = gamePlayers.game;
 		const game2: GameIdentifier = { scenario: game1.scenario, created: game1.created };
 		const expectedPath: string = GamePlayersService.getApiGamePlayersPath(game1);
 		const service: GamePlayersService = TestBed.get(GamePlayersService);
@@ -326,7 +326,7 @@ describe('GamePlayersService', () => {
 
 
 	const testUpdateGamePlayersAfterGetGamePlayers = function(gamePlayers: GamePlayers) {
-		const game: GameIdentifier = gamePlayers.identifier;
+		const game: GameIdentifier = gamePlayers.game;
 		const expectedPath: string = GamePlayersService.getApiGamePlayersPath(game);
 		const service: GamePlayersService = TestBed.get(GamePlayersService);
 
@@ -354,19 +354,19 @@ describe('GamePlayersService', () => {
 
 	const testGetGamePlayersForChangingValue = function(
 		done: any,
-		identifier: GameIdentifier,
+		game: GameIdentifier,
 		recruiting1: boolean,
 		users1: string[],
 		recruiting2: boolean,
 		users2: string[]
 	) {
-		const gamePlayers1: GamePlayers = { identifier: identifier, recruiting: recruiting1, users: users1 };
-		const gamePlayers2: GamePlayers = { identifier: identifier, recruiting: recruiting2, users: users2 };
-		const expectedPath: string = GamePlayersService.getApiGamePlayersPath(identifier);
+		const gamePlayers1: GamePlayers = { game: game, recruiting: recruiting1, users: users1 };
+		const gamePlayers2: GamePlayers = { game: game, recruiting: recruiting2, users: users2 };
+		const expectedPath: string = GamePlayersService.getApiGamePlayersPath(game);
 		const service: GamePlayersService = TestBed.get(GamePlayersService);
 		var n: number = 0;
 
-		service.getGamePlayers(identifier).subscribe(
+		service.getGamePlayers(game).subscribe(
 			gamePlayers => {
 				expect(0 != n || gamePlayers1 == gamePlayers).withContext('provides the first value').toBeTrue();
 				expect(1 != n || gamePlayers2 == gamePlayers).withContext('provides the second value').toBeTrue();
@@ -374,7 +374,7 @@ describe('GamePlayersService', () => {
 				if (n == 2) done();
 			}
 		);
-		service.updateGamePlayers(identifier);
+		service.updateGamePlayers(game);
 
 		const requests: TestRequest[] = httpTestingController.match(expectedPath);
 		expect(requests.length).withContext('number of requests').toEqual(2);
@@ -396,7 +396,7 @@ describe('GamePlayersService', () => {
 
 
 	const testGetGamePlayersForUnchangedUpdate = function(gamePlayers: GamePlayers) {
-		const game: GameIdentifier = gamePlayers.identifier;
+		const game: GameIdentifier = gamePlayers.game;
 		const expectedPath: string = GamePlayersService.getApiGamePlayersPath(game);
 		const service: GamePlayersService = TestBed.get(GamePlayersService);
 		var n: number = 0;

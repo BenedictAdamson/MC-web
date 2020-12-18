@@ -11,7 +11,7 @@ import { GameIdentifier } from './game-identifier'
  * </p>
  */
 export class GamePlayers {
-	identifier: GameIdentifier;
+	game: GameIdentifier;
 	recruiting: boolean;
 	users: string[];
 }

@@ -104,7 +104,7 @@ export class GamePlayersService {
 	}
 
 	private setGamePlayers(game: GameIdentifier, gamePlayers: GamePlayers | null): void {
-		if (gamePlayers) game = gamePlayers.identifier;
+		if (gamePlayers) game = gamePlayers.game;
 		var rs: ReplaySubject<GamePlayers | null> | undefined = this.gamesPlayers.get(GamePlayersService.createKey(game));
 		if (!rs) {
 			rs = this.createCacheForGamePlayers(game);

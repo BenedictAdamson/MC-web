@@ -34,24 +34,24 @@ class MockGamePlayersService {
 
 	private rs$: ReplaySubject<GamePlayers> = new ReplaySubject(1);
 	private serverGamePlayers: GamePlayers;
-	private identifier: GameIdentifier;
+	private game: GameIdentifier;
 
 	constructor(
 		gamePlayers: GamePlayers,
 		private mayJoin: boolean,
 		private self: string
 	) {
-		this.identifier = gamePlayers.identifier;
+		this.game = gamePlayers.game;
 		this.rs$.next(gamePlayers);
 		this.serverGamePlayers = gamePlayers;
 	};
 
 	private expectGameIdentifier(game: GameIdentifier, method: string): void {
-		expect(game).withContext('GamePlayersService.' + method + '(game)').toEqual(this.identifier);
+		expect(game).withContext('GamePlayersService.' + method + '(game)').toEqual(this.game);
 	}
 
 	private copy(): Observable<GamePlayers> {
-		return of({ identifier: this.serverGamePlayers.identifier, recruiting: this.serverGamePlayers.recruiting, users: this.serverGamePlayers.users });
+		return of({ game: this.serverGamePlayers.game, recruiting: this.serverGamePlayers.recruiting, users: this.serverGamePlayers.users });
 	}
 
 	getGamePlayers(game: GameIdentifier): Observable<GamePlayers> {
@@ -102,8 +102,8 @@ describe('GamePlayersComponent', () => {
 	const USER_NORMAL: User = { id: uuid(), username: 'Benedict', password: null, authorities: [] };
 	const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_ID_A, created: CREATED_A };
 	const GAME_IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_ID_B, created: CREATED_B };
-	const GAME_PLAYERS_A: GamePlayers = { identifier: GAME_IDENTIFIER_A, recruiting: true, users: [USER_ID_A, USER_ID_B] };
-	const GAME_PLAYERS_B: GamePlayers = { identifier: GAME_IDENTIFIER_B, recruiting: false, users: [] };
+	const GAME_PLAYERS_A: GamePlayers = { game: GAME_IDENTIFIER_A, recruiting: true, users: [USER_ID_A, USER_ID_B] };
+	const GAME_PLAYERS_B: GamePlayers = { game: GAME_IDENTIFIER_B, recruiting: false, users: [] };
 
 	const getIdentifier = function(component: GamePlayersComponent): GameIdentifier | null {
 		var identifier: GameIdentifier | null = null;
@@ -138,7 +138,7 @@ describe('GamePlayersComponent', () => {
 
 
 	const setUp = function(gamePlayers: GamePlayers, self: User, mayJoinGame: boolean) {
-		const identifier: GameIdentifier = gamePlayers.identifier;
+		const game: GameIdentifier = gamePlayers.game;
 		gamePlayersServiceSpy = new MockGamePlayersService(gamePlayers, mayJoinGame, self.id);
 
 		TestBed.configureTestingModule({
@@ -148,16 +148,16 @@ describe('GamePlayersComponent', () => {
 				useValue: {
 					parent: {
 						parent: {
-							paramMap: of(convertToParamMap({ scenario: identifier.scenario }))
+							paramMap: of(convertToParamMap({ scenario: game.scenario }))
 						},
-						paramMap: of(convertToParamMap({ created: identifier.created }))
+						paramMap: of(convertToParamMap({ created: game.created }))
 					},
 					snapshot: {
 						parent: {
 							parent: {
-								paramMap: convertToParamMap({ scenario: identifier.scenario })
+								paramMap: convertToParamMap({ scenario: game.scenario })
 							},
-							paramMap: convertToParamMap({ created: identifier.created })
+							paramMap: convertToParamMap({ created: game.created })
 						}
 					}
 				}
@@ -218,7 +218,7 @@ describe('GamePlayersComponent', () => {
 
 		assertInvariants();
 
-		expect(getIdentifier(component)).withContext('identifier$').toEqual(gamePlayers.identifier);
+		expect(getIdentifier(component)).withContext('identifier$').toEqual(gamePlayers.game);
 		expect(getGamePlayers(component)).withContext('gamePlayers$').toEqual(gamePlayers);
 		expect(isPlaying(component)).withContext('playing').toEqual(playing);
 
