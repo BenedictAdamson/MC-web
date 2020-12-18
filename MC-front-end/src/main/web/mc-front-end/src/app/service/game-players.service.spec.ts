@@ -66,7 +66,12 @@ describe('GamePlayersService', () => {
 		const expectedPath: string = GamePlayersService.getApiJoinGamePath(game);
 		var users: string[] = gamePlayers0.users;
 		users.push(user);
-		const gamePlayers1: GamePlayers = { identifier: game, recruiting: gamePlayers0.recruiting, users: users };
+		// Tough test: the reply identifier is not the same object
+		const gamePlayers1: GamePlayers = {
+			identifier: { scenario: game.scenario, created: game.created },
+			recruiting: gamePlayers0.recruiting,
+			users: users
+		};
 		const service: GamePlayersService = TestBed.get(GamePlayersService);
 
 		service.joinGame(game);
@@ -97,7 +102,7 @@ describe('GamePlayersService', () => {
 		const game: GameIdentifier = gamePlayers0.identifier;
 		const path: string = GamePlayersService.getApiGameEndRecuitmentPath(game);
 		const service: GamePlayersService = TestBed.get(GamePlayersService);
-		// Toug test: the reply identifier is not the same object
+		// Tough test: the reply identifier is not the same object
 		const gamePlayersReply: GamePlayers = {
 			identifier: { scenario: game.scenario, created: game.created },
 			recruiting: false,
