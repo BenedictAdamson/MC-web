@@ -1,16 +1,16 @@
 <article>
-<header>
-    <h2 id="username">{{(user$ | async).username}}</h2>
-</header>
+	<header>
+		<h2 id="username">{{username$ | async}}</h2>
+	</header>
 
-<section>
-<header>
-    <h3>Authorities:</h3>
-</header>
-<ul id="roles">
-    <li *ngFor="let authority of (user$ | async).authorities">
-        {{roleName(authority)}}
-    </li>
-</ul>
-</section>
+	<section>
+		<header>
+			<h3>Authorities:</h3>
+		</header>
+		<ul id="roles">
+			<li *ngFor="let authority of (authorities$ | async)">
+				{{roleName(authority)}}
+			</li>
+		</ul>
+	</section>
 </article>

@@ -31,6 +31,18 @@ export class UserComponent implements OnInit {
 		)
 	}
 
+	get username$(): Observable<string> {
+		return this.user$.pipe(
+			map(user => user.username)
+		);
+	}
+
+	get authorities$(): Observable<string[]> {
+		return this.user$.pipe(
+			map(user => user.authorities)
+		);
+	}
+
 	constructor(
 		private route: ActivatedRoute,
 		private userService: UserService) { }
