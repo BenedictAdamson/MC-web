@@ -40,6 +40,7 @@ import org.openqa.selenium.WebElement;
 public final class UserPage extends Page {
 
    private static final String BASE = "/user/";
+   private static final By USERNAME_LOCATOR = By.id("username");
    private static final By ROLES_LIST_LOCATOR = By.id("roles");
 
    private final Matcher<String> containsDisplayName;
@@ -71,8 +72,10 @@ public final class UserPage extends Page {
    }
 
    private void assertIncludesUserName(final WebElement body) {
-      assertThat("Body text includes the user name", body.getText(),
-               containsDisplayName);
+      final var element = assertHasElement("Has a username element", body,
+               USERNAME_LOCATOR);
+      assertThat("Username element text includes the user name",
+               element.getText(), containsDisplayName);
    }
 
    public void assertListsRolesOfUser() {
