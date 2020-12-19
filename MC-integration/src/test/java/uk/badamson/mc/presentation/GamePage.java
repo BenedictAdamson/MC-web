@@ -88,10 +88,10 @@ public final class GamePage extends Page {
                .matches(elements.get(0).getText());
    }
 
-   private static boolean hasJoinedGame(final WebElement body) {
-      final var elements = body.findElements(RECRUITING_ELEMENT_LOCATOR);
-      return elements.size() == 1 && INDICATES_IS_NOT_RECRUITING_PLAYERS
-               .matches(elements.get(0).getText());
+   private static boolean isPlayingGame(final WebElement body) {
+      final var elements = body.findElements(PLAYING_ELEMENT_LOCATOR);
+      return elements.size() == 1
+               && INDICATES_IS_PLAYING.matches(elements.get(0).getText());
    }
 
    private final ScenarioPage scenarioPage;
@@ -312,7 +312,7 @@ public final class GamePage extends Page {
                   "Button [" + button + "] is not enabled");
       }
       button.click();
-      awaitIsReady(GamePage::hasJoinedGame);
+      awaitIsReady(GamePage::isPlayingGame);
    }
 
    public ScenarioPage navigateToScenarioPage() {
