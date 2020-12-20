@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
 
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 import { HttpClient } from '@angular/common/http';
 
 import { UserDetails } from '../user-details';
@@ -22,9 +22,9 @@ describe('UserService', () => {
 			imports: [HttpClientTestingModule]
 		});
 
-        /* Inject for each test:
-         * HTTP requests will be handled by the mock back-end.
-          */
+		/* Inject for each test:
+		 * HTTP requests will be handled by the mock back-end.
+		  */
 		TestBed.get(HttpClient);
 		httpTestingController = TestBed.get(HttpTestingController);
 	});
@@ -82,8 +82,8 @@ describe('UserService', () => {
 	it('can add [B]', () => {
 		canAddUser(USER_B);
 	});
-	
-	
+
+
 
 
 
@@ -108,5 +108,32 @@ describe('UserService', () => {
 
 	it('can get user after update user [B]', () => {
 		testGetUserAfterUpdateUser(USER_B);
+	})
+
+
+
+	const testUpdateUserAfterGetUser = function(user: User) {
+		const id: string = user.id;
+		const expectedPath: string = UserService.getApiUserPath(id);
+		const service: UserService = TestBed.get(UserService);
+
+		service.getUser(id).subscribe(u => expect(u).toEqual(user));
+		service.updateUser(id);
+
+		const requests: TestRequest[] = httpTestingController.match(expectedPath);
+		expect(requests.length).withContext('number of requests').toEqual(2);
+		expect(requests[0].request.method).toEqual('GET');
+		requests[0].flush(user);
+		expect(requests[1].request.method).toEqual('GET');
+		requests[1].flush(user);
+		httpTestingController.verify();
+	};
+
+	it('can update user after get user [A]', () => {
+		testUpdateUserAfterGetUser(USER_A);
+	})
+
+	it('can update user after get user [B]', () => {
+		testUpdateUserAfterGetUser(USER_B);
 	})
 });

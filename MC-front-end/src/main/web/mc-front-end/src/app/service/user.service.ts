@@ -1,4 +1,4 @@
-import { Observable, of } from 'rxjs';
+import { Observable, ReplaySubject, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 import { Injectable } from '@angular/core';
@@ -18,6 +18,8 @@ export class UserService {
 		return UserService.apiUsersPath + '/' + id;
 	}
 
+	private user: Map<string, ReplaySubject<User | null>> = new Map();
+
 	constructor(
 		private http: HttpClient) { }
 
@@ -28,11 +30,31 @@ export class UserService {
 			);
 	}
 
-	getUser(id: string): Observable<User | null> {
+
+	private createCacheForUser(id: string): ReplaySubject<User> {
+		const rs: ReplaySubject<User> = new ReplaySubject<User>(1);
+		this.user.set(id, rs);
+		return rs;
+	}
+
+	private fetchUser(id: string): Observable<User | null> {
 		return this.http.get<User>(UserService.getApiUserPath(id))
 			.pipe(
-				catchError(this.handleError<User>(`getUser id=${id}`))
+				catchError(this.handleError<User>(`fetchUser id=${id}`))
 			);
+	}
+
+	private updateCachedUser(id: string, rs: ReplaySubject<User | null>): void {
+		this.fetchUser(id).subscribe(user => rs.next(user));
+	}
+
+	getUser(id: string): Observable<User | null> {
+		var rs: ReplaySubject<User | null> | undefined = this.user.get(id);
+		if (!rs) {
+			rs = this.createCacheForUser(id);
+			this.updateCachedUser(id, rs);
+		}
+		return rs;
 	}
 
 	/**@description
@@ -59,7 +81,11 @@ export class UserService {
 	 * returned by [[getUser]].
 	 */
 	updateUser(id: string): void {
-		// FIXME
+		var rs: ReplaySubject<User | null> | undefined = this.user.get(id);
+		if (!rs) {
+			rs = this.createCacheForUser(id);
+		}
+		this.updateCachedUser(id, rs);
 	}
 
 	/**
