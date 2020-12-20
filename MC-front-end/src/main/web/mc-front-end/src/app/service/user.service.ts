@@ -52,6 +52,17 @@ export class UserService {
 	}
 
 	/**
+	 * Ask the service to update its cached value for a user.
+	 *
+	 * The method does not block, but instead performs the update asynchronously.
+	 * The updated value will eventually become available through the [[Observable]]
+	 * returned by [[getUser]].
+	 */
+	updateUser(id: string): void {
+		// FIXME
+	}
+
+	/**
 	 * Handle Http operation that failed.
 	 * Let the app continue.
 	 * @param operation - name of the operation that failed

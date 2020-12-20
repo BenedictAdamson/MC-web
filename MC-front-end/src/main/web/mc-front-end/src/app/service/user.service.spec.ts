@@ -82,4 +82,31 @@ describe('UserService', () => {
 	it('can add [B]', () => {
 		canAddUser(USER_B);
 	});
+	
+	
+
+
+
+	const testGetUserAfterUpdateUser = function(user: User) {
+		const id: string = user.id;
+		const expectedPath: string = UserService.getApiUserPath(id);
+		const service: UserService = TestBed.get(UserService);
+
+		service.updateUser(id);
+		service.getUser(id).subscribe(u => expect(u).toEqual(user));
+
+		// Only one GET expected because should use the cached value.
+		const request = httpTestingController.expectOne(expectedPath);
+		expect(request.request.method).toEqual('GET');
+		request.flush(user);
+		httpTestingController.verify();
+	};
+
+	it('can get user after update user [A]', () => {
+		testGetUserAfterUpdateUser(USER_A);
+	})
+
+	it('can get user after update user [B]', () => {
+		testGetUserAfterUpdateUser(USER_B);
+	})
 });
