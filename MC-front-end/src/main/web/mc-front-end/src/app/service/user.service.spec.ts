@@ -12,10 +12,18 @@ import { User } from '../user';
 describe('UserService', () => {
 	let httpTestingController: HttpTestingController;
 
-	const USER_DETAILS_A: UserDetails = { username: 'Benedict', password: 'letmein', authorities: [] };
-	const USER_A: User = new User(uuid(), USER_DETAILS_A);
-	const USER_DETAILS_B: UserDetails = { username: 'jeff', password: 'secret', authorities: [] };
-	const USER_B: User = new User(uuid(), USER_DETAILS_B);
+	const USERNAME_A: string = 'Benedict';
+	const USERNAME_B: string = 'jeff';
+	const PASSWORD_A: string = 'letmein';
+	const PASSWORD_B: string = 'secret';
+	const AUTHORITIES_A: string[] = [];
+	const AUTHORITIES_B: string[] = ['ROLE_PLAYER'];
+	const USER_DETAILS_A: UserDetails = { username: USERNAME_A, password: PASSWORD_A, authorities: AUTHORITIES_A };
+	const USER_DETAILS_B: UserDetails = { username: USERNAME_B, password: PASSWORD_B, authorities: AUTHORITIES_B };
+	const USER_ID_A: string = uuid();
+	const USER_ID_B: string = uuid();
+	const USER_A: User = new User(USER_ID_A, USER_DETAILS_A);
+	const USER_B: User = new User(USER_ID_B, USER_DETAILS_B);
 
 	beforeEach(() => {
 		TestBed.configureTestingModule({
@@ -135,5 +143,56 @@ describe('UserService', () => {
 
 	it('can update user after get user [B]', () => {
 		testUpdateUserAfterGetUser(USER_B);
+	})
+
+
+
+
+
+	const testGetUserForChangingValue = function(
+		done: any,
+		id: string,
+		username1: string,
+		password1: string,
+		authorities1: string[],
+		username2: string,
+		password2: string,
+		authorities2: string[]
+	) {
+		const user1: User = { id: id, username: username1, password: password1, authorities: authorities1 };
+		const user2: User = { id: id, username: username2, password: password2, authorities: authorities2 };
+		const expectedPath: string = UserService.getApiUserPath(id);
+		const service: UserService = TestBed.get(UserService);
+		var n: number = 0;
+
+		service.getUser(id).subscribe(
+			user => {
+				expect(0 != n || user1 == user).withContext('provides the first value').toBeTrue();
+				expect(1 != n || user2 == user).withContext('provides the second value').toBeTrue();
+				n++;
+				if (n == 2) done();
+			}
+		);
+		service.updateUser(id);
+
+		const requests: TestRequest[] = httpTestingController.match(expectedPath);
+		expect(requests.length).withContext('number of requests').toEqual(2);
+		expect(requests[0].request.method).toEqual('GET');
+		requests[0].flush(user1);
+		expect(requests[1].request.method).toEqual('GET');
+		requests[1].flush(user2);
+		httpTestingController.verify();
+	};
+
+	it('provides updated user [A]', (done) => {
+		testGetUserForChangingValue(
+			done, USER_ID_A, USERNAME_A, PASSWORD_A, AUTHORITIES_A, USERNAME_B, PASSWORD_B, AUTHORITIES_B
+		);
+	})
+
+	it('provides updated user [B]', (done) => {
+		testGetUserForChangingValue(
+			done, USER_ID_B, USERNAME_B, PASSWORD_B, AUTHORITIES_B, USERNAME_A, PASSWORD_A, AUTHORITIES_A
+		);
 	})
 });
