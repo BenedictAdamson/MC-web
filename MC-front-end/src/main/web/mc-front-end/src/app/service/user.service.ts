@@ -12,7 +12,7 @@ import { UserDetails } from '../user-details';
 })
 export class UserService {
 
-	private static apiUsersPath: string = '/api/user';
+	static apiUsersPath: string = '/api/user';
 
 	static getApiUserPath(id: string): string {
 		return UserService.apiUsersPath + '/' + id;

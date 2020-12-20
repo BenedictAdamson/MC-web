@@ -40,19 +40,20 @@ describe('UserService', () => {
 
 		service.getUsers().subscribe(users => expect(users).toEqual(testUsers));
 
-		const request = httpTestingController.expectOne('/api/user');
+		const request = httpTestingController.expectOne(UserService.apiUsersPath);
 		expect(request.request.method).toEqual('GET');
 		request.flush(testUsers);
 		httpTestingController.verify();
 	});
 
 	const canGetUser = function(testUser: User) {
-		const username = testUser.username;
+		const id: string = testUser.id;
+		const expectedPath: string = UserService.getApiUserPath(id);
 		const service: UserService = TestBed.get(UserService);
 
-		service.getUser(username).subscribe(user => expect(user).toEqual(testUser));
+		service.getUser(id).subscribe(user => expect(user).toEqual(testUser));
 
-		const request = httpTestingController.expectOne(`/api/user/${username}`);
+		const request = httpTestingController.expectOne(expectedPath);
 		expect(request.request.method).toEqual('GET');
 		request.flush(testUser);
 		httpTestingController.verify();
@@ -70,7 +71,7 @@ describe('UserService', () => {
 
 		service.add(userDetails).subscribe(result => expect(result).withContext('returned user').toEqual(user));
 
-		const request = httpTestingController.expectOne(`/api/user`);
+		const request = httpTestingController.expectOne(UserService.apiUsersPath);
 		expect(request.request.method).toEqual('POST');
 		request.flush(user);
 		httpTestingController.verify();
