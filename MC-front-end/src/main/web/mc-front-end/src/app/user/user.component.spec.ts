@@ -29,7 +29,7 @@ describe('UserComponent', () => {
 	};
 
 	const setUp = (testUser: User) => {
-		const userServiceStub = jasmine.createSpyObj('UserService', ['getUser']);
+		const userServiceStub = jasmine.createSpyObj('UserService', ['getUser', 'updateUser']);
 		userServiceStub.getUser.and.returnValue(of(testUser));
 
 		TestBed.configureTestingModule({

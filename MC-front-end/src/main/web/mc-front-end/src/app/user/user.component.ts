@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { distinctUntilChanged, filter, flatMap, map } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, flatMap, map, tap } from 'rxjs/operators';
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -47,8 +47,15 @@ export class UserComponent implements OnInit {
 		private route: ActivatedRoute,
 		private userService: UserService) { }
 
+	private update(): void {
+		this.id$.pipe(
+			first(),// do the operation only once
+			tap(id => this.userService.updateUser(id))
+		).subscribe();
+	}
+
 	ngOnInit() {
-		// Do nothing
+		this.update()
 	}
 
 	roleName(authority: string): string {
