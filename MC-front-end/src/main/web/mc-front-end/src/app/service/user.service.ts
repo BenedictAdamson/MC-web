@@ -1,5 +1,5 @@
 import { Observable, ReplaySubject, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, distinctUntilChanged } from 'rxjs/operators';
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
@@ -54,7 +54,9 @@ export class UserService {
 			rs = this.createCacheForUser(id);
 			this.updateCachedUser(id, rs);
 		}
-		return rs;
+		return rs.pipe(
+			distinctUntilChanged()
+		);
 	}
 
 	/**@description

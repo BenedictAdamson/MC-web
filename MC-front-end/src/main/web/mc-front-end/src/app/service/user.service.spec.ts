@@ -195,4 +195,38 @@ describe('UserService', () => {
 			done, USER_ID_B, USERNAME_B, PASSWORD_B, AUTHORITIES_B, USERNAME_A, PASSWORD_A, AUTHORITIES_A
 		);
 	})
+
+
+
+	const testGetUserForUnchangedUpdate = function(user: User) {
+		const id: string = user.id;
+		const expectedPath: string = UserService.getApiUserPath(id);
+		const service: UserService = TestBed.get(UserService);
+		var n: number = 0;
+
+		service.getUser(id).subscribe(
+			u => {
+				expect(user == u).withContext('provides the expected value').toBeTrue();
+				n++;
+				expect(n).withContext('number emitted').toEqual(1);
+			}
+		);
+		service.updateUser(id);
+
+		const requests: TestRequest[] = httpTestingController.match(expectedPath);
+		expect(requests.length).withContext('number of requests').toEqual(2);
+		expect(requests[0].request.method).toEqual('GET');
+		requests[0].flush(user);
+		expect(requests[1].request.method).toEqual('GET');
+		requests[1].flush(user);
+		httpTestingController.verify();
+	};
+
+	it('provides distinct user values [A]', () => {
+		testGetUserForUnchangedUpdate(USER_A);
+	})
+
+	it('provides distinct user values [B]', () => {
+		testGetUserForUnchangedUpdate(USER_B);
+	})
 });
