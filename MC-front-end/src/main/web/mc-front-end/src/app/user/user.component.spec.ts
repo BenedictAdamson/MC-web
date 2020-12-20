@@ -5,7 +5,7 @@ import { ActivatedRoute, convertToParamMap } from '@angular/router';
 
 import { User } from '../user';
 import { UserComponent } from './user.component';
-import { UserService } from '../user.service';
+import { UserService } from '../service/user.service';
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
@@ -18,8 +18,18 @@ describe('UserComponent', () => {
 	const EXPECTED_ROLE_NAMES_A: string[] = ['player', 'manage users', 'manage games'];
 	const EXPECTED_ROLE_NAMES_B: string[] = [];
 
+	const getUser = function(component: UserComponent): User | null {
+		var user: User | null = null;
+		component.user$.subscribe({
+			next: (u) => user = u,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return user;
+	};
+
 	const setUp = (testUser: User) => {
-		const userServiceStub = jasmine.createSpyObj('UserService', ['getUser']);
+		const userServiceStub = jasmine.createSpyObj('UserService', ['getUser', 'updateUser']);
 		userServiceStub.getUser.and.returnValue(of(testUser));
 
 		TestBed.configureTestingModule({
@@ -27,10 +37,7 @@ describe('UserComponent', () => {
 			providers: [{
 				provide: ActivatedRoute,
 				useValue: {
-					params: of({ id: testUser.id }),
-					snapshot: {
-						paramMap: convertToParamMap({ id: testUser.id })
-					}
+					paramMap: of(convertToParamMap({ id: testUser.id }))
 				}
 			},
 			{ provide: UserService, useValue: userServiceStub }]
@@ -44,20 +51,23 @@ describe('UserComponent', () => {
 		setUp(user);
 
 		expect(component).toBeTruthy();
-		expect(component.user).toBe(user);
+		expect(getUser(component)).toBe(user);
 
 		const html: HTMLElement = fixture.nativeElement;
 		const displayText: string = html.innerText;
-		const rolesElement: HTMLUListElement = html.querySelector('ul#roles');
+		const rolesElement: HTMLUListElement | null = html.querySelector('ul#roles');
 		expect(displayText).withContext("The user page includes the user name").toContain(user.username);
 		expect(rolesElement).withContext('roles element').not.toBeNull();//guard
-		const roleEntries: NodeListOf<HTMLLIElement> = rolesElement.querySelectorAll('li');
-		expect(roleEntries.length).withContext('number of role entries').toBe(user.authorities.length);
-		for (let i = 0; i < roleEntries.length; i++) {
-			const expectedRoleName: string = expectedRoleNames[i];
-			const roleEntry: HTMLLIElement = roleEntries.item(i);
-			expect(roleEntry.textContent).withContext('role text').toContain(expectedRoleName);
-		}
+
+		if (rolesElement) {
+			const roleEntries: NodeListOf<HTMLLIElement> = rolesElement.querySelectorAll('li');
+			expect(roleEntries.length).withContext('number of role entries').toBe(user.authorities.length);
+			for (let i = 0; i < roleEntries.length; i++) {
+				const expectedRoleName: string = expectedRoleNames[i];
+				const roleEntry: HTMLLIElement = roleEntries.item(i);
+				expect(roleEntry.textContent).withContext('role text').toContain(expectedRoleName);
+			}// for
+		}// if
 
 	};
 	it('can create [a]', () => {

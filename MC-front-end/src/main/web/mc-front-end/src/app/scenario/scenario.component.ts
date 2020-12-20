@@ -1,10 +1,8 @@
-import { v4 as uuid } from 'uuid';
-
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { Scenario } from '../scenario';
-import { ScenarioService } from '../scenario.service';
+import { ScenarioService } from '../service/scenario.service';
 
 @Component({
 	selector: 'app-scenario',
@@ -14,7 +12,7 @@ import { ScenarioService } from '../scenario.service';
 export class ScenarioComponent implements OnInit {
 
 
-	static getScenarioPath(scenario: uuid): string {
+	static getScenarioPath(scenario: string): string {
 		return '/scenario/' + scenario;
 	}
 
@@ -26,8 +24,9 @@ export class ScenarioComponent implements OnInit {
 	) { }
 
 	ngOnInit() {
-		const id: string = this.route.snapshot.paramMap.get('scenario');
-		this.getScenario(id);
+		const scenario: string | null = this.route.snapshot.paramMap.get('scenario');
+		if (!scenario) throw new Error('missing scenario')
+		this.getScenario(scenario);
 	}
 
 

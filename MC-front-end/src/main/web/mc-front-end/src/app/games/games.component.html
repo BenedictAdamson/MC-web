@@ -3,8 +3,8 @@
 <h3>Games of this scenario</h3>
 
 <ul id="games">
-    <li *ngFor="let game of games">
-        <a [routerLink]="['/scenario',scenario,'game',game]">
+    <li *ngFor="let game of games$ | async">
+        <a [routerLink]="['/scenario',scenario$ | async,'game',game]">
             {{game}}
         </a>
     </li>

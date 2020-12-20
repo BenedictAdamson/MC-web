@@ -1,12 +1,11 @@
-import { Observable, ReplaySubject, defer, of } from 'rxjs';
+import { Observable, ReplaySubject, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { v4 as uuid } from 'uuid';
 
-import { flatMap, map, tap } from 'rxjs/operators';
+import { flatMap, map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { User } from './user';
+import { User } from '../user';
 
 const selfUrl: string = '/api/self';
 const logoutUrl: string = '/logout';
@@ -21,20 +20,18 @@ const logoutUrl: string = '/logout';
 })
 export class SelfService {
 
-	private username_: string = null;
-	private password_: string = null;
-	private id_: uuid = null;
-
 	/**
-	 * provides null if not authenticated
+	 * provides null if credentials unknown
 	 */
-	private authoritiesRS$: ReplaySubject<string[]> = new ReplaySubject(1);
+	private userRS$: ReplaySubject<User | null> = new ReplaySubject(1);
+
+	private authenticatedRS$: ReplaySubject<boolean> = new ReplaySubject(1);
 
     /**
      * @description
      * Initial state:
-     * * null [[username]]
-     * * null [[password]]
+     * * null [[username$]]
+     * * null [[password$]]
      * * not [[authenticated$]]
      *
      * Instancing this class does not trigger a login request or any network traffic.
@@ -42,7 +39,8 @@ export class SelfService {
 	constructor(
 		private http: HttpClient
 	) {
-		this.authoritiesRS$.next(null);
+		this.userRS$.next(null);
+		this.authenticatedRS$.next(false);
 	}
 
     /**
@@ -51,10 +49,11 @@ export class SelfService {
      *
      * null if the user ID is unknown,
      * which includes the case that the user is not logged in.
-     * The current user ID can be known even if that user has not been authenticated.
      */
-	get id(): uuid {
-		return this.id_;
+	get id$(): Observable<string | null> {
+		return this.userRS$.pipe(
+			map(u => u ? u.id : null)
+		);
 	}
 
     /**
@@ -63,33 +62,35 @@ export class SelfService {
      *
      * null if the user name is unknown,
      * which includes the case that the user is not logged in.
-     * The current user name can be known even if that user has not been authenticated.
      */
-	get username(): string {
-		return this.username_;
+	get username$(): Observable<string | null> {
+		return this.userRS$.pipe(
+			map(u => u ? u.username : null)
+		);
 	}
 
     /**
      * @description
      * The password of the current user.
      *
-     * null if the password is unknown,
-     * which includes the case that the user is not logged in.
-     * The current password name can be known even if that user has not been authenticated,
+     * null if the correct password is unknown,
+     * which includes the case that the user is not logged in
      * or if authentication has been tried but failed (which includes the case that the password is invalid).
      */
-	get password(): string {
-		return this.password_;
+	get password$(): Observable<string | null> {
+		return this.userRS$.pipe(
+			map(u => u ? u.password : null)
+		);
 	}
 
 	private handleUserDetailsHttpError() {
-		return (error: any): Observable<User> => {
+		return (): Observable<User | null> => {
 			// Do not log errors, all are equivalent to authentication failure.
-			return of(null as User);
+			return of(null);
 		};
 	}
 
-	private static createHeaders(username: string, password: string): HttpHeaders {
+	private static createHeaders(username: string | null, password: string | null): HttpHeaders {
 		var headers: HttpHeaders = new HttpHeaders();
 		headers = headers.set('X-Requested-With', 'XMLHttpRequest');
 		if (username && password) {
@@ -98,28 +99,39 @@ export class SelfService {
 		return headers;
 	}
 
-	private getUserDetails(username: string, password: string): Observable<User> {
+	private getUserDetails(username: string | null, password: string | null): Observable<User | null> {
 		const headers: HttpHeaders = SelfService.createHeaders(username, password);
 
-		return this.http.get<User>(selfUrl, { headers: headers })
+		return this.http.get<User | null>(selfUrl, { headers: headers })
 			.pipe(
 				catchError(this.handleUserDetailsHttpError())
 			);
 	}
 
-	private processResponse(username: string, password: string, details: User): boolean {
-		this.username_ = details ? details.username : username;
-		this.password_ = password;
-		var authorities: string[];
+	private processResponse(password: string | null, details: User | null): boolean {
+		var authenticated: boolean;
 		if (details) {
-			this.id_ = details.id;
-			authorities = details.authorities;
+			details = new User(details.id, details);
+			details.password = password;
+			authenticated = true;
 		} else {
-			this.id_ = null;
-			authorities = null;
+			authenticated = false;
 		}
-		this.authoritiesRS$.next(authorities);
-		return authorities != null;
+		this.setUser(details, authenticated);
+		return authenticated;
+	}
+
+
+	/**
+     * @description
+     * Change the current authenticated user recorded locally.
+     *
+	 * The method does not communicate with the server.
+	 * It intended only for testing.
+	 */
+	setUser(user: User | null, authenticated: boolean) {
+		this.userRS$.next(user);
+		this.authenticatedRS$.next(authenticated);
 	}
 
 	/**
@@ -132,8 +144,7 @@ export class SelfService {
 	 * so this is a cold Observable too.
 	 * That is, the expensive HTTP request will not be made until something subscribes to this Observable.
 	 *
-	 * Iff the authentication is successful, {@link authenticated$} will provide true.
-	 * The method however updates the {@link username} and {@link password} attributes even if authentication fails.
+	 * Iff the authentication is successful, {@link authenticated$} will emit `true``.
 	 * The authorities of the current user will be updated, if authentication is successful.
      *
      * The server may indicate that the user should use a different, canonical username,
@@ -143,12 +154,16 @@ export class SelfService {
      * The method makes use of the `/api/self` endpoint of the server,
      * to check that the username and password are valid,
      * and to get the authorities of the user.
+     *
+     * @param username
+     * The name of the user to authenticate as, or `null` if attempting to resume a session.
+     *
+     * @param password
+     * The password of the user to authenticate as, or `null` if attempting to resume a session.
 	 */
-	authenticate(username: string, password: string): Observable<boolean> {
-		return defer(() =>
-			this.getUserDetails(username, password).pipe(
-				map(ud => this.processResponse(username, password, ud))
-			)
+	authenticate(username: string | null, password: string | null): Observable<boolean> {
+		return this.getUserDetails(username, password).pipe(
+			map(ud => this.processResponse(password, ud))
 		);
 	}
 
@@ -179,14 +194,12 @@ export class SelfService {
      * update the authentication information (the credentials of the current user)
      * to be the information of the current session.
      *
-	 * The method provides a value indicating whether authentication was successful.
-     * That is, whether there is a current session.
-	 * That indirectly makes use of an HTTP request, which is a cold Observable,
+	 * The method provides a value indicating whether authentication has finished.
+	 * It indirectly makes use of an HTTP request, which is a cold Observable,
 	 * so this is a cold Observable too.
 	 * That is, the expensive HTTP request will not be made until something subscribes to this Observable.
 	 *
-	 * The method updates the #username and #password attributes, the #authenticated$ Observable,
-	 * and the authorisations of the current user.
+	 * The method updates the `username$`, `password$`, `authenticated$`  and `authorities$` Observables.
      *
      * The method makes use of the `/api/self` endpoint of the server,
      * to get the current user details.
@@ -198,10 +211,8 @@ export class SelfService {
 	}
 
 	private clear(): void {
-		this.username_ = null;
-		this.password_ = null;
-		this.id_ = null;
-		this.authoritiesRS$.next(null);
+		this.userRS$.next(null);
+		this.authenticatedRS$.next(false);
 	}
 
 	private endServerSession(): Observable<null> {
@@ -212,7 +223,7 @@ export class SelfService {
 	}
 
 	private handleLogoutHttpError() {
-		return (error: any): Observable<null> => {
+		return (): Observable<null> => {
 			// Do not log errors, all are equivalent to authentication failure.
 			return of(null);
 		};
@@ -227,9 +238,7 @@ export class SelfService {
      * if the user has not (recently) provided a password, but the system was able to resume a session.
      */
 	get authenticated$(): Observable<boolean> {
-		return this.authoritiesRS$.pipe(
-			map(a => a != null)
-		);
+		return this.authenticatedRS$.asObservable();
 	}
 
 	/**
@@ -241,8 +250,8 @@ export class SelfService {
      * An authenticated user could have no authorities, although that is unlikely in practice. 
 	 */
 	private get authorities$(): Observable<string[]> {
-		return this.authoritiesRS$.pipe(
-			map(a => a ? a : [])
+		return this.userRS$.pipe(
+			map(u => u ? u.authorities : [])
 		);
 	}
 

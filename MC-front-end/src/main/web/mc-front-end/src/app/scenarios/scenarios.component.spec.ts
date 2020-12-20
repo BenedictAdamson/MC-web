@@ -6,7 +6,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { NamedUUID } from '../named-uuid';
 import { ScenariosComponent } from './scenarios.component';
-import { ScenarioService } from '../scenario.service';
+import { ScenarioService } from '../service/scenario.service';
 
 
 describe('ScenariosComponent', () => {
@@ -39,20 +39,24 @@ describe('ScenariosComponent', () => {
 		expect(component).toBeTruthy();
 		expect(component.scenarios).toBe(identifiers);
 		const rootElement: HTMLElement = fixture.nativeElement;
-		const heading: HTMLHeadingElement = rootElement.querySelector('h2');
+		const heading: HTMLHeadingElement | null = rootElement.querySelector('h2');
+		const headingText: string | null = heading ? heading.textContent : null;
 		expect(heading).withContext('has heading').not.toBeNull();
-		expect(heading.textContent).withContext('heading text').toContain('Scenarios');
-		const list: HTMLUListElement = rootElement.querySelector('ul');
+		expect(headingText).withContext('heading text').toContain('Scenarios');
+		const list: HTMLUListElement | null = rootElement.querySelector('ul');
 		expect(list).withContext('has list').not.toBeNull();
-		const listEntries: NodeListOf<HTMLLIElement> = list.querySelectorAll("li");
-		expect(listEntries.length).withContext('list length').toEqual(identifiers.length);
-		for (let i = 0; i < listEntries.length; i++) {
-			const expected: NamedUUID = identifiers[i];
-			const entry: HTMLLIElement = listEntries.item(i);
-			const link: HTMLAnchorElement = entry.querySelector('a');
-			expect(link).withContext('entry has link').not.toBeNull();
-			expect(link.textContent).withContext('entry link text contains title').toContain(expected.title);
-		}
+		if (list) {
+			const listEntries: NodeListOf<HTMLLIElement> = list.querySelectorAll("li");
+			expect(listEntries.length).withContext('list length').toEqual(identifiers.length);
+			for (let i = 0; i < listEntries.length; i++) {
+				const expected: NamedUUID = identifiers[i];
+				const entry: HTMLLIElement = listEntries.item(i);
+				const link: HTMLAnchorElement | null = entry.querySelector('a');
+				const linkText: string | null = link ? link.innerText : null;
+				expect(link).withContext('entry has link').not.toBeNull();
+				expect(linkText).withContext('entry link text contains title').toContain(expected.title);
+			}// for
+		}// if
 	};
 
 	it('can create [1]', () => {

@@ -1,14 +1,13 @@
-import { Observable, ReplaySubject } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { v4 as uuid } from 'uuid';
+import { Observable, combineLatest } from 'rxjs';
+import { distinctUntilChanged, filter, first, flatMap, map, tap } from 'rxjs/operators';
 
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 import { GameIdentifier } from '../game-identifier';
 import { GamePlayers } from '../game-players';
-import { GamePlayersService } from '../game-players.service';
-import { SelfService } from '../self.service';
+import { GamePlayersService } from '../service/game-players.service';
+import { SelfService } from '../service/self.service';
 
 @Component({
 	selector: 'app-game',
@@ -17,48 +16,66 @@ import { SelfService } from '../self.service';
 })
 export class GamePlayersComponent implements OnInit {
 
-	private mayJoinGameRS$: ReplaySubject<boolean> = new ReplaySubject(1);
+	private get scenario$(): Observable<string> {
+		if (!this.route.parent) throw new Error('missing this.route.parent');
+		if (!this.route.parent.parent) throw new Error('missing this.route.parent.parent');
+		return this.route.parent.parent.paramMap.pipe(
+			map(params => params.get('scenario')),
+			filter(scenario => !!scenario),
+			map((id: string | null) => id as string)
+		);
+	};
 
-	identifier: GameIdentifier;
-	gamePlayers: GamePlayers;
+	private get created$(): Observable<string> {
+		if (!this.route.parent) throw new Error('missing this.route.parent');
+		return this.route.parent.paramMap.pipe(
+			map(params => params.get('created')),
+			filter(created => !!created),
+			map((created: string | null) => created as string)
+		);
+	};
+
+	private static createIdentifier(scenario: string, created: string) {
+		return { scenario: scenario, created: created };
+	}
+
+	get identifier$(): Observable<GameIdentifier> {
+		return combineLatest([this.scenario$, this.created$], GamePlayersComponent.createIdentifier).pipe(
+			distinctUntilChanged() // don't spam identical values
+		);
+	};
+
+	get gamePlayers$(): Observable<GamePlayers> {
+		return this.identifier$.pipe(
+			flatMap(identifier => this.gamePlayersService.getGamePlayers(identifier)),
+			filter(gps => !!gps),
+			map((gps: GamePlayers | null) => gps as GamePlayers)
+		);
+	}
 
 	constructor(
 		private route: ActivatedRoute,
 		private gamePlayersService: GamePlayersService,
 		private selfService: SelfService
 	) {
-		this.mayJoinGameRS$.next(false);
 	}
 
 	ngOnInit(): void {
-		this.identifier = this.getGameIdentifier();
-		if (!this.identifier) throw new Error('unknown this.identifier');
-		this.gamePlayersService.getGamePlayers(this.identifier)
-			.subscribe(gamePlayers => this.gamePlayers = gamePlayers);
-		this.gamePlayersService.mayJoinGame(this.identifier).subscribe(
-			may => this.mayJoinGameRS$.next(may)
-		);
+		// Do nothing
 	}
 
 
-	private getGameIdentifier(): GameIdentifier {
-		const route: ActivatedRouteSnapshot = this.route.snapshot;
-		const scenario: uuid = route.parent.parent.paramMap.get('scenario');
-		const created: string = route.parent.paramMap.get('created');
-		if (!scenario) throw new Error('unknown scenario');
-		if (!created) throw new Error('unknown created');
-		const gameId: GameIdentifier = { scenario: scenario, created: created };
-		return gameId;
-	}
-
-	isPlaying(): boolean {
-		return this.selfService.id != null && this.gamePlayers.users.includes(this.selfService.id);
+	get playing$(): Observable<boolean> {
+		return combineLatest([this.selfService.id$, this.gamePlayers$], (id: string, gamePlayers: GamePlayers) => {
+			return gamePlayers.users.includes(id)
+		});
 	}
 
 	isEndRecruitmentDisabled$(): Observable<boolean> {
-		return this.selfService.mayManageGames$.pipe(
-			map(mayManage => this.gamePlayers && (!this.gamePlayers.recruiting || !mayManage))
-		);
+		return combineLatest([this.selfService.mayManageGames$, this.gamePlayers$],
+			(mayManageGames: boolean, gamePlayers: GamePlayers) => {
+				return !gamePlayers || !gamePlayers.recruiting || !mayManageGames;
+			});
 	}
 
 	isJoinDisabled$(): Observable<boolean> {
@@ -68,33 +85,43 @@ export class GamePlayersComponent implements OnInit {
 	}
 
 	mayJoinGame$(): Observable<boolean> {
-		return this.mayJoinGameRS$.asObservable();
+		return this.identifier$.pipe(
+			flatMap(identifier => this.gamePlayersService.mayJoinGame(identifier)),
+			distinctUntilChanged() // don't spam identical values
+		);
 	}
 
-	get nPlayers(): number {
-		if (this.gamePlayers) {
-			return this.gamePlayers.users.length;
-		} else {
-			return 0;
-		}
+	get recruiting$(): Observable<boolean> {
+		return this.gamePlayers$.pipe(
+			map(gps => gps.recruiting)
+		);
 	}
 
-	get players(): string[] {
-		if (this.gamePlayers) {
-			return this.gamePlayers.users.map(id => id);// TODO provide names
-		} else {
-			return [];
-		}
+	get nPlayers$(): Observable<number> {
+		return this.gamePlayers$.pipe(
+			map(gps => gps.users.length)
+		);
 	}
 
-	endRecuitment() {
-		if (!this.identifier) throw new Error('unknown this.identifier');
-		this.gamePlayersService.endRecuitment(this.identifier).subscribe(gamePlayers => this.gamePlayers = gamePlayers);
+	get players$(): Observable<string[]> {
+		return this.gamePlayers$.pipe(
+			map(gp => gp.users)
+			// TODO provide names
+		);
+	}
+
+	endRecruitment() {
+		this.identifier$.pipe(
+			first(),// do the operation only once
+			tap(id => this.gamePlayersService.endRecruitment(id))
+		).subscribe();
 	}
 
 	joinGame() {
-		if (!this.identifier) throw new Error('unknown this.identifier');
-		this.gamePlayersService.joinGame(this.identifier).subscribe(gamePlayers => this.gamePlayers = gamePlayers);
+		this.identifier$.pipe(
+			first(),// do the operation only once
+			tap(id => this.gamePlayersService.joinGame(id))
+		).subscribe();
 	}
 
 }

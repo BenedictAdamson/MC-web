@@ -3,7 +3,7 @@ import { tap } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { SelfService } from '../self.service';
+import { SelfService } from '../service/self.service';
 
 @Component({
 	selector: 'app-login',
@@ -18,13 +18,13 @@ export class LoginComponent implements OnInit {
 	) { }
 
 	ngOnInit(): void {
-		this.username = this.service.username;
-		this.password = this.service.password;
+		this.service.username$.subscribe(u => this.username = u ? u : this.username);
+		this.service.password$.subscribe(p => this.password = p ? p : this.password);
 	}
 
-	username: string = null;
+	username: string = "";
 
-	password: string = null;
+	password: string = "";
 
 	/**
 	 * Whether these credentials have been explicitly rejected by the server.

@@ -8,7 +8,7 @@ import { ComponentFixture, TestBed, waitForAsync, fakeAsync, tick } from '@angul
 
 import { AddUserComponent } from './add-user.component';
 import { UserDetails } from '../user-details';
-import { UserService } from '../user.service';
+import { UserService } from '../service/user.service';
 import { User } from '../user';
 
 class MockUserService {
@@ -18,14 +18,14 @@ class MockUserService {
 		return of(this.users);
 	}
 
-	getUser(username: string): Observable<User> {
+	getUser(username: string): Observable<User | null> {
 		for (let user of this.users) {
 			if (user.username == username) return of(user);
 		}
 		return of(null);
 	}
 
-	add(userDetails: UserDetails): Observable<User> {
+	add(userDetails: UserDetails): Observable<User | null> {
 		for (let present of this.users) {
 			if (present.username == userDetails.username) return of(null);
 		}
@@ -74,13 +74,15 @@ describe('AddUserComponent', () => {
 		expect(component.rejected).withContext('rejected').toBeFalse();
 
 		const element: HTMLElement = fixture.nativeElement;
-		const usernameElement: HTMLInputElement = element.querySelector('input[name="username"]');
-		const passwordElement: HTMLInputElement = element.querySelector('input[name="password"]');
-		const submitButton: HTMLButtonElement = element.querySelector('button[type="submit"]');
+		const usernameElement: HTMLInputElement | null = element.querySelector('input[name="username"]');
+		const passwordElement: HTMLInputElement | null = element.querySelector('input[name="password"]');
+		const submitButton: HTMLButtonElement | null = element.querySelector('button[type="submit"]');
 		expect(usernameElement).withContext('username element').not.toBeNull();
 		expect(passwordElement).not.toBeNull('password element');
-		expect(passwordElement.getAttribute('type')).withContext('password element type').toBe('password',);
 		expect(submitButton).withContext('submit button').not.toBeNull();
+		if (passwordElement) {
+			expect(passwordElement.getAttribute('type')).withContext('password element type').toBe('password',);
+		}
 	});
 
 

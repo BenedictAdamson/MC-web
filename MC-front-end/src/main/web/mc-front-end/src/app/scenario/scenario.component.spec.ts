@@ -4,7 +4,7 @@ import { v4 as uuid } from 'uuid';
 
 import { Scenario } from '../scenario';
 import { ScenarioComponent } from './scenario.component';
-import { ScenarioService } from '../scenario.service';
+import { ScenarioService } from '../service/scenario.service';
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -13,8 +13,8 @@ describe('ScenarioComponent', () => {
 	let component: ScenarioComponent;
 	let fixture: ComponentFixture<ScenarioComponent>;
 
-	const IDENTIFIER_A: uuid = uuid();
-	const IDENTIFIER_B: uuid = uuid();
+	const IDENTIFIER_A: string = uuid();
+	const IDENTIFIER_B: string = uuid();
 	const SCENARIO_A: Scenario = { identifier: IDENTIFIER_A, title: 'Section Attack', description: 'Basic fire-and-movement tactical training.' };
 	const SCENARIO_B: Scenario = { identifier: IDENTIFIER_B, title: 'Beach Assault', description: 'Fast and deadly.' };
 
@@ -49,7 +49,7 @@ describe('ScenarioComponent', () => {
 
 		const html: HTMLElement = fixture.nativeElement;
 		const displayText: string = html.innerText;
-		const selfLink: HTMLAnchorElement = html.querySelector('a#scenario');
+		const selfLink: HTMLAnchorElement | null = html.querySelector('a#scenario');
 		expect(displayText.includes(testScenario.title)).withContext("displayed text includes title").toBeTrue();
 		expect(displayText.includes(testScenario.description)).withContext("displayed text includes description").toBeTrue();
 		expect(selfLink).withContext("self link").not.toBeNull();

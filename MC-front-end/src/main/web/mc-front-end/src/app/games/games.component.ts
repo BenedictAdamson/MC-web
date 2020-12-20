@@ -1,14 +1,13 @@
-import { v4 as uuid, parse as parseUuid } from 'uuid';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { filter, first, flatMap, map, tap } from 'rxjs/operators';
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { GameComponent } from '../game/game.component';
-import { GameService } from '../game.service';
+import { GameService } from '../service/game.service';
 import { ScenarioComponent } from '../scenario/scenario.component';
-import { SelfService } from '../self.service';
+import { SelfService } from '../service/self.service';
 
 @Component({
 	selector: 'app-scenario',
@@ -17,12 +16,24 @@ import { SelfService } from '../self.service';
 })
 export class GamesComponent implements OnInit {
 
-	static getGamesPath(scenario: uuid): string {
+	static getGamesPath(scenario: string): string {
 		return ScenarioComponent.getScenarioPath(scenario) + '/game/';
 	}
 
-	scenario: uuid;
-	games: string[];
+	get scenario$(): Observable<string> {
+		if (!this.route.parent) throw new Error('missing this.route.parent');
+		return this.route.parent.paramMap.pipe(
+			map(params => params.get('scenario')),
+			filter(scenario => !!scenario),
+			map((scenario: string | null) => scenario as string)
+		);
+	}
+
+	get games$(): Observable<string[]> {
+		return this.scenario$.pipe(
+			flatMap(scenario => this.gameService.getGamesOfScenario(scenario))
+		);
+	}
 
 	constructor(
 		private route: ActivatedRoute,
@@ -32,13 +43,9 @@ export class GamesComponent implements OnInit {
 	) { }
 
 	ngOnInit() {
-		this.scenario = this.route.snapshot.parent.paramMap.get('scenario');
-		this.getGames();
-	}
-
-	private getGames(): void {
-		this.gameService.getGamesOfScenario(this.scenario)
-			.subscribe(games => this.games = games);
+		this.scenario$.pipe(
+			tap(scenario => this.gameService.updateGamesOfScenario(scenario))
+		).subscribe();
 	}
 
 	/**
@@ -58,8 +65,14 @@ export class GamesComponent implements OnInit {
      * On completion, redirects to the the game page for that game.
 	 */
 	createGame(): void {
-		this.gameService.createGame(this.scenario).subscribe(
-			game => this.router.navigateByUrl(GameComponent.getGamePath(game.identifier))
-		);
+		this.scenario$.pipe(
+			first(),// create only 1 game
+			flatMap(scenario => this.gameService.createGame(scenario)),
+			map(game => game.identifier),
+			tap(gameIdentifier => {
+				this.gameService.updateGamesOfScenario(gameIdentifier.scenario);
+				this.router.navigateByUrl(GameComponent.getGamePath(gameIdentifier));
+			})
+		).subscribe();
 	}
 }

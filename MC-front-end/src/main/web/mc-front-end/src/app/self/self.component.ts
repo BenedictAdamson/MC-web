@@ -1,10 +1,9 @@
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { v4 as uuid } from 'uuid';
 
 import { Component, OnInit } from '@angular/core';
 
-import { SelfService } from '../self.service';
+import { SelfService } from '../service/self.service';
 
 @Component({
 	selector: 'app-self',
@@ -21,9 +20,9 @@ export class SelfComponent implements OnInit {
 		// Do nothing
 	}
 
-	get id(): uuid { return this.service.id; };
-	
-	get username(): string { return this.service.username; };
+	get id$(): Observable<string | null> { return this.service.id$; };
+
+	get username$(): Observable<string | null> { return this.service.username$; };
 
 	get authenticated$(): Observable<boolean> { return this.service.authenticated$; };
 

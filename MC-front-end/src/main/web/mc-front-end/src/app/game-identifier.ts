@@ -1,5 +1,3 @@
-import { v4 as uuid } from 'uuid';
-
 /**
  * <p>
  * The unique identifier of a game.
@@ -9,6 +7,6 @@ import { v4 as uuid } from 'uuid';
  * </p>
  */
 export class GameIdentifier {
-	scenario: uuid;
+	scenario: string;// typically a UUID
 	created: string;// a timestamp, in some format
 }

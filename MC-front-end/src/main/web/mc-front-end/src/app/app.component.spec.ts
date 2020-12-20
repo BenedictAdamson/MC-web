@@ -7,7 +7,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { SelfComponent } from './self/self.component';
-import { SelfService } from './self.service';
+import { SelfService } from './service/self.service';
 
 
 
@@ -19,7 +19,7 @@ class MockSelfService {
 
 	checkForCurrentAuthentication_calls: number = 0;
 
-	get username(): string {
+	get username(): string | null {
 		return null;
 	}
 
