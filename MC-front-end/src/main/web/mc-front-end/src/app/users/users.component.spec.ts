@@ -4,6 +4,7 @@ import { v4 as uuid } from 'uuid';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { AbstractSelfService } from '../service/abstract.self.service';
 import { MockSelfService } from '../service/mock/mock.self.service';
 import { SelfService } from '../service/self.service';
 import { User } from '../user';
@@ -14,6 +15,7 @@ import { UserService } from '../service/user.service';
 describe('UsersComponent', () => {
 	let component: UsersComponent;
 	let fixture: ComponentFixture<UsersComponent>;
+	let selfService: AbstractSelfService;
 
 	const USER_ADMIN: User = { id: uuid(), username: 'Administrator', password: null, authorities: ['ROLE_MANAGE_USERS'] };
 	const USER_NORMAL: User = { id: uuid(), username: 'Benedict', password: null, authorities: [] };
@@ -26,13 +28,15 @@ describe('UsersComponent', () => {
 			declarations: [UsersComponent],
 			imports: [RouterTestingModule],
 			providers: [
-				{ provide: SelfService, useFactory: () => { return new MockSelfService(self, true); } },
+				{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } },
 				{ provide: UserService, useValue: userServiceStub }
 			]
 		});
 
 		fixture = TestBed.createComponent(UsersComponent);
 		component = fixture.componentInstance;
+		selfService = TestBed.get(SelfService);
+		selfService.checkForCurrentAuthentication().subscribe();
 		fixture.detectChanges();
 	};
 

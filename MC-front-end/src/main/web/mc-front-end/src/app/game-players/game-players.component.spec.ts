@@ -6,6 +6,7 @@ import { ActivatedRoute, convertToParamMap } from '@angular/router';
 
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
+import { AbstractSelfService } from '../service/abstract.self.service';
 import { GameIdentifier } from '../game-identifier'
 import { GamePlayers } from '../game-players'
 import { GamePlayersService } from '../service/game-players.service';
@@ -74,6 +75,7 @@ class MockGamePlayersService {
 describe('GamePlayersComponent', () => {
 	let component: GamePlayersComponent;
 	let fixture: ComponentFixture<GamePlayersComponent>;
+	let selfService: AbstractSelfService;
 	let gamePlayersServiceSpy: MockGamePlayersService;
 
 	const SCENARIO_ID_A: string = uuid();
@@ -147,11 +149,13 @@ describe('GamePlayersComponent', () => {
 				}
 			},
 			{ provide: GamePlayersService, useValue: gamePlayersServiceSpy },
-			{ provide: SelfService, useFactory: () => { return new MockSelfService(self, true); } }]
+			{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }]
 		});
 
 		fixture = TestBed.createComponent(GamePlayersComponent);
 		component = fixture.componentInstance;
+		selfService = TestBed.get(SelfService);
+		selfService.checkForCurrentAuthentication().subscribe();
 		fixture.detectChanges();
 	};
 

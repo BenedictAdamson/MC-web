@@ -1,7 +1,6 @@
-import { Observable, defer, of } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
-import { TestBed, waitForAsync } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
@@ -14,13 +13,11 @@ import { User } from './user';
 
 
 describe('AppComponent', () => {
-	let mockSelfService: any;
+	let selfService: MockSelfService;
 
-
-	const USER_A: User = { id: uuid(), username: 'Benedict', password: null, authorities: [] };
-
-	const setUp = function(mayListUsers: boolean) {
-		mockSelfService = new MockSelfService(USER_A, mayListUsers);
+	const setUp = function(authorities: string[]) {
+		const self: User = { id: uuid(), username: 'Benedict', password: null, authorities: authorities };
+		selfService = new MockSelfService(self);
 		TestBed.configureTestingModule({
 			declarations: [
 				AppComponent, SelfComponent
@@ -30,12 +27,12 @@ describe('AppComponent', () => {
 					[{ path: '', component: HomeComponent }]
 				)
 			],
-			providers: [{ provide: SelfService, useValue: mockSelfService }]
+			providers: [{ provide: SelfService, useValue: selfService }]
 		}).compileComponents();
 	};
 
-	const testSetUp = function(mayListUsers: boolean) {
-		setUp(mayListUsers);
+	const testSetUp = function(authorities: string[], expectMayListUsers: boolean) {
+		setUp(authorities);
 		const fixture = TestBed.createComponent(AppComponent);
 		const app = fixture.debugElement.componentInstance;
 		fixture.detectChanges();
@@ -44,10 +41,9 @@ describe('AppComponent', () => {
 		const scenariosLink = html.querySelector('a[id="scenarios"]');
 
 		expect(app).toBeTruthy();
-		expect(mockSelfService.checkForCurrentAuthentication_calls).withContext('Checked the server for current authentication information').toBe(1);
 
 		expect(html.querySelector('h1').textContent).withContext('h1 text').toContain('Mission Command');
-		expect(usersLink != null).withContext('has users link element').toBe(mayListUsers);
+		expect(usersLink != null).withContext('has users link element').toBe(expectMayListUsers);
 		if (usersLink != null) {
 			expect(usersLink.textContent).withContext('users link text').toContain('Users');
 		}
@@ -55,11 +51,11 @@ describe('AppComponent', () => {
 		expect(scenariosLink.textContent).withContext('scenarios link text').toContain('Scenarios');
 	};
 
-	it('can be constructed [!mayListUsers]', () => {
-		testSetUp(false);
+	it('can be constructed [no roles]', () => {
+		testSetUp([], false);
 	});
 
-	it('can be constructed [mayListUsers]', () => {
-		testSetUp(true);
+	it('can be constructed [player]', () => {
+		testSetUp(['ROLE_PLAYER'], true);
 	});
 });

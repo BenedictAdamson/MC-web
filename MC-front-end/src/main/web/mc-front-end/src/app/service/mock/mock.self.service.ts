@@ -5,8 +5,6 @@ import { User } from '../../user';
 
 export class MockSelfService extends AbstractSelfService {
 
-	checkForCurrentAuthentication_calls: number = 0;
-
 	constructor(
 		private self: User | null
 	) {
@@ -14,7 +12,7 @@ export class MockSelfService extends AbstractSelfService {
 	};
 
 
-	protected getUserDetails(username: string | null, password: string | null): Observable<User | null> {
+	protected getUserDetails(_username: string | null, _password: string | null): Observable<User | null> {
 		return of(this.self);
 	}
 

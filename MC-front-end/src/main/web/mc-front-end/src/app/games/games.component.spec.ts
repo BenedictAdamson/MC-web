@@ -3,6 +3,7 @@ import { v4 as uuid } from 'uuid';
 
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 
+import { AbstractSelfService } from '../service/abstract.self.service';
 import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
 import { GameService } from '../service/game.service';
@@ -18,6 +19,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 describe('GamesComponent', () => {
 	let routerSpy: any;
 	let gameServiceSpy: any
+	let selfService: AbstractSelfService;
 	let component: GamesComponent;
 	let fixture: ComponentFixture<GamesComponent>;
 
@@ -77,11 +79,13 @@ describe('GamesComponent', () => {
 				}
 			},
 			{ provide: GameService, useValue: gameServiceSpy },
-			{ provide: SelfService, useFactory: () => { return new MockSelfService(self, true); } }]
+			{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }]
 		});
 
 		fixture = TestBed.createComponent(GamesComponent);
 		component = fixture.componentInstance;
+		selfService = TestBed.get(SelfService);
+		selfService.checkForCurrentAuthentication().subscribe();
 		fixture.detectChanges();
 	};
 
@@ -174,11 +178,13 @@ describe('GamesComponent', () => {
 			},
 			{ provide: GameService, useValue: gameServiceSpy },
 			{ provide: Router, useValue: routerSpy },
-			{ provide: SelfService, useFactory: () => { return new MockSelfService(USER_ADMIN, true); } }]
+			{ provide: SelfService, useFactory: () => { return new MockSelfService(USER_ADMIN); } }]
 		});
 
 		fixture = TestBed.createComponent(GamesComponent);
 		component = fixture.componentInstance;
+		selfService = TestBed.get(SelfService);
+		selfService.checkForCurrentAuthentication().subscribe();
 		fixture.detectChanges();
 	};
 	const testCreateGame = function(game: Game) {

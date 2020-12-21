@@ -4,6 +4,7 @@ import { v4 as uuid } from 'uuid';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { AbstractSelfService } from '../service/abstract.self.service';
 import { MockSelfService } from '../service/mock/mock.self.service';
 import { SelfComponent } from './self.component';
 import { SelfService } from '../service/self.service';
@@ -11,6 +12,7 @@ import { User } from '../user';
 
 describe('SelfComponent', () => {
 	let fixture: ComponentFixture<SelfComponent>;
+	let selfService: AbstractSelfService;
 	let component: SelfComponent;
 
 	let getAuthenticated = function(component: SelfComponent): boolean | null {
@@ -30,7 +32,7 @@ describe('SelfComponent', () => {
 		TestBed.configureTestingModule({
 			imports: [RouterTestingModule],
 			providers: [
-				{ provide: SelfService, useFactory: () => { return new MockSelfService(self, true); } }],
+				{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }],
 			declarations: [
 				SelfComponent
 			]
@@ -38,6 +40,8 @@ describe('SelfComponent', () => {
 
 		fixture = TestBed.createComponent(SelfComponent);
 		component = fixture.componentInstance;
+		selfService = TestBed.get(SelfService);
+		selfService.checkForCurrentAuthentication().subscribe();
 		fixture.detectChanges();
 	};
 
