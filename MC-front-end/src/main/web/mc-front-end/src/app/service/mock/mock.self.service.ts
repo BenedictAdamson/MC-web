@@ -1,51 +1,26 @@
-import { Observable, defer, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
-import { SelfService } from '../self.service';
+import { AbstractSelfService } from '../abstract.self.service';
 import { User } from '../../user';
 
-export class MockSelfService {
+export class MockSelfService extends AbstractSelfService {
 
 	checkForCurrentAuthentication_calls: number = 0;
 
 	constructor(
-		private self: User | null,
-		private mayListUsers: boolean
-	) { };
+		private self: User | null
+	) {
+		super();
+	};
 
-	get id$(): Observable<string | null> {
-		return of(this.self ? this.self.id : null);
+
+	protected getUserDetails(username: string | null, password: string | null): Observable<User | null> {
+		return of(this.self);
 	}
 
-	get username$(): Observable<string | null> {
-		return of(this.self ? this.self.username : null);
-	}
-
-	get authenticated$(): Observable<boolean> {
-		return of(this.self != null);
-	}
-
-	get mayManageGames$(): Observable<boolean> {
-		return of(this.self ? this.self.authorities.includes('ROLE_MANAGE_GAMES') : false);
-	}
-
-	get mayManageUsers$(): Observable<boolean> {
-		return of(this.self ? this.self.authorities.includes('ROLE_MANAGE_USERS') : false);
-	}
-
-
-	get mayListUsers$(): Observable<boolean> {
-		return of(this.mayListUsers);
-	}
-
-	checkForCurrentAuthentication(): Observable<null> {
-		this.checkForCurrentAuthentication_calls++;
+	protected postLogout(): Observable<null> {
+		this.self = null;
 		return of(null);
 	}
 
-	logout(): Observable<null> {
-		return defer(() => {
-			this.self = null;
-			return of(null)
-		});
-	}
 }// class
