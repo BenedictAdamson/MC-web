@@ -23,28 +23,27 @@ describe('AddUserComponent', () => {
 	let fixture: ComponentFixture<AddUserComponent>;
 	let component: AddUserComponent;
 
-	beforeEach(waitForAsync(() => {
+	const setUp = function(users0: User[]) {
 		routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
 		routerSpy.navigateByUrl.and.returnValue(null);
+
+		userService = new MockUserService(users0);
 		TestBed.configureTestingModule({
 			imports: [FormsModule],
 			providers: [
 				{ provide: Router, useValue: routerSpy },
-				{ provide: UserService, useClass: MockUserService }
+				{ provide: UserService, useValue: userService }
 			],
 			declarations: [AddUserComponent]
 		})
 			.compileComponents();
-	}));
-
-	beforeEach(() => {
-		userService = TestBed.get(UserService);
 		fixture = TestBed.createComponent(AddUserComponent);
 		component = fixture.componentInstance;
 		fixture.detectChanges();
-	});
+	};
 
 	it('can be created', () => {
+		setUp([]);
 		expect(component).toBeTruthy();
 		expect(component.userDetails.username).withContext('username').toEqual('');
 		expect(component.userDetails.password).withContext('password').toEqual('');
@@ -64,10 +63,11 @@ describe('AddUserComponent', () => {
 
 
 	const testAddFailure = function(user: User) {
-		userService.users.push(user);// will fail because a duplicate username
+		setUp([user]); // will fail because a duplicate username
 		component.userDetails = new UserDetails(user);
 
 		component.add();
+		tick();
 		tick();
 		fixture.detectChanges();
 
@@ -87,6 +87,7 @@ describe('AddUserComponent', () => {
 
 
 	const testAddSuccess = function(userDetails: UserDetails) {
+		setUp([]);
 		component.userDetails = userDetails;
 
 		component.add();
@@ -96,10 +97,15 @@ describe('AddUserComponent', () => {
 		expect(component.rejected).withContext('rejected').toBeFalse();
 		expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(1);
 		expect(routerSpy.navigateByUrl.calls.argsFor(0)).withContext('router.navigateByUrl args').toEqual(['/user']);
-		const addedUser: User = userService.users[userService.users.length - 1];
-		expect(addedUser.username).withContext('added username').toEqual(userDetails.username);
-		expect(addedUser.password).withContext('added password').toEqual(userDetails.password);
-		expect(addedUser.authorities).withContext('added authorities').toEqual([]);
+
+		userService.getUsers().subscribe(users => {
+			expect(users.length).withContext('users length').toEqual(1);
+			const addedUser: User = users[0];
+			expect(addedUser.username).withContext('added username').toEqual(userDetails.username);
+			expect(addedUser.password).withContext('added password').toEqual(userDetails.password);
+			expect(addedUser.authorities).withContext('added authorities').toEqual([]);
+		});
+		tick();
 	};
 
 	it('should handle addition success [A]', fakeAsync(() => {
