@@ -7,33 +7,10 @@ import { FormsModule } from '@angular/forms';
 import { ComponentFixture, TestBed, waitForAsync, fakeAsync, tick } from '@angular/core/testing';
 
 import { AddUserComponent } from './add-user.component';
+import { MockUserService } from '../service/mock/mock.user.service';
 import { UserDetails } from '../user-details';
 import { UserService } from '../service/user.service';
 import { User } from '../user';
-
-class MockUserService {
-	users: User[] = [];
-
-	getUsers(): Observable<User[]> {
-		return of(this.users);
-	}
-
-	getUser(username: string): Observable<User | null> {
-		for (let user of this.users) {
-			if (user.username == username) return of(user);
-		}
-		return of(null);
-	}
-
-	add(userDetails: UserDetails): Observable<User | null> {
-		for (let present of this.users) {
-			if (present.username == userDetails.username) return of(null);
-		}
-		const user: User = new User(uuid(), userDetails);
-		this.users.push(user);
-		return of(user);
-	}
-}
 
 describe('AddUserComponent', () => {
 	const USER_DETAILS_A: UserDetails = { username: 'Administrator', password: 'letmein', authorities: [] };
