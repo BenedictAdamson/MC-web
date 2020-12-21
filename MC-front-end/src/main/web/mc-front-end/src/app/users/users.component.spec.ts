@@ -4,23 +4,11 @@ import { v4 as uuid } from 'uuid';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { MockSelfService } from '../service/mock/mock.self.service';
 import { SelfService } from '../service/self.service';
 import { User } from '../user';
 import { UsersComponent } from './users.component';
 import { UserService } from '../service/user.service';
-
-class MockSelfService {
-
-	constructor(private self: User) { };
-
-	get username(): string {
-		return this.self.username;
-	}
-
-	get mayManageUsers$(): Observable<boolean> {
-		return of(this.self.authorities.includes('ROLE_MANAGE_USERS'));
-	}
-}
 
 
 describe('UsersComponent', () => {
@@ -38,7 +26,7 @@ describe('UsersComponent', () => {
 			declarations: [UsersComponent],
 			imports: [RouterTestingModule],
 			providers: [
-				{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } },
+				{ provide: SelfService, useFactory: () => { return new MockSelfService(self, true); } },
 				{ provide: UserService, useValue: userServiceStub }
 			]
 		});

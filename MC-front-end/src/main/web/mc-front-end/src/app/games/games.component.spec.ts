@@ -8,24 +8,12 @@ import { GameIdentifier } from '../game-identifier';
 import { GameService } from '../service/game.service';
 import { GameComponent } from '../game/game.component';
 import { GamesComponent } from './games.component';
+import { MockSelfService } from '../service/mock/mock.self.service';
 import { SelfService } from '../service/self.service';
 import { User } from '../user';
 
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-
-class MockSelfService {
-
-	constructor(private self: User) { };
-
-	get username(): string {
-		return this.self.username;
-	}
-
-	get mayManageGames$(): Observable<boolean> {
-		return of(this.self.authorities.includes('ROLE_MANAGE_GAMES'));
-	}
-}
 
 describe('GamesComponent', () => {
 	let routerSpy: any;
@@ -89,7 +77,7 @@ describe('GamesComponent', () => {
 				}
 			},
 			{ provide: GameService, useValue: gameServiceSpy },
-			{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }]
+			{ provide: SelfService, useFactory: () => { return new MockSelfService(self, true); } }]
 		});
 
 		fixture = TestBed.createComponent(GamesComponent);
@@ -186,7 +174,7 @@ describe('GamesComponent', () => {
 			},
 			{ provide: GameService, useValue: gameServiceSpy },
 			{ provide: Router, useValue: routerSpy },
-			{ provide: SelfService, useFactory: () => { return new MockSelfService(USER_ADMIN); } }]
+			{ provide: SelfService, useFactory: () => { return new MockSelfService(USER_ADMIN, true); } }]
 		});
 
 		fixture = TestBed.createComponent(GamesComponent);

@@ -4,29 +4,10 @@ import { v4 as uuid } from 'uuid';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { MockSelfService } from '../service/mock/mock.self.service';
 import { SelfComponent } from './self.component';
 import { SelfService } from '../service/self.service';
 import { User } from '../user';
-
-class MockSelfService {
-
-	constructor(private self: User | null) { };
-
-	get username$(): Observable<string | null> {
-		return of(this.self ? this.self.username : null);
-	}
-
-	get authenticated$(): Observable<boolean> {
-		return of(this.self != null);
-	}
-
-	logout(): Observable<null> {
-		return defer(() => {
-			this.self = null;
-			return of(null)
-		});
-	}
-}// class
 
 describe('SelfComponent', () => {
 	let fixture: ComponentFixture<SelfComponent>;
@@ -49,7 +30,7 @@ describe('SelfComponent', () => {
 		TestBed.configureTestingModule({
 			imports: [RouterTestingModule],
 			providers: [
-				{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }],
+				{ provide: SelfService, useFactory: () => { return new MockSelfService(self, true); } }],
 			declarations: [
 				SelfComponent
 			]

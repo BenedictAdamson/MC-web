@@ -10,25 +10,9 @@ import { GameIdentifier } from '../game-identifier'
 import { GamePlayers } from '../game-players'
 import { GamePlayersService } from '../service/game-players.service';
 import { GamePlayersComponent } from './game-players.component';
+import { MockSelfService } from '../service/mock/mock.self.service';
 import { SelfService } from '../service/self.service';
 import { User } from '../user';
-
-class MockSelfService {
-
-	constructor(private self: User) { };
-
-	get id$(): Observable<string> {
-		return of(this.self.id);
-	}
-
-	get username$(): Observable<string> {
-		return of(this.self.username);
-	}
-
-	get mayManageGames$(): Observable<boolean> {
-		return of(this.self.authorities.includes('ROLE_MANAGE_GAMES'));
-	}
-}
 
 class MockGamePlayersService {
 
@@ -163,7 +147,7 @@ describe('GamePlayersComponent', () => {
 				}
 			},
 			{ provide: GamePlayersService, useValue: gamePlayersServiceSpy },
-			{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }]
+			{ provide: SelfService, useFactory: () => { return new MockSelfService(self, true); } }]
 		});
 
 		fixture = TestBed.createComponent(GamePlayersComponent);

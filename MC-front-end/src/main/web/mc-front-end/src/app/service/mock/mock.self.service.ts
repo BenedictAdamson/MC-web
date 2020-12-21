@@ -8,15 +8,15 @@ export class MockSelfService {
 	checkForCurrentAuthentication_calls: number = 0;
 
 	constructor(
-		private self: User,
+		private self: User | null,
 		private mayListUsers: boolean
 	) { };
 
-	get id$(): Observable<string> {
-		return of(this.self.id);
+	get id$(): Observable<string | null> {
+		return of(this.self ? this.self.id : null);
 	}
 
-	get username$(): Observable<string> {
+	get username$(): Observable<string | null> {
 		return of(this.self ? this.self.username : null);
 	}
 
@@ -25,7 +25,11 @@ export class MockSelfService {
 	}
 
 	get mayManageGames$(): Observable<boolean> {
-		return of(this.self.authorities.includes('ROLE_MANAGE_GAMES'));
+		return of(this.self ? this.self.authorities.includes('ROLE_MANAGE_GAMES') : false);
+	}
+
+	get mayManageUsers$(): Observable<boolean> {
+		return of(this.self ? this.self.authorities.includes('ROLE_MANAGE_USERS') : false);
 	}
 
 
