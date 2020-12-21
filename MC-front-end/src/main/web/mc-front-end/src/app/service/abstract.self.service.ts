@@ -256,7 +256,9 @@ export abstract class AbstractSelfService {
 	 */
 	get mayListUsers$(): Observable<boolean> {
 		return this.authorities$.pipe(
-			map(authorities => authorities.includes('ROLE_PLAYER') || authorities.includes('ROLE_MANAGE_USERS'))
+			map(
+				authorities => authorities.includes('ROLE_PLAYER') || authorities.includes('ROLE_MANAGE_USERS')
+			)
 		);
 	}
 
