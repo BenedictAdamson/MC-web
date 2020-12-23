@@ -56,7 +56,9 @@ export abstract class AbstractUserService {
 		/* The server actually replies to the POST with a 302 (Found) redirect to the resource of the created user.
 		 * The HttpClient or browser itself handles that redirect for us.
 		 */
-		return this.postUser(userDetails);
+		return this.postUser(userDetails).pipe(
+			tap((user: User | null) => { if (user) this.setUser(user as User) })
+		);
 	}
 
 	/**

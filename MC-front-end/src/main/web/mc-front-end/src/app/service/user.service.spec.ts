@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
 
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 import { HttpClient } from '@angular/common/http';
 
@@ -90,8 +90,6 @@ describe('UserService', () => {
 	it('can add [B]', () => {
 		canAddUser(USER_B);
 	});
-
-
 
 
 
@@ -228,5 +226,35 @@ describe('UserService', () => {
 
 	it('provides distinct user values [B]', () => {
 		testGetUserForUnchangedUpdate(USER_B);
+	})
+
+
+
+
+
+	const testGetUserAfterAdd = function(user: User) {
+		fakeAsync(() => {
+			const id: string = user.id;
+			const userDetails: UserDetails = new UserDetails(user);
+			const service: UserService = TestBed.get(UserService);
+
+			service.add(userDetails).subscribe(result => expect(result).withContext('returned user').toEqual(user));
+			tick();
+			service.getUser(id).subscribe(u => expect(u).toEqual(user));
+
+			// No GET expected because should use a cached value.
+			const request = httpTestingController.expectOne(UserService.apiUsersPath);
+			expect(request.request.method).toEqual('POST');
+			request.flush(user);
+			httpTestingController.verify();
+		})
+	};
+
+	it('can get user after add [A]', () => {
+		testGetUserAfterAdd(USER_A);
+	})
+
+	it('can get user after add [B]', () => {
+		testGetUserAfterAdd(USER_B);
 	})
 });
