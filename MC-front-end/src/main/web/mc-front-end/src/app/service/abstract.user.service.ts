@@ -1,5 +1,5 @@
 import { Observable, ReplaySubject, combineLatest, from } from 'rxjs';
-import { distinctUntilChanged, finalize, first, map, tap } from 'rxjs/operators';
+import { distinctUntilChanged, finalize, first, flatMap, map, tap } from 'rxjs/operators';
 
 import { User } from '../user';
 import { UserDetails } from '../user-details';
@@ -7,21 +7,32 @@ import { UserDetails } from '../user-details';
 export abstract class AbstractUserService {
 
 	private complete: boolean = false;
+	private validIds$: ReplaySubject<string[]> = new ReplaySubject(1);
 	private user: Map<string, ReplaySubject<User | null>> = new Map();
 
 	constructor() {
+		this.validIds$.next([]);// initially none are known
 	}
 
 	getUsers(): Observable<User[]> {
-		if (this.complete) {
-			return combineLatest(Array.from(this.user.values())).pipe(
-				map((users: (User | null)[]) => users.filter((user) => !!user)),
-				map((users: (User | null)[]) => users as User[]),
-				first()
-			);
-		} else {
-			return this.updateUsers$();
+		if (!this.complete) {
+			this.updateUsers();
 		}
+		return this.validIds$.pipe(
+			distinctUntilChanged(),// do not spam changes
+			map((ids: string[]) => {// get the ReplySubjects for the valid user IDs
+				const rses: Observable<User | null>[] = [];
+				for (var id of ids) {
+					const rs: ReplaySubject<User | null> | undefined = this.user.get(id);
+					if (rs) rses.push(rs.asObservable());
+				}
+				return rses;
+			}),
+			flatMap((rses: Observable<User | null>[]) =>
+				combineLatest(rses).pipe(
+					// remove nulls
+					map((users: (User | null)[]) => users.filter((user) => !!user) as User[])
+				)));
 	}
 
 
@@ -31,8 +42,37 @@ export abstract class AbstractUserService {
 		return rs;
 	}
 
+	private addValidId(id: string): void {
+		this.validIds$.pipe(
+			first() // once only
+		).subscribe((ids: string[]) => {
+			if (!ids.includes(id)) {
+				ids.push(id);
+				this.validIds$.next(ids)
+			}// else already known
+		});
+	}
+
+	private removeValidId(id: string): void {
+		this.validIds$.pipe(
+			first() // once only
+		).subscribe((ids: string[]) => {
+			if (ids.includes(id)) {
+				ids = ids.filter(i => i != id);
+				this.validIds$.next(ids)
+			}// else already known to be invalid
+		});
+	}
+
 	private updateCachedUser(id: string, rs: ReplaySubject<User | null>): void {
-		this.fetchUser(id).subscribe(user => rs.next(user));
+		this.fetchUser(id).subscribe((user: User | null) => {
+			rs.next(user);
+			if (user) {
+				this.addValidId(id);
+			} else {
+				this.removeValidId(id);
+			}
+		});
 	}
 
 	getUser(id: string): Observable<User | null> {
@@ -44,6 +84,16 @@ export abstract class AbstractUserService {
 		return rs.pipe(
 			distinctUntilChanged()
 		);
+	}
+
+	private setUser(user: User): void {
+		const id: string = user.id;
+		var rs: ReplaySubject<User | null> | undefined = this.user.get(id);
+		if (!rs) {
+			rs = this.createCacheForUser(id);
+		}
+		rs.next(user);
+		this.addValidId(id);
 	}
 
 	/**@description
@@ -76,22 +126,6 @@ export abstract class AbstractUserService {
 		this.updateCachedUser(id, rs);
 	}
 
-	private setUser(user: User): void {
-		const id: string = user.id;
-		var rs: ReplaySubject<User | null> | undefined = this.user.get(id);
-		if (!rs) {
-			rs = this.createCacheForUser(id);
-		}
-		rs.next(user);
-	}
-
-	private updateUsers$(): Observable<User[]> {
-		return this.fetchUsers().pipe(
-			tap(users => users.forEach(user => this.setUser(user))),
-			finalize(() => { this.complete = true; })
-		);
-	}
-
 	/**
 	 * Ask the service to update its cached value for the list of users.
 	 *
@@ -100,7 +134,14 @@ export abstract class AbstractUserService {
 	 * returned by [[getUsers]].
 	 */
 	updateUsers(): void {
-		this.updateUsers$().subscribe();
+		this.fetchUsers().subscribe(
+			(users: User[]) => {
+				users.forEach(user => this.setUser(user));
+				// Remove ids that are no longer valid:
+				const ids: string[] = users.map(user => user.id);
+				this.validIds$.next(ids);
+				this.complete = true;
+			});
 	}
 
 
