@@ -1,27 +1,27 @@
-import { Observable, ReplaySubject } from 'rxjs';
-import { distinctUntilChanged, filter, map, tap } from 'rxjs/operators';
+import { Observable, ReplaySubject, combineLatest, from } from 'rxjs';
+import { distinctUntilChanged, finalize, first, map, tap } from 'rxjs/operators';
 
 import { User } from '../user';
 import { UserDetails } from '../user-details';
 
 export abstract class AbstractUserService {
 
+	private complete: boolean = false;
 	private user: Map<string, ReplaySubject<User | null>> = new Map();
-	private users: ReplaySubject<User[] | null> = new ReplaySubject(1);
 
 	constructor() {
-		this.users.next(null);
 	}
 
 	getUsers(): Observable<User[]> {
-		return this.users.pipe(
-			distinctUntilChanged(),
-			tap(users => {
-				if (users == null) this.updateUsers();// do the first fetch
-			}),
-			filter(users => users != null),
-			map((users: User[] | null) => users as User[])
-		);
+		if (this.complete) {
+			return combineLatest(Array.from(this.user.values())).pipe(
+				map((users: (User | null)[]) => users.filter((user) => !!user)),
+				map((users: (User | null)[]) => users as User[]),
+				first()
+			);
+		} else {
+			return this.updateUsers$();
+		}
 	}
 
 
@@ -74,6 +74,22 @@ export abstract class AbstractUserService {
 		this.updateCachedUser(id, rs);
 	}
 
+	private setUser(user: User): void {
+		const id: string = user.id;
+		var rs: ReplaySubject<User | null> | undefined = this.user.get(id);
+		if (!rs) {
+			rs = this.createCacheForUser(id);
+		}
+		rs.next(user);
+	}
+
+	private updateUsers$(): Observable<User[]> {
+		return this.fetchUsers().pipe(
+			tap(users => users.forEach(user => this.setUser(user))),
+			finalize(() => { this.complete = true; })
+		);
+	}
+
 	/**
 	 * Ask the service to update its cached value for the list of users.
 	 *
@@ -82,9 +98,7 @@ export abstract class AbstractUserService {
 	 * returned by [[getUsers]].
 	 */
 	updateUsers(): void {
-		this.fetchUsers().subscribe(
-			users => this.users.next(users)
-		);
+		this.updateUsers$().subscribe();
 	}
 
 
