@@ -1,61 +1,54 @@
-import { Observable, ReplaySubject, of } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 
+import { AbstractGamePlayersService } from '../abstract.game-players.service'
 import { GameIdentifier } from '../../game-identifier'
 import { GamePlayers } from '../../game-players'
 
-export class MockGamePlayersService {
+export class MockGamePlayersService extends AbstractGamePlayersService {
 
-	private rs$: ReplaySubject<GamePlayers> = new ReplaySubject(1);
 	private serverGamePlayers: GamePlayers;
 	private game: GameIdentifier;
 
 	constructor(
-		gamePlayers: GamePlayers,
-		private mayJoin: boolean,
+		gamePlayersServer: GamePlayers,
+		private mayJoinServer: boolean,
 		private self: string
 	) {
-		this.game = gamePlayers.game;
-		this.rs$.next(gamePlayers);
-		this.serverGamePlayers = gamePlayers;
+		super();
+		this.game = gamePlayersServer.game;
+		this.serverGamePlayers = gamePlayersServer;
 	};
 
 	private expectGameIdentifier(game: GameIdentifier, method: string): void {
-		expect(game).withContext('GamePlayersService.' + method + '(game)').toEqual(this.game);
+		expect(game).withContext('MockGamePlayersService.' + method + '(game)').toEqual(this.game);
 	}
 
 	private copy(): Observable<GamePlayers> {
 		return of({ game: this.serverGamePlayers.game, recruiting: this.serverGamePlayers.recruiting, users: this.serverGamePlayers.users });
 	}
 
-	getGamePlayers(game: GameIdentifier): Observable<GamePlayers> {
+
+	protected fetchGamePlayers(game: GameIdentifier): Observable<GamePlayers | null> {
 		this.expectGameIdentifier(game, 'getGamePlayers');
-		return this.rs$.pipe(
-			distinctUntilChanged()
-		);
+		return of(this.serverGamePlayers);
 	}
 
-	mayJoinGame(game: GameIdentifier): Observable<boolean> {
+	protected fetchMayJoin(game: GameIdentifier): Observable<boolean> {
 		this.expectGameIdentifier(game, 'mayJoinGame');
-		return of(this.mayJoin);
+		return of(this.mayJoinServer);
 	}
 
-	endRecruitment(game: GameIdentifier): Observable<GamePlayers> {
-		this.expectGameIdentifier(game, 'endRecuitment');
-		this.serverGamePlayers.recruiting = false;
-		return this.copy();
-	}
-
-	updateGamePlayers(game: GameIdentifier): void {
-		this.expectGameIdentifier(game, 'updateGamePlayers');
-		this.rs$.next(this.serverGamePlayers);
-	}
-
-	joinGame(game: GameIdentifier): Observable<GamePlayers> {
+	protected requestJoinGame(game: GameIdentifier): Observable<GamePlayers> {
 		this.expectGameIdentifier(game, 'joinGame');
 		if (!this.serverGamePlayers.users.includes(this.self)) {
 			this.serverGamePlayers.users.push(this.self);
 		}
+		return this.copy();
+	}
+
+	protected requestEndRecruitment(game: GameIdentifier): Observable<GamePlayers> {
+		this.expectGameIdentifier(game, 'endRecuitment');
+		this.serverGamePlayers.recruiting = false;
 		return this.copy();
 	}
 }
