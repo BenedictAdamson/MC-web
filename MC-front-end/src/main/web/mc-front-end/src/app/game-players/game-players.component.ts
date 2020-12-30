@@ -4,9 +4,9 @@ import { distinctUntilChanged, filter, first, flatMap, map, tap } from 'rxjs/ope
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
+import { AbstractGamePlayersService } from '../service/abstract.game-players.service';
 import { GameIdentifier } from '../game-identifier';
 import { GamePlayers } from '../game-players';
-import { GamePlayersService } from '../service/game-players.service';
 import { SelfService } from '../service/self.service';
 
 @Component({
@@ -55,7 +55,7 @@ export class GamePlayersComponent implements OnInit {
 
 	constructor(
 		private route: ActivatedRoute,
-		private gamePlayersService: GamePlayersService,
+		private gamePlayersService: AbstractGamePlayersService,
 		private selfService: SelfService
 	) {
 	}

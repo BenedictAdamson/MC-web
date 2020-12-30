@@ -8,11 +8,13 @@ import { RouterModule } from '@angular/router';
 import { AppRoutingModule } from './app-routing.module';
 import { WINDOW_PROVIDER } from './window.provider';
 
+import { AbstractGamePlayersService } from './service/abstract.game-players.service';
 import { AddUserComponent } from './add-user/add-user.component';
 import { AppComponent } from './app.component';
 import { GameComponent } from './game/game.component';
 import { GamesComponent } from './games/games.component';
 import { GamePlayersComponent } from './game-players/game-players.component';
+import { GamePlayersService } from './service/game-players.service';
 import { LoginComponent } from './login/login.component';
 import { ScenarioComponent } from './scenario/scenario.component';
 import { ScenariosComponent } from './scenarios/scenarios.component';
@@ -45,7 +47,8 @@ import { SelfComponent } from './self/self.component';
 		UserComponent
 	],
 	providers: [
-		WINDOW_PROVIDER
+		WINDOW_PROVIDER,
+		{ provide: AbstractGamePlayersService, useClass: GamePlayersService }
 	],
 	bootstrap: [AppComponent]
 })

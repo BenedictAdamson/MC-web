@@ -6,9 +6,9 @@ import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
 import { AbstractSelfService } from '../service/abstract.self.service';
+import { AbstractGamePlayersService } from '../service/abstract.game-players.service';
 import { GameIdentifier } from '../game-identifier'
 import { GamePlayers } from '../game-players'
-import { GamePlayersService } from '../service/game-players.service';
 import { GamePlayersComponent } from './game-players.component';
 import { MockGamePlayersService } from '../service/mock/mock.game-players.service'
 import { MockSelfService } from '../service/mock/mock.self.service';
@@ -92,7 +92,7 @@ describe('GamePlayersComponent', () => {
 					}
 				}
 			},
-			{ provide: GamePlayersService, useValue: gamePlayersServiceSpy },
+			{ provide: AbstractGamePlayersService, useValue: gamePlayersServiceSpy },
 			{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }]
 		});
 
