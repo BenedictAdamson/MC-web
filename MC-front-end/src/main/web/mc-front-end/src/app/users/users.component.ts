@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { AbstractSelfService } from '../service/abstract.self.service';
+import { AbstractUserService } from '../service/abstract.user.service';
 import { User } from '../user';
-import { UserService } from '../service/user.service';
 
 @Component({
 	selector: 'app-users',
@@ -16,7 +16,7 @@ export class UsersComponent implements OnInit {
 
 	constructor(
 		private selfService: AbstractSelfService,
-		private userService: UserService
+		private userService: AbstractUserService
 	) { }
 
 	ngOnInit() {

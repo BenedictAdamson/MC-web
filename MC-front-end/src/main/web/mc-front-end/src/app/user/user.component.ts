@@ -4,7 +4,7 @@ import { distinctUntilChanged, filter, first, flatMap, map, tap } from 'rxjs/ope
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { UserService } from '../service/user.service';
+import { AbstractUserService } from '../service/abstract.user.service';
 import { User } from '../user';
 
 @Component({
@@ -45,7 +45,8 @@ export class UserComponent implements OnInit {
 
 	constructor(
 		private route: ActivatedRoute,
-		private userService: UserService) { }
+		private userService: AbstractUserService
+	) { }
 
 	private update(): void {
 		this.id$.pipe(

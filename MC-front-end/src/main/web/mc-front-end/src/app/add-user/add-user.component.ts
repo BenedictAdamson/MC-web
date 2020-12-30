@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { AbstractUserService } from '../service/abstract.user.service';
 import { UserDetails } from '../user-details';
-import { UserService } from '../service/user.service';
 
 @Component({
 	selector: 'app-add-user',
@@ -13,7 +13,7 @@ export class AddUserComponent implements OnInit {
 
 	constructor(
 		private readonly router: Router,
-		private readonly service: UserService
+		private readonly service: AbstractUserService
 	) { }
 
 	ngOnInit(): void {

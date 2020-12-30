@@ -5,10 +5,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { AbstractSelfService } from '../service/abstract.self.service';
+import { AbstractUserService } from '../service/abstract.user.service';
 import { MockSelfService } from '../service/mock/mock.self.service';
 import { User } from '../user';
 import { UsersComponent } from './users.component';
-import { UserService } from '../service/user.service';
 
 
 describe('UsersComponent', () => {
@@ -28,7 +28,7 @@ describe('UsersComponent', () => {
 			imports: [RouterTestingModule],
 			providers: [
 				{ provide: AbstractSelfService, useFactory: () => { return new MockSelfService(self); } },
-				{ provide: UserService, useValue: userServiceStub }
+				{ provide: AbstractUserService, useValue: userServiceStub }
 			]
 		});
 

@@ -10,6 +10,7 @@ import { WINDOW_PROVIDER } from './window.provider';
 
 import { AbstractGamePlayersService } from './service/abstract.game-players.service';
 import { AbstractSelfService } from './service/abstract.self.service';
+import { AbstractUserService } from './service/abstract.user.service';
 import { AddUserComponent } from './add-user/add-user.component';
 import { AppComponent } from './app.component';
 import { GameComponent } from './game/game.component';
@@ -24,6 +25,7 @@ import { UsersComponent } from './users/users.component';
 import { HomeComponent } from './home/home.component';
 import { SelfComponent } from './self/self.component';
 import { SelfService } from './service/self.service';
+import { UserService } from './service/user.service';
 
 @NgModule({
 	imports: [
@@ -51,7 +53,8 @@ import { SelfService } from './service/self.service';
 	providers: [
 		WINDOW_PROVIDER,
 		{ provide: AbstractGamePlayersService, useClass: GamePlayersService },
-		{ provide: AbstractSelfService, useClass: SelfService }
+		{ provide: AbstractSelfService, useClass: SelfService },
+		{ provide: AbstractUserService, useClass: UserService }
 	],
 	bootstrap: [AppComponent]
 })

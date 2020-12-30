@@ -3,9 +3,9 @@ import { v4 as uuid } from 'uuid';
 
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 
+import { AbstractUserService } from '../service/abstract.user.service';
 import { User } from '../user';
 import { UserComponent } from './user.component';
-import { UserService } from '../service/user.service';
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
@@ -29,7 +29,7 @@ describe('UserComponent', () => {
 	};
 
 	const setUp = (testUser: User) => {
-		const userServiceStub = jasmine.createSpyObj('UserService', ['getUser', 'updateUser']);
+		const userServiceStub = jasmine.createSpyObj('AbstractUserService', ['getUser', 'updateUser']);
 		userServiceStub.getUser.and.returnValue(of(testUser));
 
 		TestBed.configureTestingModule({
@@ -40,7 +40,7 @@ describe('UserComponent', () => {
 					paramMap: of(convertToParamMap({ id: testUser.id }))
 				}
 			},
-			{ provide: UserService, useValue: userServiceStub }]
+			{ provide: AbstractUserService, useValue: userServiceStub }]
 		});
 
 		fixture = TestBed.createComponent(UserComponent);

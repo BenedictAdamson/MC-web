@@ -1,15 +1,14 @@
 import { Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
 import { FormsModule } from '@angular/forms';
 
 import { ComponentFixture, TestBed, waitForAsync, fakeAsync, tick } from '@angular/core/testing';
 
+import { AbstractUserService } from '../service/abstract.user.service';
 import { AddUserComponent } from './add-user.component';
 import { MockUserService } from '../service/mock/mock.user.service';
 import { UserDetails } from '../user-details';
-import { UserService } from '../service/user.service';
 import { User } from '../user';
 
 describe('AddUserComponent', () => {
@@ -32,7 +31,7 @@ describe('AddUserComponent', () => {
 			imports: [FormsModule],
 			providers: [
 				{ provide: Router, useValue: routerSpy },
-				{ provide: UserService, useValue: userService }
+				{ provide: AbstractUserService, useValue: userService }
 			],
 			declarations: [AddUserComponent]
 		})
