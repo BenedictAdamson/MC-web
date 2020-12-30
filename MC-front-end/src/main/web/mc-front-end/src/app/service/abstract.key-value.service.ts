@@ -6,6 +6,6 @@ export abstract class AbstractKeyValueService<KEY, VALUE, SPECIFICATION> {
 
 	abstract get(id: KEY): Observable<VALUE | null>;
 
-	abstract add(specification: SPECIFICATION): Observable<VALUE | null> | undefined;
+	abstract add(specification: SPECIFICATION): Observable<VALUE> | undefined;
 
 }
