@@ -1,4 +1,4 @@
-import { Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -6,7 +6,6 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { AbstractSelfService } from '../service/abstract.self.service';
 import { MockSelfService } from '../service/mock/mock.self.service';
-import { SelfService } from '../service/self.service';
 import { User } from '../user';
 import { UsersComponent } from './users.component';
 import { UserService } from '../service/user.service';
@@ -28,14 +27,14 @@ describe('UsersComponent', () => {
 			declarations: [UsersComponent],
 			imports: [RouterTestingModule],
 			providers: [
-				{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } },
+				{ provide: AbstractSelfService, useFactory: () => { return new MockSelfService(self); } },
 				{ provide: UserService, useValue: userServiceStub }
 			]
 		});
 
 		fixture = TestBed.createComponent(UsersComponent);
 		component = fixture.componentInstance;
-		selfService = TestBed.get(SelfService);
+		selfService = TestBed.get(AbstractSelfService);
 		selfService.checkForCurrentAuthentication().subscribe();
 		fixture.detectChanges();
 	};

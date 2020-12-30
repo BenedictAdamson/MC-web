@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 
 import { Component } from '@angular/core';
 
-import { SelfService } from './service/self.service';
+import { AbstractSelfService } from './service/abstract.self.service';
 
 @Component({
 	selector: 'app-root',
@@ -13,13 +13,13 @@ export class AppComponent {
 
 	/**
 	 * {@linkplain SelfService.checkForCurrentAuthentication Checks the server for current authentication information}.
-     * That is, if the authentication system maintains sessions, and there is a current session,
-     * the constructor will resume the current session.
-     * This provides a better UX if the user refreshes their browser window,
-     * because they will not then have to login again.
+	 * That is, if the authentication system maintains sessions, and there is a current session,
+	 * the constructor will resume the current session.
+	 * This provides a better UX if the user refreshes their browser window,
+	 * because they will not then have to login again.
 	 */
 	constructor(
-		private readonly selfService: SelfService
+		private readonly selfService: AbstractSelfService
 	) {
 		this.checkForCurrentAuthentication();
 	}

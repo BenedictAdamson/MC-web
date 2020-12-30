@@ -1,4 +1,4 @@
-import { Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
@@ -10,7 +10,6 @@ import { GameService } from '../service/game.service';
 import { GameComponent } from '../game/game.component';
 import { GamesComponent } from './games.component';
 import { MockSelfService } from '../service/mock/mock.self.service';
-import { SelfService } from '../service/self.service';
 import { User } from '../user';
 
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
@@ -79,12 +78,12 @@ describe('GamesComponent', () => {
 				}
 			},
 			{ provide: GameService, useValue: gameServiceSpy },
-			{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }]
+			{ provide: AbstractSelfService, useFactory: () => { return new MockSelfService(self); } }]
 		});
 
 		fixture = TestBed.createComponent(GamesComponent);
 		component = fixture.componentInstance;
-		selfService = TestBed.get(SelfService);
+		selfService = TestBed.get(AbstractSelfService);
 		selfService.checkForCurrentAuthentication().subscribe();
 		fixture.detectChanges();
 	};
@@ -178,12 +177,12 @@ describe('GamesComponent', () => {
 			},
 			{ provide: GameService, useValue: gameServiceSpy },
 			{ provide: Router, useValue: routerSpy },
-			{ provide: SelfService, useFactory: () => { return new MockSelfService(USER_ADMIN); } }]
+			{ provide: AbstractSelfService, useFactory: () => { return new MockSelfService(USER_ADMIN); } }]
 		});
 
 		fixture = TestBed.createComponent(GamesComponent);
 		component = fixture.componentInstance;
-		selfService = TestBed.get(SelfService);
+		selfService = TestBed.get(AbstractSelfService);
 		selfService.checkForCurrentAuthentication().subscribe();
 		fixture.detectChanges();
 	};

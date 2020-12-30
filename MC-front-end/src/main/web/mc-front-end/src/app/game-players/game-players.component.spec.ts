@@ -12,7 +12,6 @@ import { GamePlayers } from '../game-players'
 import { GamePlayersComponent } from './game-players.component';
 import { MockGamePlayersService } from '../service/mock/mock.game-players.service'
 import { MockSelfService } from '../service/mock/mock.self.service';
-import { SelfService } from '../service/self.service';
 import { User } from '../user';
 
 
@@ -93,12 +92,12 @@ describe('GamePlayersComponent', () => {
 				}
 			},
 			{ provide: AbstractGamePlayersService, useValue: gamePlayersServiceSpy },
-			{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }]
+			{ provide: AbstractSelfService, useFactory: () => { return new MockSelfService(self); } }]
 		});
 
 		fixture = TestBed.createComponent(GamePlayersComponent);
 		component = fixture.componentInstance;
-		selfService = TestBed.get(SelfService);
+		selfService = TestBed.get(AbstractSelfService);
 		selfService.checkForCurrentAuthentication().subscribe();
 		fixture.detectChanges();
 	};

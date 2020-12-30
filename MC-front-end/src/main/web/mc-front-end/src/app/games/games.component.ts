@@ -4,10 +4,10 @@ import { filter, first, flatMap, map, tap } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { AbstractSelfService } from '../service/abstract.self.service';
 import { GameComponent } from '../game/game.component';
 import { GameService } from '../service/game.service';
 import { ScenarioComponent } from '../scenario/scenario.component';
-import { SelfService } from '../service/self.service';
 
 @Component({
 	selector: 'app-scenario',
@@ -38,7 +38,7 @@ export class GamesComponent implements OnInit {
 	constructor(
 		private route: ActivatedRoute,
 		private readonly router: Router,
-		private selfService: SelfService,
+		private selfService: AbstractSelfService,
 		private gameService: GameService
 	) { }
 

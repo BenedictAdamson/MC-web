@@ -5,9 +5,9 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { AbstractGamePlayersService } from '../service/abstract.game-players.service';
+import { AbstractSelfService } from '../service/abstract.self.service';
 import { GameIdentifier } from '../game-identifier';
 import { GamePlayers } from '../game-players';
-import { SelfService } from '../service/self.service';
 
 @Component({
 	selector: 'app-game',
@@ -56,7 +56,7 @@ export class GamePlayersComponent implements OnInit {
 	constructor(
 		private route: ActivatedRoute,
 		private gamePlayersService: AbstractGamePlayersService,
-		private selfService: SelfService
+		private selfService: AbstractSelfService
 	) {
 	}
 

@@ -2,18 +2,17 @@ import { v4 as uuid } from 'uuid';
 
 import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 
+import { AbstractSelfService } from './service/abstract.self.service';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { MockSelfService } from './service/mock/mock.self.service';
 import { SelfComponent } from './self/self.component';
-import { SelfService } from './service/self.service';
 import { User } from './user';
 
 
 describe('AppComponent', () => {
-	let selfService: MockSelfService;
+	let selfService: AbstractSelfService;
 
 	const setUp = function(authorities: string[]) {
 		const self: User = { id: uuid(), username: 'Benedict', password: null, authorities: authorities };
@@ -22,12 +21,12 @@ describe('AppComponent', () => {
 			declarations: [
 				AppComponent, SelfComponent
 			],
-			imports: [HttpClientTestingModule,
+			imports: [
 				RouterTestingModule.withRoutes(
 					[{ path: '', component: HomeComponent }]
 				)
 			],
-			providers: [{ provide: SelfService, useValue: selfService }]
+			providers: [{ provide: AbstractSelfService, useValue: selfService }]
 		}).compileComponents();
 	};
 

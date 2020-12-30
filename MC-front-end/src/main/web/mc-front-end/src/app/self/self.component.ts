@@ -3,7 +3,7 @@ import { map } from 'rxjs/operators';
 
 import { Component, OnInit } from '@angular/core';
 
-import { SelfService } from '../service/self.service';
+import { AbstractSelfService } from '../service/abstract.self.service';
 
 @Component({
 	selector: 'app-self',
@@ -13,7 +13,7 @@ import { SelfService } from '../service/self.service';
 export class SelfComponent implements OnInit {
 
 	constructor(
-		private readonly service: SelfService) {
+		private readonly service: AbstractSelfService) {
 	}
 
 	ngOnInit(): void {
