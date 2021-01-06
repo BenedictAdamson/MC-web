@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { AbstractSelfService } from '../service/abstract.self.service';
-import { AbstractUserService } from '../service/abstract.user.service';
+import { UserService } from '../service/user.service';
 import { User } from '../user';
 
 @Component({
@@ -16,11 +16,11 @@ export class UsersComponent implements OnInit {
 
 	constructor(
 		private selfService: AbstractSelfService,
-		private userService: AbstractUserService
+		private userService: UserService
 	) { }
 
 	ngOnInit() {
-		this.userService.getUsers().subscribe(users => this.users = users);
+		this.userService.getAll().subscribe(users => this.users = users);
 	}
 
 	/**

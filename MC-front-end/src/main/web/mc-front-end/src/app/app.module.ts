@@ -10,7 +10,7 @@ import { WINDOW_PROVIDER } from './window.provider';
 
 import { AbstractGamePlayersService } from './service/abstract.game-players.service';
 import { AbstractSelfService } from './service/abstract.self.service';
-import { AbstractUserService } from './service/abstract.user.service';
+import { AbstractUserBackEndService } from './service/abstract.user.back-end.service';
 import { AddUserComponent } from './add-user/add-user.component';
 import { AppComponent } from './app.component';
 import { GameComponent } from './game/game.component';
@@ -23,6 +23,7 @@ import { ScenariosComponent } from './scenarios/scenarios.component';
 import { UserComponent } from './user/user.component';
 import { UsersComponent } from './users/users.component';
 import { HomeComponent } from './home/home.component';
+import { HttpUserBackEndService } from './service/http.user.back-end.service';
 import { SelfComponent } from './self/self.component';
 import { SelfService } from './service/self.service';
 import { UserService } from './service/user.service';
@@ -54,7 +55,7 @@ import { UserService } from './service/user.service';
 		WINDOW_PROVIDER,
 		{ provide: AbstractGamePlayersService, useClass: GamePlayersService },
 		{ provide: AbstractSelfService, useClass: SelfService },
-		{ provide: AbstractUserService, useClass: UserService }
+		{ provide: AbstractUserBackEndService, useClass: HttpUserBackEndService }
 	],
 	bootstrap: [AppComponent]
 })

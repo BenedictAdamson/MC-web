@@ -1,14 +1,16 @@
-import { of } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { AbstractUserBackEndService } from '../service/abstract.user.back-end.service';
 import { AbstractSelfService } from '../service/abstract.self.service';
-import { AbstractUserService } from '../service/abstract.user.service';
 import { MockSelfService } from '../service/mock/mock.self.service';
 import { User } from '../user';
 import { UsersComponent } from './users.component';
+import { UserService } from '../service/user.service';
+
+import { MockUserBackEndService } from '../service/mock/mock.user.back-end.service';
 
 
 describe('UsersComponent', () => {
@@ -20,15 +22,14 @@ describe('UsersComponent', () => {
 	const USER_NORMAL: User = { id: uuid(), username: 'Benedict', password: null, authorities: [] };
 
 	const setUp = (self: User, testUsers: User[]) => {
-		const userServiceStub = jasmine.createSpyObj('UserService', ['getUsers']);
-		userServiceStub.getUsers.and.returnValue(of(testUsers));
+		const userServiceStub = new MockUserBackEndService(testUsers);
 
 		TestBed.configureTestingModule({
 			declarations: [UsersComponent],
 			imports: [RouterTestingModule],
 			providers: [
 				{ provide: AbstractSelfService, useFactory: () => { return new MockSelfService(self); } },
-				{ provide: AbstractUserService, useValue: userServiceStub }
+				{ provide: AbstractUserBackEndService, useValue: userServiceStub }
 			]
 		});
 
@@ -78,7 +79,7 @@ describe('UsersComponent', () => {
 		setUp(self, testUsers);
 
 		assertInvariants();
-		expect(component.users).toBe(testUsers);
+		expect(component.users).toEqual(testUsers);
 	};
 
 	it('can create [1]', () => {

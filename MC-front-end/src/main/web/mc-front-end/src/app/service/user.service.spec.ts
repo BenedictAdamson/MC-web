@@ -4,6 +4,8 @@ import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 import { HttpClient } from '@angular/common/http';
 
+import { AbstractUserBackEndService } from './abstract.user.back-end.service';
+import { HttpUserBackEndService, getApiUserPath, apiUsersPath } from './http.user.back-end.service';
 import { UserDetails } from '../user-details';
 import { UserService } from './user.service';
 import { User } from '../user';
@@ -25,41 +27,40 @@ describe('UserService', () => {
 	const USER_A: User = new User(USER_ID_A, USER_DETAILS_A);
 	const USER_B: User = new User(USER_ID_B, USER_DETAILS_B);
 
-	beforeEach(() => {
+	const setUp = function(): UserService {
 		TestBed.configureTestingModule({
 			imports: [HttpClientTestingModule]
 		});
 
-		/* Inject for each test:
-		 * HTTP requests will be handled by the mock back-end.
-		  */
-		TestBed.get(HttpClient);
+		const httpClient: HttpClient = TestBed.get(HttpClient);
 		httpTestingController = TestBed.get(HttpTestingController);
-	});
+		const backEnd: AbstractUserBackEndService = new HttpUserBackEndService(httpClient);
+		return new UserService(backEnd);
+	};
 
 	it('should be created', () => {
-		const service: UserService = TestBed.get(UserService);
+		const service: UserService = setUp();
 		expect(service).toBeTruthy();
 	});
 
-	it('can get users', () => {
+	it('can get all users', () => {
 		const testUsers: User[] = [USER_A, USER_B];
-		const service: UserService = TestBed.get(UserService);
+		const service: UserService = setUp();
 
-		service.getUsers().subscribe(users => expect(users).toEqual(testUsers));
+		service.getAll().subscribe(users => expect(users).toEqual(testUsers));
 
-		const request = httpTestingController.expectOne(UserService.apiUsersPath);
+		const request = httpTestingController.expectOne(apiUsersPath);
 		expect(request.request.method).toEqual('GET');
 		request.flush(testUsers);
 		httpTestingController.verify();
 	});
 
-	const canGetUser = function(testUser: User) {
+	const testGet = function(testUser: User) {
 		const id: string = testUser.id;
-		const expectedPath: string = UserService.getApiUserPath(id);
-		const service: UserService = TestBed.get(UserService);
+		const expectedPath: string = getApiUserPath(id);
+		const service: UserService = setUp();
 
-		service.getUser(id).subscribe(user => expect(user).toEqual(testUser));
+		service.get(id).subscribe(user => expect(user).toEqual(testUser));
 
 		const request = httpTestingController.expectOne(expectedPath);
 		expect(request.request.method).toEqual('GET');
@@ -67,39 +68,39 @@ describe('UserService', () => {
 		httpTestingController.verify();
 	};
 	it('can get [A]', () => {
-		canGetUser(USER_A);
+		testGet(USER_A);
 	});
 	it('can get [B]', () => {
-		canGetUser(USER_B);
+		testGet(USER_B);
 	});
 
-	const canAddUser = function(user: User) {
+	const testAdd = function(user: User) {
 		const userDetails: UserDetails = new UserDetails(user);
-		const service: UserService = TestBed.get(UserService);
+		const service: UserService = setUp();
 
 		service.add(userDetails).subscribe(result => expect(result).withContext('returned user').toEqual(user));
 
-		const request = httpTestingController.expectOne(UserService.apiUsersPath);
+		const request = httpTestingController.expectOne(apiUsersPath);
 		expect(request.request.method).toEqual('POST');
 		request.flush(user);
 		httpTestingController.verify();
 	};
 	it('can add [A]', () => {
-		canAddUser(USER_A);
+		testAdd(USER_A);
 	});
 	it('can add [B]', () => {
-		canAddUser(USER_B);
+		testAdd(USER_B);
 	});
 
 
 
 	const testGetUserAfterUpdateUser = function(user: User) {
 		const id: string = user.id;
-		const expectedPath: string = UserService.getApiUserPath(id);
-		const service: UserService = TestBed.get(UserService);
+		const expectedPath: string = getApiUserPath(id);
+		const service: UserService = setUp();
 
-		service.updateUser(id);
-		service.getUser(id).subscribe(u => expect(u).toEqual(user));
+		service.update(id);
+		service.get(id).subscribe(u => expect(u).toEqual(user));
 
 		// Only one GET expected because should use the cached value.
 		const request = httpTestingController.expectOne(expectedPath);
@@ -120,11 +121,11 @@ describe('UserService', () => {
 
 	const testUpdateUserAfterGetUser = function(user: User) {
 		const id: string = user.id;
-		const expectedPath: string = UserService.getApiUserPath(id);
-		const service: UserService = TestBed.get(UserService);
+		const expectedPath: string = getApiUserPath(id);
+		const service: UserService = setUp();
 
-		service.getUser(id).subscribe(u => expect(u).toEqual(user));
-		service.updateUser(id);
+		service.get(id).subscribe(u => expect(u).toEqual(user));
+		service.update(id);
 
 		const requests: TestRequest[] = httpTestingController.match(expectedPath);
 		expect(requests.length).withContext('number of requests').toEqual(2);
@@ -159,11 +160,11 @@ describe('UserService', () => {
 	) {
 		const user1: User = { id: id, username: username1, password: password1, authorities: authorities1 };
 		const user2: User = { id: id, username: username2, password: password2, authorities: authorities2 };
-		const expectedPath: string = UserService.getApiUserPath(id);
-		const service: UserService = TestBed.get(UserService);
+		const expectedPath: string = getApiUserPath(id);
+		const service: UserService = setUp();
 		var n: number = 0;
 
-		service.getUser(id).subscribe(
+		service.get(id).subscribe(
 			user => {
 				expect(0 != n || user1 == user).withContext('provides the first value').toBeTrue();
 				expect(1 != n || user2 == user).withContext('provides the second value').toBeTrue();
@@ -171,7 +172,7 @@ describe('UserService', () => {
 				if (n == 2) done();
 			}
 		);
-		service.updateUser(id);
+		service.update(id);
 
 		const requests: TestRequest[] = httpTestingController.match(expectedPath);
 		expect(requests.length).withContext('number of requests').toEqual(2);
@@ -198,18 +199,18 @@ describe('UserService', () => {
 
 	const testGetUserForUnchangedUpdate = function(user: User) {
 		const id: string = user.id;
-		const expectedPath: string = UserService.getApiUserPath(id);
-		const service: UserService = TestBed.get(UserService);
+		const expectedPath: string = getApiUserPath(id);
+		const service: UserService = setUp();
 		var n: number = 0;
 
-		service.getUser(id).subscribe(
+		service.get(id).subscribe(
 			u => {
 				expect(user == u).withContext('provides the expected value').toBeTrue();
 				n++;
 				expect(n).withContext('number emitted').toEqual(1);
 			}
 		);
-		service.updateUser(id);
+		service.update(id);
 
 		const requests: TestRequest[] = httpTestingController.match(expectedPath);
 		expect(requests.length).withContext('number of requests').toEqual(2);
@@ -236,14 +237,14 @@ describe('UserService', () => {
 		fakeAsync(() => {
 			const id: string = user.id;
 			const userDetails: UserDetails = new UserDetails(user);
-			const service: UserService = TestBed.get(UserService);
+			const service: UserService = setUp();
 
 			service.add(userDetails).subscribe(result => expect(result).withContext('returned user').toEqual(user));
 			tick();
-			service.getUser(id).subscribe(u => expect(u).toEqual(user));
+			service.get(id).subscribe(u => expect(u).toEqual(user));
 
 			// No GET expected because should use a cached value.
-			const request = httpTestingController.expectOne(UserService.apiUsersPath);
+			const request = httpTestingController.expectOne(apiUsersPath);
 			expect(request.request.method).toEqual('POST');
 			request.flush(user);
 			httpTestingController.verify();

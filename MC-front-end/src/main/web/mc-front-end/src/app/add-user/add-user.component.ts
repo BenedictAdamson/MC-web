@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { AbstractUserService } from '../service/abstract.user.service';
+import { UserService } from '../service/user.service';
 import { UserDetails } from '../user-details';
+import { User } from '../user';
 
 @Component({
 	selector: 'app-add-user',
@@ -13,7 +14,7 @@ export class AddUserComponent implements OnInit {
 
 	constructor(
 		private readonly router: Router,
-		private readonly service: AbstractUserService
+		private readonly service: UserService
 	) { }
 
 	ngOnInit(): void {
@@ -23,24 +24,25 @@ export class AddUserComponent implements OnInit {
 	userDetails: UserDetails = { username: "", password: "", authorities: [] };
 
 	/**
-	 * Whether this user have been explicitly rejected by the server.
-     * This will be false if the user have not *yet* been submitted to the server.
+	 * Whether this user has been explicitly rejected by the server.
+	 * This will be false if the user have not *yet* been submitted to the server.
 	 */
 	rejected: boolean = false;
 
 	/**
-     * @description
-     * Attempts to add a user using the #username and #password,
-     * through the UserService associated with this component.
-     */
+	 * @description
+	 * Attempts to add a user using the #username and #password,
+	 * through the UserService associated with this component.
+	 */
 	add(): void {
-		this.service.add(this.userDetails).subscribe(
-			user => {
-				this.rejected = (user == null);
-				if (!this.rejected) {
-					this.router.navigateByUrl('/user')
-				}
-			}
-		);
+		this.service.add(this.userDetails).subscribe({
+			next: (user: User) => {
+				this.rejected = false;
+				this.router.navigateByUrl('/user')
+			},
+			error: () => {
+				this.rejected = true;
+			},
+		});
 	}
 }

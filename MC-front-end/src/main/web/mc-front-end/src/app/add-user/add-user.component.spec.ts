@@ -3,13 +3,15 @@ import { v4 as uuid } from 'uuid';
 
 import { FormsModule } from '@angular/forms';
 
-import { ComponentFixture, TestBed, waitForAsync, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
-import { AbstractUserService } from '../service/abstract.user.service';
+import { AbstractUserBackEndService } from '../service/abstract.user.back-end.service';
+import { UserService } from '../service/user.service';
 import { AddUserComponent } from './add-user.component';
-import { MockUserService } from '../service/mock/mock.user.service';
 import { UserDetails } from '../user-details';
 import { User } from '../user';
+
+import { MockUserBackEndService } from '../service/mock/mock.user.back-end.service';
 
 describe('AddUserComponent', () => {
 	const USER_DETAILS_A: UserDetails = { username: 'Administrator', password: 'letmein', authorities: [] };
@@ -18,20 +20,20 @@ describe('AddUserComponent', () => {
 	const USER_B: User = new User(uuid(), USER_DETAILS_B);
 
 	let routerSpy: any;
-	let userService: MockUserService;
+	let userBackEndService: MockUserBackEndService;
 	let fixture: ComponentFixture<AddUserComponent>;
 	let component: AddUserComponent;
 
 	const setUp = function(users0: User[]) {
+		userBackEndService = new MockUserBackEndService(users0);
 		routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
 		routerSpy.navigateByUrl.and.returnValue(null);
 
-		userService = new MockUserService(users0);
 		TestBed.configureTestingModule({
 			imports: [FormsModule],
 			providers: [
 				{ provide: Router, useValue: routerSpy },
-				{ provide: AbstractUserService, useValue: userService }
+				{ provide: AbstractUserBackEndService, useValue: userBackEndService }
 			],
 			declarations: [AddUserComponent]
 		})
@@ -97,14 +99,12 @@ describe('AddUserComponent', () => {
 		expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(1);
 		expect(routerSpy.navigateByUrl.calls.argsFor(0)).withContext('router.navigateByUrl args').toEqual(['/user']);
 
-		userService.getUsers().subscribe(users => {
-			expect(users.length).withContext('users length').toEqual(1);
-			const addedUser: User = users[0];
-			expect(addedUser.username).withContext('added username').toEqual(userDetails.username);
-			expect(addedUser.password).withContext('added password').toEqual(userDetails.password);
-			expect(addedUser.authorities).withContext('added authorities').toEqual([]);
-		});
-		tick();
+		const users: User[] = userBackEndService.users;
+		expect(users.length).withContext('users length').toEqual(1);
+		const addedUser: User = users[0];
+		expect(addedUser.username).withContext('added username').toEqual(userDetails.username);
+		expect(addedUser.password).withContext('added password').toEqual(userDetails.password);
+		expect(addedUser.authorities).withContext('added authorities').toEqual([]);
 	};
 
 	it('should handle addition success [A]', fakeAsync(() => {

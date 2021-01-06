@@ -4,8 +4,8 @@ import { distinctUntilChanged, filter, first, flatMap, map, tap } from 'rxjs/ope
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { AbstractUserService } from '../service/abstract.user.service';
 import { User } from '../user';
+import { UserService } from '../service/user.service';
 
 @Component({
 	selector: 'app-user',
@@ -13,6 +13,12 @@ import { User } from '../user';
 	styleUrls: ['./user.component.css']
 })
 export class UserComponent implements OnInit {
+
+	constructor(
+		private route: ActivatedRoute,
+		private userService: UserService
+	) { }
+
 
 	get id$(): Observable<string> {
 		return this.route.paramMap.pipe(
@@ -25,7 +31,7 @@ export class UserComponent implements OnInit {
 
 	get user$(): Observable<User> {
 		return this.id$.pipe(
-			flatMap(id => this.userService.getUser(id)),
+			flatMap(id => this.userService.get(id)),
 			filter(user => !!user),
 			map((user: User | null) => user as User)
 		)
@@ -43,15 +49,10 @@ export class UserComponent implements OnInit {
 		);
 	}
 
-	constructor(
-		private route: ActivatedRoute,
-		private userService: AbstractUserService
-	) { }
-
 	private update(): void {
 		this.id$.pipe(
 			first(),// do the operation only once
-			tap(id => this.userService.updateUser(id))
+			tap(id => this.userService.update(id))
 		).subscribe();
 	}
 
