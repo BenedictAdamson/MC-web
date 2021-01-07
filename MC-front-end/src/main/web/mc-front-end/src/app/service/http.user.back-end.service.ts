@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs';
 
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 
 import { AbstractUserBackEndService } from './abstract.user.back-end.service';
 import { HttpKeyValueService } from './http.key-value.service';
@@ -37,7 +38,9 @@ class Delegate extends HttpKeyValueService<string, User, UserDetails> {
 
 }// class
 
-
+@Injectable({
+	providedIn: 'root'
+})
 export class HttpUserBackEndService extends AbstractUserBackEndService {
 
 	private delegate: Delegate;

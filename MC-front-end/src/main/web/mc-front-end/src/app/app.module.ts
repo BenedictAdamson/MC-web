@@ -26,7 +26,6 @@ import { HomeComponent } from './home/home.component';
 import { HttpUserBackEndService } from './service/http.user.back-end.service';
 import { SelfComponent } from './self/self.component';
 import { SelfService } from './service/self.service';
-import { UserService } from './service/user.service';
 
 @NgModule({
 	imports: [
