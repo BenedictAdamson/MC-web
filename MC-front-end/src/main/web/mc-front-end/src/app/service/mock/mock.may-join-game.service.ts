@@ -3,7 +3,7 @@ import { Observable, of } from 'rxjs';
 import { AbstractMayJoinGameService } from '../abstract.may-join-game.service'
 import { GameIdentifier } from '../../game-identifier'
 
-export class MockGamePlayersService extends AbstractMayJoinGameService {
+export class MockMayJoinGameService extends AbstractMayJoinGameService {
 
 	constructor(
 		private mayJoinServer: boolean
