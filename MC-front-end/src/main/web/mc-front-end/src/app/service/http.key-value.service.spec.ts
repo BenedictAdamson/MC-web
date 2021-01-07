@@ -24,26 +24,35 @@ class Value {
 }// class
 
 
-class TestHttpKeyValueService extends HttpKeyValueService<Id, Value, Data> {
+class TestHttpKeyValueService extends HttpKeyValueService<Id, Value, Data, Data> {
 
 	constructor(
 		http: HttpClient,
 		allUrl: string | undefined,
-		addUrl: string | undefined
+		private addUrl: string | undefined
 	) {
-		super(http, allUrl, addUrl);
+		super(http, allUrl);
 	}
 
 
 	getUrl(id: Id): string {
 		return id.first + '/' + id.second;
 	}
+
+	protected getAddUrl(specification: Data): string | undefined {
+		return this.addUrl;
+	}
+
+	protected getAddPayload(specification: Data): Data {
+		return specification;
+	}
+
 }
 
 
 describe('HttpKeyValueService', () => {
 	let httpTestingController: HttpTestingController;
-	let service: HttpKeyValueService<Id, Value, Data>;
+	let service: HttpKeyValueService<Id, Value, Data, Data>;
 
 	const ID_A: Id = { first: 'A', second: '1' };
 	const ID_B: Id = { first: 'B', second: '2' };

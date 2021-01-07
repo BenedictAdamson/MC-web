@@ -6,6 +6,8 @@ import { HttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 
+import { AbstractGameBackEndService } from './abstract.game.back-end.service';
+import { HttpGameBackEndService, getApiGamePath } from './http.game.back-end.service';
 import { Game } from '../game'
 import { GameIdentifier } from '../game-identifier'
 import { GameService } from './game.service';
@@ -26,28 +28,27 @@ describe('GameService', () => {
 	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A };
 	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B };
 
-	beforeEach(() => {
+	const setUp = function(): GameService {
 		TestBed.configureTestingModule({
 			imports: [HttpClientTestingModule]
 		});
 
-        /* Inject for each test:
-         * HTTP requests will be handled by the mock back-end.
-          */
-		TestBed.get(HttpClient);
+		const httpClient: HttpClient = TestBed.get(HttpClient);
 		httpTestingController = TestBed.get(HttpTestingController);
-	});
+		const backEnd: AbstractGameBackEndService = new HttpGameBackEndService(httpClient);
+		return new GameService(backEnd);
+	};
 
 	it('should be created', () => {
-		const service: GameService = TestBed.get(GameService);
+		const service: GameService = setUp();
 		expect(service).toBeTruthy();
 	});
 
 
 	const testGetGame = function(game: Game) {
-		const service: GameService = TestBed.get(GameService);
+		const service: GameService = setUp();
 
-		service.getGame(game.identifier).subscribe(g => expect(g).toEqual(game));
+		service.get(game.identifier).subscribe(g => expect(g).toEqual(game));
 
 		const request = httpTestingController.expectOne(GameService.getApiGamePath(game.identifier));
 		expect(request.request.method).toEqual('GET');
@@ -65,7 +66,7 @@ describe('GameService', () => {
 
 	const testCreateGame = function(createdGame: Game) {
 		const scenario: string = createdGame.identifier.scenario;
-		const service: GameService = TestBed.get(GameService);
+		const service: GameService = setUp();
 
 		const result: Observable<Game> = service.createGame(scenario);
 

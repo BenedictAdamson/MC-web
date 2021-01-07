@@ -5,10 +5,13 @@ import { ActivatedRoute, convertToParamMap } from '@angular/router';
 
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
+import { AbstractGameBackEndService } from '../service/abstract.game.back-end.service';
 import { Game } from '../game'
 import { GameIdentifier } from '../game-identifier'
 import { GameService } from '../service/game.service';
 import { GameComponent } from './game.component';
+
+import { MockGameBackEndService } from '../service/mock/mock.game.back-end.service';
 
 
 describe('GameComponent', () => {
@@ -24,10 +27,8 @@ describe('GameComponent', () => {
 	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A };
 	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B };
 
-
 	const setUpForNgInit = function(game: Game) {
-		const gameServiceStub = jasmine.createSpyObj('GameService', ['getGame']);
-		gameServiceStub.getGame.and.returnValue(of(game));
+		const gameServiceStub: AbstractGameBackEndService = new MockGameBackEndService([game]);
 
 		const identifier: GameIdentifier = game.identifier;
 		TestBed.configureTestingModule({
@@ -44,7 +45,7 @@ describe('GameComponent', () => {
 					}
 				}
 			},
-			{ provide: GameService, useValue: gameServiceStub }]
+			{ provide: AbstractGameBackEndService, useValue: gameServiceStub }]
 		});
 
 		fixture = TestBed.createComponent(GameComponent);

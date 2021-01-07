@@ -4,13 +4,13 @@ import { HttpClient } from '@angular/common/http';
 
 import { AbstractKeyValueService } from './abstract.key-value.service'
 
-export abstract class HttpKeyValueService<KEY, VALUE, SPECIFICATION> extends AbstractKeyValueService<KEY, VALUE, SPECIFICATION> {
+export abstract class HttpKeyValueService<KEY, VALUE, SPECIFICATION, ADD_PAYLOAD>
+	extends AbstractKeyValueService<KEY, VALUE, SPECIFICATION> {
 
 
 	constructor(
 		private http: HttpClient,
-		public allUrl: string | undefined,
-		public addUrl: string | undefined
+		public allUrl: string | undefined
 	) {
 		super();
 	}
@@ -28,11 +28,12 @@ export abstract class HttpKeyValueService<KEY, VALUE, SPECIFICATION> extends Abs
 	}
 
 	add(specification: SPECIFICATION): Observable<VALUE> | undefined {
+		const url: string | undefined = this.getAddUrl(specification);
 		/* The server probably replies to the POST with a 302 (Found) redirect to the resource of the created value.
 		 * The HttpClient or browser itself handles that redirect for us.
 		 */
-		if (this.addUrl) {
-			return this.http.post<VALUE>(this.addUrl as string, specification);
+		if (url) {
+			return this.http.post<VALUE>(url as string, this.getAddPayload(specification));
 		} else {
 			return undefined;
 		}
@@ -40,4 +41,9 @@ export abstract class HttpKeyValueService<KEY, VALUE, SPECIFICATION> extends Abs
 
 
 	abstract getUrl(id: KEY): string;
+
+	protected abstract getAddUrl(specification: SPECIFICATION): string | undefined;
+
+	protected abstract getAddPayload(specification: SPECIFICATION): ADD_PAYLOAD;
+
 }

@@ -1,9 +1,9 @@
-import { Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 
+import { AbstractGameBackEndService } from './abstract.game.back-end.service';
+import { CachingKeyValueService } from './caching.key-value.service';
 import { Game } from '../game'
 import { GameIdentifier } from '../game-identifier'
 
@@ -11,10 +11,7 @@ import { GameIdentifier } from '../game-identifier'
 @Injectable({
 	providedIn: 'root'
 })
-export class GameService {
-
-	constructor(
-		private http: HttpClient) { }
+export class GameService extends CachingKeyValueService<GameIdentifier, Game, string> {
 
 	static getApiGamesPath(scenario: string): string {
 		return '/api/scenario/' + scenario + '/game/';
@@ -24,16 +21,12 @@ export class GameService {
 		return GameService.getApiGamesPath(id.scenario) + id.created;
 	}
 
-	/**
-	 * Get the game that has a given ID.
-	 */
-	getGame(id: GameIdentifier): Observable<Game | null> {
-		return this.http.get<Game>(GameService.getApiGamePath(id))
-			.pipe(
-				catchError(this.handleError<Game | null>('getGame', null))
-			);
+	constructor(
+		backEnd: AbstractGameBackEndService
+	) {
+		super(backEnd);
 	}
-
+	
 	/**
 	 * Create a new game for a given scenario.
 	 *
@@ -48,24 +41,18 @@ export class GameService {
 		/* The server actually replies to the POST with a 302 (Found) redirect to the resource of the created game.
 		 * The HttpClient or browser itself handles that redirect for us.
 		 */
-		return this.http.post<Game>(GameService.getApiGamesPath(scenario), "");
+		return this.add(scenario) as Observable<Game>;
 	}
 
+	getAll(): undefined {
+		return undefined;
+	}
 
-	/**
-	 * Handle Http operation that failed.
-	 * Let the app continue.
-	 * @param operation - name of the operation that failed
-	 * @param result - optional value to return as the observable result
-	 */
-	private handleError<T>(operation = 'operation', result?: T) {
-		return (error: any): Observable<T> => {
+	protected createKeyString(id: GameIdentifier): string {
+		return id.scenario + '/' + id.created;
+	}
 
-			// TODO: send the error to remote logging infrastructure
-			console.error(operation + error); // log to console instead
-
-			// Let the app keep running by returning an empty result.
-			return of(result as T);
-		};
+	protected getKey(value: Game): GameIdentifier {
+		return value.identifier;
 	}
 }

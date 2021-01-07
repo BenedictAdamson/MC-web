@@ -10,8 +10,10 @@ import { WINDOW_PROVIDER } from './window.provider';
 
 import { AbstractGamePlayersService } from './service/abstract.game-players.service';
 import { AbstractSelfService } from './service/abstract.self.service';
+import { AbstractGameBackEndService } from './service/abstract.game.back-end.service';
 import { AbstractUserBackEndService } from './service/abstract.user.back-end.service';
 import { GamePlayersService } from './service/game-players.service';
+import { HttpGameBackEndService } from './service/http.game.back-end.service';
 import { HttpUserBackEndService } from './service/http.user.back-end.service';
 import { SelfService } from './service/self.service';
 
@@ -56,6 +58,7 @@ import { SelfComponent } from './self/self.component';
 		WINDOW_PROVIDER,
 		{ provide: AbstractGamePlayersService, useClass: GamePlayersService },
 		{ provide: AbstractSelfService, useClass: SelfService },
+		{ provide: AbstractGameBackEndService, useClass: HttpGameBackEndService },
 		{ provide: AbstractUserBackEndService, useClass: HttpUserBackEndService }
 	],
 	bootstrap: [AppComponent]

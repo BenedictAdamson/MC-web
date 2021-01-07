@@ -46,7 +46,7 @@ export class GameComponent implements OnInit {
 	}
 
 	private subscribeToGame(): void {
-		this.gameService.getGame(this.identifier).pipe(
+		this.gameService.get(this.identifier).pipe(
 			filter(game => !!game),
 			map((game: Game | null) => game as Game)
 		).subscribe(game => this.game = game);

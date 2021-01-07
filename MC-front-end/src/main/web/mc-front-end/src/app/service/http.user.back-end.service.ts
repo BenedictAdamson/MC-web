@@ -16,12 +16,12 @@ export function getApiUserPath(id: string): string {
 }
 
 
-class Delegate extends HttpKeyValueService<string, User, UserDetails> {
+class Delegate extends HttpKeyValueService<string, User, UserDetails, UserDetails> {
 
 	constructor(
 		http: HttpClient
 	) {
-		super(http, apiUsersPath, apiUsersPath);
+		super(http, apiUsersPath);
 	}
 
 	getUrl(id: string): string {
@@ -36,7 +36,17 @@ class Delegate extends HttpKeyValueService<string, User, UserDetails> {
 		return super.add(specification) as Observable<User>;// is not undefined
 	}
 
+	protected getAddUrl(_specification: UserDetails): string {
+		return apiUsersPath;
+	}
+
+	protected getAddPayload(specification: UserDetails): UserDetails {
+		return specification;
+	}
+
+
 }// class
+
 
 @Injectable({
 	providedIn: 'root'
