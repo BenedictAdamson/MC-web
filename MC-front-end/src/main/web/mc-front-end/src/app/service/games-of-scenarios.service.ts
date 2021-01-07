@@ -4,14 +4,13 @@ import { catchError, distinctUntilChanged } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Game } from '../game'
 import { GameIdentifier } from '../game-identifier'
 
 
 @Injectable({
 	providedIn: 'root'
 })
-export class GameService {
+export class GamesOfScenarioService {
 
 	private gamesOfScenarios: Map<string, ReplaySubject<string[]>> = new Map();
 
@@ -23,7 +22,7 @@ export class GameService {
 	}
 
 	static getApiGamePath(id: GameIdentifier): string {
-		return GameService.getApiGamesPath(id.scenario) + id.created;
+		return GamesOfScenarioService.getApiGamesPath(id.scenario) + id.created;
 	}
 
     /**
@@ -62,7 +61,7 @@ export class GameService {
 	}
 
 	private fetchGamesOfScenario(scenario: string): Observable<string[]> {
-		return this.http.get<string[]>(GameService.getApiGamesPath(scenario))
+		return this.http.get<string[]>(GamesOfScenarioService.getApiGamesPath(scenario))
 			.pipe(
 				catchError(this.handleError<string[]>('fetchGamesOfScenario', []))
 			);
@@ -82,33 +81,6 @@ export class GameService {
 			rs = this.createCacheForGamesOfScenario(scenario);
 		}
 		this.updateCachedGamesOfScenario(scenario, rs);
-	}
-
-    /**
-     * Get the game that has a given ID.
-     */
-	getGame(id: GameIdentifier): Observable<Game | null> {
-		return this.http.get<Game>(GameService.getApiGamePath(id))
-			.pipe(
-				catchError(this.handleError<Game | null>('getGame', null))
-			);
-	}
-
-    /**
-     * Create a new game for a given scenario.
-     *
-     * @param scenario
-     * The unique ID of the scenario for which to create a gave.
-     * @returns
-     * An [[Observable]] that provides the created game.
-     * The [[GameIdentifier.scenario]] of the [[Game.identifier]] of the created game
-     * is equal to the given {@code scenario}.
-     */
-	createGame(scenario: string): Observable<Game> {
-		/* The server actually replies to the POST with a 302 (Found) redirect to the resource of the created game.
-		 * The HttpClient or browser itself handles that redirect for us.
-	     */
-		return this.http.post<Game>(GameService.getApiGamesPath(scenario), "");
 	}
 
 
