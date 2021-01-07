@@ -59,9 +59,7 @@ describe('GamesComponent', () => {
 	};
 
 	const setUpForNgInit = function(self: User, scenario: string, gamesOfScenario: string[]) {
-		gameServiceSpy = jasmine.createSpyObj('GameService', ['getGamesOfScenario', 'updateGamesOfScenario']);
-		gameServiceSpy.getGamesOfScenario.and.returnValue(of(gamesOfScenario));
-		gameServiceSpy.updateGamesOfScenario.and.returnValue(null);
+		gameServiceSpy = null;
 		
 		gamesOfScenarioServiceSpy = jasmine.createSpyObj('GamesOfScenarioService', ['getGamesOfScenario', 'updateGamesOfScenario']);
 		gamesOfScenarioServiceSpy.getGamesOfScenario.and.returnValue(of(gamesOfScenario));
@@ -158,10 +156,8 @@ describe('GamesComponent', () => {
 
 	const setUpForCreateGame = function(game: Game) {
 		const scenario: string = game.identifier.scenario;
-		gameServiceSpy = jasmine.createSpyObj('GameService', ['getGamesOfScenario', 'createGame', 'updateGamesOfScenario']);
-		gameServiceSpy.getGamesOfScenario.and.returnValue(of([]));
+		gameServiceSpy = jasmine.createSpyObj('GameService', ['createGame']);
 		gameServiceSpy.createGame.and.returnValue(of(game));
-		gameServiceSpy.updateGamesOfScenario.and.returnValue(null);
 		
 		gamesOfScenarioServiceSpy = jasmine.createSpyObj('GamesOfScenarioService', ['getGamesOfScenario', 'updateGamesOfScenario']);
 		gamesOfScenarioServiceSpy.getGamesOfScenario.and.returnValue(of([]));
