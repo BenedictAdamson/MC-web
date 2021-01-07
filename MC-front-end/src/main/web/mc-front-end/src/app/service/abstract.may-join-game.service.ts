@@ -2,7 +2,6 @@ import { Observable, ReplaySubject } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
 
 import { GameIdentifier } from '../game-identifier'
-import { GamePlayers } from '../game-players'
 
 
 export abstract class AbstractMayJoinGameService {
