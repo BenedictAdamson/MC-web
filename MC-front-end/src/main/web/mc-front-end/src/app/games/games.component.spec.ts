@@ -129,8 +129,8 @@ describe('GamesComponent', () => {
 		assertInvariants();
 		expect(getScenario(component)).withContext('scenario$').toEqual(scenario);
 		expect(getGames(component)).withContext('games$').toEqual(gamesOfScenario);
-		expect(gameServiceSpy.updateGamesOfScenario.calls.count()).withContext('gameService.updateGamesOfScenario calls').toEqual(1);
-		expect(gameServiceSpy.updateGamesOfScenario.calls.argsFor(0)).withContext('gameService.updateGamesOfScenario args').toEqual([scenario]);
+		expect(gamesOfScenarioServiceSpy.updateGamesOfScenario.calls.count()).withContext('gameService.updateGamesOfScenario calls').toEqual(1);
+		expect(gamesOfScenarioServiceSpy.updateGamesOfScenario.calls.argsFor(0)).withContext('gameService.updateGamesOfScenario args').toEqual([scenario]);
 
 		const html: HTMLElement = fixture.nativeElement;
 		const gamesList: HTMLUListElement | null = html.querySelector('#games');
@@ -210,8 +210,8 @@ describe('GamesComponent', () => {
 		assertInvariants();
 		expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(1);
 		expect(routerSpy.navigateByUrl.calls.argsFor(0)).withContext('router.navigateByUrl args').toEqual([expectedPath]);
-		expect(gameServiceSpy.updateGamesOfScenario.calls.count()).withContext('gameService.updateGamesOfScenario calls').toEqual(2);
-		expect(gameServiceSpy.updateGamesOfScenario.calls.argsFor(1)).withContext('gameService.updateGamesOfScenario args').toEqual([game.identifier.scenario]);
+		expect(gamesOfScenarioServiceSpy.updateGamesOfScenario.calls.count()).withContext('gameService.updateGamesOfScenario calls').toEqual(2);
+		expect(gamesOfScenarioServiceSpy.updateGamesOfScenario.calls.argsFor(1)).withContext('gameService.updateGamesOfScenario args').toEqual([game.identifier.scenario]);
 	};
 
 	it('can create game [A]', fakeAsync(() => {

@@ -32,7 +32,7 @@ export class GamesComponent implements OnInit {
 
 	get games$(): Observable<string[]> {
 		return this.scenario$.pipe(
-			flatMap(scenario => this.gameService.getGamesOfScenario(scenario))
+			flatMap(scenario => this.gamesOfScenarioService.getGamesOfScenario(scenario))
 		);
 	}
 
@@ -46,7 +46,7 @@ export class GamesComponent implements OnInit {
 
 	ngOnInit() {
 		this.scenario$.pipe(
-			tap(scenario => this.gameService.updateGamesOfScenario(scenario))
+			tap(scenario => this.gamesOfScenarioService.updateGamesOfScenario(scenario))
 		).subscribe();
 	}
 
@@ -72,7 +72,7 @@ export class GamesComponent implements OnInit {
 			flatMap(scenario => this.gameService.createGame(scenario)),
 			map(game => game.identifier),
 			tap(gameIdentifier => {
-				this.gameService.updateGamesOfScenario(gameIdentifier.scenario);
+				this.gamesOfScenarioService.updateGamesOfScenario(gameIdentifier.scenario);
 				this.router.navigateByUrl(GameComponent.getGamePath(gameIdentifier));
 			})
 		).subscribe();
