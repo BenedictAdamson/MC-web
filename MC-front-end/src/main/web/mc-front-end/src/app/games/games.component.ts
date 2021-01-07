@@ -7,6 +7,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AbstractSelfService } from '../service/abstract.self.service';
 import { GameComponent } from '../game/game.component';
 import { GameService } from '../service/game.service';
+import { GamesOfScenarioService } from '../service/games-of-scenarios.service';
 import { ScenarioComponent } from '../scenario/scenario.component';
 
 @Component({
@@ -39,7 +40,8 @@ export class GamesComponent implements OnInit {
 		private route: ActivatedRoute,
 		private readonly router: Router,
 		private selfService: AbstractSelfService,
-		private gameService: GameService
+		private gameService: GameService,
+		private gamesOfScenarioService: GamesOfScenarioService
 	) { }
 
 	ngOnInit() {

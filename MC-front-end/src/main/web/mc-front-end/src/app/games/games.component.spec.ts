@@ -7,6 +7,7 @@ import { AbstractSelfService } from '../service/abstract.self.service';
 import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
 import { GameService } from '../service/game.service';
+import { GamesOfScenarioService } from '../service/games-of-scenarios.service';
 import { GameComponent } from '../game/game.component';
 import { GamesComponent } from './games.component';
 import { MockSelfService } from '../service/mock/mock.self.service';
@@ -17,7 +18,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 describe('GamesComponent', () => {
 	let routerSpy: any;
-	let gameServiceSpy: any
+	let gameServiceSpy: any;
+	let gamesOfScenarioServiceSpy: any;
 	let selfService: AbstractSelfService;
 	let component: GamesComponent;
 	let fixture: ComponentFixture<GamesComponent>;
@@ -60,6 +62,10 @@ describe('GamesComponent', () => {
 		gameServiceSpy = jasmine.createSpyObj('GameService', ['getGamesOfScenario', 'updateGamesOfScenario']);
 		gameServiceSpy.getGamesOfScenario.and.returnValue(of(gamesOfScenario));
 		gameServiceSpy.updateGamesOfScenario.and.returnValue(null);
+		
+		gamesOfScenarioServiceSpy = jasmine.createSpyObj('GamesOfScenarioService', ['getGamesOfScenario', 'updateGamesOfScenario']);
+		gamesOfScenarioServiceSpy.getGamesOfScenario.and.returnValue(of(gamesOfScenario));
+		gamesOfScenarioServiceSpy.updateGamesOfScenario.and.returnValue(null);
 
 		TestBed.configureTestingModule({
 			imports: [RouterTestingModule],
@@ -78,6 +84,7 @@ describe('GamesComponent', () => {
 				}
 			},
 			{ provide: GameService, useValue: gameServiceSpy },
+			{ provide: GamesOfScenarioService, useValue: gamesOfScenarioServiceSpy },
 			{ provide: AbstractSelfService, useFactory: () => { return new MockSelfService(self); } }]
 		});
 
@@ -155,6 +162,10 @@ describe('GamesComponent', () => {
 		gameServiceSpy.getGamesOfScenario.and.returnValue(of([]));
 		gameServiceSpy.createGame.and.returnValue(of(game));
 		gameServiceSpy.updateGamesOfScenario.and.returnValue(null);
+		
+		gamesOfScenarioServiceSpy = jasmine.createSpyObj('GamesOfScenarioService', ['getGamesOfScenario', 'updateGamesOfScenario']);
+		gamesOfScenarioServiceSpy.getGamesOfScenario.and.returnValue(of([]));
+		gamesOfScenarioServiceSpy.updateGamesOfScenario.and.returnValue(null);
 
 		routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
 		routerSpy.navigateByUrl.and.returnValue(null);
@@ -176,6 +187,7 @@ describe('GamesComponent', () => {
 				}
 			},
 			{ provide: GameService, useValue: gameServiceSpy },
+			{ provide: GamesOfScenarioService, useValue: gamesOfScenarioServiceSpy },
 			{ provide: Router, useValue: routerSpy },
 			{ provide: AbstractSelfService, useFactory: () => { return new MockSelfService(USER_ADMIN); } }]
 		});
