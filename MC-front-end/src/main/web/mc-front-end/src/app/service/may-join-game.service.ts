@@ -4,7 +4,7 @@ import { catchError } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { AbstractGamePlayersService } from './abstract.game-players.service'
+import { AbstractMayJoinGameService } from './abstract.may-join-game.service'
 import { GameIdentifier } from '../game-identifier'
 import { GamePlayers } from '../game-players'
 import { GameService } from './game.service'
@@ -13,7 +13,7 @@ import { GameService } from './game.service'
 @Injectable({
 	providedIn: 'root'
 })
-export class GamePlayersService extends AbstractGamePlayersService {
+export class MayJoinGameService extends AbstractMayJoinGameService {
 
 	constructor(
 		private http: HttpClient
@@ -26,15 +26,15 @@ export class GamePlayersService extends AbstractGamePlayersService {
 	}
 
 	static getApiJoinGamePath(game: GameIdentifier): string {
-		return GamePlayersService.getApiGamePlayersPath(game) + '?join';
+		return MayJoinGameService.getApiGamePlayersPath(game) + '?join';
 	}
 
 	static getApiGameEndRecuitmentPath(game: GameIdentifier): string {
-		return GamePlayersService.getApiGamePlayersPath(game) + '?endRecruitment';
+		return MayJoinGameService.getApiGamePlayersPath(game) + '?endRecruitment';
 	}
 
 	static getApiMayJoinGamePath(game: GameIdentifier): string {
-		return GamePlayersService.getApiGamePlayersPath(game) + '?mayJoin';
+		return MayJoinGameService.getApiGamePlayersPath(game) + '?mayJoin';
 	}
 
 
@@ -59,14 +59,14 @@ export class GamePlayersService extends AbstractGamePlayersService {
 
 
 	protected fetchGamePlayers(game: GameIdentifier): Observable<GamePlayers | null> {
-		return this.http.get<GamePlayers>(GamePlayersService.getApiGamePlayersPath(game))
+		return this.http.get<GamePlayers>(MayJoinGameService.getApiGamePlayersPath(game))
 			.pipe(
 				catchError(this.handleError<GamePlayers | null>('fetchGamePlayers', null))
 			);
 	}
 
 	protected fetchMayJoin(game: GameIdentifier): Observable<boolean> {
-		return this.http.get<boolean>(GamePlayersService.getApiMayJoinGamePath(game))
+		return this.http.get<boolean>(MayJoinGameService.getApiMayJoinGamePath(game))
 			.pipe(
 				catchError(this.handleError<boolean>('mayJoinGame', false))
 			);
@@ -74,11 +74,11 @@ export class GamePlayersService extends AbstractGamePlayersService {
 
 
 	protected requestJoinGame(game: GameIdentifier): Observable<GamePlayers> {
-		return this.http.post<GamePlayers>(GamePlayersService.getApiJoinGamePath(game), "");
+		return this.http.post<GamePlayers>(MayJoinGameService.getApiJoinGamePath(game), "");
 	}
 
 
 	protected requestEndRecruitment(game: GameIdentifier): Observable<GamePlayers> {
-		return this.http.post<GamePlayers>(GamePlayersService.getApiGameEndRecuitmentPath(game), "");
+		return this.http.post<GamePlayers>(MayJoinGameService.getApiGameEndRecuitmentPath(game), "");
 	}
 }

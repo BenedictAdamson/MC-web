@@ -5,7 +5,7 @@ import { GameIdentifier } from '../game-identifier'
 import { GamePlayers } from '../game-players'
 
 
-export abstract class AbstractGamePlayersService {
+export abstract class AbstractMayJoinGameService {
 
 	private static createKey(game: GameIdentifier): string {
 		return game.scenario + '@' + game.created;
@@ -22,7 +22,7 @@ export abstract class AbstractGamePlayersService {
 
 	private createCacheForGamePlayers(game: GameIdentifier): ReplaySubject<GamePlayers> {
 		const rs: ReplaySubject<GamePlayers> = new ReplaySubject<GamePlayers>(1);
-		this.gamesPlayers.set(AbstractGamePlayersService.createKey(game), rs);
+		this.gamesPlayers.set(AbstractMayJoinGameService.createKey(game), rs);
 		return rs;
 	}
 
@@ -33,7 +33,7 @@ export abstract class AbstractGamePlayersService {
 
 	private createCacheForMayJoin(game: GameIdentifier): ReplaySubject<boolean> {
 		const rs: ReplaySubject<boolean> = new ReplaySubject<boolean>(1);
-		this.mayJoin.set(AbstractGamePlayersService.createKey(game), rs);
+		this.mayJoin.set(AbstractMayJoinGameService.createKey(game), rs);
 		return rs;
 	}
 
@@ -55,7 +55,7 @@ export abstract class AbstractGamePlayersService {
 	 * The  [[Observable]] returned by this method emits only distinct values.
 	 */
 	getGamePlayers(game: GameIdentifier): Observable<GamePlayers | null> {
-		var rs: ReplaySubject<GamePlayers | null> | undefined = this.gamesPlayers.get(AbstractGamePlayersService.createKey(game));
+		var rs: ReplaySubject<GamePlayers | null> | undefined = this.gamesPlayers.get(AbstractMayJoinGameService.createKey(game));
 		if (!rs) {
 			rs = this.createCacheForGamePlayers(game);
 			this.updateCachedGamePlayers(game, rs);
@@ -67,7 +67,7 @@ export abstract class AbstractGamePlayersService {
 
 	private setGamePlayers(game: GameIdentifier, gamePlayers: GamePlayers | null): void {
 		if (gamePlayers) game = gamePlayers.game;
-		var rs: ReplaySubject<GamePlayers | null> | undefined = this.gamesPlayers.get(AbstractGamePlayersService.createKey(game));
+		var rs: ReplaySubject<GamePlayers | null> | undefined = this.gamesPlayers.get(AbstractMayJoinGameService.createKey(game));
 		if (!rs) {
 			rs = this.createCacheForGamePlayers(game);
 		}
@@ -82,7 +82,7 @@ export abstract class AbstractGamePlayersService {
 	 * returned by [[getGamePlayers]].
 	 */
 	updateGamePlayers(game: GameIdentifier): void {
-		var rs: ReplaySubject<GamePlayers | null> | undefined = this.gamesPlayers.get(AbstractGamePlayersService.createKey(game));
+		var rs: ReplaySubject<GamePlayers | null> | undefined = this.gamesPlayers.get(AbstractMayJoinGameService.createKey(game));
 		if (!rs) {
 			rs = this.createCacheForGamePlayers(game);
 		}
@@ -97,7 +97,7 @@ export abstract class AbstractGamePlayersService {
 	 * returned by [[mayJoinGame]].
 	 */
 	updateMayJoinGame(game: GameIdentifier): void {
-		var rs: ReplaySubject<boolean> | undefined = this.mayJoin.get(AbstractGamePlayersService.createKey(game));
+		var rs: ReplaySubject<boolean> | undefined = this.mayJoin.get(AbstractMayJoinGameService.createKey(game));
 		if (!rs) {
 			rs = this.createCacheForMayJoin(game);
 		}
@@ -158,7 +158,7 @@ export abstract class AbstractGamePlayersService {
 	 * An [[Observable]] that indicates whether may join.
 	 */
 	mayJoinGame(game: GameIdentifier): Observable<boolean> {
-		var rs: ReplaySubject<boolean> | undefined = this.mayJoin.get(AbstractGamePlayersService.createKey(game));
+		var rs: ReplaySubject<boolean> | undefined = this.mayJoin.get(AbstractMayJoinGameService.createKey(game));
 		if (!rs) {
 			rs = this.createCacheForMayJoin(game);
 			this.updateCachedMayJoin(game, rs);

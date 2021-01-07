@@ -1,10 +1,10 @@
 import { Observable, of } from 'rxjs';
 
-import { AbstractGamePlayersService } from '../abstract.game-players.service'
+import { AbstractMayJoinGameService } from '../abstract.may-join-game.service'
 import { GameIdentifier } from '../../game-identifier'
 import { GamePlayers } from '../../game-players'
 
-export class MockGamePlayersService extends AbstractGamePlayersService {
+export class MockGamePlayersService extends AbstractMayJoinGameService {
 
 	private serverGamePlayers: GamePlayers;
 	private game: GameIdentifier;

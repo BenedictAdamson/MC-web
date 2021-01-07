@@ -8,10 +8,10 @@ import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@an
 
 import { GamePlayers } from '../game-players'
 import { GameIdentifier } from '../game-identifier'
-import { GamePlayersService } from './game-players.service';
+import { MayJoinGameService } from './may-join-game.service';
 
 
-describe('GamePlayersService', () => {
+describe('MayJoinGameService', () => {
 	let httpTestingController: HttpTestingController;
 
 	const SCENARIO_A: string = uuid();
@@ -38,16 +38,16 @@ describe('GamePlayersService', () => {
 	});
 
 	it('should be created', () => {
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		const service: MayJoinGameService = TestBed.get(MayJoinGameService);
 		expect(service).toBeTruthy();
 	});
 
 	const testGetGamePlayers = function(gamePlayers: GamePlayers) {
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		const service: MayJoinGameService = TestBed.get(MayJoinGameService);
 
 		service.getGamePlayers(gamePlayers.game).subscribe(g => expect(g).toEqual(gamePlayers));
 
-		const request = httpTestingController.expectOne(GamePlayersService.getApiGamePlayersPath(gamePlayers.game));
+		const request = httpTestingController.expectOne(MayJoinGameService.getApiGamePlayersPath(gamePlayers.game));
 		expect(request.request.method).toEqual('GET');
 		request.flush(gamePlayers);
 		httpTestingController.verify();
@@ -63,7 +63,7 @@ describe('GamePlayersService', () => {
 
 	const testJoinGame = function(done: any, gamePlayers0: GamePlayers, user: string) {
 		const game: GameIdentifier = gamePlayers0.game;
-		const expectedPath: string = GamePlayersService.getApiJoinGamePath(game);
+		const expectedPath: string = MayJoinGameService.getApiJoinGamePath(game);
 		var users: string[] = gamePlayers0.users;
 		users.push(user);
 		// Tough test: the reply identifier is not the same object
@@ -72,7 +72,7 @@ describe('GamePlayersService', () => {
 			recruiting: gamePlayers0.recruiting,
 			users: users
 		};
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		const service: MayJoinGameService = TestBed.get(MayJoinGameService);
 
 		service.joinGame(game);
 
@@ -100,8 +100,8 @@ describe('GamePlayersService', () => {
 
 	const testEndRecuitment = function(done: any, gamePlayers0: GamePlayers) {
 		const game: GameIdentifier = gamePlayers0.game;
-		const path: string = GamePlayersService.getApiGameEndRecuitmentPath(game);
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		const path: string = MayJoinGameService.getApiGameEndRecuitmentPath(game);
+		const service: MayJoinGameService = TestBed.get(MayJoinGameService);
 		// Tough test: the reply identifier is not the same object
 		const gamePlayersReply: GamePlayers = {
 			game: { scenario: game.scenario, created: game.created },
@@ -136,7 +136,7 @@ describe('GamePlayersService', () => {
 
 
 	const testMayJoinGame = function(game: GameIdentifier, mayJoin: boolean) {
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		const service: MayJoinGameService = TestBed.get(MayJoinGameService);
 
 		const result: Observable<boolean> = service.mayJoinGame(game);
 
@@ -145,7 +145,7 @@ describe('GamePlayersService', () => {
 			expect(may).withContext('result').toEqual(mayJoin);
 		});
 
-		const request = httpTestingController.expectOne(GamePlayersService.getApiMayJoinGamePath(game));
+		const request = httpTestingController.expectOne(MayJoinGameService.getApiMayJoinGamePath(game));
 		expect(request.request.method).toEqual('GET');
 		request.event(new HttpResponse<boolean>({ body: mayJoin }));
 		httpTestingController.verify();
@@ -164,8 +164,8 @@ describe('GamePlayersService', () => {
 	const testMayJoinGameAfterUpdateMayJoinGame = function(game: GameIdentifier, mayJoin: boolean) {
 		// Tough test: use two identifiers that are semantically equivalent, but not the same object.
 		const game2: GameIdentifier = { scenario: game.scenario, created: game.created };
-		const expectedPath: string = GamePlayersService.getApiMayJoinGamePath(game);
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		const expectedPath: string = MayJoinGameService.getApiMayJoinGamePath(game);
+		const service: MayJoinGameService = TestBed.get(MayJoinGameService);
 
 		service.updateMayJoinGame(game);
 		service.mayJoinGame(game2).subscribe(may => expect(may).toEqual(mayJoin));
@@ -196,8 +196,8 @@ describe('GamePlayersService', () => {
 
 
 	const testUpdateMayJoinGameAfterMayJoinGame = function(game: GameIdentifier, mayJoin: boolean) {
-		const expectedPath: string = GamePlayersService.getApiMayJoinGamePath(game);
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		const expectedPath: string = MayJoinGameService.getApiMayJoinGamePath(game);
+		const service: MayJoinGameService = TestBed.get(MayJoinGameService);
 
 		service.mayJoinGame(game).subscribe(may => expect(may).toEqual(mayJoin));
 		service.updateMayJoinGame(game);
@@ -235,8 +235,8 @@ describe('GamePlayersService', () => {
 		may1: boolean
 	) {
 		const may2: boolean = !may1;
-		const expectedPath: string = GamePlayersService.getApiMayJoinGamePath(game);
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		const expectedPath: string = MayJoinGameService.getApiMayJoinGamePath(game);
+		const service: MayJoinGameService = TestBed.get(MayJoinGameService);
 		var n: number = 0;
 
 		service.mayJoinGame(game).subscribe(
@@ -267,8 +267,8 @@ describe('GamePlayersService', () => {
 
 
 	const testMayJoinGameForUnchangedUpdate = function(game: GameIdentifier, may: boolean) {
-		const expectedPath: string = GamePlayersService.getApiMayJoinGamePath(game);
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		const expectedPath: string = MayJoinGameService.getApiMayJoinGamePath(game);
+		const service: MayJoinGameService = TestBed.get(MayJoinGameService);
 		var n: number = 0;
 
 		service.mayJoinGame(game).subscribe(
@@ -302,8 +302,8 @@ describe('GamePlayersService', () => {
 		// Tough test: use two identifiers that are semantically equivalent, but not the same object.
 		const game1: GameIdentifier = gamePlayers.game;
 		const game2: GameIdentifier = { scenario: game1.scenario, created: game1.created };
-		const expectedPath: string = GamePlayersService.getApiGamePlayersPath(game1);
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		const expectedPath: string = MayJoinGameService.getApiGamePlayersPath(game1);
+		const service: MayJoinGameService = TestBed.get(MayJoinGameService);
 
 		service.updateGamePlayers(game1);
 		service.getGamePlayers(game2).subscribe(g => expect(g).toEqual(gamePlayers));
@@ -327,8 +327,8 @@ describe('GamePlayersService', () => {
 
 	const testUpdateGamePlayersAfterGetGamePlayers = function(gamePlayers: GamePlayers) {
 		const game: GameIdentifier = gamePlayers.game;
-		const expectedPath: string = GamePlayersService.getApiGamePlayersPath(game);
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		const expectedPath: string = MayJoinGameService.getApiGamePlayersPath(game);
+		const service: MayJoinGameService = TestBed.get(MayJoinGameService);
 
 		service.getGamePlayers(game).subscribe(g => expect(g).toEqual(gamePlayers));
 		service.updateGamePlayers(game);
@@ -362,8 +362,8 @@ describe('GamePlayersService', () => {
 	) {
 		const gamePlayers1: GamePlayers = { game: game, recruiting: recruiting1, users: users1 };
 		const gamePlayers2: GamePlayers = { game: game, recruiting: recruiting2, users: users2 };
-		const expectedPath: string = GamePlayersService.getApiGamePlayersPath(game);
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		const expectedPath: string = MayJoinGameService.getApiGamePlayersPath(game);
+		const service: MayJoinGameService = TestBed.get(MayJoinGameService);
 		var n: number = 0;
 
 		service.getGamePlayers(game).subscribe(
@@ -397,8 +397,8 @@ describe('GamePlayersService', () => {
 
 	const testGetGamePlayersForUnchangedUpdate = function(gamePlayers: GamePlayers) {
 		const game: GameIdentifier = gamePlayers.game;
-		const expectedPath: string = GamePlayersService.getApiGamePlayersPath(game);
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		const expectedPath: string = MayJoinGameService.getApiGamePlayersPath(game);
+		const service: MayJoinGameService = TestBed.get(MayJoinGameService);
 		var n: number = 0;
 
 		service.getGamePlayers(game).subscribe(
