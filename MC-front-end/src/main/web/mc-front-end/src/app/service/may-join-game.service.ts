@@ -1,10 +1,7 @@
-import { Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 
-import { AbstractMayJoinGameService } from './abstract.may-join-game.service'
+import { AbstractMayJoinGameBackEndService } from './abstract.may-join-game.back-end.service';
+import { CachingKeyValueService } from './caching.key-value.service';
 import { GameIdentifier } from '../game-identifier'
 import { GameService } from './game.service'
 
@@ -12,13 +9,7 @@ import { GameService } from './game.service'
 @Injectable({
 	providedIn: 'root'
 })
-export class MayJoinGameService extends AbstractMayJoinGameService {
-
-	constructor(
-		private http: HttpClient
-	) {
-		super();
-	}
+export class MayJoinGameService extends CachingKeyValueService<GameIdentifier, boolean, void> {
 
 	static getApiGamePlayersPath(game: GameIdentifier): string {
 		return GameService.getApiGamePath(game) + '/players';
@@ -29,31 +20,19 @@ export class MayJoinGameService extends AbstractMayJoinGameService {
 	}
 
 
-
-	/**
-	 * Handle Http operation that failed.
-	 * Let the app continue.
-	 * @param operation - name of the operation that failed
-	 * @param result - optional value to return as the observable result
-	 */
-	private handleError<T>(operation = 'operation', result?: T) {
-		return (error: any): Observable<T> => {
-
-			// TODO: send the error to remote logging infrastructure
-			console.error(operation + error); // log to console instead
-
-			// Let the app keep running by returning an empty result.
-			return of(result as T);
-		};
+	constructor(
+		backEnd: AbstractMayJoinGameBackEndService
+	) {
+		super(backEnd);
 	}
 
 
+	protected createKeyString(id: GameIdentifier): string {
+		return id.scenario + '/' + id.created;
+	}
 
-	protected fetchMayJoin(game: GameIdentifier): Observable<boolean> {
-		return this.http.get<boolean>(MayJoinGameService.getApiMayJoinGamePath(game))
-			.pipe(
-				catchError(this.handleError<boolean>('mayJoinGame', false))
-			);
+	protected getKey(_value: boolean): undefined {
+		return undefined;
 	}
 
 }

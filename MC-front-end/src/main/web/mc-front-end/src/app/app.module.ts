@@ -9,12 +9,13 @@ import { AppRoutingModule } from './app-routing.module';
 import { WINDOW_PROVIDER } from './window.provider';
 
 import { AbstractGamePlayersService } from './service/abstract.game-players.service';
-import { AbstractMayJoinGameService } from './service/abstract.may-join-game.service';
 import { AbstractSelfService } from './service/abstract.self.service';
 import { AbstractGameBackEndService } from './service/abstract.game.back-end.service';
+import { AbstractMayJoinGameBackEndService } from './service/abstract.may-join-game.back-end.service';
 import { AbstractUserBackEndService } from './service/abstract.user.back-end.service';
 import { GamePlayersService } from './service/game-players.service';
 import { HttpGameBackEndService } from './service/http.game.back-end.service';
+import { HttpMayJoinGameBackEndService } from './service/http.may-join-game.back-end.service';
 import { HttpUserBackEndService } from './service/http.user.back-end.service';
 import { MayJoinGameService } from './service/may-join-game.service';
 import { SelfService } from './service/self.service';
@@ -61,7 +62,7 @@ import { SelfComponent } from './self/self.component';
 		{ provide: AbstractGamePlayersService, useClass: GamePlayersService },
 		{ provide: AbstractSelfService, useClass: SelfService },
 		{ provide: AbstractGameBackEndService, useClass: HttpGameBackEndService },
-		{ provide: AbstractMayJoinGameService, useClass: MayJoinGameService },
+		{ provide: AbstractMayJoinGameBackEndService, useClass: HttpMayJoinGameBackEndService },
 		{ provide: AbstractUserBackEndService, useClass: HttpUserBackEndService }
 	],
 	bootstrap: [AppComponent]

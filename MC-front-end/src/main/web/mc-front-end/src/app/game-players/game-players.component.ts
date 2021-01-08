@@ -5,10 +5,10 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { AbstractGamePlayersService } from '../service/abstract.game-players.service';
-import { AbstractMayJoinGameService } from '../service/abstract.may-join-game.service';
 import { AbstractSelfService } from '../service/abstract.self.service';
 import { GameIdentifier } from '../game-identifier';
 import { GamePlayers } from '../game-players';
+import { MayJoinGameService } from '../service/may-join-game.service';
 
 @Component({
 	selector: 'app-game',
@@ -57,7 +57,7 @@ export class GamePlayersComponent implements OnInit {
 	constructor(
 		private route: ActivatedRoute,
 		private gamePlayersService: AbstractGamePlayersService,
-		private mayJoinGameService: AbstractMayJoinGameService,
+		private mayJoinGameService: MayJoinGameService,
 		private selfService: AbstractSelfService
 	) {
 	}
@@ -88,7 +88,9 @@ export class GamePlayersComponent implements OnInit {
 
 	mayJoinGame$(): Observable<boolean> {
 		return this.identifier$.pipe(
-			flatMap(identifier => this.mayJoinGameService.mayJoinGame(identifier)),
+			flatMap(identifier => this.mayJoinGameService.get(identifier)),
+			filter((may: boolean | null) => may != null),
+			map(may => may as boolean),
 			distinctUntilChanged() // don't spam identical values
 		);
 	}

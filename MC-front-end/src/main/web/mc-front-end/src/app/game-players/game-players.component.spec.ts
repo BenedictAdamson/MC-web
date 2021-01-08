@@ -7,12 +7,13 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 
 import { AbstractSelfService } from '../service/abstract.self.service';
 import { AbstractGamePlayersService } from '../service/abstract.game-players.service';
-import { AbstractMayJoinGameService } from '../service/abstract.may-join-game.service';
+import { AbstractMayJoinGameBackEndService } from '../service/abstract.may-join-game.back-end.service';
 import { GameIdentifier } from '../game-identifier'
 import { GamePlayers } from '../game-players'
 import { GamePlayersComponent } from './game-players.component';
 import { MockGamePlayersService } from '../service/mock/mock.game-players.service';
-import { MockMayJoinGameService } from '../service/mock/mock.may-join-game.service';
+import { MockMayJoinGameBackEndService } from '../service/mock/mock.may-join-game.back-end.service';
+import { MayJoinGameService } from '../service/may-join-game.service';
 import { MockSelfService } from '../service/mock/mock.self.service';
 import { User } from '../user';
 
@@ -22,7 +23,7 @@ describe('GamePlayersComponent', () => {
 	let fixture: ComponentFixture<GamePlayersComponent>;
 	let selfService: AbstractSelfService;
 	let gamePlayersServiceSpy: MockGamePlayersService;
-	let mayJoinGameServiceSpy: MockMayJoinGameService;
+	let mayJoinGameService: MayJoinGameService;
 
 	const SCENARIO_ID_A: string = uuid();
 	const SCENARIO_ID_B: string = uuid();
@@ -72,7 +73,8 @@ describe('GamePlayersComponent', () => {
 	const setUp = function(gamePlayers: GamePlayers, self: User, mayJoinGame: boolean) {
 		const game: GameIdentifier = gamePlayers.game;
 		gamePlayersServiceSpy = new MockGamePlayersService(gamePlayers, mayJoinGame, self.id);
-		mayJoinGameServiceSpy = new MockMayJoinGameService(mayJoinGame);
+		const mayJoinGameBackEnd: AbstractMayJoinGameBackEndService = new MockMayJoinGameBackEndService(mayJoinGame);
+		mayJoinGameService = new MayJoinGameService(mayJoinGameBackEnd);
 
 		TestBed.configureTestingModule({
 			declarations: [GamePlayersComponent],
@@ -96,7 +98,7 @@ describe('GamePlayersComponent', () => {
 				}
 			},
 			{ provide: AbstractGamePlayersService, useValue: gamePlayersServiceSpy },
-			{ provide: AbstractMayJoinGameService, useValue: mayJoinGameServiceSpy },
+			{ provide: MayJoinGameService, useValue: mayJoinGameService },
 			{ provide: AbstractSelfService, useFactory: () => { return new MockSelfService(self); } }]
 		});
 

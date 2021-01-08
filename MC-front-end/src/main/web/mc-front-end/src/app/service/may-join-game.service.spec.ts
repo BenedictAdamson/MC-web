@@ -6,8 +6,10 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 
-import { GamePlayers } from '../game-players'
-import { GameIdentifier } from '../game-identifier'
+import { AbstractMayJoinGameBackEndService } from './abstract.may-join-game.back-end.service';
+import { GamePlayers } from '../game-players';
+import { GameIdentifier } from '../game-identifier';
+import { HttpMayJoinGameBackEndService } from './http.may-join-game.back-end.service';
 import { MayJoinGameService } from './may-join-game.service';
 
 
@@ -25,30 +27,29 @@ describe('MayJoinGameService', () => {
 	const GAME_PLAYERS_A: GamePlayers = { game: GAME_IDENTIFIER_A, recruiting: true, users: [USER_ID_A, USER_ID_B] };
 	const GAME_PLAYERS_B: GamePlayers = { game: GAME_IDENTIFIER_B, recruiting: false, users: [] };
 
-	beforeEach(() => {
+
+	const setUp = function(): MayJoinGameService {
 		TestBed.configureTestingModule({
 			imports: [HttpClientTestingModule]
 		});
 
-		/* Inject for each test:
-		 * HTTP requests will be handled by the mock back-end.
-		  */
-		TestBed.get(HttpClient);
+		const httpClient: HttpClient = TestBed.get(HttpClient);
 		httpTestingController = TestBed.get(HttpTestingController);
-	});
+		const backEnd: AbstractMayJoinGameBackEndService = new HttpMayJoinGameBackEndService(httpClient);
+		return new MayJoinGameService(backEnd);
+	};
 
 	it('should be created', () => {
-		const service: MayJoinGameService = TestBed.get(MayJoinGameService);
+		const service: MayJoinGameService = setUp();
 		expect(service).toBeTruthy();
 	});
 
 
-	const testMayJoinGame = function(game: GameIdentifier, mayJoin: boolean) {
-		const service: MayJoinGameService = TestBed.get(MayJoinGameService);
+	const testGet = function(game: GameIdentifier, mayJoin: boolean) {
+		const service: MayJoinGameService = setUp();
 
-		const result: Observable<boolean> = service.mayJoinGame(game);
+		const result: Observable<boolean | null> = service.get(game);
 
-		expect(result).withContext('result').not.toBeNull();// guard
 		result.subscribe(may => {
 			expect(may).withContext('result').toEqual(mayJoin);
 		});
@@ -60,23 +61,23 @@ describe('MayJoinGameService', () => {
 	}
 
 	it('can query whether may join game a [A]', () => {
-		testMayJoinGame(GAME_IDENTIFIER_A, true);
+		testGet(GAME_IDENTIFIER_A, true);
 	})
 
 	it('can query whether may join game a [B]', () => {
-		testMayJoinGame(GAME_IDENTIFIER_B, false);
+		testGet(GAME_IDENTIFIER_B, false);
 	})
 
 
 
-	const testMayJoinGameAfterUpdateMayJoinGame = function(game: GameIdentifier, mayJoin: boolean) {
+	const testGetAfterUpdate = function(game: GameIdentifier, mayJoin: boolean) {
 		// Tough test: use two identifiers that are semantically equivalent, but not the same object.
 		const game2: GameIdentifier = { scenario: game.scenario, created: game.created };
 		const expectedPath: string = MayJoinGameService.getApiMayJoinGamePath(game);
-		const service: MayJoinGameService = TestBed.get(MayJoinGameService);
+		const service: MayJoinGameService = setUp();
 
-		service.updateMayJoinGame(game);
-		service.mayJoinGame(game2).subscribe(may => expect(may).toEqual(mayJoin));
+		service.update(game);
+		service.get(game2).subscribe(may => expect(may).toEqual(mayJoin));
 
 		// Only one GET expected because should use the cached value.
 		const request = httpTestingController.expectOne(expectedPath);
@@ -86,29 +87,29 @@ describe('MayJoinGameService', () => {
 	};
 
 	it('can query whether may join game after update whether may join game [A]', () => {
-		testMayJoinGameAfterUpdateMayJoinGame(GAME_IDENTIFIER_A, true);
+		testGetAfterUpdate(GAME_IDENTIFIER_A, true);
 	})
 
 	it('can query whether may join game after update whether may join game [B]', () => {
-		testMayJoinGameAfterUpdateMayJoinGame(GAME_IDENTIFIER_A, false);
+		testGetAfterUpdate(GAME_IDENTIFIER_A, false);
 	})
 
 	it('can query whether may join game after update whether may join game [C]', () => {
-		testMayJoinGameAfterUpdateMayJoinGame(GAME_IDENTIFIER_B, true);
+		testGetAfterUpdate(GAME_IDENTIFIER_B, true);
 	})
 
 	it('can query whether may join game after update whether may join game [D]', () => {
-		testMayJoinGameAfterUpdateMayJoinGame(GAME_IDENTIFIER_B, false);
+		testGetAfterUpdate(GAME_IDENTIFIER_B, false);
 	})
 
 
 
-	const testUpdateMayJoinGameAfterMayJoinGame = function(game: GameIdentifier, mayJoin: boolean) {
+	const testUpdateAfterGet = function(game: GameIdentifier, mayJoin: boolean) {
 		const expectedPath: string = MayJoinGameService.getApiMayJoinGamePath(game);
-		const service: MayJoinGameService = TestBed.get(MayJoinGameService);
+		const service: MayJoinGameService = setUp();
 
-		service.mayJoinGame(game).subscribe(may => expect(may).toEqual(mayJoin));
-		service.updateMayJoinGame(game);
+		service.get(game).subscribe(may => expect(may).toEqual(mayJoin));
+		service.update(game);
 
 		const requests: TestRequest[] = httpTestingController.match(expectedPath);
 		expect(requests.length).withContext('number of requests').toEqual(2);
@@ -120,40 +121,40 @@ describe('MayJoinGameService', () => {
 	};
 
 	it('can update whether may join game after query whether may join game [A]', () => {
-		testUpdateMayJoinGameAfterMayJoinGame(GAME_IDENTIFIER_A, false);
+		testUpdateAfterGet(GAME_IDENTIFIER_A, false);
 	})
 
 	it('can update whether may join game after query whether may join game [B]', () => {
-		testUpdateMayJoinGameAfterMayJoinGame(GAME_IDENTIFIER_A, true);
+		testUpdateAfterGet(GAME_IDENTIFIER_A, true);
 	})
 
 	it('can update whether may join game afte rquery whether may join game [C]', () => {
-		testUpdateMayJoinGameAfterMayJoinGame(GAME_IDENTIFIER_B, false);
+		testUpdateAfterGet(GAME_IDENTIFIER_B, false);
 	})
 
 	it('can update whether may join game after query whether may join game [D]', () => {
-		testUpdateMayJoinGameAfterMayJoinGame(GAME_IDENTIFIER_B, true);
+		testUpdateAfterGet(GAME_IDENTIFIER_B, true);
 	})
 
 
 
-	const testMayJoinGameForChangingValue = function(
+	const testGetForChangingValue = function(
 		done: any,
 		game: GameIdentifier,
 		may1: boolean
 	) {
 		const may2: boolean = !may1;
 		const expectedPath: string = MayJoinGameService.getApiMayJoinGamePath(game);
-		const service: MayJoinGameService = TestBed.get(MayJoinGameService);
+		const service: MayJoinGameService = setUp();
 		var n: number = 0;
 
-		service.mayJoinGame(game).subscribe(
+		service.get(game).subscribe(
 			() => {
 				n++;
 				if (n == 2) done();
 			}
 		);
-		service.updateMayJoinGame(game);
+		service.update(game);
 
 		const requests: TestRequest[] = httpTestingController.match(expectedPath);
 		expect(requests.length).withContext('number of requests').toEqual(2);
@@ -165,27 +166,27 @@ describe('MayJoinGameService', () => {
 	};
 
 	it('provides updated may join query results [A]', (done) => {
-		testMayJoinGameForChangingValue(done, GAME_IDENTIFIER_A, true);
+		testGetForChangingValue(done, GAME_IDENTIFIER_A, true);
 	})
 
 	it('provides updated may join query results [B]', (done) => {
-		testMayJoinGameForChangingValue(done, GAME_IDENTIFIER_B, false);
+		testGetForChangingValue(done, GAME_IDENTIFIER_B, false);
 	})
 
 
 
-	const testMayJoinGameForUnchangedUpdate = function(game: GameIdentifier, may: boolean) {
+	const testGetForUnchangedUpdate = function(game: GameIdentifier, may: boolean) {
 		const expectedPath: string = MayJoinGameService.getApiMayJoinGamePath(game);
-		const service: MayJoinGameService = TestBed.get(MayJoinGameService);
+		const service: MayJoinGameService = setUp();
 		var n: number = 0;
 
-		service.mayJoinGame(game).subscribe(
+		service.get(game).subscribe(
 			() => {
 				n++;
 				expect(n).withContext('number emitted').toEqual(1);
 			}
 		);
-		service.updateMayJoinGame(game);
+		service.update(game);
 
 		const requests: TestRequest[] = httpTestingController.match(expectedPath);
 		expect(requests.length).withContext('number of requests').toEqual(2);
@@ -197,11 +198,11 @@ describe('MayJoinGameService', () => {
 	};
 
 	it('provides distinct may join query results [A]', () => {
-		testMayJoinGameForUnchangedUpdate(GAME_IDENTIFIER_A, false);
+		testGetForUnchangedUpdate(GAME_IDENTIFIER_A, false);
 	})
 
 	it('provides distinct may join query results [B]', () => {
-		testMayJoinGameForUnchangedUpdate(GAME_IDENTIFIER_B, true);
+		testGetForUnchangedUpdate(GAME_IDENTIFIER_B, true);
 	})
 
 });

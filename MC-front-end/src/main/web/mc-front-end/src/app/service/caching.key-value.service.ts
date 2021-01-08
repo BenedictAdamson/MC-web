@@ -103,14 +103,16 @@ export abstract class CachingKeyValueService<KEY, VALUE, SPECIFICATION>
 	}
 
 	private setValue(value: VALUE): void {
-		const key: KEY = this.getKey(value);
-		const id: string = this.createKeyString(key);
-		var rs: ReplaySubject<VALUE | null> | undefined = this.values.get(id);
-		if (!rs) {
-			rs = this.createCache(id);
+		const key: KEY | undefined = this.getKey(value);
+		if (key) {
+			const id: string = this.createKeyString(key);
+			var rs: ReplaySubject<VALUE | null> | undefined = this.values.get(id);
+			if (!rs) {
+				rs = this.createCache(id);
+			}
+			rs.next(value);
+			this.addValidKey(key);
 		}
-		rs.next(value);
-		this.addValidKey(key);
 	}
 
 	private updateAllUsing(backEndGetAll: Observable<VALUE[]>): void {
@@ -118,7 +120,7 @@ export abstract class CachingKeyValueService<KEY, VALUE, SPECIFICATION>
 			(values: VALUE[]) => {
 				values.forEach(value => this.setValue(value));
 				// Remove keys that are no longer valid:
-				const keys: KEY[] = values.map(value => this.getKey(value));
+				const keys: KEY[] = values.map(value => this.getKey(value) as KEY);
 				this.validKeys$.next(keys);
 				this.complete = true;
 			});
@@ -165,5 +167,5 @@ export abstract class CachingKeyValueService<KEY, VALUE, SPECIFICATION>
 
 	protected abstract createKeyString(id: KEY): string;
 
-	protected abstract getKey(value: VALUE): KEY;
+	protected abstract getKey(value: VALUE): KEY | undefined;
 }
