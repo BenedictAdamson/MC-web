@@ -14,7 +14,6 @@ export abstract class AbstractGamePlayersService {
 
 
 	private gamesPlayers: Map<string, ReplaySubject<GamePlayers | null>> = new Map();
-	private mayJoin: Map<string, ReplaySubject<boolean>> = new Map();
 
 	constructor() { }
 
@@ -28,17 +27,6 @@ export abstract class AbstractGamePlayersService {
 
 	private updateCachedGamePlayers(game: GameIdentifier, rs: ReplaySubject<GamePlayers | null>): void {
 		this.fetchGamePlayers(game).subscribe(gamePlayers => rs.next(gamePlayers));
-	}
-
-
-	private createCacheForMayJoin(game: GameIdentifier): ReplaySubject<boolean> {
-		const rs: ReplaySubject<boolean> = new ReplaySubject<boolean>(1);
-		this.mayJoin.set(AbstractGamePlayersService.createKey(game), rs);
-		return rs;
-	}
-
-	private updateCachedMayJoin(game: GameIdentifier, rs: ReplaySubject<boolean>): void {
-		this.fetchMayJoin(game).subscribe(may => rs.next(may));
 	}
 
 	/**
@@ -88,22 +76,7 @@ export abstract class AbstractGamePlayersService {
 		}
 		this.updateCachedGamePlayers(game, rs);
 	}
-
-	/**
-	 * Ask the service to update its cached value for whether the current user may join the game that has a given ID.
-	 *
-	 * The method does not block, but instead performs the update asynchronously.
-	 * The updated value will eventually become available through the [[Observable]]
-	 * returned by [[mayJoinGame]].
-	 */
-	updateMayJoinGame(game: GameIdentifier): void {
-		var rs: ReplaySubject<boolean> | undefined = this.mayJoin.get(AbstractGamePlayersService.createKey(game));
-		if (!rs) {
-			rs = this.createCacheForMayJoin(game);
-		}
-		this.updateCachedMayJoin(game, rs);
-	}
-
+	
 	/**
 	 * Ask that the current user joins the game that has a given ID.
 	 *
@@ -149,30 +122,9 @@ export abstract class AbstractGamePlayersService {
 		);
 	}
 
-	/**
-	 * Ask whether the current user may join the game that has a given ID.
-	 *
-	 * @param game
-	 * The unique ID of the game to join.
-	 * @returns
-	 * An [[Observable]] that indicates whether may join.
-	 */
-	mayJoinGame(game: GameIdentifier): Observable<boolean> {
-		var rs: ReplaySubject<boolean> | undefined = this.mayJoin.get(AbstractGamePlayersService.createKey(game));
-		if (!rs) {
-			rs = this.createCacheForMayJoin(game);
-			this.updateCachedMayJoin(game, rs);
-		}
-		return rs.pipe(
-			distinctUntilChanged()
-		);
-	}
-
 
 
 	protected abstract fetchGamePlayers(game: GameIdentifier): Observable<GamePlayers | null>;
-
-	protected abstract fetchMayJoin(game: GameIdentifier): Observable<boolean>;
 
 	protected abstract requestJoinGame(game: GameIdentifier): Observable<GamePlayers>;
 

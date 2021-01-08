@@ -33,10 +33,6 @@ export class GamePlayersService extends AbstractGamePlayersService {
 		return GamePlayersService.getApiGamePlayersPath(game) + '?endRecruitment';
 	}
 
-	static getApiMayJoinGamePath(game: GameIdentifier): string {
-		return GamePlayersService.getApiGamePlayersPath(game) + '?mayJoin';
-	}
-
 
 
 	/**
@@ -62,13 +58,6 @@ export class GamePlayersService extends AbstractGamePlayersService {
 		return this.http.get<GamePlayers>(GamePlayersService.getApiGamePlayersPath(game))
 			.pipe(
 				catchError(this.handleError<GamePlayers | null>('fetchGamePlayers', null))
-			);
-	}
-
-	protected fetchMayJoin(game: GameIdentifier): Observable<boolean> {
-		return this.http.get<boolean>(GamePlayersService.getApiMayJoinGamePath(game))
-			.pipe(
-				catchError(this.handleError<boolean>('mayJoinGame', false))
 			);
 	}
 
