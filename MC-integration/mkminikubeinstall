@@ -36,10 +36,8 @@ VM="k8-mc-$VERSION"
 minikube start \
   --profile="${VM}" \
   --delete-on-failure=true \
-  --memory=4g
-minikube addons enable \
-  --profile="${VM}" \
-  ingress
+  --memory=4g \
+  --addons ingress
 
 # Upload the local Docker images
 # (minikube will only fetch from public registries or using loaded images,
