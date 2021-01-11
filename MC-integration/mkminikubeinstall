@@ -47,7 +47,7 @@ minikube addons enable \
 
 loadDockerImage () {
   echo "loading Docker image for $1"
-  minikube cache add "benedictadamson/$1:$VERSION"
+  minikube cache add "--profile="${VM}" benedictadamson/$1:$VERSION"
 }
   
 loadDockerImage awaitport
