@@ -46,7 +46,8 @@ minikube addons enable \
 # never from our local registry)
 
 loadDockerImage () {
-  minikube cache add alpine:latest "benedictadamson/$1:$VERSION"
+  echo "loading Docker image for $1"
+  minikube cache add "benedictadamson/$1:$VERSION"
 }
   
 loadDockerImage awaitport
