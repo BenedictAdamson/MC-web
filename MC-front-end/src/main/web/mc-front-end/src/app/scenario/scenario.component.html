@@ -1,6 +1,6 @@
 <section>
 <header>
-   <h2><a id="scenario" [routerLink]="['/scenario/',(scenario$ | async).identifier]">Scenario: {{(scenario$ | async).title}}</a></h2>
+   <h2><a id="scenario" [routerLink]="['/scenario/',(id$ | async)]">Scenario: {{(scenario$ | async).title}}</a></h2>
 </header>
 <p>{{(scenario$ | async).description}}</p>
 <router-outlet></router-outlet>

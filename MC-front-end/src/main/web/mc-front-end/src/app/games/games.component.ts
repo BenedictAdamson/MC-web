@@ -8,6 +8,7 @@ import { AbstractSelfService } from '../service/abstract.self.service';
 import { GameComponent } from '../game/game.component';
 import { GameService } from '../service/game.service';
 import { GamesOfScenarioService } from '../service/games-of-scenarios.service';
+import { getApiScenarioPath } from '../service/http.scenario.back-end.service';
 import { ScenarioComponent } from '../scenario/scenario.component';
 
 @Component({
@@ -18,7 +19,7 @@ import { ScenarioComponent } from '../scenario/scenario.component';
 export class GamesComponent implements OnInit {
 
 	static getGamesPath(scenario: string): string {
-		return ScenarioComponent.getScenarioPath(scenario) + '/game/';
+		return getApiScenarioPath(scenario) + '/game/';
 	}
 
 	get scenario$(): Observable<string> {
@@ -52,9 +53,9 @@ export class GamesComponent implements OnInit {
 
 	/**
 	 * @description
-     * Whether the current user does not have permission to create games.
-     *
-     * A user that has not been authenticated does not have that permission.
+	 * Whether the current user does not have permission to create games.
+	 *
+	 * A user that has not been authenticated does not have that permission.
 	 */
 	get isDisabledCreateGame$(): Observable<boolean> {
 		return this.selfService.mayManageGames$.pipe(
@@ -63,8 +64,8 @@ export class GamesComponent implements OnInit {
 	}
 
 	/**
-     * Attempts to create a new game for the scenario of this games list.
-     * On completion, redirects to the the game page for that game.
+	 * Attempts to create a new game for the scenario of this games list.
+	 * On completion, redirects to the the game page for that game.
 	 */
 	createGame(): void {
 		this.scenario$.pipe(

@@ -9,10 +9,10 @@ import { NamedUUID } from '../named-uuid';
 import { Scenario } from '../scenario';
 
 
-const apiScenariosPath: string = '/api/scenario/';
+const apiScenariosPath: string = '/api/scenario';
 
 export function getApiScenarioPath(scenario: string): string {
-	return apiScenariosPath + scenario + '/';
+	return apiScenariosPath + '/' + scenario;
 }
 
 

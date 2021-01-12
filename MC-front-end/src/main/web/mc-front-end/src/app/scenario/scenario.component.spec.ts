@@ -5,7 +5,6 @@ import { v4 as uuid } from 'uuid';
 import { AbstractScenarioBackEndService } from '../service/abstract.scenario.back-end.service';
 import { Scenario } from '../scenario';
 import { ScenarioComponent } from './scenario.component';
-import { ScenarioService } from '../service/scenario.service';
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';

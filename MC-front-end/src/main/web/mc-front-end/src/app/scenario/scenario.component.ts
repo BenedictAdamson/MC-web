@@ -22,7 +22,7 @@ export class ScenarioComponent implements OnInit {
 
 	get id$(): Observable<string> {
 		return this.route.paramMap.pipe(
-			map(params => params.get('id')),
+			map(params => params.get('scenario')),
 			distinctUntilChanged(),
 			filter(id => !!id),
 			map((id: string | null) => id as string)
