@@ -102,7 +102,7 @@ export abstract class CachingKeyValueService<KEY, VALUE, SPECIFICATION>
 		);
 	}
 
-	private setValue(value: VALUE): void {
+	protected setValue(value: VALUE): void {
 		const key: KEY | undefined = this.getKey(value);
 		if (key) {
 			const id: string = this.createKeyString(key);

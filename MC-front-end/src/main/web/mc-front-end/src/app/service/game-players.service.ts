@@ -1,10 +1,7 @@
-import { Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 
-import { AbstractGamePlayersService } from './abstract.game-players.service'
+import { AbstractGamePlayersBackEndService } from './abstract.game-players.back-end.service';
+import { CachingKeyValueService } from './caching.key-value.service';
 import { GameIdentifier } from '../game-identifier'
 import { GamePlayers } from '../game-players'
 import { GameService } from './game.service'
@@ -13,13 +10,7 @@ import { GameService } from './game.service'
 @Injectable({
 	providedIn: 'root'
 })
-export class GamePlayersService extends AbstractGamePlayersService {
-
-	constructor(
-		private http: HttpClient
-	) {
-		super();
-	}
+export class GamePlayersService extends CachingKeyValueService<GameIdentifier, GamePlayers, void> {
 
 	static getApiGamePlayersPath(game: GameIdentifier): string {
 		return GameService.getApiGamePath(game) + '/players';
@@ -33,41 +24,59 @@ export class GamePlayersService extends AbstractGamePlayersService {
 		return GamePlayersService.getApiGamePlayersPath(game) + '?endRecruitment';
 	}
 
+	constructor(
+		private gamePlayersBackEnd: AbstractGamePlayersBackEndService
+	) {
+		super(gamePlayersBackEnd);
+	}
+
+
+	protected createKeyString(id: GameIdentifier): string {
+		return id.scenario + '/' + id.created;
+	}
+
+	protected getKey(value: GamePlayers): GameIdentifier {
+		return value.game;
+	}
+	
+	
+	/**
+	 * Ask that the current user joins the game that has a given ID.
+	 *
+	 * Calling this method starts an asynchronous operation to cause the change on the server,
+	 * which will result in the [[Observable]] returned by [[get(GameIdentifier)]]
+	 * emitting an updated value for the game players of the given `game`,
+	 * if server value has changed.
+	 *
+	 * @param game
+	 * The unique ID of the game to join.
+	 */
+	joinGame(game: GameIdentifier): void {
+		this.gamePlayersBackEnd.joinGame(game).subscribe(
+			gps => this.setValue( gps)
+		);
+	}
 
 
 	/**
-	 * Handle Http operation that failed.
-	 * Let the app continue.
-	 * @param operation - name of the operation that failed
-	 * @param result - optional value to return as the observable result
+	 * Change a game so it is no longer [[Game.recruiting|recruiting]] players.
+	 *
+	 * Calling this method starts an asynchronous operation to cause the change on the server,
+	 * which will result in the [[Observable]] returned by [[getGamePlayers(GameIdentifier)]]
+	 * emitting an updated value for the game players of the given `game`,
+	 * if server value has changed.
+	 *
+	 * The operation performs a POST.
+	 * The server actually replies to the POST with a 302 (Found) redirect
+	 * to the resource of the altered game players resource.
+	 * The HttpClient or browser itself handles that redirect for us.
+	 *
+	 * @param game
+	 * The unique ID of the game for which to end recuitment.
 	 */
-	private handleError<T>(operation = 'operation', result?: T) {
-		return (error: any): Observable<T> => {
-
-			// TODO: send the error to remote logging infrastructure
-			console.error(operation + error); // log to console instead
-
-			// Let the app keep running by returning an empty result.
-			return of(result as T);
-		};
-	}
-
-
-
-	protected fetchGamePlayers(game: GameIdentifier): Observable<GamePlayers | null> {
-		return this.http.get<GamePlayers>(GamePlayersService.getApiGamePlayersPath(game))
-			.pipe(
-				catchError(this.handleError<GamePlayers | null>('fetchGamePlayers', null))
-			);
-	}
-
-
-	protected requestJoinGame(game: GameIdentifier): Observable<GamePlayers> {
-		return this.http.post<GamePlayers>(GamePlayersService.getApiJoinGamePath(game), "");
-	}
-
-
-	protected requestEndRecruitment(game: GameIdentifier): Observable<GamePlayers> {
-		return this.http.post<GamePlayers>(GamePlayersService.getApiGameEndRecuitmentPath(game), "");
+	endRecruitment(game: GameIdentifier): void {
+		this.gamePlayersBackEnd.endRecruitment(game).subscribe(
+			gps => this.setValue(gps)
+		);
 	}
 }

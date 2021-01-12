@@ -4,7 +4,7 @@ import { distinctUntilChanged, filter, first, flatMap, map, tap } from 'rxjs/ope
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { AbstractGamePlayersService } from '../service/abstract.game-players.service';
+import { GamePlayersService } from '../service/game-players.service';
 import { AbstractSelfService } from '../service/abstract.self.service';
 import { GameIdentifier } from '../game-identifier';
 import { GamePlayers } from '../game-players';
@@ -48,7 +48,7 @@ export class GamePlayersComponent implements OnInit {
 
 	get gamePlayers$(): Observable<GamePlayers> {
 		return this.identifier$.pipe(
-			flatMap(identifier => this.gamePlayersService.getGamePlayers(identifier)),
+			flatMap(identifier => this.gamePlayersService.get(identifier)),
 			filter(gps => !!gps),
 			map((gps: GamePlayers | null) => gps as GamePlayers)
 		);
@@ -56,7 +56,7 @@ export class GamePlayersComponent implements OnInit {
 
 	constructor(
 		private route: ActivatedRoute,
-		private gamePlayersService: AbstractGamePlayersService,
+		private gamePlayersService: GamePlayersService,
 		private mayJoinGameService: MayJoinGameService,
 		private selfService: AbstractSelfService
 	) {

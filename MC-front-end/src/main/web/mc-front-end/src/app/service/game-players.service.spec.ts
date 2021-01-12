@@ -1,11 +1,12 @@
 import { v4 as uuid } from 'uuid';
-import { Observable } from 'rxjs';
 
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 
+import { AbstractGamePlayersBackEndService } from './abstract.game-players.back-end.service';
+import { HttpGamePlayersBackEndService, getApiGamePlayersPath, getApiJoinGamePath, getApiGameEndRecuitmentPath } from './http.game-players.back-end.service';
 import { GamePlayers } from '../game-players'
 import { GameIdentifier } from '../game-identifier'
 import { GamePlayersService } from './game-players.service';
@@ -25,45 +26,46 @@ describe('GamePlayersService', () => {
 	const GAME_PLAYERS_A: GamePlayers = { game: GAME_IDENTIFIER_A, recruiting: true, users: [USER_ID_A, USER_ID_B] };
 	const GAME_PLAYERS_B: GamePlayers = { game: GAME_IDENTIFIER_B, recruiting: false, users: [] };
 
-	beforeEach(() => {
+	const setUp = function(): GamePlayersService {
 		TestBed.configureTestingModule({
 			imports: [HttpClientTestingModule]
 		});
 
-		/* Inject for each test:
-		 * HTTP requests will be handled by the mock back-end.
-		  */
-		TestBed.get(HttpClient);
+		const httpClient: HttpClient = TestBed.get(HttpClient);
 		httpTestingController = TestBed.get(HttpTestingController);
-	});
+		const backEnd: AbstractGamePlayersBackEndService = new HttpGamePlayersBackEndService(httpClient);
+		return new GamePlayersService(backEnd);
+	};
 
 	it('should be created', () => {
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		const service: GamePlayersService = setUp();
 		expect(service).toBeTruthy();
 	});
 
-	const testGetGamePlayers = function(gamePlayers: GamePlayers) {
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+	const testGet = function(gamePlayers: GamePlayers) {
+		const expectedPath: string = getApiGamePlayersPath(gamePlayers.game);
+		const service: GamePlayersService = setUp();
 
-		service.getGamePlayers(gamePlayers.game).subscribe(g => expect(g).toEqual(gamePlayers));
+		service.get(gamePlayers.game).subscribe(g => expect(g).toEqual(gamePlayers));
 
-		const request = httpTestingController.expectOne(GamePlayersService.getApiGamePlayersPath(gamePlayers.game));
+		const request = httpTestingController.expectOne(expectedPath);
 		expect(request.request.method).toEqual('GET');
 		request.flush(gamePlayers);
 		httpTestingController.verify();
 	};
 
 	it('can get game players [A]', () => {
-		testGetGamePlayers(GAME_PLAYERS_A);
+		testGet(GAME_PLAYERS_A);
 	})
 
 	it('can get game players [B]', () => {
-		testGetGamePlayers(GAME_PLAYERS_B);
+		testGet(GAME_PLAYERS_B);
 	})
+
 
 	const testJoinGame = function(done: any, gamePlayers0: GamePlayers, user: string) {
 		const game: GameIdentifier = gamePlayers0.game;
-		const expectedPath: string = GamePlayersService.getApiJoinGamePath(game);
+		const expectedPath: string = getApiJoinGamePath(game);
 		var users: string[] = gamePlayers0.users;
 		users.push(user);
 		// Tough test: the reply identifier is not the same object
@@ -72,7 +74,7 @@ describe('GamePlayersService', () => {
 			recruiting: gamePlayers0.recruiting,
 			users: users
 		};
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		const service: GamePlayersService = setUp();
 
 		service.joinGame(game);
 
@@ -81,7 +83,7 @@ describe('GamePlayersService', () => {
 		request.flush(gamePlayers1);
 		httpTestingController.verify();
 
-		service.getGamePlayers(game).subscribe({
+		service.get(game).subscribe({
 			next: (gps) => {
 				expect(gps).withContext('gamePlayers').not.toBeNull();
 				expect(gps).withContext('gamePlayers').toEqual(gamePlayers1);
@@ -98,10 +100,11 @@ describe('GamePlayersService', () => {
 		testJoinGame(done, GAME_PLAYERS_B, USER_ID_B);
 	})
 
+
 	const testEndRecuitment = function(done: any, gamePlayers0: GamePlayers) {
 		const game: GameIdentifier = gamePlayers0.game;
-		const path: string = GamePlayersService.getApiGameEndRecuitmentPath(game);
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		const path: string = getApiGameEndRecuitmentPath(game);
+		const service: GamePlayersService = setUp();
 		// Tough test: the reply identifier is not the same object
 		const gamePlayersReply: GamePlayers = {
 			game: { scenario: game.scenario, created: game.created },
@@ -116,7 +119,7 @@ describe('GamePlayersService', () => {
 		request.flush(gamePlayersReply);
 		httpTestingController.verify();
 
-		service.getGamePlayers(game).subscribe({
+		service.get(game).subscribe({
 			next: (gps) => {
 				expect(gps).withContext('gamePlayers').not.toBeNull();
 				expect(gps).withContext('gamePlayers').toEqual(gamePlayersReply);
@@ -135,15 +138,15 @@ describe('GamePlayersService', () => {
 
 
 
-	const testGetGamePlayersAfterUpdateGamePlayers = function(gamePlayers: GamePlayers) {
+	const testGetAfterUpdate = function(gamePlayers: GamePlayers) {
 		// Tough test: use two identifiers that are semantically equivalent, but not the same object.
 		const game1: GameIdentifier = gamePlayers.game;
 		const game2: GameIdentifier = { scenario: game1.scenario, created: game1.created };
-		const expectedPath: string = GamePlayersService.getApiGamePlayersPath(game1);
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		const expectedPath: string = getApiGamePlayersPath(game1);
+		const service: GamePlayersService = setUp();
 
-		service.updateGamePlayers(game1);
-		service.getGamePlayers(game2).subscribe(g => expect(g).toEqual(gamePlayers));
+		service.update(game1);
+		service.get(game2).subscribe(g => expect(g).toEqual(gamePlayers));
 
 		// Only one GET expected because should use the cached value.
 		const request = httpTestingController.expectOne(expectedPath);
@@ -153,22 +156,22 @@ describe('GamePlayersService', () => {
 	};
 
 	it('can get game players after update game players [A]', () => {
-		testGetGamePlayersAfterUpdateGamePlayers(GAME_PLAYERS_A);
+		testGetAfterUpdate(GAME_PLAYERS_A);
 	})
 
 	it('can get game players after update game players [B]', () => {
-		testGetGamePlayersAfterUpdateGamePlayers(GAME_PLAYERS_B);
+		testGetAfterUpdate(GAME_PLAYERS_B);
 	})
 
 
 
-	const testUpdateGamePlayersAfterGetGamePlayers = function(gamePlayers: GamePlayers) {
+	const testUpdateAfterGet = function(gamePlayers: GamePlayers) {
 		const game: GameIdentifier = gamePlayers.game;
-		const expectedPath: string = GamePlayersService.getApiGamePlayersPath(game);
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		const expectedPath: string = getApiGamePlayersPath(game);
+		const service: GamePlayersService = setUp();
 
-		service.getGamePlayers(game).subscribe(g => expect(g).toEqual(gamePlayers));
-		service.updateGamePlayers(game);
+		service.get(game).subscribe(g => expect(g).toEqual(gamePlayers));
+		service.update(game);
 
 		const requests: TestRequest[] = httpTestingController.match(expectedPath);
 		expect(requests.length).withContext('number of requests').toEqual(2);
@@ -180,16 +183,16 @@ describe('GamePlayersService', () => {
 	};
 
 	it('can update game players after get game players [A]', () => {
-		testUpdateGamePlayersAfterGetGamePlayers(GAME_PLAYERS_A);
+		testUpdateAfterGet(GAME_PLAYERS_A);
 	})
 
 	it('can update game players after get game players [B]', () => {
-		testUpdateGamePlayersAfterGetGamePlayers(GAME_PLAYERS_B);
+		testUpdateAfterGet(GAME_PLAYERS_B);
 	})
 
 
 
-	const testGetGamePlayersForChangingValue = function(
+	const testGetForChangingValue = function(
 		done: any,
 		game: GameIdentifier,
 		recruiting1: boolean,
@@ -199,11 +202,11 @@ describe('GamePlayersService', () => {
 	) {
 		const gamePlayers1: GamePlayers = { game: game, recruiting: recruiting1, users: users1 };
 		const gamePlayers2: GamePlayers = { game: game, recruiting: recruiting2, users: users2 };
-		const expectedPath: string = GamePlayersService.getApiGamePlayersPath(game);
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		const expectedPath: string = getApiGamePlayersPath(game);
+		const service: GamePlayersService = setUp();
 		var n: number = 0;
 
-		service.getGamePlayers(game).subscribe(
+		service.get(game).subscribe(
 			gamePlayers => {
 				expect(0 != n || gamePlayers1 == gamePlayers).withContext('provides the first value').toBeTrue();
 				expect(1 != n || gamePlayers2 == gamePlayers).withContext('provides the second value').toBeTrue();
@@ -211,7 +214,7 @@ describe('GamePlayersService', () => {
 				if (n == 2) done();
 			}
 		);
-		service.updateGamePlayers(game);
+		service.update(game);
 
 		const requests: TestRequest[] = httpTestingController.match(expectedPath);
 		expect(requests.length).withContext('number of requests').toEqual(2);
@@ -223,29 +226,29 @@ describe('GamePlayersService', () => {
 	};
 
 	it('provides updated game players [A]', (done) => {
-		testGetGamePlayersForChangingValue(done, GAME_IDENTIFIER_A, true, [], false, [USER_ID_A]);
+		testGetForChangingValue(done, GAME_IDENTIFIER_A, true, [], false, [USER_ID_A]);
 	})
 
 	it('provides updated game players [B]', (done) => {
-		testGetGamePlayersForChangingValue(done, GAME_IDENTIFIER_B, true, [USER_ID_A], true, [USER_ID_B]);
+		testGetForChangingValue(done, GAME_IDENTIFIER_B, true, [USER_ID_A], true, [USER_ID_B]);
 	})
 
 
 
-	const testGetGamePlayersForUnchangedUpdate = function(gamePlayers: GamePlayers) {
+	const testGetForUnchangedUpdate = function(gamePlayers: GamePlayers) {
 		const game: GameIdentifier = gamePlayers.game;
-		const expectedPath: string = GamePlayersService.getApiGamePlayersPath(game);
-		const service: GamePlayersService = TestBed.get(GamePlayersService);
+		const expectedPath: string = getApiGamePlayersPath(game);
+		const service: GamePlayersService = setUp();
 		var n: number = 0;
 
-		service.getGamePlayers(game).subscribe(
+		service.get(game).subscribe(
 			gps => {
 				expect(gamePlayers == gps).withContext('provides the expected value').toBeTrue();
 				n++;
 				expect(n).withContext('number emitted').toEqual(1);
 			}
 		);
-		service.updateGamePlayers(game);
+		service.update(game);
 
 		const requests: TestRequest[] = httpTestingController.match(expectedPath);
 		expect(requests.length).withContext('number of requests').toEqual(2);
@@ -257,10 +260,10 @@ describe('GamePlayersService', () => {
 	};
 
 	it('provides distinct game players [A]', () => {
-		testGetGamePlayersForUnchangedUpdate(GAME_PLAYERS_A);
+		testGetForUnchangedUpdate(GAME_PLAYERS_A);
 	})
 
 	it('provides distinct game players [B]', () => {
-		testGetGamePlayersForUnchangedUpdate(GAME_PLAYERS_B);
+		testGetForUnchangedUpdate(GAME_PLAYERS_B);
 	})
 });

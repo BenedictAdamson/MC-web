@@ -9,7 +9,7 @@ export abstract class HttpKeyValueService<KEY, VALUE, SPECIFICATION, ADD_PAYLOAD
 
 
 	constructor(
-		private http: HttpClient,
+		protected http: HttpClient,
 		public allUrl: string | undefined
 	) {
 		super();
