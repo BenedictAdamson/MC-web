@@ -8,7 +8,6 @@ import { AbstractSelfService } from '../service/abstract.self.service';
 import { GameComponent } from '../game/game.component';
 import { GameService } from '../service/game.service';
 import { GamesOfScenarioService } from '../service/games-of-scenarios.service';
-import { getApiScenarioPath } from '../service/http.scenario.back-end.service';
 
 @Component({
 	selector: 'app-scenario',
@@ -16,10 +15,6 @@ import { getApiScenarioPath } from '../service/http.scenario.back-end.service';
 	styleUrls: ['./games.component.css']
 })
 export class GamesComponent implements OnInit {
-
-	static getGamesPath(scenario: string): string {
-		return getApiScenarioPath(scenario) + '/game/';
-	}
 
 	get scenario$(): Observable<string> {
 		if (!this.route.parent) throw new Error('missing this.route.parent');
