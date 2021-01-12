@@ -18,7 +18,7 @@ export class GameComponent implements OnInit {
 
 
 	static getGamePath(id: GameIdentifier): string {
-		return GamesComponent.getGamesPath(id.scenario) + id.created;
+		return GameService.getApiGamePath(id.);
 	}
 
 	constructor(
