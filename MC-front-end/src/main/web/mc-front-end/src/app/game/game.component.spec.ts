@@ -8,7 +8,6 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { AbstractGameBackEndService } from '../service/abstract.game.back-end.service';
 import { Game } from '../game'
 import { GameIdentifier } from '../game-identifier'
-import { GameService } from '../service/game.service';
 import { GameComponent } from './game.component';
 
 import { MockGameBackEndService } from '../service/mock/mock.game.back-end.service';
@@ -26,6 +25,19 @@ describe('GameComponent', () => {
 	const GAME_IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_ID_B, created: CREATED_B };
 	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A };
 	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B };
+	
+	
+	
+	const getGame = function(component: GameComponent): Game | null {
+		var game: Game | null = null;
+		component.game$.subscribe({
+			next: (g) => game = g,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return game;
+	};
+
 
 	const setUpForNgInit = function(game: Game) {
 		const gameServiceStub: AbstractGameBackEndService = new MockGameBackEndService([game]);
@@ -36,13 +48,10 @@ describe('GameComponent', () => {
 			providers: [{
 				provide: ActivatedRoute,
 				useValue: {
-					params: of({ scenario: identifier.scenario, created: identifier.created }),
-					snapshot: {
 						parent: {
-							paramMap: convertToParamMap({ scenario: identifier.scenario })
+							paramMap: of(convertToParamMap({ scenario: identifier.scenario }))
 						},
-						paramMap: convertToParamMap({ created: identifier.created })
-					}
+						paramMap: of(convertToParamMap({ created: identifier.created }))
 				}
 			},
 			{ provide: AbstractGameBackEndService, useValue: gameServiceStub }]
@@ -71,7 +80,7 @@ describe('GameComponent', () => {
 
 		assertInvariants();
 
-		expect(component.game).withContext('game').toBe(game);
+		expect(getGame(component)).withContext('game').toBe(game);
 
 		const html: HTMLElement = fixture.nativeElement;
 		const displayText: string = html.innerText;

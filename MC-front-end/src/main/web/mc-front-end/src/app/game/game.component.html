@@ -1,4 +1,4 @@
 <section>
-<h3><a id="game" [routerLink]="['/scenario/',game.identifier.scenario,'game',game.identifier.created]">Game created {{game.identifier.created}}</a></h3>
+<h3><a id="game" [routerLink]="['/scenario/',(scenario$ | async),'game',(created$ | async)]">Game created {{created$ | async}}</a></h3>
 <router-outlet></router-outlet>
 </section>

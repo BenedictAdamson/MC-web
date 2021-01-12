@@ -1,7 +1,8 @@
-import { filter, map } from 'rxjs/operators';
+import { Observable, combineLatest } from 'rxjs';
+import { distinctUntilChanged, filter, flatMap, map } from 'rxjs/operators';
 
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
@@ -20,36 +21,52 @@ export class GameComponent implements OnInit {
 		return GamesComponent.getGamesPath(id.scenario) + id.created;
 	}
 
-	identifier: GameIdentifier;
-	game: Game;
-
 	constructor(
 		private route: ActivatedRoute,
 		private gameService: GameService
 	) { }
 
+
+
+	get scenario$(): Observable<string> {
+		if (!this.route.parent) throw new Error('missing this.route.parent');
+		return this.route.parent.paramMap.pipe(
+			map(params => params.get('scenario')),
+			filter(scenario => !!scenario),
+			map((id: string | null) => id as string)
+		);
+	};
+
+	get created$(): Observable<string> {
+		if (!this.route) throw new Error('missing this.route.parent');
+		return this.route.paramMap.pipe(
+			map(params => params.get('created')),
+			filter(created => !!created),
+			map((created: string | null) => created as string)
+		);
+	};
+
+	private static createIdentifier(scenario: string, created: string) {
+		return { scenario: scenario, created: created };
+	}
+
+	get identifier$(): Observable<GameIdentifier> {
+		return combineLatest([this.scenario$, this.created$], GameComponent.createIdentifier).pipe(
+			distinctUntilChanged() // don't spam identical values
+		);
+	};
+
+
+	get game$(): Observable<Game> {
+		return this.identifier$.pipe(
+			flatMap(identifier => this.gameService.get(identifier)),
+			filter(game => !!flatMap),
+			map((flatMap: Game | null) => flatMap as Game)
+		);
+	}
+
 	ngOnInit(): void {
-		this.identifier = this.getGameIdentifier();
-		this.subscribeToGame();
-	}
-
-
-	private getGameIdentifier(): GameIdentifier {
-		const route: ActivatedRouteSnapshot = this.route.snapshot;
-		if (!route.parent) throw new Error('missing this.route.parent');
-		const scenario: string | null = route.parent.paramMap.get('scenario');
-		const created: string | null = route.paramMap.get('created');
-		if (scenario == null) throw new Error('null scenario');
-		if (created == null) throw new Error('null created');
-		const gameId: GameIdentifier = { scenario: scenario, created: created };
-		return gameId;
-	}
-
-	private subscribeToGame(): void {
-		this.gameService.get(this.identifier).pipe(
-			filter(game => !!game),
-			map((game: Game | null) => game as Game)
-		).subscribe(game => this.game = game);
+		// Do nothing
 	}
 
 }
