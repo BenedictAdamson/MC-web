@@ -82,13 +82,6 @@ public final class GamePage extends Page {
             .id("end-recruitment");
    private static final By JOIN_BUTTON_LOCATOR = By.id("join");
 
-   private static boolean hasElementWithText(final @Nonnull WebElement body,
-            final By elementLocator, final Matcher<String> textMatcher) {
-      final var elements = body.findElements(elementLocator);
-      return !elements.isEmpty()
-               && textMatcher.matches(elements.get(0).getText());
-   }
-
    private static boolean hasEndedRecruitment(final WebElement body) {
       final var elements = body.findElements(RECRUITING_ELEMENT_LOCATOR);
       return elements.size() == 1 && INDICATES_IS_NOT_RECRUITING_PLAYERS
@@ -294,25 +287,6 @@ public final class GamePage extends Page {
       awaitIsReady(GamePage::hasEndedRecruitment);
    }
 
-   /**
-    * During updating the body could (briefly) be inconsistent.
-    */
-   private boolean isBodyConsistent(final @Nonnull WebElement body) {
-      final var joinButton = body.findElements(JOIN_BUTTON_LOCATOR);
-
-      final var reportsJoinable = hasElementWithText(body,
-               JOINABLE_ELEMENT_LOCATOR, INDICATES_IS_JOINABLE);
-      final var reportsNoPlayers = hasElementWithText(body,
-               PLAYERS_ELEMENT_LOCATOR, INDICATES_HAS_NO_PLAYERS);
-      final var reportsPlaying = hasElementWithText(body,
-               PLAYING_ELEMENT_LOCATOR, INDICATES_IS_NOT_PLAYING);
-      final var joinButtonEnabled = !joinButton.isEmpty()
-               && isEnabled(joinButton.get(0));
-
-      return !(reportsNoPlayers && reportsPlaying)
-               && !(reportsJoinable && !joinButtonEnabled);
-   }
-
    public boolean isEndRecruitmentEnabled() {
       requireIsReady();
       return isEnabled(getBody().findElement(END_RECRUITMENT_BUTTON_LOCATOR));
@@ -321,8 +295,7 @@ public final class GamePage extends Page {
    @Override
    protected boolean isReady(@Nonnull final String path,
             @Nonnull final String title, final @Nonnull WebElement body) {
-      return isValidPath(path) && INDICATES_IS_A_GAME.matches(body.getText())
-               && isBodyConsistent(body);
+      return isValidPath(path) && INDICATES_IS_A_GAME.matches(body.getText());
    }
 
    @Override
