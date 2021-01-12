@@ -160,11 +160,11 @@ describe('GamePlayersComponent', () => {
 		expect(getGamePlayers(component)).withContext('gamePlayers$').toEqual(gamePlayers);
 		expect(isPlaying(component)).withContext('playing').toEqual(playing);
 
-		component.isEndRecruitmentDisabled$().subscribe(may => {
+		component.isEndRecruitmentDisabled$.subscribe(may => {
 			expect(may).withContext('end recuitment disabled if game is not recuiting or user is not authorised').toEqual(!mayEndRecuitment);
 		});
 
-		component.mayJoinGame$().subscribe(may => {
+		component.mayJoinGame$.subscribe(may => {
 			expect(may).withContext('mayJoinGame').toEqual(mayJoinGame);
 		});
 
