@@ -7,9 +7,9 @@
    <p id="recruiting" >This game is not recruiting players.</p>
    </ng-template>
 
-   <button id="end-recruitment" [disabled]="isEndRecruitmentDisabled$() | async" (click)="endRecruitment()">End recruitment</button>
+   <button id="end-recruitment" [disabled]="isEndRecruitmentDisabled$ | async" (click)="endRecruitment()">End recruitment</button>
 
-   <div  *ngIf="mayJoinGame$() | async; else notJoinable">
+   <div  *ngIf="mayJoinGame$ | async; else notJoinable">
       <p id="joinable">You may join this game.</p>
       <button id="join" (click)="joinGame()">Join</button>
    </div>

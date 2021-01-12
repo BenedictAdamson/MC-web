@@ -73,14 +73,14 @@ export class GamePlayersComponent implements OnInit {
 		});
 	}
 
-	isEndRecruitmentDisabled$(): Observable<boolean> {
+	get isEndRecruitmentDisabled$(): Observable<boolean> {
 		return combineLatest([this.selfService.mayManageGames$, this.gamePlayers$],
 			(mayManageGames: boolean, gamePlayers: GamePlayers) => {
 				return !gamePlayers || !gamePlayers.recruiting || !mayManageGames;
 			});
 	}
 
-	mayJoinGame$(): Observable<boolean> {
+	get mayJoinGame$(): Observable<boolean> {
 		return this.identifier$.pipe(
 			flatMap(identifier => this.mayJoinGameService.get(identifier)),
 			filter((may: boolean | null) => may != null),
