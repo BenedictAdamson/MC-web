@@ -8,16 +8,15 @@ import { RouterModule } from '@angular/router';
 import { AppRoutingModule } from './app-routing.module';
 import { WINDOW_PROVIDER } from './window.provider';
 
-import { AbstractGamePlayersService } from './service/abstract.game-players.service';
-import { AbstractSelfService } from './service/abstract.self.service';
+import { AbstractGamePlayersBackEndService } from './service/abstract.game-players.back-end.service';
 import { AbstractGameBackEndService } from './service/abstract.game.back-end.service';
 import { AbstractMayJoinGameBackEndService } from './service/abstract.may-join-game.back-end.service';
+import { AbstractSelfService } from './service/abstract.self.service';
 import { AbstractUserBackEndService } from './service/abstract.user.back-end.service';
-import { GamePlayersService } from './service/game-players.service';
 import { HttpGameBackEndService } from './service/http.game.back-end.service';
+import { HttpGamePlayersBackEndService } from './service/http.game-players.back-end.service';
 import { HttpMayJoinGameBackEndService } from './service/http.may-join-game.back-end.service';
 import { HttpUserBackEndService } from './service/http.user.back-end.service';
-import { MayJoinGameService } from './service/may-join-game.service';
 import { SelfService } from './service/self.service';
 
 import { AddUserComponent } from './add-user/add-user.component';
@@ -59,10 +58,10 @@ import { SelfComponent } from './self/self.component';
 	],
 	providers: [
 		WINDOW_PROVIDER,
-		{ provide: AbstractGamePlayersService, useClass: GamePlayersService },
-		{ provide: AbstractSelfService, useClass: SelfService },
+		{ provide: AbstractGamePlayersBackEndService, useClass: HttpGamePlayersBackEndService },
 		{ provide: AbstractGameBackEndService, useClass: HttpGameBackEndService },
 		{ provide: AbstractMayJoinGameBackEndService, useClass: HttpMayJoinGameBackEndService },
+		{ provide: AbstractSelfService, useClass: SelfService },
 		{ provide: AbstractUserBackEndService, useClass: HttpUserBackEndService }
 	],
 	bootstrap: [AppComponent]
