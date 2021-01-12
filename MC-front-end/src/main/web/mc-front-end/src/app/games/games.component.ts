@@ -9,7 +9,6 @@ import { GameComponent } from '../game/game.component';
 import { GameService } from '../service/game.service';
 import { GamesOfScenarioService } from '../service/games-of-scenarios.service';
 import { getApiScenarioPath } from '../service/http.scenario.back-end.service';
-import { ScenarioComponent } from '../scenario/scenario.component';
 
 @Component({
 	selector: 'app-scenario',
