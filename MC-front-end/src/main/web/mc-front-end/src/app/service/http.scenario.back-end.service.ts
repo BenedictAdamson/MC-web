@@ -5,6 +5,7 @@ import { Injectable } from '@angular/core';
 
 import { AbstractScenarioBackEndService } from './abstract.scenario.back-end.service';
 import { HttpKeyValueService } from './http.key-value.service';
+import { NamedUUID } from '../named-uuid';
 import { Scenario } from '../scenario';
 
 
@@ -30,6 +31,10 @@ class Delegate extends HttpKeyValueService<string, Scenario, string, null> {
 
 	getAll(): undefined {
 		return undefined;
+	}
+
+	getScenarioIdentifiers(): Observable<NamedUUID[]> {
+		return this.http.get<NamedUUID[]>(apiScenariosPath);
 	}
 
 
@@ -59,8 +64,13 @@ export class HttpScenarioBackEndService extends AbstractScenarioBackEndService {
 		this.delegate = new Delegate(http)
 	}
 
+
 	get(id: string): Observable<Scenario | null> {
 		return this.delegate.get(id);
+	}
+
+	getScenarioIdentifiers(): Observable<NamedUUID[]> {
+		return this.delegate.getScenarioIdentifiers();
 	}
 
 }// class
