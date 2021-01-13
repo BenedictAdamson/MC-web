@@ -5,7 +5,6 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { AbstractSelfService } from '../service/abstract.self.service';
-import { GameComponent } from '../game/game.component';
 import { GameService } from '../service/game.service';
 import { GamesOfScenarioService } from '../service/games-of-scenarios.service';
 
@@ -68,7 +67,7 @@ export class GamesComponent implements OnInit {
 			map(game => game.identifier),
 			tap(gameIdentifier => {
 				this.gamesOfScenarioService.updateGamesOfScenario(gameIdentifier.scenario);
-				this.router.navigateByUrl(GameComponent.getGamePath(gameIdentifier));
+				this.router.navigateByUrl(GamesOfScenarioService.getApiGamePath(gameIdentifier));
 			})
 		).subscribe();
 	}

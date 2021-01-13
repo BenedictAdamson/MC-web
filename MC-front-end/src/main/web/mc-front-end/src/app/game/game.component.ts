@@ -7,7 +7,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
 import { GameService } from '../service/game.service';
-import { GamesComponent } from '../games/games.component';
 
 @Component({
 	selector: 'app-game',
@@ -15,11 +14,6 @@ import { GamesComponent } from '../games/games.component';
 	styleUrls: ['./game.component.css']
 })
 export class GameComponent implements OnInit {
-
-
-	static getGamePath(id: GameIdentifier): string {
-		return GameService.getApiGamePath(id);
-	}
 
 	constructor(
 		private route: ActivatedRoute,
