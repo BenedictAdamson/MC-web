@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import { AbstractGamesOfScenarioBackEndService } from './abstract.games-of-scenarios.back-end.service';
+import { AbstractGamesOfScenarioBackEndService } from './abstract.games-of-scenario.back-end.service';
 import { HttpKeyValueService } from './http.key-value.service';
 
 

@@ -7,7 +7,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AbstractSelfService } from '../service/abstract.self.service';
 import { GameIdentifier } from '../game-identifier';
 import { GameService } from '../service/game.service';
-import { GamesOfScenarioService } from '../service/games-of-scenarios.service';
+import { GamesOfScenarioService } from '../service/games-of-scenario.service';
 
 @Component({
 	selector: 'app-scenario',

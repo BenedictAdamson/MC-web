@@ -3,7 +3,7 @@ import { v4 as uuid } from 'uuid';
 
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 
-import { AbstractGamesOfScenarioBackEndService } from '../service/abstract.games-of-scenarios.back-end.service';
+import { AbstractGamesOfScenarioBackEndService } from '../service/abstract.games-of-scenario.back-end.service';
 import { AbstractSelfService } from '../service/abstract.self.service';
 import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
@@ -15,7 +15,7 @@ import { User } from '../user';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { MockGamesOfScenarioBackEndService } from '../service/mock/mock.games-of-scenarios.back-end.service';
+import { MockGamesOfScenarioBackEndService } from '../service/mock/mock.games-of-scenario.back-end.service';
 
 
 

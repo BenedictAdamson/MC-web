@@ -1,6 +1,6 @@
 import { Observable, of } from 'rxjs';
 
-import { AbstractGamesOfScenarioBackEndService } from '../abstract.games-of-scenarios.back-end.service'
+import { AbstractGamesOfScenarioBackEndService } from '../abstract.games-of-scenario.back-end.service'
 
 export class MockGamesOfScenarioBackEndService extends AbstractGamesOfScenarioBackEndService {
 

@@ -5,9 +5,9 @@ import { HttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 
-import { AbstractGamesOfScenarioBackEndService } from './abstract.games-of-scenarios.back-end.service';
-import { HttpGamesOfScenarioBackEndService } from './http.games-of-scenarios.back-end.service';
-import { GamesOfScenarioService, getApiGamesPath } from './games-of-scenarios.service';
+import { AbstractGamesOfScenarioBackEndService } from './abstract.games-of-scenario.back-end.service';
+import { HttpGamesOfScenarioBackEndService } from './http.games-of-scenario.back-end.service';
+import { GamesOfScenarioService, getApiGamesPath } from './games-of-scenario.service';
 
 
 describe('GamesOfScenarioService', () => {
