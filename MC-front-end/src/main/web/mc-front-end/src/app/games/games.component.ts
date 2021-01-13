@@ -5,6 +5,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { AbstractSelfService } from '../service/abstract.self.service';
+import { GameIdentifier } from '../game-identifier';
 import { GameService } from '../service/game.service';
 import { GamesOfScenarioService } from '../service/games-of-scenarios.service';
 
@@ -14,6 +15,10 @@ import { GamesOfScenarioService } from '../service/games-of-scenarios.service';
 	styleUrls: ['./games.component.css']
 })
 export class GamesComponent implements OnInit {
+
+	private static getGamePagePath(game: GameIdentifier) {
+		return '/scenario/' + game.scenario + '/game/' + game.created;
+	}
 
 	get scenario$(): Observable<string> {
 		if (!this.route.parent) throw new Error('missing this.route.parent');
@@ -67,7 +72,7 @@ export class GamesComponent implements OnInit {
 			map(game => game.identifier),
 			tap(gameIdentifier => {
 				this.gamesOfScenarioService.updateGamesOfScenario(gameIdentifier.scenario);
-				this.router.navigateByUrl(GamesOfScenarioService.getApiGamePath(gameIdentifier));
+				this.router.navigateByUrl(GamesComponent.getGamePagePath(gameIdentifier));
 			})
 		).subscribe();
 	}
