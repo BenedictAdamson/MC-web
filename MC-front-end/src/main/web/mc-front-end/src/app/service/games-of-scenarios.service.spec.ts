@@ -39,7 +39,7 @@ describe('GamesOfScenarioService', () => {
 	const testGetGamesOfScenario = function(scenario: string, identifiers: string[]) {
 		const service: GamesOfScenarioService = TestBed.get(GamesOfScenarioService);
 
-		service.getGamesOfScenario(scenario).subscribe(ids => expect(ids).toEqual(identifiers));
+		service.get(scenario).subscribe(ids => expect(ids).toEqual(identifiers));
 
 		const request = httpTestingController.expectOne(getApiGamesPath(scenario));
 		expect(request.request.method).toEqual('GET');
@@ -64,8 +64,8 @@ describe('GamesOfScenarioService', () => {
 	const testGetGamesOfScenarioAfterUpdateGamesOfScenario = function(scenario: string, identifiers: string[]) {
 		const service: GamesOfScenarioService = TestBed.get(GamesOfScenarioService);
 
-		service.updateGamesOfScenario(scenario);
-		service.getGamesOfScenario(scenario).subscribe(ids => expect(ids).toEqual(identifiers));
+		service.update(scenario);
+		service.get(scenario).subscribe(ids => expect(ids).toEqual(identifiers));
 
 		// Only one GET expected because should use the cached value.
 		const request = httpTestingController.expectOne(getApiGamesPath(scenario));
@@ -88,8 +88,8 @@ describe('GamesOfScenarioService', () => {
 		const service: GamesOfScenarioService = TestBed.get(GamesOfScenarioService);
 		const expectedPath: string = getApiGamesPath(scenario);
 
-		service.getGamesOfScenario(scenario).subscribe(ids => expect(ids).toEqual(identifiers));
-		service.updateGamesOfScenario(scenario);
+		service.get(scenario).subscribe(ids => expect(ids).toEqual(identifiers));
+		service.update(scenario);
 
 		const requests: TestRequest[] = httpTestingController.match(expectedPath);
 		expect(requests.length).withContext('number of requests').toEqual(2);
@@ -115,7 +115,7 @@ describe('GamesOfScenarioService', () => {
 		const expectedPath: string = getApiGamesPath(scenario);
 		var n: number = 0;
 
-		service.getGamesOfScenario(scenario).subscribe(
+		service.get(scenario).subscribe(
 			ids => {
 				expect(0 != n || identifiers1 == ids).withContext('provides the first identifiers').toBeTrue();
 				expect(1 != n || identifiers2 == ids).withContext('provides the second identifiers').toBeTrue();
@@ -123,7 +123,7 @@ describe('GamesOfScenarioService', () => {
 				if (n == 2) done();
 			}
 		);
-		service.updateGamesOfScenario(scenario);
+		service.update(scenario);
 
 		const requests: TestRequest[] = httpTestingController.match(expectedPath);
 		expect(requests.length).withContext('number of requests').toEqual(2);
@@ -151,14 +151,14 @@ describe('GamesOfScenarioService', () => {
 		const expectedPath: string = getApiGamesPath(scenario);
 		var n: number = 0;
 
-		service.getGamesOfScenario(scenario).subscribe(
+		service.get(scenario).subscribe(
 			ids => {
 				expect(identifiers == ids).withContext('provides the expected identifiers').toBeTrue();
 				n++;
 				expect(n).withContext('number emitted').toEqual(1);
 			}
 		);
-		service.updateGamesOfScenario(scenario);
+		service.update(scenario);
 
 		const requests: TestRequest[] = httpTestingController.match(expectedPath);
 		expect(requests.length).withContext('number of requests').toEqual(2);

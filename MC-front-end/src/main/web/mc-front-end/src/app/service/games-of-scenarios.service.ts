@@ -40,7 +40,7 @@ export class GamesOfScenarioService {
 	 *
 	 * The  [[Observable]] returned by this method emits only distinct values.
 	 */
-	getGamesOfScenario(scenario: string): Observable<string[]> {
+	get(scenario: string): Observable<string[]> {
 		var rs: ReplaySubject<string[]> | undefined = this.gamesOfScenarios.get(scenario);
 		if (!rs) {
 			rs = this.createCacheForGamesOfScenario(scenario);
@@ -77,7 +77,7 @@ export class GamesOfScenarioService {
 	 * The updated value will eventually become available through the [[Observable]]
 	 * returned by [[getGamesOfScenario]].
 	 */
-	updateGamesOfScenario(scenario: string): void {
+	update(scenario: string): void {
 		var rs: ReplaySubject<string[]> | undefined = this.gamesOfScenarios.get(scenario);
 		if (!rs) {
 			rs = this.createCacheForGamesOfScenario(scenario);
