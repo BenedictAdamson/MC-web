@@ -3,12 +3,11 @@ import { v4 as uuid } from 'uuid';
 
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 
+import { AbstractGamesOfScenarioBackEndService } from '../service/abstract.games-of-scenarios.back-end.service';
 import { AbstractSelfService } from '../service/abstract.self.service';
 import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
 import { GameService } from '../service/game.service';
-import { GamesOfScenarioService } from '../service/games-of-scenarios.service';
-import { GameComponent } from '../game/game.component';
 import { GamesComponent } from './games.component';
 import { MockSelfService } from '../service/mock/mock.self.service';
 import { User } from '../user';
@@ -16,10 +15,14 @@ import { User } from '../user';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { MockGamesOfScenarioBackEndService } from '../service/mock/mock.games-of-scenarios.back-end.service';
+
+
+
 describe('GamesComponent', () => {
 	let routerSpy: any;
 	let gameServiceSpy: any;
-	let gamesOfScenarioServiceSpy: any;
+	let gamesOfScenarioBackEndService: MockGamesOfScenarioBackEndService;
 	let selfService: AbstractSelfService;
 	let component: GamesComponent;
 	let fixture: ComponentFixture<GamesComponent>;
@@ -60,10 +63,7 @@ describe('GamesComponent', () => {
 
 	const setUpForNgInit = function(self: User, scenario: string, gamesOfScenario: string[]) {
 		gameServiceSpy = null;
-		
-		gamesOfScenarioServiceSpy = jasmine.createSpyObj('GamesOfScenarioService', ['getGamesOfScenario', 'updateGamesOfScenario']);
-		gamesOfScenarioServiceSpy.getGamesOfScenario.and.returnValue(of(gamesOfScenario));
-		gamesOfScenarioServiceSpy.updateGamesOfScenario.and.returnValue(null);
+		gamesOfScenarioBackEndService = new MockGamesOfScenarioBackEndService(scenario, gamesOfScenario);
 
 		TestBed.configureTestingModule({
 			imports: [RouterTestingModule],
@@ -82,7 +82,7 @@ describe('GamesComponent', () => {
 				}
 			},
 			{ provide: GameService, useValue: gameServiceSpy },
-			{ provide: GamesOfScenarioService, useValue: gamesOfScenarioServiceSpy },
+			{ provide: AbstractGamesOfScenarioBackEndService, useValue: gamesOfScenarioBackEndService },
 			{ provide: AbstractSelfService, useFactory: () => { return new MockSelfService(self); } }]
 		});
 
@@ -127,8 +127,6 @@ describe('GamesComponent', () => {
 		assertInvariants();
 		expect(getScenario(component)).withContext('scenario$').toEqual(scenario);
 		expect(getGames(component)).withContext('games$').toEqual(gamesOfScenario);
-		expect(gamesOfScenarioServiceSpy.updateGamesOfScenario.calls.count()).withContext('gameService.updateGamesOfScenario calls').toEqual(1);
-		expect(gamesOfScenarioServiceSpy.updateGamesOfScenario.calls.argsFor(0)).withContext('gameService.updateGamesOfScenario args').toEqual([scenario]);
 
 		const html: HTMLElement = fixture.nativeElement;
 		const gamesList: HTMLUListElement | null = html.querySelector('#games');
@@ -153,21 +151,17 @@ describe('GamesComponent', () => {
 	});
 
 
-
 	const setUpForCreateGame = function(game: Game) {
 		const scenario: string = game.identifier.scenario;
+		const userServiceStub = new MockGamesOfScenarioBackEndService(scenario, []);
+
 		gameServiceSpy = jasmine.createSpyObj('GameService', ['createGame']);
 		gameServiceSpy.createGame.and.returnValue(of(game));
-		
-		gamesOfScenarioServiceSpy = jasmine.createSpyObj('GamesOfScenarioService', ['getGamesOfScenario', 'updateGamesOfScenario']);
-		gamesOfScenarioServiceSpy.getGamesOfScenario.and.returnValue(of([]));
-		gamesOfScenarioServiceSpy.updateGamesOfScenario.and.returnValue(null);
 
 		routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
 		routerSpy.navigateByUrl.and.returnValue(null);
 
 		TestBed.configureTestingModule({
-			imports: [RouterTestingModule],
 			declarations: [GamesComponent],
 			providers: [{
 				provide: ActivatedRoute,
@@ -182,8 +176,8 @@ describe('GamesComponent', () => {
 					}
 				}
 			},
+			{ provide: AbstractGamesOfScenarioBackEndService, useValue: userServiceStub },
 			{ provide: GameService, useValue: gameServiceSpy },
-			{ provide: GamesOfScenarioService, useValue: gamesOfScenarioServiceSpy },
 			{ provide: Router, useValue: routerSpy },
 			{ provide: AbstractSelfService, useFactory: () => { return new MockSelfService(USER_ADMIN); } }]
 		});
@@ -194,6 +188,7 @@ describe('GamesComponent', () => {
 		selfService.checkForCurrentAuthentication().subscribe();
 		fixture.detectChanges();
 	};
+
 	const testCreateGame = function(game: Game) {
 		const expectedPath: string = GamesComponent.getGamePagePath(game.identifier);
 		setUpForCreateGame(game);
@@ -206,8 +201,6 @@ describe('GamesComponent', () => {
 		assertInvariants();
 		expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(1);
 		expect(routerSpy.navigateByUrl.calls.argsFor(0)).withContext('router.navigateByUrl args').toEqual([expectedPath]);
-		expect(gamesOfScenarioServiceSpy.updateGamesOfScenario.calls.count()).withContext('gameService.updateGamesOfScenario calls').toEqual(2);
-		expect(gamesOfScenarioServiceSpy.updateGamesOfScenario.calls.argsFor(1)).withContext('gameService.updateGamesOfScenario args').toEqual([game.identifier.scenario]);
 	};
 
 	it('can create game [A]', fakeAsync(() => {

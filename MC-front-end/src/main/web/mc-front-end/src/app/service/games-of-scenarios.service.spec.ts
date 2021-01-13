@@ -5,6 +5,8 @@ import { HttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 
+import { AbstractGamesOfScenarioBackEndService } from './abstract.games-of-scenarios.back-end.service';
+import { HttpGamesOfScenarioBackEndService } from './http.games-of-scenarios.back-end.service';
 import { GamesOfScenarioService, getApiGamesPath } from './games-of-scenarios.service';
 
 
@@ -18,26 +20,27 @@ describe('GamesOfScenarioService', () => {
 	const CREATEDS_0: string[] = [];
 	const CREATEDS_1: string[] = [CREATED_A];
 	const CREATEDS_2: string[] = [CREATED_A, CREATED_B];
-
-	beforeEach(() => {
+	
+	
+	const setUp = function(): GamesOfScenarioService {
 		TestBed.configureTestingModule({
 			imports: [HttpClientTestingModule]
 		});
 
-		/* Inject for each test:
-		 * HTTP requests will be handled by the mock back-end.
-		  */
-		TestBed.get(HttpClient);
+		const httpClient: HttpClient = TestBed.get(HttpClient);
 		httpTestingController = TestBed.get(HttpTestingController);
-	});
+		const backEnd: AbstractGamesOfScenarioBackEndService = new HttpGamesOfScenarioBackEndService(httpClient);
+		return new GamesOfScenarioService(backEnd);
+	};
+	
 
 	it('should be created', () => {
-		const service: GamesOfScenarioService = TestBed.get(GamesOfScenarioService);
+		const service: GamesOfScenarioService = setUp();
 		expect(service).toBeTruthy();
 	});
 
 	const testGetGamesOfScenario = function(scenario: string, identifiers: string[]) {
-		const service: GamesOfScenarioService = TestBed.get(GamesOfScenarioService);
+		const service: GamesOfScenarioService = setUp();
 
 		service.get(scenario).subscribe(ids => expect(ids).toEqual(identifiers));
 
@@ -62,7 +65,7 @@ describe('GamesOfScenarioService', () => {
 
 
 	const testGetGamesOfScenarioAfterUpdateGamesOfScenario = function(scenario: string, identifiers: string[]) {
-		const service: GamesOfScenarioService = TestBed.get(GamesOfScenarioService);
+		const service: GamesOfScenarioService = setUp();
 
 		service.update(scenario);
 		service.get(scenario).subscribe(ids => expect(ids).toEqual(identifiers));
@@ -85,7 +88,7 @@ describe('GamesOfScenarioService', () => {
 
 
 	const testUpdateGamesOfScenarioAfterGetGamesOfScenario = function(scenario: string, identifiers: string[]) {
-		const service: GamesOfScenarioService = TestBed.get(GamesOfScenarioService);
+		const service: GamesOfScenarioService = setUp();
 		const expectedPath: string = getApiGamesPath(scenario);
 
 		service.get(scenario).subscribe(ids => expect(ids).toEqual(identifiers));
@@ -111,7 +114,7 @@ describe('GamesOfScenarioService', () => {
 
 
 	const testGetGamesOfScenarioForChangingValue = function(done: any, scenario: string, identifiers1: string[], identifiers2: string[]) {
-		const service: GamesOfScenarioService = TestBed.get(GamesOfScenarioService);
+		const service: GamesOfScenarioService = setUp();
 		const expectedPath: string = getApiGamesPath(scenario);
 		var n: number = 0;
 
@@ -147,7 +150,7 @@ describe('GamesOfScenarioService', () => {
 
 
 	const testGetGamesOfScenarioForUnchangedUpdate = function(scenario: string, identifiers: string[]) {
-		const service: GamesOfScenarioService = TestBed.get(GamesOfScenarioService);
+		const service: GamesOfScenarioService = setUp();
 		const expectedPath: string = getApiGamesPath(scenario);
 		var n: number = 0;
 

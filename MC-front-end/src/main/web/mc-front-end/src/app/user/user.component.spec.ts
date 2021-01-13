@@ -8,7 +8,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AbstractUserBackEndService } from '../service/abstract.user.back-end.service';
 import { User } from '../user';
 import { UserComponent } from './user.component';
-import { UserService } from '../service/user.service';
 
 import { MockUserBackEndService } from '../service/mock/mock.user.back-end.service';
 
