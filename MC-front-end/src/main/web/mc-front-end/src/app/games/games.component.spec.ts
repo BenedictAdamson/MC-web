@@ -195,7 +195,7 @@ describe('GamesComponent', () => {
 		fixture.detectChanges();
 	};
 	const testCreateGame = function(game: Game) {
-		const expectedPath: string = GameComponent.getGamePath(game.identifier);
+		const expectedPath: string = GamesComponent.getGamePagePath(game.identifier);
 		setUpForCreateGame(game);
 
 		component.createGame();

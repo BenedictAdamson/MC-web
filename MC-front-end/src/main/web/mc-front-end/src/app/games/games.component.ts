@@ -16,7 +16,7 @@ import { GamesOfScenarioService } from '../service/games-of-scenarios.service';
 })
 export class GamesComponent implements OnInit {
 
-	private static getGamePagePath(game: GameIdentifier) {
+	static getGamePagePath(game: GameIdentifier) {
 		return '/scenario/' + game.scenario + '/game/' + game.created;
 	}
 
