@@ -7,7 +7,6 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 
 import { AbstractMayJoinGameBackEndService } from './abstract.may-join-game.back-end.service';
-import { GamePlayers } from '../game-players';
 import { GameIdentifier } from '../game-identifier';
 import { HttpMayJoinGameBackEndService } from './http.may-join-game.back-end.service';
 import { MayJoinGameService } from './may-join-game.service';
@@ -18,14 +17,10 @@ describe('MayJoinGameService', () => {
 
 	const SCENARIO_A: string = uuid();
 	const SCENARIO_B: string = uuid();
-	const USER_ID_A: string = uuid();
-	const USER_ID_B: string = uuid();
 	const CREATED_A: string = '1970-01-01T00:00:00.000Z';
 	const CREATED_B: string = '2020-12-31T23:59:59.999Z';
 	const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_A, created: CREATED_A };
 	const GAME_IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_B, created: CREATED_B };
-	const GAME_PLAYERS_A: GamePlayers = { game: GAME_IDENTIFIER_A, recruiting: true, users: [USER_ID_A, USER_ID_B] };
-	const GAME_PLAYERS_B: GamePlayers = { game: GAME_IDENTIFIER_B, recruiting: false, users: [] };
 
 
 	const setUp = function(): MayJoinGameService {
