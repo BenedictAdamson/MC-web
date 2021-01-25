@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { HttpClient } from '@angular/common/http';
 
 import { HttpKeyValueService } from './http.key-value.service';
@@ -39,7 +39,7 @@ class TestHttpKeyValueService extends HttpKeyValueService<Id, Value, Data, Data>
 		return id.first + '/' + id.second;
 	}
 
-	protected getAddUrl(specification: Data): string | undefined {
+	protected getAddUrl(_specification: Data): string | undefined {
 		return this.addUrl;
 	}
 
