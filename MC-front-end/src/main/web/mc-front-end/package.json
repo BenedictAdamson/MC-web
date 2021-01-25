@@ -1,6 +1,6 @@
 {
   "name": "mc-front-end",
-  "version": "2.17.2-SNAPSHOT",
+  "version": "2.17.2",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
