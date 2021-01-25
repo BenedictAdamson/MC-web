@@ -41,7 +41,8 @@ export class GamePlayersComponent implements OnInit {
 	}
 
 	get identifier$(): Observable<GameIdentifier> {
-		return combineLatest([this.scenario$, this.created$], GamePlayersComponent.createIdentifier).pipe(
+		return combineLatest([this.scenario$, this.created$]).pipe(
+			map(([scenario, created]) => GamePlayersComponent.createIdentifier(scenario, created)),
 			distinctUntilChanged() // don't spam identical values
 		);
 	};
@@ -67,17 +68,25 @@ export class GamePlayersComponent implements OnInit {
 	}
 
 
+	private static isPlaying(id: string | null, gamePlayers: GamePlayers): boolean {
+		return id ? gamePlayers.users.includes(id) : false;
+	}
+
 	get playing$(): Observable<boolean> {
-		return combineLatest([this.selfService.id$, this.gamePlayers$], (id: string, gamePlayers: GamePlayers) => {
-			return gamePlayers.users.includes(id)
-		});
+		return combineLatest([this.selfService.id$, this.gamePlayers$]).pipe(
+			map(([id, gamePlayers]) => GamePlayersComponent.isPlaying(id, gamePlayers))
+		);
+	}
+
+
+	private static isEndRecruitmentDisabled(mayManageGames: boolean, gamePlayers: GamePlayers): boolean {
+		return !gamePlayers || !gamePlayers.recruiting || !mayManageGames;
 	}
 
 	get isEndRecruitmentDisabled$(): Observable<boolean> {
-		return combineLatest([this.selfService.mayManageGames$, this.gamePlayers$],
-			(mayManageGames: boolean, gamePlayers: GamePlayers) => {
-				return !gamePlayers || !gamePlayers.recruiting || !mayManageGames;
-			});
+		return combineLatest([this.selfService.mayManageGames$, this.gamePlayers$]).pipe(
+			map(([mayManageGames, gamePlayers]) => GamePlayersComponent.isEndRecruitmentDisabled(mayManageGames, gamePlayers))
+		);
 	}
 
 	get mayJoinGame$(): Observable<boolean> {

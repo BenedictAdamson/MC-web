@@ -40,12 +40,13 @@ export class GameComponent implements OnInit {
 		);
 	};
 
-	private static createIdentifier(scenario: string, created: string) {
+	private static createIdentifier(scenario: string, created: string): GameIdentifier {
 		return { scenario: scenario, created: created };
 	}
 
 	get identifier$(): Observable<GameIdentifier> {
-		return combineLatest([this.scenario$, this.created$], GameComponent.createIdentifier).pipe(
+		return combineLatest([this.scenario$, this.created$]).pipe(
+			map(([scenario, created]) => GameComponent.createIdentifier(scenario, created)),
 			distinctUntilChanged() // don't spam identical values
 		);
 	};
