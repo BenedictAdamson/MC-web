@@ -8,7 +8,6 @@ import { AbstractSelfService } from '../service/abstract.self.service';
 import { MockSelfService } from '../service/mock/mock.self.service';
 import { User } from '../user';
 import { UsersComponent } from './users.component';
-import { UserService } from '../service/user.service';
 
 import { MockUserBackEndService } from '../service/mock/mock.user.back-end.service';
 
