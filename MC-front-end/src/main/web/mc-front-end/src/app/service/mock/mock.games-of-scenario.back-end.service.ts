@@ -11,10 +11,6 @@ export class MockGamesOfScenarioBackEndService extends AbstractGamesOfScenarioBa
 		super();
 	};
 
-	private expectScenario(scenario: string, method: string): void {
-		expect(scenario).withContext('MockGamesOfScenarioService.' + method + '(scenario)').toEqual(this.scenario);
-	}
-
 	private copy(): Observable<string[]> {
 		var result: string[] = [];
 		this.games.forEach(game => result.push(game));

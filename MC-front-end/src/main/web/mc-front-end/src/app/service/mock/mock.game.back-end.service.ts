@@ -1,5 +1,4 @@
-import { Observable, throwError, of } from 'rxjs';
-import { v4 as uuid } from 'uuid';
+import { Observable,  of } from 'rxjs';
 
 import { AbstractGameBackEndService } from '../abstract.game.back-end.service';
 import { Game } from '../../game';

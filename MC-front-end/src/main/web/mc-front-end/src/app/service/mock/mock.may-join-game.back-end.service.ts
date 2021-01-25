@@ -11,7 +11,7 @@ export class MockMayJoinGameBackEndService extends AbstractMayJoinGameBackEndSer
 		super();
 	}
 
-	get(id: GameIdentifier): Observable<boolean | null> {
+	get(_id: GameIdentifier): Observable<boolean | null> {
 		return of(this.may);
 	}
 }
