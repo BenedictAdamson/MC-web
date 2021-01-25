@@ -1,7 +1,7 @@
 <section>
 <header>
-   <h2><a id="scenario" [routerLink]="['/scenario/',scenario.identifier]">Scenario: {{scenario.title}}</a></h2>
+   <h2><a id="scenario" [routerLink]="['/scenario/',(id$ | async)]">Scenario: {{(scenario$ | async).title}}</a></h2>
 </header>
-<p>{{scenario.description}}</p>
+<p>{{(scenario$ | async).description}}</p>
 <router-outlet></router-outlet>
 </section>

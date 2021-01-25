@@ -1,50 +1,41 @@
-import { Observable, of } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { SelfService } from '../service/self.service';
+import { AbstractUserBackEndService } from '../service/abstract.user.back-end.service';
+import { AbstractSelfService } from '../service/abstract.self.service';
+import { MockSelfService } from '../service/mock/mock.self.service';
 import { User } from '../user';
 import { UsersComponent } from './users.component';
-import { UserService } from '../service/user.service';
 
-class MockSelfService {
-
-	constructor(private self: User) { };
-
-	get username(): string {
-		return this.self.username;
-	}
-
-	get mayManageUsers$(): Observable<boolean> {
-		return of(this.self.authorities.includes('ROLE_MANAGE_USERS'));
-	}
-}
+import { MockUserBackEndService } from '../service/mock/mock.user.back-end.service';
 
 
 describe('UsersComponent', () => {
 	let component: UsersComponent;
 	let fixture: ComponentFixture<UsersComponent>;
+	let selfService: AbstractSelfService;
 
 	const USER_ADMIN: User = { id: uuid(), username: 'Administrator', password: null, authorities: ['ROLE_MANAGE_USERS'] };
 	const USER_NORMAL: User = { id: uuid(), username: 'Benedict', password: null, authorities: [] };
 
 	const setUp = (self: User, testUsers: User[]) => {
-		const userServiceStub = jasmine.createSpyObj('UserService', ['getUsers']);
-		userServiceStub.getUsers.and.returnValue(of(testUsers));
+		const userServiceStub = new MockUserBackEndService(testUsers);
 
 		TestBed.configureTestingModule({
 			declarations: [UsersComponent],
 			imports: [RouterTestingModule],
 			providers: [
-				{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } },
-				{ provide: UserService, useValue: userServiceStub }
+				{ provide: AbstractSelfService, useFactory: () => { return new MockSelfService(self); } },
+				{ provide: AbstractUserBackEndService, useValue: userServiceStub }
 			]
 		});
 
 		fixture = TestBed.createComponent(UsersComponent);
 		component = fixture.componentInstance;
+		selfService = TestBed.inject(AbstractSelfService);
+		selfService.checkForCurrentAuthentication().subscribe();
 		fixture.detectChanges();
 	};
 
@@ -87,7 +78,7 @@ describe('UsersComponent', () => {
 		setUp(self, testUsers);
 
 		assertInvariants();
-		expect(component.users).toBe(testUsers);
+		expect(component.users).toEqual(testUsers);
 	};
 
 	it('can create [1]', () => {

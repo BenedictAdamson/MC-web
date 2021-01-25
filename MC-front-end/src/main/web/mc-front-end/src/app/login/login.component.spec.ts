@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
+import { AbstractSelfService } from '../service/abstract.self.service';
 import { LoginComponent } from './login.component';
 import { SelfService } from '../service/self.service';
 import { User } from '../user';
@@ -17,7 +18,7 @@ describe('LoginComponent', () => {
 
 	let routerSpy: any;
 	let httpTestingController: HttpTestingController;
-	let selfService: SelfService;
+	let selfService: AbstractSelfService;
 	let fixture: ComponentFixture<LoginComponent>;
 	let component: LoginComponent;
 
@@ -28,7 +29,7 @@ describe('LoginComponent', () => {
 			imports: [FormsModule, HttpClientTestingModule],
 			providers: [
 				{ provide: Router, useValue: routerSpy },
-				{ provide: SelfService, useClass: SelfService }
+				{ provide: AbstractSelfService, useClass: SelfService }
 			],
 			declarations: [LoginComponent]
 		})
@@ -36,12 +37,12 @@ describe('LoginComponent', () => {
 	}));
 
 	beforeEach(() => {
-        /* Inject for each test:
-         * HTTP requests will be handled by the mock back-end.
-          */
-		TestBed.get(HttpClient);
-		httpTestingController = TestBed.get(HttpTestingController);
-		selfService = TestBed.get(SelfService);
+		/* Inject for each test:
+		 * HTTP requests will be handled by the mock back-end.
+		  */
+		TestBed.inject(HttpClient);
+		httpTestingController = TestBed.inject(HttpTestingController);
+		selfService = TestBed.inject(AbstractSelfService);
 		fixture = TestBed.createComponent(LoginComponent);
 		component = fixture.componentInstance;
 		fixture.detectChanges();

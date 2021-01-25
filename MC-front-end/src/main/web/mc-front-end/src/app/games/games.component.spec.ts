@@ -1,35 +1,29 @@
-import { Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 
+import { AbstractGamesOfScenarioBackEndService } from '../service/abstract.games-of-scenario.back-end.service';
+import { AbstractSelfService } from '../service/abstract.self.service';
 import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
 import { GameService } from '../service/game.service';
-import { GameComponent } from '../game/game.component';
 import { GamesComponent } from './games.component';
-import { SelfService } from '../service/self.service';
+import { MockSelfService } from '../service/mock/mock.self.service';
 import { User } from '../user';
 
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
-class MockSelfService {
+import { MockGamesOfScenarioBackEndService } from '../service/mock/mock.games-of-scenario.back-end.service';
 
-	constructor(private self: User) { };
 
-	get username(): string {
-		return this.self.username;
-	}
-
-	get mayManageGames$(): Observable<boolean> {
-		return of(this.self.authorities.includes('ROLE_MANAGE_GAMES'));
-	}
-}
 
 describe('GamesComponent', () => {
 	let routerSpy: any;
-	let gameServiceSpy: any
+	let gameServiceSpy: any;
+	let gamesOfScenarioBackEndService: MockGamesOfScenarioBackEndService;
+	let selfService: AbstractSelfService;
 	let component: GamesComponent;
 	let fixture: ComponentFixture<GamesComponent>;
 
@@ -68,9 +62,8 @@ describe('GamesComponent', () => {
 	};
 
 	const setUpForNgInit = function(self: User, scenario: string, gamesOfScenario: string[]) {
-		gameServiceSpy = jasmine.createSpyObj('GameService', ['getGamesOfScenario', 'updateGamesOfScenario']);
-		gameServiceSpy.getGamesOfScenario.and.returnValue(of(gamesOfScenario));
-		gameServiceSpy.updateGamesOfScenario.and.returnValue(null);
+		gameServiceSpy = null;
+		gamesOfScenarioBackEndService = new MockGamesOfScenarioBackEndService(scenario, gamesOfScenario);
 
 		TestBed.configureTestingModule({
 			imports: [RouterTestingModule],
@@ -89,11 +82,14 @@ describe('GamesComponent', () => {
 				}
 			},
 			{ provide: GameService, useValue: gameServiceSpy },
-			{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }]
+			{ provide: AbstractGamesOfScenarioBackEndService, useValue: gamesOfScenarioBackEndService },
+			{ provide: AbstractSelfService, useFactory: () => { return new MockSelfService(self); } }]
 		});
 
 		fixture = TestBed.createComponent(GamesComponent);
 		component = fixture.componentInstance;
+		selfService = TestBed.inject(AbstractSelfService);
+		selfService.checkForCurrentAuthentication().subscribe();
 		fixture.detectChanges();
 	};
 
@@ -131,8 +127,6 @@ describe('GamesComponent', () => {
 		assertInvariants();
 		expect(getScenario(component)).withContext('scenario$').toEqual(scenario);
 		expect(getGames(component)).withContext('games$').toEqual(gamesOfScenario);
-		expect(gameServiceSpy.updateGamesOfScenario.calls.count()).withContext('gameService.updateGamesOfScenario calls').toEqual(1);
-		expect(gameServiceSpy.updateGamesOfScenario.calls.argsFor(0)).withContext('gameService.updateGamesOfScenario args').toEqual([scenario]);
 
 		const html: HTMLElement = fixture.nativeElement;
 		const gamesList: HTMLUListElement | null = html.querySelector('#games');
@@ -157,19 +151,17 @@ describe('GamesComponent', () => {
 	});
 
 
-
 	const setUpForCreateGame = function(game: Game) {
 		const scenario: string = game.identifier.scenario;
-		gameServiceSpy = jasmine.createSpyObj('GameService', ['getGamesOfScenario', 'createGame', 'updateGamesOfScenario']);
-		gameServiceSpy.getGamesOfScenario.and.returnValue(of([]));
+		const userServiceStub = new MockGamesOfScenarioBackEndService(scenario, []);
+
+		gameServiceSpy = jasmine.createSpyObj('GameService', ['createGame']);
 		gameServiceSpy.createGame.and.returnValue(of(game));
-		gameServiceSpy.updateGamesOfScenario.and.returnValue(null);
 
 		routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
 		routerSpy.navigateByUrl.and.returnValue(null);
 
 		TestBed.configureTestingModule({
-			imports: [RouterTestingModule],
 			declarations: [GamesComponent],
 			providers: [{
 				provide: ActivatedRoute,
@@ -184,17 +176,21 @@ describe('GamesComponent', () => {
 					}
 				}
 			},
+			{ provide: AbstractGamesOfScenarioBackEndService, useValue: userServiceStub },
 			{ provide: GameService, useValue: gameServiceSpy },
 			{ provide: Router, useValue: routerSpy },
-			{ provide: SelfService, useFactory: () => { return new MockSelfService(USER_ADMIN); } }]
+			{ provide: AbstractSelfService, useFactory: () => { return new MockSelfService(USER_ADMIN); } }]
 		});
 
 		fixture = TestBed.createComponent(GamesComponent);
 		component = fixture.componentInstance;
+		selfService = TestBed.inject(AbstractSelfService);
+		selfService.checkForCurrentAuthentication().subscribe();
 		fixture.detectChanges();
 	};
+
 	const testCreateGame = function(game: Game) {
-		const expectedPath: string = GameComponent.getGamePath(game.identifier);
+		const expectedPath: string = GamesComponent.getGamePagePath(game.identifier);
 		setUpForCreateGame(game);
 
 		component.createGame();
@@ -205,8 +201,6 @@ describe('GamesComponent', () => {
 		assertInvariants();
 		expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(1);
 		expect(routerSpy.navigateByUrl.calls.argsFor(0)).withContext('router.navigateByUrl args').toEqual([expectedPath]);
-		expect(gameServiceSpy.updateGamesOfScenario.calls.count()).withContext('gameService.updateGamesOfScenario calls').toEqual(2);
-		expect(gameServiceSpy.updateGamesOfScenario.calls.argsFor(1)).withContext('gameService.updateGamesOfScenario args').toEqual([game.identifier.scenario]);
 	};
 
 	it('can create game [A]', fakeAsync(() => {

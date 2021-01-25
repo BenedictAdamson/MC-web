@@ -1,96 +1,30 @@
-import { Observable, ReplaySubject, of } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
+import { AbstractSelfService } from '../service/abstract.self.service';
+import { AbstractGamePlayersBackEndService } from '../service/abstract.game-players.back-end.service';
+import { AbstractMayJoinGameBackEndService } from '../service/abstract.may-join-game.back-end.service';
 import { GameIdentifier } from '../game-identifier'
 import { GamePlayers } from '../game-players'
-import { GamePlayersService } from '../service/game-players.service';
 import { GamePlayersComponent } from './game-players.component';
-import { SelfService } from '../service/self.service';
+import { GamePlayersService } from '../service/game-players.service';
+import { MockGamePlayersBackEndService } from '../service/mock/mock.game-players.back-end.service';
+import { MockMayJoinGameBackEndService } from '../service/mock/mock.may-join-game.back-end.service';
+import { MayJoinGameService } from '../service/may-join-game.service';
+import { MockSelfService } from '../service/mock/mock.self.service';
 import { User } from '../user';
-
-class MockSelfService {
-
-	constructor(private self: User) { };
-
-	get id$(): Observable<string> {
-		return of(this.self.id);
-	}
-
-	get username$(): Observable<string> {
-		return of(this.self.username);
-	}
-
-	get mayManageGames$(): Observable<boolean> {
-		return of(this.self.authorities.includes('ROLE_MANAGE_GAMES'));
-	}
-}
-
-class MockGamePlayersService {
-
-	private rs$: ReplaySubject<GamePlayers> = new ReplaySubject(1);
-	private serverGamePlayers: GamePlayers;
-	private game: GameIdentifier;
-
-	constructor(
-		gamePlayers: GamePlayers,
-		private mayJoin: boolean,
-		private self: string
-	) {
-		this.game = gamePlayers.game;
-		this.rs$.next(gamePlayers);
-		this.serverGamePlayers = gamePlayers;
-	};
-
-	private expectGameIdentifier(game: GameIdentifier, method: string): void {
-		expect(game).withContext('GamePlayersService.' + method + '(game)').toEqual(this.game);
-	}
-
-	private copy(): Observable<GamePlayers> {
-		return of({ game: this.serverGamePlayers.game, recruiting: this.serverGamePlayers.recruiting, users: this.serverGamePlayers.users });
-	}
-
-	getGamePlayers(game: GameIdentifier): Observable<GamePlayers> {
-		this.expectGameIdentifier(game, 'getGamePlayers');
-		return this.rs$.pipe(
-			distinctUntilChanged()
-		);
-	}
-
-	mayJoinGame(game: GameIdentifier): Observable<boolean> {
-		this.expectGameIdentifier(game, 'mayJoinGame');
-		return of(this.mayJoin);
-	}
-
-	endRecruitment(game: GameIdentifier): Observable<GamePlayers> {
-		this.expectGameIdentifier(game, 'endRecuitment');
-		this.serverGamePlayers.recruiting = false;
-		return this.copy();
-	}
-
-	updateGamePlayers(game: GameIdentifier): void {
-		this.expectGameIdentifier(game, 'updateGamePlayers');
-		this.rs$.next(this.serverGamePlayers);
-	}
-
-	joinGame(game: GameIdentifier): Observable<GamePlayers> {
-		this.expectGameIdentifier(game, 'joinGame');
-		if (!this.serverGamePlayers.users.includes(this.self)) {
-			this.serverGamePlayers.users.push(this.self);
-		}
-		return this.copy();
-	}
-}
 
 
 describe('GamePlayersComponent', () => {
 	let component: GamePlayersComponent;
 	let fixture: ComponentFixture<GamePlayersComponent>;
-	let gamePlayersServiceSpy: MockGamePlayersService;
+	let selfService: AbstractSelfService;
+	let gamePlayersService: GamePlayersService;
+	let mayJoinGameService: MayJoinGameService;
 
 	const SCENARIO_ID_A: string = uuid();
 	const SCENARIO_ID_B: string = uuid();
@@ -139,7 +73,10 @@ describe('GamePlayersComponent', () => {
 
 	const setUp = function(gamePlayers: GamePlayers, self: User, mayJoinGame: boolean) {
 		const game: GameIdentifier = gamePlayers.game;
-		gamePlayersServiceSpy = new MockGamePlayersService(gamePlayers, mayJoinGame, self.id);
+		const gamePlayersBackEndService: AbstractGamePlayersBackEndService = new MockGamePlayersBackEndService(gamePlayers, self.id);
+		gamePlayersService = new GamePlayersService(gamePlayersBackEndService);
+		const mayJoinGameBackEnd: AbstractMayJoinGameBackEndService = new MockMayJoinGameBackEndService(mayJoinGame);
+		mayJoinGameService = new MayJoinGameService(mayJoinGameBackEnd);
 
 		TestBed.configureTestingModule({
 			declarations: [GamePlayersComponent],
@@ -162,12 +99,15 @@ describe('GamePlayersComponent', () => {
 					}
 				}
 			},
-			{ provide: GamePlayersService, useValue: gamePlayersServiceSpy },
-			{ provide: SelfService, useFactory: () => { return new MockSelfService(self); } }]
+			{ provide: GamePlayersService, useValue: gamePlayersService },
+			{ provide: MayJoinGameService, useValue: mayJoinGameService },
+			{ provide: AbstractSelfService, useFactory: () => { return new MockSelfService(self); } }]
 		});
 
 		fixture = TestBed.createComponent(GamePlayersComponent);
 		component = fixture.componentInstance;
+		selfService = TestBed.inject(AbstractSelfService);
+		selfService.checkForCurrentAuthentication().subscribe();
 		fixture.detectChanges();
 	};
 
@@ -222,11 +162,11 @@ describe('GamePlayersComponent', () => {
 		expect(getGamePlayers(component)).withContext('gamePlayers$').toEqual(gamePlayers);
 		expect(isPlaying(component)).withContext('playing').toEqual(playing);
 
-		component.isEndRecruitmentDisabled$().subscribe(may => {
+		component.isEndRecruitmentDisabled$.subscribe(may => {
 			expect(may).withContext('end recuitment disabled if game is not recuiting or user is not authorised').toEqual(!mayEndRecuitment);
 		});
 
-		component.mayJoinGame$().subscribe(may => {
+		component.mayJoinGame$.subscribe(may => {
 			expect(may).withContext('mayJoinGame').toEqual(mayJoinGame);
 		});
 

@@ -36,40 +36,22 @@ VM="k8-mc-$VERSION"
 minikube start \
   --profile="${VM}" \
   --delete-on-failure=true \
-  --memory=4g
-minikube addons enable \
-  --profile="${VM}" \
-  ingress
+  --memory=4g \
+  --addons ingress
 
 # Upload the local Docker images
 # (minikube will only fetch from public registries or using loaded images,
 # never from our local registry)
 
-saveDockerImage () {
-  echo "saving Docker image for $1"
-  docker save --output "$TMPDIR/$1.tar" "benedictadamson/$1:$VERSION"
+loadDockerImage () {
+  echo "loading Docker image for $1"
+  minikube cache add "--profile="${VM}" benedictadamson/$1:$VERSION"
 }
-
-saveDockerImage awaitport
-saveDockerImage mc-back-end
-saveDockerImage mc-database
-saveDockerImage mc-front-end-srv
-
-(
-  eval $(minikube docker-env --profile="${VM}")
-
-  loadDockerImage () {
-    echo "loading Docker image for $1"
-    docker load --input "$TMPDIR/$1.tar"
-  }
   
-  loadDockerImage awaitport
-  loadDockerImage mc-back-end
-  loadDockerImage mc-database
-  loadDockerImage mc-front-end-srv
-  
-  eval $(minikube docker-env --profile="${VM}" -u)
-)
+loadDockerImage awaitport
+loadDockerImage mc-back-end
+loadDockerImage mc-database
+loadDockerImage mc-front-end-srv
 
 echo "installing Helm package"
 helm install -g --timeout 600s "${PACKAGE}"

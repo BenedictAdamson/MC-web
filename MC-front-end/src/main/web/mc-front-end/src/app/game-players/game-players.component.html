@@ -7,14 +7,18 @@
    <p id="recruiting" >This game is not recruiting players.</p>
    </ng-template>
 
-   <button id="end-recruitment" [disabled]="isEndRecruitmentDisabled$() | async" (click)="endRecruitment()">End recruitment</button>
+   <button id="end-recruitment" [disabled]="isEndRecruitmentDisabled$ | async" (click)="endRecruitment()">End recruitment</button>
 
-   <p id="joinable"  *ngIf="mayJoinGame$() | async; else notJoinable">You may join this game.</p>
+   <div  *ngIf="mayJoinGame$ | async; else notJoinable">
+      <p id="joinable">You may join this game.</p>
+      <button id="join" (click)="joinGame()">Join</button>
+   </div>
    <ng-template #notJoinable>
-   <p id="joinable" >You may not join this game.</p>
+   <div>
+      <p id="joinable" >You may not join this game.</p>
+      <button id="join" disabled>Join</button>
+   </div>
    </ng-template>
-
-   <button id="join" [disabled]="isJoinDisabled$() | async" (click)="joinGame()">Join</button>
 
    <p id="players" *ngIf="0 < (nPlayers$ | async); else noPlayers">This game has players.</p>
    <ng-template #noPlayers>

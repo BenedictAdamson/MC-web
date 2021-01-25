@@ -3,7 +3,7 @@ import { tap } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { SelfService } from '../service/self.service';
+import { AbstractSelfService } from '../service/abstract.self.service';
 
 @Component({
 	selector: 'app-login',
@@ -14,7 +14,7 @@ export class LoginComponent implements OnInit {
 
 	constructor(
 		private readonly router: Router,
-		private readonly service: SelfService
+		private readonly service: AbstractSelfService
 	) { }
 
 	ngOnInit(): void {

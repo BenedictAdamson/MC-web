@@ -1,24 +1,24 @@
-import { Observable, defer, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
-import { SelfService } from '../self.service';
+import { AbstractSelfService } from '../abstract.self.service';
 import { User } from '../../user';
 
-export class MockSelfService {
+export class MockSelfService extends AbstractSelfService {
 
-	constructor(private self: User) { };
+	constructor(
+		private self: User | null
+	) {
+		super();
+	};
 
-	get username$(): Observable<string> {
-		return of(this.self ? this.self.username : null);
+
+	protected getUserDetails(_username: string | null, _password: string | null): Observable<User | null> {
+		return of(this.self);
 	}
 
-	get authenticated$(): Observable<boolean> {
-		return of(this.self != null);
+	protected postLogout(): Observable<null> {
+		this.self = null;
+		return of(null);
 	}
 
-	logout(): Observable<null> {
-		return defer(() => {
-			this.self = null;
-			return of(null)
-		});
-	}
 }// class

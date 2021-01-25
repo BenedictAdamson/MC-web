@@ -1,13 +1,14 @@
 import { Observable, combineLatest } from 'rxjs';
-import { distinctUntilChanged, filter, first, flatMap, map, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, mergeMap, tap } from 'rxjs/operators';
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
+import { GamePlayersService } from '../service/game-players.service';
+import { AbstractSelfService } from '../service/abstract.self.service';
 import { GameIdentifier } from '../game-identifier';
 import { GamePlayers } from '../game-players';
-import { GamePlayersService } from '../service/game-players.service';
-import { SelfService } from '../service/self.service';
+import { MayJoinGameService } from '../service/may-join-game.service';
 
 @Component({
 	selector: 'app-game',
@@ -40,14 +41,15 @@ export class GamePlayersComponent implements OnInit {
 	}
 
 	get identifier$(): Observable<GameIdentifier> {
-		return combineLatest([this.scenario$, this.created$], GamePlayersComponent.createIdentifier).pipe(
+		return combineLatest([this.scenario$, this.created$]).pipe(
+			map(([scenario, created]) => GamePlayersComponent.createIdentifier(scenario, created)),
 			distinctUntilChanged() // don't spam identical values
 		);
 	};
 
 	get gamePlayers$(): Observable<GamePlayers> {
 		return this.identifier$.pipe(
-			flatMap(identifier => this.gamePlayersService.getGamePlayers(identifier)),
+			mergeMap(identifier => this.gamePlayersService.get(identifier)),
 			filter(gps => !!gps),
 			map((gps: GamePlayers | null) => gps as GamePlayers)
 		);
@@ -56,7 +58,8 @@ export class GamePlayersComponent implements OnInit {
 	constructor(
 		private route: ActivatedRoute,
 		private gamePlayersService: GamePlayersService,
-		private selfService: SelfService
+		private mayJoinGameService: MayJoinGameService,
+		private selfService: AbstractSelfService
 	) {
 	}
 
@@ -65,28 +68,32 @@ export class GamePlayersComponent implements OnInit {
 	}
 
 
+	private static isPlaying(id: string | null, gamePlayers: GamePlayers): boolean {
+		return id ? gamePlayers.users.includes(id) : false;
+	}
+
 	get playing$(): Observable<boolean> {
-		return combineLatest([this.selfService.id$, this.gamePlayers$], (id: string, gamePlayers: GamePlayers) => {
-			return gamePlayers.users.includes(id)
-		});
-	}
-
-	isEndRecruitmentDisabled$(): Observable<boolean> {
-		return combineLatest([this.selfService.mayManageGames$, this.gamePlayers$],
-			(mayManageGames: boolean, gamePlayers: GamePlayers) => {
-				return !gamePlayers || !gamePlayers.recruiting || !mayManageGames;
-			});
-	}
-
-	isJoinDisabled$(): Observable<boolean> {
-		return this.mayJoinGame$().pipe(
-			map(may => !may)
+		return combineLatest([this.selfService.id$, this.gamePlayers$]).pipe(
+			map(([id, gamePlayers]) => GamePlayersComponent.isPlaying(id, gamePlayers))
 		);
 	}
 
-	mayJoinGame$(): Observable<boolean> {
+
+	private static isEndRecruitmentDisabled(mayManageGames: boolean, gamePlayers: GamePlayers): boolean {
+		return !gamePlayers || !gamePlayers.recruiting || !mayManageGames;
+	}
+
+	get isEndRecruitmentDisabled$(): Observable<boolean> {
+		return combineLatest([this.selfService.mayManageGames$, this.gamePlayers$]).pipe(
+			map(([mayManageGames, gamePlayers]) => GamePlayersComponent.isEndRecruitmentDisabled(mayManageGames, gamePlayers))
+		);
+	}
+
+	get mayJoinGame$(): Observable<boolean> {
 		return this.identifier$.pipe(
-			flatMap(identifier => this.gamePlayersService.mayJoinGame(identifier)),
+			mergeMap(identifier => this.mayJoinGameService.get(identifier)),
+			filter((may: boolean | null) => may != null),
+			map(may => may as boolean),
 			distinctUntilChanged() // don't spam identical values
 		);
 	}

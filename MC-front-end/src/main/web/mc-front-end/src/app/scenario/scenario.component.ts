@@ -1,3 +1,6 @@
+import { Observable } from 'rxjs';
+import { distinctUntilChanged, filter, map, mergeMap } from 'rxjs/operators';
+
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
@@ -11,27 +14,31 @@ import { ScenarioService } from '../service/scenario.service';
 })
 export class ScenarioComponent implements OnInit {
 
-
-	static getScenarioPath(scenario: string): string {
-		return '/scenario/' + scenario;
-	}
-
-	scenario: Scenario;
-
 	constructor(
 		private route: ActivatedRoute,
 		private scenarioService: ScenarioService
 	) { }
 
+
+	get id$(): Observable<string> {
+		return this.route.paramMap.pipe(
+			map(params => params.get('scenario')),
+			distinctUntilChanged(),
+			filter(id => !!id),
+			map((id: string | null) => id as string)
+		);
+	}
+
+	get scenario$(): Observable<Scenario> {
+		return this.id$.pipe(
+			mergeMap(id => this.scenarioService.get(id)),
+			filter(scenario => !!scenario),
+			map((scenario: Scenario | null) => scenario as Scenario)
+		)
+	}
+
 	ngOnInit() {
-		const scenario: string | null = this.route.snapshot.paramMap.get('scenario');
-		if (!scenario) throw new Error('missing scenario')
-		this.getScenario(scenario);
+		// Do nothing
 	}
 
-
-	private getScenario(id: string): void {
-		this.scenarioService.getScenario(id)
-			.subscribe(scenario => this.scenario = scenario);
-	}
 }

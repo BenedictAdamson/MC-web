@@ -1,50 +1,44 @@
-import { Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 
+import { AbstractScenarioBackEndService } from './abstract.scenario.back-end.service';
+import { CachingKeyValueService } from './caching.key-value.service';
 import { NamedUUID } from '../named-uuid';
 import { Scenario } from '../scenario';
+
+
 
 @Injectable({
 	providedIn: 'root'
 })
-export class ScenarioService {
-
-	private scenarioUrl = '/api/scenario';  // URL to API
+export class ScenarioService extends CachingKeyValueService<string, Scenario, void>  {
 
 	constructor(
-		private http: HttpClient) { }
+		private scenarioBackEnd: AbstractScenarioBackEndService
+	) {
+		super(scenarioBackEnd);
+	}
+
+
+	getAll(): undefined {
+		return undefined;
+	}
+
+	add(_specification: void): undefined {
+		return undefined;
+	}
 
 	getScenarioIdentifiers(): Observable<NamedUUID[]> {
-		return this.http.get<NamedUUID[]>(this.scenarioUrl)
-			.pipe(
-				catchError(this.handleError<NamedUUID[]>('getScenarioIdentifiers', []))
-			);
+		return this.scenarioBackEnd.getScenarioIdentifiers();
 	}
 
-	getScenario(id: string): Observable<Scenario> {
-		const url = `${this.scenarioUrl}/${id}`;
-		return this.http.get<Scenario>(url)
-			.pipe(
-				catchError(this.handleError<Scenario>(`getScenario id=${id}`))
-			);
+
+	protected createKeyString(id: string): string {
+		return id;
 	}
-    /**
-     * Handle Http operation that failed.
-     * Let the app continue.
-     * @param operation - name of the operation that failed
-     * @param result - optional value to return as the observable result
-     */
-	private handleError<T>(operation = 'operation', result?: T) {
-		return (error: any): Observable<T> => {
 
-			// TODO: send the error to remote logging infrastructure
-			console.error(operation + error); // log to console instead
-
-			// Let the app keep running by returning an empty result.
-			return of(result as T);
-		};
+	protected getKey(value: Scenario): string {
+		return value.identifier;
 	}
 }

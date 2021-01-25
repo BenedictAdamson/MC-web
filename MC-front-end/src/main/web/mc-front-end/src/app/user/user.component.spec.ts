@@ -3,11 +3,14 @@ import { v4 as uuid } from 'uuid';
 
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+
+import { AbstractUserBackEndService } from '../service/abstract.user.back-end.service';
 import { User } from '../user';
 import { UserComponent } from './user.component';
-import { UserService } from '../service/user.service';
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MockUserBackEndService } from '../service/mock/mock.user.back-end.service';
+
 
 describe('UserComponent', () => {
 	let component: UserComponent;
@@ -29,8 +32,7 @@ describe('UserComponent', () => {
 	};
 
 	const setUp = (testUser: User) => {
-		const userServiceStub = jasmine.createSpyObj('UserService', ['getUser', 'updateUser']);
-		userServiceStub.getUser.and.returnValue(of(testUser));
+		const userServiceStub = new MockUserBackEndService([testUser]);
 
 		TestBed.configureTestingModule({
 			declarations: [UserComponent],
@@ -40,7 +42,7 @@ describe('UserComponent', () => {
 					paramMap: of(convertToParamMap({ id: testUser.id }))
 				}
 			},
-			{ provide: UserService, useValue: userServiceStub }]
+			{ provide: AbstractUserBackEndService, useValue: userServiceStub }]
 		});
 
 		fixture = TestBed.createComponent(UserComponent);

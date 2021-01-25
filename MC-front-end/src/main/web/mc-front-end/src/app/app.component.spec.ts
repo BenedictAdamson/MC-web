@@ -1,69 +1,37 @@
-import { Observable, defer, of } from 'rxjs';
+import { v4 as uuid } from 'uuid';
 
-import { TestBed, waitForAsync } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 
+import { AbstractSelfService } from './service/abstract.self.service';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
+import { MockSelfService } from './service/mock/mock.self.service';
 import { SelfComponent } from './self/self.component';
-import { SelfService } from './service/self.service';
+import { User } from './user';
 
-
-
-class MockSelfService {
-
-	constructor(private mayListUsers: boolean) {
-
-	}
-
-	checkForCurrentAuthentication_calls: number = 0;
-
-	get username(): string | null {
-		return null;
-	}
-
-	get authenticated$(): Observable<boolean> {
-		return of(false);
-	}
-
-	logout(): Observable<null> {
-		return defer(() => {
-			return of(null)
-		});
-	}
-
-	checkForCurrentAuthentication(): Observable<null> {
-		this.checkForCurrentAuthentication_calls++;
-		return of(null);
-	}
-
-
-	get mayListUsers$(): Observable<boolean> {
-		return of(this.mayListUsers);
-	}
-}// class
 
 describe('AppComponent', () => {
-	let mockSelfService: any;
+	let selfService: AbstractSelfService;
 
-	const setUp = function(mayListUsers: boolean) {
-		mockSelfService = new MockSelfService(mayListUsers);
+	const setUp = function(authorities: string[]) {
+		const self: User = { id: uuid(), username: 'Benedict', password: null, authorities: authorities };
+		selfService = new MockSelfService(self);
 		TestBed.configureTestingModule({
 			declarations: [
 				AppComponent, SelfComponent
 			],
-			imports: [HttpClientTestingModule,
+			imports: [
 				RouterTestingModule.withRoutes(
 					[{ path: '', component: HomeComponent }]
 				)
 			],
-			providers: [{ provide: SelfService, useValue: mockSelfService }]
+			providers: [{ provide: AbstractSelfService, useValue: selfService }]
 		}).compileComponents();
 	};
 
-	const testSetUp = function(mayListUsers: boolean) {
-		setUp(mayListUsers);
+	const testSetUp = function(authorities: string[], expectMayListUsers: boolean) {
+		setUp(authorities);
 		const fixture = TestBed.createComponent(AppComponent);
 		const app = fixture.debugElement.componentInstance;
 		fixture.detectChanges();
@@ -72,10 +40,9 @@ describe('AppComponent', () => {
 		const scenariosLink = html.querySelector('a[id="scenarios"]');
 
 		expect(app).toBeTruthy();
-		expect(mockSelfService.checkForCurrentAuthentication_calls).withContext('Checked the server for current authentication information').toBe(1);
 
 		expect(html.querySelector('h1').textContent).withContext('h1 text').toContain('Mission Command');
-		expect(usersLink != null).withContext('has users link element').toBe(mayListUsers);
+		expect(usersLink != null).withContext('has users link element').toBe(expectMayListUsers);
 		if (usersLink != null) {
 			expect(usersLink.textContent).withContext('users link text').toContain('Users');
 		}
@@ -83,11 +50,11 @@ describe('AppComponent', () => {
 		expect(scenariosLink.textContent).withContext('scenarios link text').toContain('Scenarios');
 	};
 
-	it('can be constructed [!mayListUsers]', () => {
-		testSetUp(false);
+	it('can be constructed [no roles]', () => {
+		testSetUp([], false);
 	});
 
-	it('can be constructed [mayListUsers]', () => {
-		testSetUp(true);
+	it('can be constructed [player]', () => {
+		testSetUp(['ROLE_PLAYER'], true);
 	});
 });

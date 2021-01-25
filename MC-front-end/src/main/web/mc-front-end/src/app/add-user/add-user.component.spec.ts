@@ -1,39 +1,16 @@
 import { Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
 import { FormsModule } from '@angular/forms';
 
-import { ComponentFixture, TestBed, waitForAsync, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
+import { AbstractUserBackEndService } from '../service/abstract.user.back-end.service';
 import { AddUserComponent } from './add-user.component';
 import { UserDetails } from '../user-details';
-import { UserService } from '../service/user.service';
 import { User } from '../user';
 
-class MockUserService {
-	users: User[] = [];
-
-	getUsers(): Observable<User[]> {
-		return of(this.users);
-	}
-
-	getUser(username: string): Observable<User | null> {
-		for (let user of this.users) {
-			if (user.username == username) return of(user);
-		}
-		return of(null);
-	}
-
-	add(userDetails: UserDetails): Observable<User | null> {
-		for (let present of this.users) {
-			if (present.username == userDetails.username) return of(null);
-		}
-		const user: User = new User(uuid(), userDetails);
-		this.users.push(user);
-		return of(user);
-	}
-}
+import { MockUserBackEndService } from '../service/mock/mock.user.back-end.service';
 
 describe('AddUserComponent', () => {
 	const USER_DETAILS_A: UserDetails = { username: 'Administrator', password: 'letmein', authorities: [] };
@@ -42,32 +19,31 @@ describe('AddUserComponent', () => {
 	const USER_B: User = new User(uuid(), USER_DETAILS_B);
 
 	let routerSpy: any;
-	let userService: MockUserService;
+	let userBackEndService: MockUserBackEndService;
 	let fixture: ComponentFixture<AddUserComponent>;
 	let component: AddUserComponent;
 
-	beforeEach(waitForAsync(() => {
+	const setUp = function(users0: User[]) {
+		userBackEndService = new MockUserBackEndService(users0);
 		routerSpy = jasmine.createSpyObj('Router', ['navigateByUrl']);
 		routerSpy.navigateByUrl.and.returnValue(null);
+
 		TestBed.configureTestingModule({
 			imports: [FormsModule],
 			providers: [
 				{ provide: Router, useValue: routerSpy },
-				{ provide: UserService, useClass: MockUserService }
+				{ provide: AbstractUserBackEndService, useValue: userBackEndService }
 			],
 			declarations: [AddUserComponent]
 		})
 			.compileComponents();
-	}));
-
-	beforeEach(() => {
-		userService = TestBed.get(UserService);
 		fixture = TestBed.createComponent(AddUserComponent);
 		component = fixture.componentInstance;
 		fixture.detectChanges();
-	});
+	};
 
 	it('can be created', () => {
+		setUp([]);
 		expect(component).toBeTruthy();
 		expect(component.userDetails.username).withContext('username').toEqual('');
 		expect(component.userDetails.password).withContext('password').toEqual('');
@@ -87,10 +63,11 @@ describe('AddUserComponent', () => {
 
 
 	const testAddFailure = function(user: User) {
-		userService.users.push(user);// will fail because a duplicate username
+		setUp([user]); // will fail because a duplicate username
 		component.userDetails = new UserDetails(user);
 
 		component.add();
+		tick();
 		tick();
 		fixture.detectChanges();
 
@@ -110,6 +87,7 @@ describe('AddUserComponent', () => {
 
 
 	const testAddSuccess = function(userDetails: UserDetails) {
+		setUp([]);
 		component.userDetails = userDetails;
 
 		component.add();
@@ -119,7 +97,10 @@ describe('AddUserComponent', () => {
 		expect(component.rejected).withContext('rejected').toBeFalse();
 		expect(routerSpy.navigateByUrl.calls.count()).withContext('router.navigateByUrl calls').toEqual(1);
 		expect(routerSpy.navigateByUrl.calls.argsFor(0)).withContext('router.navigateByUrl args').toEqual(['/user']);
-		const addedUser: User = userService.users[userService.users.length - 1];
+
+		const users: User[] = userBackEndService.users;
+		expect(users.length).withContext('users length').toEqual(1);
+		const addedUser: User = users[0];
 		expect(addedUser.username).withContext('added username').toEqual(userDetails.username);
 		expect(addedUser.password).withContext('added password').toEqual(userDetails.password);
 		expect(addedUser.authorities).withContext('added authorities').toEqual([]);
