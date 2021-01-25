@@ -1,5 +1,5 @@
 import { Observable, combineLatest } from 'rxjs';
-import { distinctUntilChanged, filter, flatMap, map } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, mergeMap } from 'rxjs/operators';
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -53,9 +53,9 @@ export class GameComponent implements OnInit {
 
 	get game$(): Observable<Game> {
 		return this.identifier$.pipe(
-			flatMap(identifier => this.gameService.get(identifier)),
-			filter(game => !!flatMap),
-			map((flatMap: Game | null) => flatMap as Game)
+			mergeMap(identifier => this.gameService.get(identifier)),
+			filter(game => !!game),
+			map((game: Game | null) => game as Game)
 		);
 	}
 

@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { distinctUntilChanged, filter, first, flatMap, map, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, mergeMap, tap } from 'rxjs/operators';
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -31,7 +31,7 @@ export class UserComponent implements OnInit {
 
 	get user$(): Observable<User> {
 		return this.id$.pipe(
-			flatMap(id => this.userService.get(id)),
+			mergeMap(id => this.userService.get(id)),
 			filter(user => !!user),
 			map((user: User | null) => user as User)
 		)

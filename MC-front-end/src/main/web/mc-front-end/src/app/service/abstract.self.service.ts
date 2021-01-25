@@ -1,5 +1,5 @@
 import { Observable, ReplaySubject, of } from 'rxjs';
-import { flatMap, map } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs/operators';
 
 import { User } from '../user';
 
@@ -143,7 +143,7 @@ export abstract class AbstractSelfService {
 	 */
 	logout(): Observable<null> {
 		return this.postLogout().pipe(
-			flatMap(() => {
+			mergeMap(() => {
 				this.clear();
 				return of(null);
 			}

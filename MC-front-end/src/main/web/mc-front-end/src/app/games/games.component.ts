@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { filter, first, flatMap, map, tap } from 'rxjs/operators';
+import { filter, first, map, mergeMap, tap } from 'rxjs/operators';
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -31,7 +31,7 @@ export class GamesComponent implements OnInit {
 
 	get games$(): Observable<string[]> {
 		return this.scenario$.pipe(
-			flatMap(scenario => this.gamesOfScenarioService.get(scenario)),
+			mergeMap(scenario => this.gamesOfScenarioService.get(scenario)),
 			map((games: string[] | null) => {
 				if (games) {
 					return games;
@@ -75,7 +75,7 @@ export class GamesComponent implements OnInit {
 	createGame(): void {
 		this.scenario$.pipe(
 			first(),// create only 1 game
-			flatMap(scenario => this.gameService.createGame(scenario)),
+			mergeMap(scenario => this.gameService.createGame(scenario)),
 			map(game => game.identifier),
 			tap(gameIdentifier => {
 				this.gamesOfScenarioService.update(gameIdentifier.scenario);

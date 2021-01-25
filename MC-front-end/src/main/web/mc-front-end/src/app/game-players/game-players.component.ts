@@ -1,5 +1,5 @@
 import { Observable, combineLatest } from 'rxjs';
-import { distinctUntilChanged, filter, first, flatMap, map, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, mergeMap, tap } from 'rxjs/operators';
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -48,7 +48,7 @@ export class GamePlayersComponent implements OnInit {
 
 	get gamePlayers$(): Observable<GamePlayers> {
 		return this.identifier$.pipe(
-			flatMap(identifier => this.gamePlayersService.get(identifier)),
+			mergeMap(identifier => this.gamePlayersService.get(identifier)),
 			filter(gps => !!gps),
 			map((gps: GamePlayers | null) => gps as GamePlayers)
 		);
@@ -82,7 +82,7 @@ export class GamePlayersComponent implements OnInit {
 
 	get mayJoinGame$(): Observable<boolean> {
 		return this.identifier$.pipe(
-			flatMap(identifier => this.mayJoinGameService.get(identifier)),
+			mergeMap(identifier => this.mayJoinGameService.get(identifier)),
 			filter((may: boolean | null) => may != null),
 			map(may => may as boolean),
 			distinctUntilChanged() // don't spam identical values

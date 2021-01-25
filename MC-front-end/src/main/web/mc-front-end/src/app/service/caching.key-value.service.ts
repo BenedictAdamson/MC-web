@@ -1,5 +1,5 @@
 import { Observable, ReplaySubject, combineLatest } from 'rxjs';
-import { distinctUntilChanged, first, flatMap, map, tap } from 'rxjs/operators';
+import { distinctUntilChanged, first, map, mergeMap, tap } from 'rxjs/operators';
 
 import { AbstractKeyValueService } from './abstract.key-value.service'
 
@@ -94,7 +94,7 @@ export abstract class CachingKeyValueService<KEY, VALUE, SPECIFICATION>
 				}
 				return rses;
 			}),
-			flatMap((rses: Observable<VALUE | null>[]) =>
+			mergeMap((rses: Observable<VALUE | null>[]) =>
 				combineLatest(rses).pipe(
 					// remove nulls
 					map((values: (VALUE | null)[]) => values.filter((value) => !!value) as VALUE[])

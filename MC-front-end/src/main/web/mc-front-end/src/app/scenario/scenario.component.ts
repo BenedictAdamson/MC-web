@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { distinctUntilChanged, filter, flatMap, map } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, mergeMap } from 'rxjs/operators';
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -31,7 +31,7 @@ export class ScenarioComponent implements OnInit {
 
 	get scenario$(): Observable<Scenario> {
 		return this.id$.pipe(
-			flatMap(id => this.scenarioService.get(id)),
+			mergeMap(id => this.scenarioService.get(id)),
 			filter(scenario => !!scenario),
 			map((scenario: Scenario | null) => scenario as Scenario)
 		)
