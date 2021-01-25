@@ -38,7 +38,7 @@ describe('SelfComponent', () => {
 
 		fixture = TestBed.createComponent(SelfComponent);
 		component = fixture.componentInstance;
-		selfService = TestBed.get(AbstractSelfService);
+		selfService = TestBed.inject(AbstractSelfService);
 		selfService.checkForCurrentAuthentication().subscribe();
 		fixture.detectChanges();
 	};

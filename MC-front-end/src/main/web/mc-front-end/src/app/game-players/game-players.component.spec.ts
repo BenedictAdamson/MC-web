@@ -106,7 +106,7 @@ describe('GamePlayersComponent', () => {
 
 		fixture = TestBed.createComponent(GamePlayersComponent);
 		component = fixture.componentInstance;
-		selfService = TestBed.get(AbstractSelfService);
+		selfService = TestBed.inject(AbstractSelfService);
 		selfService.checkForCurrentAuthentication().subscribe();
 		fixture.detectChanges();
 	};

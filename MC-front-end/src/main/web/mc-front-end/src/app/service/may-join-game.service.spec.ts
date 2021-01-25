@@ -33,8 +33,8 @@ describe('MayJoinGameService', () => {
 			imports: [HttpClientTestingModule]
 		});
 
-		const httpClient: HttpClient = TestBed.get(HttpClient);
-		httpTestingController = TestBed.get(HttpTestingController);
+		const httpClient: HttpClient = TestBed.inject(HttpClient);
+		httpTestingController = TestBed.inject(HttpTestingController);
 		const backEnd: AbstractMayJoinGameBackEndService = new HttpMayJoinGameBackEndService(httpClient);
 		return new MayJoinGameService(backEnd);
 	};

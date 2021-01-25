@@ -120,8 +120,8 @@ describe('SelfService', () => {
         /* Inject for each test:
          * HTTP requests will be handled by the mock back-end.
           */
-		httpClient = TestBed.get(HttpClient);
-		httpTestingController = TestBed.get(HttpTestingController);
+		httpClient = TestBed.inject(HttpClient);
+		httpTestingController = TestBed.inject(HttpTestingController);
 	});
 	beforeEach(() => {
 		service = new SelfService(httpClient);

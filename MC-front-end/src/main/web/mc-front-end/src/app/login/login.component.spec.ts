@@ -40,9 +40,9 @@ describe('LoginComponent', () => {
 		/* Inject for each test:
 		 * HTTP requests will be handled by the mock back-end.
 		  */
-		TestBed.get(HttpClient);
-		httpTestingController = TestBed.get(HttpTestingController);
-		selfService = TestBed.get(AbstractSelfService);
+		TestBed.inject(HttpClient);
+		httpTestingController = TestBed.inject(HttpTestingController);
+		selfService = TestBed.inject(AbstractSelfService);
 		fixture = TestBed.createComponent(LoginComponent);
 		component = fixture.componentInstance;
 		fixture.detectChanges();

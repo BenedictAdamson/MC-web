@@ -31,8 +31,8 @@ describe('GamePlayersService', () => {
 			imports: [HttpClientTestingModule]
 		});
 
-		const httpClient: HttpClient = TestBed.get(HttpClient);
-		httpTestingController = TestBed.get(HttpTestingController);
+		const httpClient: HttpClient = TestBed.inject(HttpClient);
+		httpTestingController = TestBed.inject(HttpTestingController);
 		const backEnd: AbstractGamePlayersBackEndService = new HttpGamePlayersBackEndService(httpClient);
 		return new GamePlayersService(backEnd);
 	};

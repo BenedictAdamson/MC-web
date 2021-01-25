@@ -32,8 +32,8 @@ describe('UserService', () => {
 			imports: [HttpClientTestingModule]
 		});
 
-		const httpClient: HttpClient = TestBed.get(HttpClient);
-		httpTestingController = TestBed.get(HttpTestingController);
+		const httpClient: HttpClient = TestBed.inject(HttpClient);
+		httpTestingController = TestBed.inject(HttpTestingController);
 		const backEnd: AbstractUserBackEndService = new HttpUserBackEndService(httpClient);
 		return new UserService(backEnd);
 	};

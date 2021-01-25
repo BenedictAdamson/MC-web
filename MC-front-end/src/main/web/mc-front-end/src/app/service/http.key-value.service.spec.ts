@@ -71,8 +71,8 @@ describe('HttpKeyValueService', () => {
 		/* Inject for each test:
 		 * HTTP requests will be handled by the mock back-end.
 		  */
-		const http: HttpClient = TestBed.get(HttpClient);
-		httpTestingController = TestBed.get(HttpTestingController);
+		const http: HttpClient = TestBed.inject(HttpClient);
+		httpTestingController = TestBed.inject(HttpTestingController);
 		service = new TestHttpKeyValueService(http, allUrl, addUrl);
 	};
 
