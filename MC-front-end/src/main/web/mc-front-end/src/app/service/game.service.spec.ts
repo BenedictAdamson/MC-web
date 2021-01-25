@@ -4,10 +4,10 @@ import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
 import { AbstractGameBackEndService } from './abstract.game.back-end.service';
-import { HttpGameBackEndService, getApiGamePath } from './http.game.back-end.service';
+import { HttpGameBackEndService } from './http.game.back-end.service';
 import { Game } from '../game'
 import { GameIdentifier } from '../game-identifier'
 import { GameService } from './game.service';
@@ -20,9 +20,6 @@ describe('GameService', () => {
 	const SCENARIO_B: string = uuid();
 	const CREATED_A: string = '1970-01-01T00:00:00.000Z';
 	const CREATED_B: string = '2020-12-31T23:59:59.999Z';
-	const CREATEDS_0: string[] = [];
-	const CREATEDS_1: string[] = [CREATED_A];
-	const CREATEDS_2: string[] = [CREATED_A, CREATED_B];
 	const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_A, created: CREATED_A };
 	const GAME_IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_B, created: CREATED_B };
 	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A };
