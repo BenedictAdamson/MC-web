@@ -6,7 +6,6 @@ import { FormsModule } from '@angular/forms';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
 import { AbstractUserBackEndService } from '../service/abstract.user.back-end.service';
-import { UserService } from '../service/user.service';
 import { AddUserComponent } from './add-user.component';
 import { UserDetails } from '../user-details';
 import { User } from '../user';

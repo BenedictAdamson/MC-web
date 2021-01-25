@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 
 import { UserService } from '../service/user.service';
 import { UserDetails } from '../user-details';
-import { User } from '../user';
 
 @Component({
 	selector: 'app-add-user',
@@ -36,7 +35,7 @@ export class AddUserComponent implements OnInit {
 	 */
 	add(): void {
 		this.service.add(this.userDetails).subscribe({
-			next: (user: User) => {
+			next: () => {
 				this.rejected = false;
 				this.router.navigateByUrl('/user')
 			},
