@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020-21.
  *
  * This file is part of MC.
  *
@@ -113,6 +113,12 @@ public class ScenarioSteps extends Steps {
    @Then("The scenario page includes the scenario description")
    public void scenario_page_includes_scenario_description() {
       // Hard to test
+   }
+
+   @Then("The scenario page includes the list of playable characters of that scenario")
+   public void scenario_page_includes_the_list_of_playable_characters_of_that_scenario() {
+      world.getAndAssertExpectedPage(ScenarioPage.class)
+               .assertHasListOfCharacters();
    }
 
    @When("Viewing the games of the scenario")

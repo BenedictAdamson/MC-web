@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-21.
  *
  * This file is part of MC.
  *
@@ -25,6 +25,7 @@ import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -66,6 +67,8 @@ public final class GamePage extends Page {
             "You are playing this game");
    private static final Matcher<String> INDICATES_IS_NOT_PLAYING = containsString(
             "You are not playing this game");
+   private static final Matcher<String> INDICATES_CHARACTER_PLAYED = containsString(
+            " as character ");
    private static final Matcher<String> INDICATES_JOINING_NFORMATION = anyOf(
             INDICATES_IS_JOINABLE, INDICATES_IS_NOT_JOINABLE);
    private static final Matcher<String> INDICATES_HAS_NO_PLAYERS = containsString(
@@ -81,6 +84,8 @@ public final class GamePage extends Page {
    private static final By END_RECRUITMENT_BUTTON_LOCATOR = By
             .id("end-recruitment");
    private static final By JOIN_BUTTON_LOCATOR = By.id("join");
+   private static final By PLAYED_CHARACTERS_ELEMENT_LOCATOR = By
+            .id("played-characters");
 
    private static boolean hasEndedRecruitment(final WebElement body) {
       final var elements = body.findElements(RECRUITING_ELEMENT_LOCATOR);
@@ -120,6 +125,12 @@ public final class GamePage extends Page {
       includesCreationTime = creationTime == null ? null
                : containsString(creationTime);
       includesScenarioTitile = containsString(scenarioPage.getScenarioTitle());
+   }
+
+   public void assertDoesNotIndicateWhichCharactersPlayedByOtherUsers() {
+      assertThat("Does not list characters",
+               getBody().findElements(PLAYED_CHARACTERS_ELEMENT_LOCATOR),
+               empty());
    }
 
    private WebElement assertHasJoinableElement(final WebElement body) {
@@ -241,6 +252,16 @@ public final class GamePage extends Page {
       final var joinable = assertHasJoinableElement(body);
       assertThat("Indicates whether the user may join this game",
                joinable.getText(), INDICATES_JOINING_NFORMATION);
+   }
+
+   public void assertIndicatesWhichCharactersPlayedByWhichUsers() {
+      assertHasElement(getBody(), PLAYED_CHARACTERS_ELEMENT_LOCATOR);
+   }
+
+   public void assertIndicatesWhichCharacterUserIsPlaying() {
+      final var playing = assertHasPlayingElement(getBody());
+      assertThat("Indicates which character user is playing", playing.getText(),
+               INDICATES_CHARACTER_PLAYED);
    }
 
    private void assertJoinButtonConsistentWithJoinableText(

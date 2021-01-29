@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020-21.
  *
  * This file is part of MC.
  *
@@ -92,6 +92,12 @@ public class GameSteps extends Steps {
       world.setExpectedPage(gamePage);
    }
 
+   @Then("The game page does not indicate which characters are played by which \\(other) users")
+   public void game_page_does_not_indicate_which_characters_are_played_by_other_users() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertDoesNotIndicateWhichCharactersPlayedByOtherUsers();
+   }
+
    @Then("The game page includes the scenario description")
    public void game_page_includes_scenario_description() {
       // hard to test
@@ -179,6 +185,18 @@ public class GameSteps extends Steps {
    public void game_page_indicates_whether_user_may_join_game() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesWhetherUserMayJoinGame();
+   }
+
+   @Then("The game page indicates which character \\(if any) the user is playing")
+   public void game_page_indicates_which_character_user_is_playing() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertIndicatesWhichCharacterUserIsPlaying();
+   }
+
+   @Then("The game page indicates which characters are played by which users")
+   public void game_page_indicates_which_characters_are_played_by_which_users() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertIndicatesWhichCharactersPlayedByWhichUsers();
    }
 
    @Then("the list of games includes the new game")

@@ -39,6 +39,7 @@ public final class ScenarioPage extends Page {
 
    private static final String BASE = "/scenario/";
 
+   private static final By CHARACTERS_LIST_LOCATOR = By.id("characters");
    private static final By GAMES_LIST_LOCATOR = By.id("games");
    private static final By CREATE_GAME_LOCATOR = By.id("create-game");
 
@@ -68,6 +69,14 @@ public final class ScenarioPage extends Page {
    private void assertDisplaysScenarioTitle(final WebElement body) {
       assertThat("displays the scenario title", body.getText(),
                containsString(scenarioTitle));
+   }
+
+   public void assertHasListOfCharacters() {
+      assertHasListOfCharacters(getBody());
+   }
+
+   private void assertHasListOfCharacters(final WebElement body) {
+      assertHasElement(body, CHARACTERS_LIST_LOCATOR);
    }
 
    public void assertHasListOfGames() {
@@ -125,7 +134,7 @@ public final class ScenarioPage extends Page {
          throw new IndexOutOfBoundsException("Negative gameIndex");
       }
       requireIsReady();
-      final List<WebElement> gameElements = findGameElements();
+      final var gameElements = findGameElements();
       final WebElement listEntry;
       try {
          listEntry = gameElements.get(gameIndex);
