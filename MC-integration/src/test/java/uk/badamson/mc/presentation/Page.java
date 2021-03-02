@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-21.
  *
  * This file is part of MC.
  *
@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -37,7 +38,9 @@ import org.hamcrest.CustomTypeSafeMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
+import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -72,6 +75,15 @@ public abstract class Page {
 
    }// class
 
+   protected static abstract class WebElementMatcher
+            extends TypeSafeDiagnosingMatcher<WebElement> {
+
+      @Override
+      public void describeTo(final Description description) {
+         description.appendText("Element matches");
+      }
+   }// class
+
    /**
     * <p>
     * How error messages are expected to be marked up in pages.
@@ -80,6 +92,20 @@ public abstract class Page {
    public static final By ERROR_LOCATOR = By.className("error");
 
    private static final By BODY_LOCATOR = By.tagName("body");
+
+   private static final Matcher<WebElement> HAS_ERROR_ELEMENT = new WebElementMatcher() {
+
+      @Override
+      public void describeTo(final Description description) {
+         description.appendText("Has an element with the error class");
+      }
+
+      @Override
+      protected boolean matchesSafely(final WebElement item,
+               final Description mismatchDescription) {
+         return !item.findElements(ERROR_LOCATOR).isEmpty();
+      }
+   };
 
    /**
     * <p>
@@ -284,32 +310,22 @@ public abstract class Page {
       // Do nothing
    }
 
-   public final void awaitIsReady() throws IllegalStateException {
-      awaitIsReady(body -> true);
+   public final void awaitIsReady() throws NotReadyException {
+      awaitIsReady(isA(WebElement.class));
    }
 
    protected final void awaitIsReady(
-            @Nonnull final Predicate<WebElement> satisfiesAdditionalConstraints)
+            @Nonnull final Matcher<WebElement> additionalBodyConstraints)
             throws IllegalStateException {
       try {
-         new WebDriverWait(webDriver, 17).until(
-                  driver -> isReady(driver, satisfiesAdditionalConstraints));
+         new WebDriverWait(webDriver, 17)
+                  .until(driver -> isReady(driver, additionalBodyConstraints));
+      } catch (final TimeoutException e) {
+         requireIsReady(); // throws NotReadyException, with good diagnostics,
+                           // if still not ready
+         // OK, the final check was OK, so *just* became ready in time
       } catch (final Exception e) {// give better diagnostics
          throw new NotReadyException(e);
-      }
-   }
-
-   public final void awaitIsReadyOrErrorMessage() throws IllegalStateException {
-      try {
-         new WebDriverWait(webDriver, 17)
-                  .until(driver -> isReady(driver, body -> true)
-                           || !driver.findElements(ERROR_LOCATOR).isEmpty());
-      } catch (final Exception e) {// give better diagnostics
-         throw new IllegalStateException(
-                  "No indication of success or failure (awaiting "
-                           + getClass().getTypeName() + ", at "
-                           + getCurrentPath() + ")",
-                  e);
       }
    }
 
@@ -391,14 +407,13 @@ public abstract class Page {
    }
 
    private boolean isReady(final WebDriver driver,
-            final Predicate<WebElement> satisfiesAdditionalConstraints) {
+            final Matcher<WebElement> additionalRequirements) {
       final var body = driver.findElement(BODY_LOCATOR);
       try {
          requireIsReady(getPathOfUrl(driver.getCurrentUrl()), driver.getTitle(),
                   body);
-         if (!satisfiesAdditionalConstraints.test(body)) {
-            throw new NotReadyException();
-         }
+         requireForReady("Additional body constraints", body,
+                  additionalRequirements);
       } catch (final NotReadyException e) {
          return false;
       }
@@ -436,10 +451,12 @@ public abstract class Page {
       }
    }
 
-   public final void requireIsReady() throws IllegalStateException {
-      if (!isReady(webDriver, body -> true)) {
-         throw new NotReadyException();
-      }
+   public final void requireHasErrorMessage() throws IllegalStateException {
+      requireForReady("Has error message(s)", getBody(), HAS_ERROR_ELEMENT);
+   }
+
+   public final void requireIsReady() throws NotReadyException {
+      requireIsReady(getCurrentPath(), getTitle(), getBody());
    }
 
    /**

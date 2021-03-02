@@ -66,12 +66,15 @@ public final class AddUserPage extends Page {
       getBody().findElement(By.xpath("//input[@type='password']"))
                .sendKeys(password);
       getBody().findElement(By.xpath("//button[@type='submit']")).submit();
-      usersPage.awaitIsReadyOrErrorMessage();
-      if (usersPage.isCurrentPath()) {
+
+      /* Must either transition to the Users' Page, or report an error. */
+      try {
+         usersPage.requireIsReady();
          return usersPage;
-      } else {
-         return this;
+      } catch (final NotReadyException e) {
+         requireHasErrorMessage();
       }
+      return this;
    }
 
 }

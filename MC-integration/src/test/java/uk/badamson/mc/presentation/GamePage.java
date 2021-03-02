@@ -34,6 +34,7 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -87,17 +88,29 @@ public final class GamePage extends Page {
    private static final By PLAYED_CHARACTERS_ELEMENT_LOCATOR = By
             .id("played-characters");
 
-   private static boolean hasEndedRecruitment(final WebElement body) {
-      final var elements = body.findElements(RECRUITING_ELEMENT_LOCATOR);
-      return elements.size() == 1 && INDICATES_IS_NOT_RECRUITING_PLAYERS
-               .matches(elements.get(0).getText());
-   }
+   private static final Matcher<WebElement> HAS_ENDED_RECUITMENT = new WebElementMatcher() {
 
-   private static boolean isPlayingGame(final WebElement body) {
-      final var elements = body.findElements(PLAYING_ELEMENT_LOCATOR);
-      return elements.size() == 1
-               && INDICATES_IS_PLAYING.matches(elements.get(0).getText());
-   }
+      @Override
+      protected boolean matchesSafely(final WebElement body,
+               final Description mismatchDescription) {
+         final var elements = body.findElements(RECRUITING_ELEMENT_LOCATOR);
+         return elements.size() == 1 && INDICATES_IS_NOT_RECRUITING_PLAYERS
+                  .matches(elements.get(0).getText());
+      }
+
+   };
+
+   private static final Matcher<WebElement> IS_PLAYING_GAME = new WebElementMatcher() {
+
+      @Override
+      protected boolean matchesSafely(final WebElement body,
+               final Description mismatchDescription) {
+         final var elements = body.findElements(PLAYING_ELEMENT_LOCATOR);
+         return elements.size() == 1
+                  && INDICATES_IS_PLAYING.matches(elements.get(0).getText());
+      }
+
+   };
 
    private final ScenarioPage scenarioPage;
 
@@ -306,7 +319,7 @@ public final class GamePage extends Page {
                   "Button [" + button + "] is not enabled");
       }
       button.click();
-      awaitIsReady(GamePage::hasEndedRecruitment);
+      awaitIsReady(HAS_ENDED_RECUITMENT);
    }
 
    public boolean isEndRecruitmentEnabled() {
@@ -328,7 +341,7 @@ public final class GamePage extends Page {
                   "Button [" + button + "] is not enabled");
       }
       button.click();
-      awaitIsReady(GamePage::isPlayingGame);
+      awaitIsReady(IS_PLAYING_GAME);
    }
 
    public ScenarioPage navigateToScenarioPage() {

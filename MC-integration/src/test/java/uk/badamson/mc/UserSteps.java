@@ -37,6 +37,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import uk.badamson.mc.presentation.HomePage;
 import uk.badamson.mc.presentation.LoginPage;
+import uk.badamson.mc.presentation.Page.NotReadyException;
 import uk.badamson.mc.presentation.UserPage;
 import uk.badamson.mc.presentation.UsersPage;
 
@@ -132,9 +133,8 @@ public class UserSteps extends Steps {
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() {
       try {
-         world.getAndAssertExpectedPage(UsersPage.class)
-                  .awaitIsReadyOrErrorMessage();
-      } catch (final IllegalStateException e) {
+         world.getAndAssertExpectedPage(UsersPage.class).awaitIsReady();
+      } catch (final NotReadyException e) {
          throw new AssertionFailedError(e.getMessage(), e);
       }
    }
@@ -265,13 +265,16 @@ public class UserSteps extends Steps {
       final var loginPage = homePage.navigateToLoginPage();
       world.setExpectedPage(loginPage);
       loginPage.submitLoginForm(user.getUsername(), user.getPassword());
-      homePage.awaitIsReadyOrErrorMessage();
-      if (homePage.isCurrentPath()) {// success
-         world.setExpectedPage(homePage);
-         world.setLoggedInUser(user);
-      } else {
+
+      try {
+         homePage.requireIsReady();
+      } catch (final NotReadyException e) {
          world.setLoggedInUser(null);
+         homePage.requireHasErrorMessage();
+         return;
       }
+      world.setExpectedPage(homePage);
+      world.setLoggedInUser(user);
    }
 
    @Given("unknown user")
