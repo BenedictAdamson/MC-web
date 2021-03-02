@@ -137,7 +137,9 @@ public final class World implements AutoCloseable {
 
    private Page expectedPage;
 
-   private User loggedInUser;
+   private User currentUser;
+
+   private boolean loggedIn;
 
    /**
     * @param failureRecordingDirectory
@@ -206,7 +208,8 @@ public final class World implements AutoCloseable {
        */
       containers.beforeTest(createTestDescription(scenario));
       webDriver = containers.getWebDriver();
-      setLoggedInUser(null);
+      currentUser = null;
+      setLoggedIn(false);
       /*
        * The previous test might have left us deep in the page hierarchy, so
        * reset to the top location, and must not use the old webDriver.
@@ -234,25 +237,20 @@ public final class World implements AutoCloseable {
       return containers.createGame(scenario);
    }
 
-   public User createUnknownUser() {
-      return new User(UUID.randomUUID(),
-               generateBasicUserDetails(Authority.ALL));
-   }
-
    private User createUser(final Set<Authority> authoritites) {
       final var userDetails = generateBasicUserDetails(authoritites);
       final var id = containers.addUser(userDetails);
       return new User(id, userDetails);
    }
 
-   public User createUserWithoutRole(final Authority role) {
+   public void currentUserDoesNotHaveRole(final Authority role) {
       Objects.requireNonNull(role, "role");
 
       final var authorities = EnumSet.complementOf(EnumSet.of(role));
-      return createUser(authorities);
+      currentUser = createUser(authorities);
    }
 
-   public User createUserWithRoles(final Set<Authority> included,
+   public void currentUserHasRoles(final Set<Authority> included,
             final Set<Authority> excluded) {
       Objects.requireNonNull(included, "included");
       Objects.requireNonNull(excluded, "excluded");
@@ -260,7 +258,17 @@ public final class World implements AutoCloseable {
          throw new IllegalArgumentException("Contradictory role constraints");
       }
 
-      return createUser(included);
+      currentUser = createUser(included);
+   }
+
+   public void currentUserIsAdministrator() {
+      Objects.requireNonNull(administratorUser, "administratorUser");
+      currentUser = administratorUser;
+   }
+
+   public void currentUserIsUnknownUser() {
+      currentUser = new User(UUID.randomUUID(),
+               generateBasicUserDetails(Authority.ALL));
    }
 
    /**
@@ -292,11 +300,6 @@ public final class World implements AutoCloseable {
       final var password = "password" + sequenceId;
       return new BasicUserDetails(username, password, authorities, true, true,
                true, true);
-   }
-
-   public User getAdministratorUser() {
-      Objects.requireNonNull(administratorUser, "administratorUser");
-      return administratorUser;
    }
 
    /**
@@ -349,6 +352,10 @@ public final class World implements AutoCloseable {
     */
    public String getCurrentUrlPath() {
       return getPathOfUrl(getWebDriver().getCurrentUrl());
+   }
+
+   public User getCurrentUser() {
+      return currentUser;
    }
 
    /**
@@ -444,7 +451,7 @@ public final class World implements AutoCloseable {
     * @return the user
     */
    public User getLoggedInUser() {
-      return loggedInUser;
+      return loggedIn ? currentUser : null;
    }
 
    public Stream<NamedUUID> getScenarios() {
@@ -539,14 +546,15 @@ public final class World implements AutoCloseable {
 
    /**
     * <p>
-    * Change the {@linkplain #getLoggedInUser() currently logged-in user}.
+    * Change whether the current user is {@linkplain #getLoggedInUser()
+    * logged-in user}.
     * </p>
     *
-    * @param loggedInUser
-    *           The currently logged-in user.
+    * @param loggedIn
+    *           Whether the current user is logged in
     */
-   public void setLoggedInUser(final User loggedInUser) {
-      this.loggedInUser = loggedInUser;
+   public void setLoggedIn(final boolean loggedIn) {
+      this.loggedIn = loggedIn;
    }
 
    /**

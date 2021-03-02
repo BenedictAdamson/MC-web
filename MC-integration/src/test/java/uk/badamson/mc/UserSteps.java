@@ -58,8 +58,6 @@ public class UserSteps extends Steps {
       }
    }
 
-   private User user;
-
    @Autowired
    public UserSteps(@Nonnull final World world) {
       super(world);
@@ -111,7 +109,7 @@ public class UserSteps extends Steps {
       world.getHomePage().requireIsReady();
       try {
          tryToLogin();
-      } catch (Exception e) {
+      } catch (final Exception e) {
          throw new IllegalStateException("Failed to log in", e);
       }
    }
@@ -217,7 +215,8 @@ public class UserSteps extends Steps {
    }
 
    private UsersPage navigateToUsersPage() {
-      Objects.requireNonNull(user, "user");
+      final var user = world.getCurrentUser();
+      Objects.requireNonNull(user, "currentUser");
       final var authorities = user.getAuthorities();
       if (!(authorities.contains(Authority.ROLE_MANAGE_USERS)
                || authorities.contains(Authority.ROLE_PLAYER))) {
@@ -234,7 +233,7 @@ public class UserSteps extends Steps {
    @Given("not logged in")
    public void not_logged_in() {
       world.getHomePage();
-      world.setLoggedInUser(null);
+      world.setLoggedIn(false);
    }
 
    @Then("redirected to home-page")
@@ -267,7 +266,8 @@ public class UserSteps extends Steps {
    }
 
    private void tryToLogin() {
-      Objects.requireNonNull(user, "user");
+      final var user = world.getCurrentUser();
+      Objects.requireNonNull(user, "currentUser");
 
       final var homePage = world.getExpectedPage(HomePage.class);
       final var loginPage = homePage.navigateToLoginPage();
@@ -277,33 +277,33 @@ public class UserSteps extends Steps {
       try {
          homePage.requireIsReady();
       } catch (final NotReadyException e) {
-         world.setLoggedInUser(null);
+         world.setLoggedIn(false);
          homePage.requireHasErrorMessage(
                   "Report error message on login failure");
          return;
       }
       world.setExpectedPage(homePage);
-      world.setLoggedInUser(user);
+      world.setLoggedIn(true);
    }
 
    @Given("unknown user")
    public void unknown_user() {
-      user = world.createUnknownUser();
+      world.currentUserIsUnknownUser();
    }
 
    @Given("user does not have the {string} role")
    public void user_does_not_have_role(final String roleName) {
-      user = world.createUserWithoutRole(parseRole(roleName));
+      world.currentUserDoesNotHaveRole(parseRole(roleName));
    }
 
    @Given("user has any role")
    public void user_has_any_role() {
-      user = world.createUserWithRoles(Set.of(Authority.values()[0]), Set.of());
+      world.currentUserHasRoles(Set.of(Authority.values()[0]), Set.of());
    }
 
    @Given("user has the {string} role")
    public void user_has_role(final String roleName) {
-      user = world.createUserWithRoles(Set.of(parseRole(roleName)), Set.of());
+      world.currentUserHasRoles(Set.of(parseRole(roleName)), Set.of());
    }
 
    @When("user has the {string} role but not the {string} role")
@@ -315,8 +315,8 @@ public class UserSteps extends Steps {
          throw new IllegalArgumentException("Contradictory role constraints");
       }
 
-      user = world.createUserWithRoles(Set.of(includedRole),
-               Set.of(excludedRole));
+      world.currentUserHasRoles(Set.of(includedRole), Set.of(excludedRole));
+      final var user = world.getCurrentUser();
 
       assert user != null && user.getAuthorities().contains(includedRole)
                && !user.getAuthorities().contains(excludedRole);
@@ -324,7 +324,7 @@ public class UserSteps extends Steps {
 
    @Given("user is the administrator")
    public void user_is_administrator() {
-      user = world.getAdministratorUser();
+      world.currentUserIsAdministrator();
    }
 
    @Then("The user page includes the user name")
