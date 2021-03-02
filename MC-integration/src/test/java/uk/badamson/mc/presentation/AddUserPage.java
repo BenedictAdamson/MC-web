@@ -72,7 +72,7 @@ public final class AddUserPage extends Page {
          usersPage.requireIsReady();
          return usersPage;
       } catch (final NotReadyException e) {
-         requireHasErrorMessage();
+         requireHasErrorMessage("Report error message on failure to add user");
       }
       return this;
    }

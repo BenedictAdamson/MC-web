@@ -270,7 +270,8 @@ public class UserSteps extends Steps {
          homePage.requireIsReady();
       } catch (final NotReadyException e) {
          world.setLoggedInUser(null);
-         homePage.requireHasErrorMessage();
+         homePage.requireHasErrorMessage(
+                  "Report error message on login failure");
          return;
       }
       world.setExpectedPage(homePage);

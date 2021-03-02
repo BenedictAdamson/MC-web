@@ -451,8 +451,9 @@ public abstract class Page {
       }
    }
 
-   public final void requireHasErrorMessage() throws IllegalStateException {
-      requireForReady("Has error message(s)", getBody(), HAS_ERROR_ELEMENT);
+   public final void requireHasErrorMessage(String requirementDescription)
+            throws IllegalStateException {
+      requireForReady(requirementDescription, getBody(), HAS_ERROR_ELEMENT);
    }
 
    public final void requireIsReady() throws NotReadyException {
