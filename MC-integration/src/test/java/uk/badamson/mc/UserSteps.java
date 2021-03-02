@@ -104,14 +104,21 @@ public class UserSteps extends Steps {
 
    @Given("logged in")
    public void logged_in() {
+      logIn();
+   }
+
+   private void logIn() {
       world.getHomePage().requireIsReady();
-      tryToLogin();
+      try {
+         tryToLogin();
+      } catch (Exception e) {
+         throw new IllegalStateException("Failed to log in", e);
+      }
    }
 
    @When("log in using correct password")
    public void login_using_correct_password() {
-      world.getHomePage().requireIsReady();
-      tryToLogin();
+      logIn();
    }
 
    @Then("MC accepts the login")
@@ -261,6 +268,7 @@ public class UserSteps extends Steps {
 
    private void tryToLogin() {
       Objects.requireNonNull(user, "user");
+
       final var homePage = world.getExpectedPage(HomePage.class);
       final var loginPage = homePage.navigateToLoginPage();
       world.setExpectedPage(loginPage);
