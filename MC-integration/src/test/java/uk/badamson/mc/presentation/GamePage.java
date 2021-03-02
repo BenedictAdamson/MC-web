@@ -254,14 +254,15 @@ public final class GamePage extends Page {
                joinable.getText(), INDICATES_JOINING_NFORMATION);
    }
 
-   public void assertIndicatesWhichCharactersPlayedByWhichUsers() {
-      assertHasElement(getBody(), PLAYED_CHARACTERS_ELEMENT_LOCATOR);
+   public void assertIndicatesWhichCharacterIfAnyUserIsPlaying() {
+      final var playing = assertHasPlayingElement(getBody());
+      assertThat("Indicates which character (if any) user is playing",
+               playing.getText(),
+               either(INDICATES_CHARACTER_PLAYED).or(INDICATES_IS_NOT_PLAYING));
    }
 
-   public void assertIndicatesWhichCharacterUserIsPlaying() {
-      final var playing = assertHasPlayingElement(getBody());
-      assertThat("Indicates which character user is playing", playing.getText(),
-               INDICATES_CHARACTER_PLAYED);
+   public void assertIndicatesWhichCharactersPlayedByWhichUsers() {
+      assertHasElement(getBody(), PLAYED_CHARACTERS_ELEMENT_LOCATOR);
    }
 
    private void assertJoinButtonConsistentWithJoinableText(
