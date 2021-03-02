@@ -102,21 +102,21 @@ public class UserSteps extends Steps {
 
    @Given("logged in")
    public void logged_in() {
-      logIn();
-   }
-
-   private void logIn() {
-      world.getHomePage().requireIsReady();
-      try {
-         tryToLogin();
-      } catch (final Exception e) {
-         throw new IllegalStateException("Failed to log in", e);
-      }
+      logInCorrectly();
    }
 
    @When("log in using correct password")
    public void login_using_correct_password() {
-      logIn();
+      logInCorrectly();
+   }
+
+   private void logInCorrectly() {
+      tryToLogin();
+      /*
+       * If the login failed, will still be on the login page rather than the
+       * home page.
+       */
+      world.getExpectedPage(HomePage.class).requireIsReady();
    }
 
    @Then("MC accepts the login")

@@ -343,7 +343,7 @@ public abstract class Page {
          try {
             /* Use requireIsReady to get a good diagnostic exception */
             requireIsReady();
-         } catch (NotReadyException e2) {
+         } catch (final NotReadyException e2) {
             throw new NotReadyException("Not ready and no error message", e2);
          }
          // OK, the final check was OK, so *just* became ready in time
