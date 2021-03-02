@@ -315,12 +315,6 @@ public final class GamePage extends Page {
    }
 
    @Override
-   protected boolean isReady(@Nonnull final String path,
-            @Nonnull final String title, final @Nonnull WebElement body) {
-      return isValidPath(path) && INDICATES_IS_A_GAME.matches(body.getText());
-   }
-
-   @Override
    protected boolean isValidPath(@Nonnull final String path) {
       Objects.requireNonNull(path, "path");
       return URI_TEMPLATE.matches(path);
@@ -359,5 +353,14 @@ public final class GamePage extends Page {
       if (!INDICATES_IS_RECRUITING_PLAYERS.matches(text)) {
          throw new IllegalStateException("Wrong text (" + text + ")");
       }
+   }
+
+   @Override
+   protected void requireIsReady(@Nonnull final String path,
+            @Nonnull final String title, final @Nonnull WebElement body)
+            throws NotReadyException {
+      super.requireIsReady(path, title, body);
+      requireForReady("Indicates is a game", body.getText(),
+               INDICATES_IS_A_GAME);
    }
 }

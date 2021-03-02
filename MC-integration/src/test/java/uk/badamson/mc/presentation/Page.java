@@ -34,7 +34,9 @@ import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 
 import org.hamcrest.CustomTypeSafeMatcher;
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.StringDescription;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -54,10 +56,14 @@ import uk.badamson.mc.McContainers;
 public abstract class Page {
 
    @SuppressWarnings("serial")
-   private final class NotReadyException extends IllegalStateException {
+   public final class NotReadyException extends IllegalStateException {
 
       public NotReadyException() {
-         this(null);
+         super(createNotReadyMessage());
+      }
+
+      public NotReadyException(final String message) {
+         super(message);
       }
 
       public NotReadyException(final Throwable cause) {
@@ -384,40 +390,19 @@ public abstract class Page {
       return isValidPath(getCurrentPath());
    }
 
-   /**
-    * <p>
-    * Whether a given page is a page of this type in its ready (loaded) state.
-    * </p>
-    * <p>
-    * The provided implementation checks only that the given {@code path}
-    * {@linkplain #isValidPath(String) is a valid path for this type of page}.
-    * </p>
-    *
-    * @param path
-    *           The {@linkplain URI#getPath() path component} of the
-    *           {@linkplain URI URI} of the page.
-    * @param title
-    *           The page (window) title of the page.
-    * @param body
-    *           the body of the page
-    * @return whether ready.
-    * @throws NullPointerException
-    *            <ul>
-    *            <li>If {@code path} is null.</li>
-    *            <li>If {@code title} is null.</li>
-    *            <li>If {@code body} is null.</li>
-    *            </ul>
-    */
-   protected boolean isReady(@Nonnull final String path,
-            @Nonnull final String title, final @Nonnull WebElement body) {
-      return isValidPath(path);
-   }
-
    private boolean isReady(final WebDriver driver,
             final Predicate<WebElement> satisfiesAdditionalConstraints) {
       final var body = driver.findElement(BODY_LOCATOR);
-      return isReady(getPathOfUrl(driver.getCurrentUrl()), driver.getTitle(),
-               body) && satisfiesAdditionalConstraints.test(body);
+      try {
+         requireIsReady(getPathOfUrl(driver.getCurrentUrl()), driver.getTitle(),
+                  body);
+         if (!satisfiesAdditionalConstraints.test(body)) {
+            throw new NotReadyException();
+         }
+      } catch (final NotReadyException e) {
+         return false;
+      }
+      return true;
    }
 
    /**
@@ -435,9 +420,59 @@ public abstract class Page {
     */
    protected abstract boolean isValidPath(@Nonnull String path);
 
+   protected <T> void requireForReady(final String requirementDescription,
+            final T value, final Matcher<T> requirement)
+            throws NotReadyException {
+      if (!requirement.matches(value)) {
+         final Description description = new StringDescription();
+         description.appendText("Not ready because requires ")
+                  .appendText(System.lineSeparator())
+                  .appendText(requirementDescription)
+                  .appendText(System.lineSeparator())
+                  .appendDescriptionOf(requirement)
+                  .appendText(System.lineSeparator()).appendText("     but: ");
+         requirement.describeMismatch(value, description);
+         throw new NotReadyException(description.toString());
+      }
+   }
+
    public final void requireIsReady() throws IllegalStateException {
       if (!isReady(webDriver, body -> true)) {
          throw new NotReadyException();
+      }
+   }
+
+   /**
+    * <p>
+    * Throw an exception if a given page is not a page of this type in its ready
+    * (loaded) state.
+    * </p>
+    * <p>
+    * The provided implementation checks only that the given {@code path}
+    * {@linkplain #isValidPath(String) is a valid path for this type of page}.
+    * </p>
+    *
+    * @param path
+    *           The {@linkplain URI#getPath() path component} of the
+    *           {@linkplain URI URI} of the page.
+    * @param title
+    *           The page (window) title of the page.
+    * @param body
+    *           the body of the page
+    * @throws NullPointerException
+    *            <ul>
+    *            <li>If {@code path} is null.</li>
+    *            <li>If {@code title} is null.</li>
+    *            <li>If {@code body} is null.</li>
+    *            </ul>
+    * @throws NotReadyException
+    *            If, and only if, the page is not ready
+    */
+   protected void requireIsReady(@Nonnull final String path,
+            @Nonnull final String title, final @Nonnull WebElement body)
+            throws NotReadyException {
+      if (!isValidPath(path)) {
+         throw new NotReadyException("Invalid path " + path);
       }
    }
 }
