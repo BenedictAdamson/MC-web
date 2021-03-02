@@ -274,16 +274,13 @@ public class UserSteps extends Steps {
       world.setExpectedPage(loginPage);
       loginPage.submitLoginForm(user.getUsername(), user.getPassword());
 
-      try {
-         homePage.requireIsReady();
-      } catch (final NotReadyException e) {
+      homePage.awaitIsReadyOrErrorMessage();
+      if (homePage.isCurrentPath()) {// success
+         world.setExpectedPage(homePage);
+         world.setLoggedIn(true);
+      } else {
          world.setLoggedIn(false);
-         homePage.requireHasErrorMessage(
-                  "Report error message on login failure");
-         return;
       }
-      world.setExpectedPage(homePage);
-      world.setLoggedIn(true);
    }
 
    @Given("unknown user")

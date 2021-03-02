@@ -69,6 +69,10 @@ public abstract class Page {
          super(message);
       }
 
+      public NotReadyException(final String message, final Throwable cause) {
+         super(message, cause);
+      }
+
       public NotReadyException(final Throwable cause) {
          super(createNotReadyMessage(), cause);
       }
@@ -329,6 +333,25 @@ public abstract class Page {
       }
    }
 
+   public final void awaitIsReadyOrErrorMessage() throws IllegalStateException {
+      try {
+         new WebDriverWait(webDriver, 17)
+                  .until(driver -> isReady(driver, isA(WebElement.class))
+                           || HAS_ERROR_ELEMENT
+                                    .matches(driver.findElement(BODY_LOCATOR)));
+      } catch (final TimeoutException e) {
+         try {
+            /* Use requireIsReady to get a good diagnostic exception */
+            requireIsReady();
+         } catch (NotReadyException e2) {
+            throw new NotReadyException("Not ready and no error message", e2);
+         }
+         // OK, the final check was OK, so *just* became ready in time
+      } catch (final Exception e) {// give better diagnostics
+         throw new NotReadyException(e);
+      }
+   }
+
    private final <T> Matcher<T> createMatcher(final String decription,
             final Predicate<T> predicate) {
       return new CustomTypeSafeMatcher<>(decription) {
@@ -449,11 +472,6 @@ public abstract class Page {
          requirement.describeMismatch(value, description);
          throw new NotReadyException(description.toString());
       }
-   }
-
-   public final void requireHasErrorMessage(String requirementDescription)
-            throws IllegalStateException {
-      requireForReady(requirementDescription, getBody(), HAS_ERROR_ELEMENT);
    }
 
    public final void requireIsReady() throws NotReadyException {

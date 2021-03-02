@@ -68,13 +68,12 @@ public final class AddUserPage extends Page {
       getBody().findElement(By.xpath("//button[@type='submit']")).submit();
 
       /* Must either transition to the Users' Page, or report an error. */
-      try {
-         usersPage.requireIsReady();
+      usersPage.awaitIsReadyOrErrorMessage();
+      if (usersPage.isCurrentPath()) {
          return usersPage;
-      } catch (final NotReadyException e) {
-         requireHasErrorMessage("Report error message on failure to add user");
+      } else {
+         return this;
       }
-      return this;
    }
 
 }
