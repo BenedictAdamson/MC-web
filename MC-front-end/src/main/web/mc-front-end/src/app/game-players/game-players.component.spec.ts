@@ -10,6 +10,7 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { AbstractSelfService } from '../service/abstract.self.service';
 import { AbstractGamePlayersBackEndService } from '../service/abstract.game-players.back-end.service';
 import { AbstractMayJoinGameBackEndService } from '../service/abstract.may-join-game.back-end.service';
+import { AbstractScenarioBackEndService } from '../service/abstract.scenario.back-end.service';
 import { GameIdentifier } from '../game-identifier';
 import { GamePlayers } from '../game-players';
 import { GamePlayersComponent } from './game-players.component';
@@ -17,7 +18,11 @@ import { GamePlayersService } from '../service/game-players.service';
 import { MockGamePlayersBackEndService } from '../service/mock/mock.game-players.back-end.service';
 import { MockMayJoinGameBackEndService } from '../service/mock/mock.may-join-game.back-end.service';
 import { MayJoinGameService } from '../service/may-join-game.service';
+import { MockScenarioBackEndService } from '../service/mock/mock.scenario.back-end.service';
 import { MockSelfService } from '../service/mock/mock.self.service';
+import { NamedUUID } from '../named-uuid';
+import { Scenario } from '../scenario';
+import { ScenarioService } from '../service/scenario.service';
 import { User } from '../user';
 
 
@@ -27,6 +32,7 @@ describe('GamePlayersComponent', () => {
 	let selfService: AbstractSelfService;
 	let gamePlayersService: GamePlayersService;
 	let mayJoinGameService: MayJoinGameService;
+	let scenarioService: ScenarioService;
 
 	const SCENARIO_ID_A: string = uuid();
 	const SCENARIO_ID_B: string = uuid();
@@ -36,6 +42,20 @@ describe('GamePlayersComponent', () => {
 	const USER_ID_B: string = uuid();
 	const CHARACTER_ID_A: string = uuid();
 	const CHARACTER_ID_B: string = uuid();
+	const CHARACTER_A: NamedUUID = { id: uuid(), title: 'Sergeant' };
+	const CHARACTER_B: NamedUUID = { id: uuid(), title: 'Private' };
+	const SCENARIO_A: Scenario = {
+		identifier: SCENARIO_ID_A,
+		title: 'Section Attack',
+		description: 'Basic fire-and-movement tactical training.',
+		characters: [CHARACTER_A, CHARACTER_B]
+	};
+	const SCENARIO_B: Scenario = {
+		identifier: SCENARIO_ID_B,
+		title: 'Beach Assault',
+		description: 'Fast and deadly.',
+		characters: [CHARACTER_A]
+	};
 	const USER_ADMIN: User = { id: USER_ID_A, username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
 	const USER_NORMAL: User = { id: USER_ID_B, username: 'Benedict', password: null, authorities: [] };
 	const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_ID_A, created: CREATED_A };
@@ -80,12 +100,14 @@ describe('GamePlayersComponent', () => {
 
 
 
-	const setUp = function(gamePlayers: GamePlayers, self: User, mayJoinGame: boolean) {
+	const setUp = function(gamePlayers: GamePlayers, self: User, mayJoinGame: boolean, scenario: Scenario) {
 		const game: GameIdentifier = gamePlayers.game;
 		const gamePlayersBackEndService: AbstractGamePlayersBackEndService = new MockGamePlayersBackEndService(gamePlayers, self.id);
 		gamePlayersService = new GamePlayersService(gamePlayersBackEndService);
 		const mayJoinGameBackEnd: AbstractMayJoinGameBackEndService = new MockMayJoinGameBackEndService(mayJoinGame);
 		mayJoinGameService = new MayJoinGameService(mayJoinGameBackEnd);
+		const scenarioBackEndService: AbstractScenarioBackEndService = new MockScenarioBackEndService([scenario]);
+		scenarioService = new ScenarioService(scenarioBackEndService);
 
 		TestBed.configureTestingModule({
 			declarations: [GamePlayersComponent],
@@ -110,7 +132,8 @@ describe('GamePlayersComponent', () => {
 			},
 			{ provide: GamePlayersService, useValue: gamePlayersService },
 			{ provide: MayJoinGameService, useValue: mayJoinGameService },
-			{ provide: AbstractSelfService, useFactory: () => new MockSelfService(self) }]
+			{ provide: AbstractSelfService, useFactory: () => new MockSelfService(self) },
+			{ provide: ScenarioService, useValue: scenarioService }]
 		});
 
 		fixture = TestBed.createComponent(GamePlayersComponent);
@@ -157,13 +180,13 @@ describe('GamePlayersComponent', () => {
 	};
 
 
-	const canCreate = function(gamePlayers: GamePlayers, self: User, mayJoinGame: boolean) {
+	const canCreate = function(gamePlayers: GamePlayers, self: User, mayJoinGame: boolean, scenario: Scenario) {
 		const recruiting: boolean = gamePlayers.recruiting;
 		const manager: boolean = self.authorities.includes('ROLE_MANAGE_GAMES');
 		const mayEndRecuitment: boolean = recruiting && manager;
 		const playing: boolean = gamePlayers.isPlaying(self.id);
 
-		setUp(gamePlayers, self, mayJoinGame);
+		setUp(gamePlayers, self, mayJoinGame, scenario);
 		tick();
 		fixture.detectChanges();
 
@@ -218,26 +241,26 @@ describe('GamePlayersComponent', () => {
 	};
 
 	it('can create [A]', fakeAsync(() => {
-		canCreate(GAME_PLAYERS_A, USER_ADMIN, true);
+		canCreate(GAME_PLAYERS_A, USER_ADMIN, true, SCENARIO_A);
 	}));
 
 	it('can create [B]', fakeAsync(() => {
-		canCreate(GAME_PLAYERS_A, USER_NORMAL, true);
+		canCreate(GAME_PLAYERS_A, USER_NORMAL, true, SCENARIO_A);
 	}));
 
 	it('can create [C]', fakeAsync(() => {
-		canCreate(GAME_PLAYERS_B, USER_ADMIN, false);
+		canCreate(GAME_PLAYERS_B, USER_ADMIN, false, SCENARIO_B);
 	}));
 
 	it('can create [D]', fakeAsync(() => {
-		canCreate(GAME_PLAYERS_B, USER_NORMAL, false);
+		canCreate(GAME_PLAYERS_B, USER_NORMAL, false, SCENARIO_B);
 	}));
 
 
-	const testEndRecruitment = function(gamePlayers0: GamePlayers) {
+	const testEndRecruitment = function(gamePlayers0: GamePlayers, scenario: Scenario) {
 		const self: User = USER_ADMIN;
 
-		setUp(gamePlayers0, self, true);
+		setUp(gamePlayers0, self, true, scenario);
 		component.endRecruitment();
 		tick();
 		tick();
@@ -257,15 +280,15 @@ describe('GamePlayersComponent', () => {
 	};
 
 	it('can end recuitment [A]', fakeAsync((() => {
-		testEndRecruitment(GAME_PLAYERS_A);
+		testEndRecruitment(GAME_PLAYERS_A, SCENARIO_A);
 	})));
 
 	it('can end recuitment [B]', fakeAsync((() => {
-		testEndRecruitment(GAME_PLAYERS_B);
+		testEndRecruitment(GAME_PLAYERS_B, SCENARIO_B);
 	})));
 
-	const testJoinGame = function(gamePlayers0: GamePlayers, self: User) {
-		setUp(gamePlayers0, self, true);
+	const testJoinGame = function(gamePlayers0: GamePlayers, self: User, scenario: Scenario) {
+		setUp(gamePlayers0, self, true, scenario);
 		component.joinGame();
 		tick();
 		fixture.detectChanges();
@@ -279,10 +302,10 @@ describe('GamePlayersComponent', () => {
 	};
 
 	it('can join game [A]', fakeAsync((() => {
-		testJoinGame(GAME_PLAYERS_A, USER_ADMIN);
+		testJoinGame(GAME_PLAYERS_A, USER_ADMIN, SCENARIO_A);
 	})));
 
 	it('can join game [B]', fakeAsync((() => {
-		testJoinGame(GAME_PLAYERS_B, USER_NORMAL);
+		testJoinGame(GAME_PLAYERS_B, USER_NORMAL, SCENARIO_B);
 	})));
 });

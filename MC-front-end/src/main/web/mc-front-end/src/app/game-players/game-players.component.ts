@@ -9,6 +9,7 @@ import { AbstractSelfService } from '../service/abstract.self.service';
 import { GameIdentifier } from '../game-identifier';
 import { GamePlayers } from '../game-players';
 import { MayJoinGameService } from '../service/may-join-game.service';
+import { ScenarioService } from '../service/scenario.service';
 
 @Component({
 	selector: 'app-game',
@@ -46,6 +47,7 @@ export class GamePlayersComponent implements OnInit {
 		private route: ActivatedRoute,
 		private gamePlayersService: GamePlayersService,
 		private mayJoinGameService: MayJoinGameService,
+		private scenarioService: ScenarioService,
 		private selfService: AbstractSelfService
 	) {
 	}
