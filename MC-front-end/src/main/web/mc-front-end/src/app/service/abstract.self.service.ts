@@ -71,19 +71,6 @@ export abstract class AbstractSelfService {
 		);
 	}
 
-	private processResponse(password: string | null, details: User | null): boolean {
-		var authenticated: boolean;
-		if (details) {
-			details = new User(details.id, details);
-			details.password = password;
-			authenticated = true;
-		} else {
-			authenticated = false;
-		}
-		this.setUser(details, authenticated);
-		return authenticated;
-	}
-
 
 	/**
 	 * @description
@@ -173,6 +160,19 @@ export abstract class AbstractSelfService {
 		);
 	}
 
+	private processResponse(password: string | null, details: User | null): boolean {
+		let authenticated: boolean;
+		if (details) {
+			details = new User(details.id, details);
+			details.password = password;
+			authenticated = true;
+		} else {
+			authenticated = false;
+		}
+		this.setUser(details, authenticated);
+		return authenticated;
+	}
+
 	private clear(): void {
 		this.userRS$.next(null);
 		this.authenticatedRS$.next(false);
@@ -196,7 +196,7 @@ export abstract class AbstractSelfService {
 	 *
 	 * These values are for role based access control (RBAC).
 	 * A user that has not been authenticated has no authorities.
-	 * An authenticated user could have no authorities, although that is unlikely in practice. 
+	 * An authenticated user could have no authorities, although that is unlikely in practice.
 	 */
 	private get authorities$(): Observable<string[]> {
 		return this.userRS$.pipe(
