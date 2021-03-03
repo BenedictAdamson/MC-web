@@ -1,3 +1,5 @@
+import { NamedUUID } from './named-uuid';
+
 /**
  * <p>
  * A scenario of the Mission Command game.
@@ -10,4 +12,17 @@ export class Scenario {
 	identifier: string;// typically a UUID
 	title: string;
 	description: string;
+
+	/**
+	 * <p>
+	 * The names and IDs of the persons in this scenario that
+	 * players can play.
+	 * </p>
+	 * <ul>
+	 * <li>The list of characters is in descending order of selection priority:
+	 * with all else equal, players should be allocated characters near the start
+	 * of the list.</li>
+	 * </ul>
+	 */
+	characters: NamedUUID[];
 }
