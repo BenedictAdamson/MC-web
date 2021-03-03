@@ -82,6 +82,10 @@ export class GamePlayersComponent implements OnInit {
 		// Do nothing
 	}
 
+	private get mayManageGames$(): Observable<boolean> {
+		return this.selfService.mayManageGames$;
+	}
+
 	get playing$(): Observable<boolean> {
 		return combineLatest([this.selfService.id$, this.gamePlayers$]).pipe(
 			map(([id, gamePlayers]) => GamePlayersComponent.isPlaying(id, gamePlayers))
@@ -89,7 +93,7 @@ export class GamePlayersComponent implements OnInit {
 	}
 
 	get isEndRecruitmentDisabled$(): Observable<boolean> {
-		return combineLatest([this.selfService.mayManageGames$, this.gamePlayers$]).pipe(
+		return combineLatest([this.mayManageGames$, this.gamePlayers$]).pipe(
 			map(([mayManageGames, gamePlayers]) => GamePlayersComponent.isEndRecruitmentDisabled(mayManageGames, gamePlayers))
 		);
 	}
