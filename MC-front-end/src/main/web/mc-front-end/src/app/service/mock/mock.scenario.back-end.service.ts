@@ -15,15 +15,17 @@ export class MockScenarioBackEndService extends AbstractScenarioBackEndService {
 
 
 	get(id: string): Observable<Scenario | null> {
-		for (let scenario of this.scenarios) {
-			if (scenario.identifier == id) return of(scenario);
+		for (const scenario of this.scenarios) {
+			if (scenario.identifier === id) {
+				return of(scenario);
+			};
 		}
 		return of(null);
 	}
 
 	getScenarioIdentifiers(): Observable<NamedUUID[]> {
-		var result: NamedUUID[] = [];
-		for (let scenario of this.scenarios) {
+		const result: NamedUUID[] = [];
+		for (const scenario of this.scenarios) {
 			const namedId: NamedUUID = { id: scenario.identifier, title: scenario.title };
 			result.push(namedId);
 		}

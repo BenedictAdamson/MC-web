@@ -16,10 +16,12 @@ describe('ScenarioService', () => {
 
 	const IDENTIFIER_A: string = uuid();
 	const IDENTIFIER_B: string = uuid();
-	const SCENARIO_A: Scenario = { identifier: IDENTIFIER_A, title: 'Section Attack', description: 'Basic fire-and-movement tactical training.' };
-	const SCENARIO_B: Scenario = { identifier: IDENTIFIER_B, title: 'Beach Assault', description: 'Fast and deadly.' };
+	const SCENARIO_A: Scenario =
+		{ identifier: IDENTIFIER_A, title: 'Section Attack', description: 'Basic fire-and-movement tactical training.' };
+	const SCENARIO_B: Scenario =
+		{ identifier: IDENTIFIER_B, title: 'Beach Assault', description: 'Fast and deadly.' };
 
-	const setUp = function(): ScenarioService {
+	const setUp = (): ScenarioService => {
 		TestBed.configureTestingModule({
 			imports: [HttpClientTestingModule]
 		});
@@ -39,7 +41,9 @@ describe('ScenarioService', () => {
 
 	it('can get scenario identifiers', () => {
 		const scenarios: Scenario[] = [SCENARIO_A, SCENARIO_B];
-		const identifiers: NamedUUID[] = scenarios.map(scenario => { return { id: scenario.identifier, title: scenario.title }; });
+		const identifiers: NamedUUID[] = scenarios.map(
+			scenario => ({ id: scenario.identifier, title: scenario.title })
+			);
 		const service: ScenarioService = setUp();
 
 		service.getScenarioIdentifiers().subscribe(ids => expect(ids).toEqual(identifiers));
@@ -51,7 +55,7 @@ describe('ScenarioService', () => {
 	});
 
 
-	const canGetScenario = function(testScenario: Scenario) {
+	const canGetScenario = (testScenario: Scenario) => {
 		const id: string = testScenario.identifier;
 		const expectedPath: string = getApiScenarioPath(id);
 		const service: ScenarioService = setUp();

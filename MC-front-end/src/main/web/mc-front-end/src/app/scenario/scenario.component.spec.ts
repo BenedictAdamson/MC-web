@@ -17,13 +17,15 @@ describe('ScenarioComponent', () => {
 
 	const IDENTIFIER_A: string = uuid();
 	const IDENTIFIER_B: string = uuid();
-	const SCENARIO_A: Scenario = { identifier: IDENTIFIER_A, title: 'Section Attack', description: 'Basic fire-and-movement tactical training.' };
-	const SCENARIO_B: Scenario = { identifier: IDENTIFIER_B, title: 'Beach Assault', description: 'Fast and deadly.' };
+	const SCENARIO_A: Scenario =
+		{ identifier: IDENTIFIER_A, title: 'Section Attack', description: 'Basic fire-and-movement tactical training.' };
+	const SCENARIO_B: Scenario =
+		{ identifier: IDENTIFIER_B, title: 'Beach Assault', description: 'Fast and deadly.' };
 
 
-	const getScenario = function(component: ScenarioComponent): Scenario | null {
-		var scenario: Scenario | null = null;
-		component.scenario$.subscribe({
+	const getScenario = (sc: ScenarioComponent): Scenario | null => {
+		let scenario: Scenario | null = null;
+		sc.scenario$.subscribe({
 			next: (s) => scenario = s,
 			error: (err) => fail(err),
 			complete: () => { }
@@ -32,7 +34,7 @@ describe('ScenarioComponent', () => {
 	};
 
 
-	const setUpForNgInit = function(testScenario: Scenario,) {
+	const setUpForNgInit = (testScenario: Scenario,) => {
 		const scenarioBackEndService: AbstractScenarioBackEndService = new MockScenarioBackEndService([testScenario]);
 
 		TestBed.configureTestingModule({
@@ -62,9 +64,9 @@ describe('ScenarioComponent', () => {
 		const html: HTMLElement = fixture.nativeElement;
 		const displayText: string = html.innerText;
 		const selfLink: HTMLAnchorElement | null = html.querySelector('a#scenario');
-		expect(displayText.includes(testScenario.title)).withContext("displayed text includes title").toBeTrue();
-		expect(displayText.includes(testScenario.description)).withContext("displayed text includes description").toBeTrue();
-		expect(selfLink).withContext("self link").not.toBeNull();
+		expect(displayText.includes(testScenario.title)).withContext('displayed text includes title').toBeTrue();
+		expect(displayText.includes(testScenario.description)).withContext('displayed text includes description').toBeTrue();
+		expect(selfLink).withContext('self link').not.toBeNull();
 	};
 
 	it('can create [a]', () => {
