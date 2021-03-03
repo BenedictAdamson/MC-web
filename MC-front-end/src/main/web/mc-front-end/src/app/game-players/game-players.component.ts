@@ -18,8 +18,12 @@ import { MayJoinGameService } from '../service/may-join-game.service';
 export class GamePlayersComponent implements OnInit {
 
 	private get scenario$(): Observable<string> {
-		if (!this.route.parent) throw new Error('missing this.route.parent');
-		if (!this.route.parent.parent) throw new Error('missing this.route.parent.parent');
+		if (!this.route.parent) {
+			throw new Error('missing this.route.parent');
+		};
+		if (!this.route.parent.parent) {
+			throw new Error('missing this.route.parent.parent');
+		};
 		return this.route.parent.parent.paramMap.pipe(
 			map(params => params.get('scenario')),
 			filter(scenario => !!scenario),
@@ -28,7 +32,9 @@ export class GamePlayersComponent implements OnInit {
 	};
 
 	private get created$(): Observable<string> {
-		if (!this.route.parent) throw new Error('missing this.route.parent');
+		if (!this.route.parent) {
+			throw new Error('missing this.route.parent');
+		};
 		return this.route.parent.paramMap.pipe(
 			map(params => params.get('created')),
 			filter(created => !!created),
@@ -36,9 +42,26 @@ export class GamePlayersComponent implements OnInit {
 		);
 	};
 
-	private static createIdentifier(scenario: string, created: string) {
-		return { scenario: scenario, created: created };
+	constructor(
+		private route: ActivatedRoute,
+		private gamePlayersService: GamePlayersService,
+		private mayJoinGameService: MayJoinGameService,
+		private selfService: AbstractSelfService
+	) {
 	}
+
+	private static createIdentifier(scenario: string, created: string) {
+		return { scenario, created };
+	}
+
+	private static isEndRecruitmentDisabled(mayManageGames: boolean, gamePlayers: GamePlayers): boolean {
+		return !gamePlayers || !gamePlayers.recruiting || !mayManageGames;
+	}
+
+	private static isPlaying(id: string | null, gamePlayers: GamePlayers): boolean {
+		return id ? gamePlayers.isPlaying(id) : false;
+	}
+
 
 	get identifier$(): Observable<GameIdentifier> {
 		return combineLatest([this.scenario$, this.created$]).pipe(
@@ -55,32 +78,14 @@ export class GamePlayersComponent implements OnInit {
 		);
 	}
 
-	constructor(
-		private route: ActivatedRoute,
-		private gamePlayersService: GamePlayersService,
-		private mayJoinGameService: MayJoinGameService,
-		private selfService: AbstractSelfService
-	) {
-	}
-
 	ngOnInit(): void {
 		// Do nothing
-	}
-
-
-	private static isPlaying(id: string | null, gamePlayers: GamePlayers): boolean {
-		return id ? gamePlayers.users.includes(id) : false;
 	}
 
 	get playing$(): Observable<boolean> {
 		return combineLatest([this.selfService.id$, this.gamePlayers$]).pipe(
 			map(([id, gamePlayers]) => GamePlayersComponent.isPlaying(id, gamePlayers))
 		);
-	}
-
-
-	private static isEndRecruitmentDisabled(mayManageGames: boolean, gamePlayers: GamePlayers): boolean {
-		return !gamePlayers || !gamePlayers.recruiting || !mayManageGames;
 	}
 
 	get isEndRecruitmentDisabled$(): Observable<boolean> {
@@ -106,11 +111,11 @@ export class GamePlayersComponent implements OnInit {
 
 	get nPlayers$(): Observable<number> {
 		return this.gamePlayers$.pipe(
-			map(gps => gps.users.length)
+			map(gps => gps.users.size)
 		);
 	}
 
-	get players$(): Observable<string[]> {
+	get players$(): Observable<Map<string,string>> {
 		return this.gamePlayers$.pipe(
 			map(gp => gp.users)
 			// TODO provide names
