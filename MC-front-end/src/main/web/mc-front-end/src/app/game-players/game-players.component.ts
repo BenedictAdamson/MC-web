@@ -17,7 +17,7 @@ import { MayJoinGameService } from '../service/may-join-game.service';
 })
 export class GamePlayersComponent implements OnInit {
 
-	private get scenario$(): Observable<string> {
+	private get scenarioId$(): Observable<string> {
 		if (!this.route.parent) {
 			throw new Error('missing this.route.parent');
 		};
@@ -64,7 +64,7 @@ export class GamePlayersComponent implements OnInit {
 
 
 	get identifier$(): Observable<GameIdentifier> {
-		return combineLatest([this.scenario$, this.created$]).pipe(
+		return combineLatest([this.scenarioId$, this.created$]).pipe(
 			map(([scenario, created]) => GamePlayersComponent.createIdentifier(scenario, created)),
 			distinctUntilChanged() // don't spam identical values
 		);
