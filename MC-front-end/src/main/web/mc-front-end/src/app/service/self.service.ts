@@ -7,8 +7,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AbstractSelfService } from './abstract.self.service';
 import { User } from '../user';
 
-const selfUrl: string = '/api/self';
-const logoutUrl: string = '/logout';
+const selfUrl = '/api/self';
+const logoutUrl = '/logout';
 
 /**
  * @description
@@ -36,15 +36,8 @@ export class SelfService extends AbstractSelfService {
 		super();
 	}
 
-	private handleUserDetailsHttpError() {
-		return (): Observable<User | null> => {
-			// Do not log errors, all are equivalent to authentication failure.
-			return of(null);
-		};
-	}
-
 	private static createHeaders(username: string | null, password: string | null): HttpHeaders {
-		var headers: HttpHeaders = new HttpHeaders();
+		let headers: HttpHeaders = new HttpHeaders();
 		headers = headers.set('X-Requested-With', 'XMLHttpRequest');
 		if (username && password) {
 			headers = headers.set('Authorization', 'Basic ' + btoa(username + ':' + password));
@@ -55,17 +48,10 @@ export class SelfService extends AbstractSelfService {
 	protected getUserDetails(username: string | null, password: string | null): Observable<User | null> {
 		const headers: HttpHeaders = SelfService.createHeaders(username, password);
 
-		return this.http.get<User | null>(selfUrl, { headers: headers })
+		return this.http.get<User | null>(selfUrl, { headers })
 			.pipe(
 				catchError(this.handleUserDetailsHttpError())
 			);
-	}
-
-	private handleLogoutHttpError() {
-		return (): Observable<null> => {
-			// Do not log errors, all are equivalent to authentication failure.
-			return of(null);
-		};
 	}
 
 	protected postLogout(): Observable<null> {
@@ -73,6 +59,16 @@ export class SelfService extends AbstractSelfService {
 			.pipe(
 				catchError(this.handleLogoutHttpError())
 			);
+	}
+
+	private handleUserDetailsHttpError() {
+		// Do not log errors, all are equivalent to authentication failure.
+		return (): Observable<User | null> => of(null);
+	}
+
+	private handleLogoutHttpError() {
+		// Do not log errors, all are equivalent to authentication failure.
+		return (): Observable<null> => of(null);
 	}
 
 }
