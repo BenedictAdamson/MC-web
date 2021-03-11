@@ -60,11 +60,11 @@ describe('GamePlayersComponent', () => {
 	const USER_NORMAL: User = { id: USER_ID_B, username: 'Benedict', password: null, authorities: [] };
 	const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_ID_A, created: CREATED_A };
 	const GAME_IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_ID_B, created: CREATED_B };
-	const USERS_A: Map<string,string> = new Map([
+	const USERS_A: Map<string, string> = new Map([
 		[CHARACTER_ID_A, USER_ID_A],
 		[CHARACTER_ID_B, USER_ID_B]
 	]);
-	const USERS_B: Map<string,string> = new Map([]);
+	const USERS_B: Map<string, string> = new Map([]);
 	const GAME_PLAYERS_A: GamePlayers = new GamePlayers(GAME_IDENTIFIER_A, true, USERS_A);
 	const GAME_PLAYERS_B: GamePlayers = new GamePlayers(GAME_IDENTIFIER_B, false, USERS_B);
 
@@ -97,6 +97,55 @@ describe('GamePlayersComponent', () => {
 		});
 		return playing;
 	};
+
+	const getScenario = function(gp: GamePlayersComponent): Scenario | null {
+		let scenario: Scenario | null = null;
+		gp.scenario$.subscribe({
+			next: (sc) => scenario = sc,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return scenario;
+	};
+
+	const getPlayedCharacters = function(gp: GamePlayersComponent): string[] | null {
+		let playedCharacters: string[] | null = null;
+		gp.playedCharacters$.subscribe({
+			next: (pcs) => playedCharacters = pcs,
+			error: (err) => fail(err),
+			complete: () => { }
+		});
+		return playedCharacters;
+	};
+
+
+
+	const testPlayedCharacters = function(scenario: Scenario, gamePlayers: GamePlayers, expected: string[]) {
+		const actual: string[] = GamePlayersComponent.playedCharacters(scenario, gamePlayers);
+		expect(actual).toEqual(expected);
+	};
+
+	const testPlayedCharacters1 = function(character: NamedUUID, userId: string) {
+		const scenario: Scenario = {
+			identifier: SCENARIO_A.identifier,
+			title: SCENARIO_A.title,
+			description: SCENARIO_A.description,
+			characters: [character]
+		};
+		const game: GameIdentifier = { scenario: scenario.identifier, created: GAME_IDENTIFIER_A.created };
+		const users: Map<string, string> = new Map([[character.id, userId]]);
+		const gamePlayers: GamePlayers = new GamePlayers(game, true, users);
+
+		testPlayedCharacters(scenario, gamePlayers, [character.title]);
+	};
+
+	it('can join scenario and game players information [A]', () => {
+		testPlayedCharacters1(CHARACTER_A, USER_ID_A);
+	});
+
+	it('can join scenario and game players information [B]', () => {
+		testPlayedCharacters1(CHARACTER_B, USER_ID_B);
+	});
 
 
 
@@ -180,7 +229,9 @@ describe('GamePlayersComponent', () => {
 	};
 
 
-	const canCreate = function(gamePlayers: GamePlayers, self: User, mayJoinGame: boolean, scenario: Scenario) {
+	const canCreate = function(
+		gamePlayers: GamePlayers, self: User, mayJoinGame: boolean, scenario: Scenario, expectedPlayedCharacters: string[] | null
+	) {
 		const recruiting: boolean = gamePlayers.recruiting;
 		const manager: boolean = self.authorities.includes('ROLE_MANAGE_GAMES');
 		const mayEndRecuitment: boolean = recruiting && manager;
@@ -195,6 +246,8 @@ describe('GamePlayersComponent', () => {
 		expect(getIdentifier(component)).withContext('identifier$').toEqual(gamePlayers.game);
 		expect(getGamePlayers(component)).withContext('gamePlayers$').toEqual(gamePlayers);
 		expect(isPlaying(component)).withContext('playing').toEqual(playing);
+		expect(getScenario(component)).withContext('scenario').toEqual(scenario);
+		expect(getPlayedCharacters(component)).withContext('playedCharacters').toEqual(expectedPlayedCharacters);
 
 		component.isEndRecruitmentDisabled$.subscribe(may => {
 			expect(may).withContext(
@@ -241,19 +294,42 @@ describe('GamePlayersComponent', () => {
 	};
 
 	it('can create [A]', fakeAsync(() => {
-		canCreate(GAME_PLAYERS_A, USER_ADMIN, true, SCENARIO_A);
+		canCreate(GAME_PLAYERS_A, USER_NORMAL, true, SCENARIO_A, []);
 	}));
 
 	it('can create [B]', fakeAsync(() => {
-		canCreate(GAME_PLAYERS_A, USER_NORMAL, true, SCENARIO_A);
+		canCreate(GAME_PLAYERS_B, USER_ADMIN, false, SCENARIO_B, []);
 	}));
 
 	it('can create [C]', fakeAsync(() => {
-		canCreate(GAME_PLAYERS_B, USER_ADMIN, false, SCENARIO_B);
+		canCreate(GAME_PLAYERS_B, USER_NORMAL, false, SCENARIO_B, []);
 	}));
 
-	it('can create [D]', fakeAsync(() => {
-		canCreate(GAME_PLAYERS_B, USER_NORMAL, false, SCENARIO_B);
+	const canCreateWithPlayer = function(character: NamedUUID, self: User, user: User) {
+		const scenario: Scenario = {
+			identifier: SCENARIO_A.identifier,
+			title: SCENARIO_A.title,
+			description: SCENARIO_A.description,
+			characters: [character]
+		};
+		const game: GameIdentifier = { scenario: scenario.identifier, created: GAME_IDENTIFIER_A.created };
+		const users: Map<string, string> = new Map([[character.id, user.id]]);
+		const gamePlayers: GamePlayers = new GamePlayers(game, true, users);
+		const expectedPlayedCharacters: string[] = [character.title];
+
+		canCreate(gamePlayers, self, true, scenario, expectedPlayedCharacters);
+	};
+
+	it('can create with player [A]', fakeAsync(() => {
+		canCreateWithPlayer(CHARACTER_A, USER_ADMIN, USER_ADMIN);
+	}));
+
+	it('can create with player [A]', fakeAsync(() => {
+		canCreateWithPlayer(CHARACTER_B, USER_ADMIN, USER_ADMIN);
+	}));
+
+	it('can create with player [C]', fakeAsync(() => {
+		canCreateWithPlayer(CHARACTER_A, USER_ADMIN, USER_NORMAL);
 	}));
 
 

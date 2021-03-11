@@ -9,6 +9,7 @@ import { AbstractSelfService } from '../service/abstract.self.service';
 import { GameIdentifier } from '../game-identifier';
 import { GamePlayers } from '../game-players';
 import { MayJoinGameService } from '../service/may-join-game.service';
+import { Scenario } from '../scenario';
 import { ScenarioService } from '../service/scenario.service';
 
 @Component({
@@ -27,8 +28,9 @@ export class GamePlayersComponent implements OnInit {
 		};
 		return this.route.parent.parent.paramMap.pipe(
 			map(params => params.get('scenario')),
-			filter(scenario => !!scenario),
-			map((id: string | null) => id as string)
+			filter(id => !!id),
+			map((id: string | null) => id as string),
+			distinctUntilChanged() // don't spam identical values
 		);
 	};
 
@@ -39,7 +41,8 @@ export class GamePlayersComponent implements OnInit {
 		return this.route.parent.paramMap.pipe(
 			map(params => params.get('created')),
 			filter(created => !!created),
-			map((created: string | null) => created as string)
+			map((created: string | null) => created as string),
+			distinctUntilChanged() // don't spam identical values
 		);
 	};
 
@@ -50,6 +53,10 @@ export class GamePlayersComponent implements OnInit {
 		private scenarioService: ScenarioService,
 		private selfService: AbstractSelfService
 	) {
+	}
+
+	static playedCharacters(scenario: Scenario, gamePlayers: GamePlayers): string[] {
+		return scenario.characters.filter(c => gamePlayers.users.has(c.id)).map(c => c.title);
 	}
 
 	private static createIdentifier(scenario: string, created: string) {
@@ -79,6 +86,14 @@ export class GamePlayersComponent implements OnInit {
 			map((gps: GamePlayers | null) => gps as GamePlayers)
 		);
 	}
+
+	get scenario$(): Observable<Scenario> {
+		return this.scenarioId$.pipe(
+			mergeMap(id => this.scenarioService.get(id)),
+			filter(scenario => !!scenario),
+			map((scenario: Scenario | null) => scenario as Scenario)
+		);
+	};
 
 	ngOnInit(): void {
 		// Do nothing
@@ -121,10 +136,16 @@ export class GamePlayersComponent implements OnInit {
 		);
 	}
 
-	get players$(): Observable<Map<string,string>> {
+	get players$(): Observable<Map<string, string>> {
 		return this.gamePlayers$.pipe(
 			map(gp => gp.users)
 			// TODO provide names
+		);
+	}
+
+	get playedCharacters$(): Observable<string[]> {
+		return combineLatest([this.scenario$, this.gamePlayers$]).pipe(
+			map(([scenario, gamePlayers]) => GamePlayersComponent.playedCharacters(scenario, gamePlayers))
 		);
 	}
 
