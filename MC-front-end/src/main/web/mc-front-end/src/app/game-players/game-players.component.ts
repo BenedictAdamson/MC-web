@@ -105,7 +105,8 @@ export class GamePlayersComponent implements OnInit {
 
 	get playing$(): Observable<boolean> {
 		return combineLatest([this.selfService.id$, this.gamePlayers$]).pipe(
-			map(([id, gamePlayers]) => GamePlayersComponent.isPlaying(id, gamePlayers))
+			map(([id, gamePlayers]) => GamePlayersComponent.isPlaying(id, gamePlayers)),
+			distinctUntilChanged() // don't spam identical values
 		);
 	}
 

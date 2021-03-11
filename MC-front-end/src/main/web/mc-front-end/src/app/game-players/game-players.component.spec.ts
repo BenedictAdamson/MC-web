@@ -381,6 +381,14 @@ describe('GamePlayersComponent', () => {
 		if (gamePlayers1) {
 			expect(gamePlayers1.isPlaying(self.id)).withContext('gamePlayers.users includes self').toBeTrue();
 		}
+
+		expect(isPlaying(component)).withContext('component flags user as playing').toBeTrue();
+
+
+		const html: HTMLElement = fixture.nativeElement;
+		const playingElement: HTMLElement | null = html.querySelector('#playing');
+		const playingText: string = playingElement ? playingElement.innerText : '';
+		expect(playingText.includes('You are playing this game')).withContext('Reports that user is playing');
 	};
 
 	it('can join game [A]', fakeAsync((() => {
