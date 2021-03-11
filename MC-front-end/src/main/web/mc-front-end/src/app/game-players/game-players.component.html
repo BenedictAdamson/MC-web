@@ -29,6 +29,12 @@
    <ng-template #notPlaying>
    <p id="playing" >You are not playing this game.</p>
    </ng-template>
+
+   <section id="played-characters" *ngIf="mayManageGames$ | async">
+   <ol>
+     <li *ngFor="let character of playedCharacters$ | async">{{character}}</li>
+   </ol>
+   </section>
 </section>
 
 </section>

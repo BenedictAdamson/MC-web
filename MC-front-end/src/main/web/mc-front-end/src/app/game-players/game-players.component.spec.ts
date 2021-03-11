@@ -265,6 +265,7 @@ describe('GamePlayersComponent', () => {
 		const playingElement: HTMLElement | null = html.querySelector('#playing');
 		const endRecuitmentButton: HTMLButtonElement | null = html.querySelector('button#end-recruitment');
 		const joinButton: HTMLButtonElement | null = html.querySelector('button#join');
+		const playedCharactersElement: HTMLElement | null = html.querySelector('#played-characters');
 
 		const recruitingText: string = recruitingElement ? recruitingElement.innerText : '';
 		const joinableText: string = joinableElement ? joinableElement.innerText : '';
@@ -291,6 +292,7 @@ describe('GamePlayersComponent', () => {
 		if (joinButton) {
 			expect(joinButton.disabled).withContext('join button is disabled').toEqual(!mayJoinGame);
 		}
+		expect(!!playedCharactersElement).withContext('Displayed played characters IFF manager').toEqual(manager);
 	};
 
 	it('can create [A]', fakeAsync(() => {
@@ -305,7 +307,8 @@ describe('GamePlayersComponent', () => {
 		canCreate(GAME_PLAYERS_B, USER_NORMAL, false, SCENARIO_B, []);
 	}));
 
-	const canCreateWithPlayer = function(character: NamedUUID, self: User, user: User) {
+	const canCreateWithPlayer = function(character: NamedUUID, user: User) {
+		const self: User = USER_ADMIN;
 		const scenario: Scenario = {
 			identifier: SCENARIO_A.identifier,
 			title: SCENARIO_A.title,
@@ -318,18 +321,24 @@ describe('GamePlayersComponent', () => {
 		const expectedPlayedCharacters: string[] = [character.title];
 
 		canCreate(gamePlayers, self, true, scenario, expectedPlayedCharacters);
+
+		const html: HTMLElement = fixture.nativeElement;
+		const playedCharactersElement: HTMLElement | null = html.querySelector('#played-characters');
+		expect(playedCharactersElement).withContext('Displayed played charactersn element').not.toBeNull();
+		const playedCharactersElementText: string = (playedCharactersElement as HTMLElement).innerText;
+		expect(playedCharactersElementText).withContext('Played characters element includes character title').toContain(character.title);
 	};
 
 	it('can create with player [A]', fakeAsync(() => {
-		canCreateWithPlayer(CHARACTER_A, USER_ADMIN, USER_ADMIN);
+		canCreateWithPlayer(CHARACTER_A, USER_ADMIN);
 	}));
 
 	it('can create with player [A]', fakeAsync(() => {
-		canCreateWithPlayer(CHARACTER_B, USER_ADMIN, USER_ADMIN);
+		canCreateWithPlayer(CHARACTER_B, USER_ADMIN);
 	}));
 
 	it('can create with player [C]', fakeAsync(() => {
-		canCreateWithPlayer(CHARACTER_A, USER_ADMIN, USER_NORMAL);
+		canCreateWithPlayer(CHARACTER_A, USER_NORMAL);
 	}));
 
 

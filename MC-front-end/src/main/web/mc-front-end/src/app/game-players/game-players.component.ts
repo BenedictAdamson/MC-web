@@ -99,7 +99,7 @@ export class GamePlayersComponent implements OnInit {
 		// Do nothing
 	}
 
-	private get mayManageGames$(): Observable<boolean> {
+	get mayManageGames$(): Observable<boolean> {
 		return this.selfService.mayManageGames$;
 	}
 
