@@ -72,14 +72,9 @@ public final class GamePage extends Page {
             " as character ");
    private static final Matcher<String> INDICATES_JOINING_NFORMATION = anyOf(
             INDICATES_IS_JOINABLE, INDICATES_IS_NOT_JOINABLE);
-   private static final Matcher<String> INDICATES_HAS_NO_PLAYERS = containsString(
-            "This game has no players");
-   private static final Matcher<String> INDICATES_HAS_PLAYERS = containsString(
-            "This game has players");
 
    private static final By SCENARIO_LINK_LOCATOR = By.id("scenario");
    private static final By RECRUITING_ELEMENT_LOCATOR = By.id("recruiting");
-   private static final By PLAYERS_ELEMENT_LOCATOR = By.id("players");
    private static final By PLAYING_ELEMENT_LOCATOR = By.id("playing");
    private static final By JOINABLE_ELEMENT_LOCATOR = By.id("joinable");
    private static final By END_RECRUITMENT_BUTTON_LOCATOR = By
@@ -150,11 +145,6 @@ public final class GamePage extends Page {
       return assertHasElement(body, JOINABLE_ELEMENT_LOCATOR);
    }
 
-   private WebElement assertHasPlayersElement(final WebElement body) {
-      return assertHasElement("Has a players element", body,
-               PLAYERS_ELEMENT_LOCATOR);
-   }
-
    private WebElement assertHasPlayingElement(final WebElement body) {
       return assertHasElement("Has an element for reporting whether playing",
                body, PLAYING_ELEMENT_LOCATOR);
@@ -173,16 +163,12 @@ public final class GamePage extends Page {
                includesScenarioTitile);
    }
 
-   public void assertIndicatesGameHasNoPlayers() {
-      final var players = assertHasPlayersElement(getBody());
-      assertThat("Players element reports that has no players",
-               players.getText(), INDICATES_HAS_NO_PLAYERS);
-   }
-
-   public void assertIndicatesGameHasPlayers() {
-      final var players = assertHasPlayersElement(getBody());
-      assertThat("Players element reports that has players", players.getText(),
-               INDICATES_HAS_PLAYERS);
+   public void assertIndicatesGameHasNoPlayedCharacters() {
+      final var playedCharacters = assertHasElement(getBody(),
+               PLAYED_CHARACTERS_ELEMENT_LOCATOR);
+      final var playedCharacterTitles = playedCharacters
+               .findElements(By.tagName("li"));
+      assertThat("played character titles", playedCharacterTitles, empty());
    }
 
    public void assertIndicatesIsNotRecruitingPlayers() {
@@ -223,12 +209,6 @@ public final class GamePage extends Page {
 
    public void assertIndicatesWhetherGameHasPlayers() {
 
-   }
-
-   private void assertIndicatesWhetherGameHasPlayers(final WebElement body) {
-      final var players = assertHasPlayersElement(body);
-      assertThat("Players text provides information", players.getText(),
-               either(INDICATES_HAS_NO_PLAYERS).or(INDICATES_HAS_PLAYERS));
    }
 
    public void assertIndicatesWhetherRecruitingPlayers() {
@@ -291,7 +271,6 @@ public final class GamePage extends Page {
    @Override
    protected void assertValidBody(@Nonnull final WebElement body) {
       assertAll(() -> assertIndicatesWhetherUserMayJoinGame(body),
-               () -> assertIndicatesWhetherGameHasPlayers(body),
                () -> assertIndicatesWhetherUserIsPlayingGame(body),
                () -> assertJoinButtonConsistentWithJoinableText(body),
                () -> assertValidBodyText(body, body.getText()));

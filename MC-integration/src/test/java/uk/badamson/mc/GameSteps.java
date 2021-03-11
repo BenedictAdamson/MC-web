@@ -118,13 +118,7 @@ public class GameSteps extends Steps {
    @Then("The game page indicates that the game has no players")
    public void game_page_indicates_game_has_no_players() {
       world.getAndAssertExpectedPage(GamePage.class)
-               .assertIndicatesGameHasNoPlayers();
-   }
-
-   @Then("The game page indicates that the game has a player")
-   public void game_page_indicates_game_has_player() {
-      world.getAndAssertExpectedPage(GamePage.class)
-               .assertIndicatesGameHasPlayers();
+               .assertIndicatesGameHasNoPlayedCharacters();
    }
 
    @Then("the game page indicates that the game is not recruiting players")

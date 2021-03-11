@@ -1,5 +1,4 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
-/* eslint-disable prefer-arrow/prefer-arrow-functions */
 import { of } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
@@ -199,7 +198,6 @@ describe('GamePlayersComponent', () => {
 		const html: HTMLElement = fixture.nativeElement;
 		const recruitingElement: HTMLElement | null = html.querySelector('#recruiting');
 		const joinableElement: HTMLElement | null = html.querySelector('#joinable');
-		const playersElement: HTMLElement | null = html.querySelector('#players');
 		const playingElement: HTMLElement | null = html.querySelector('#playing');
 		const endRecuitmentButton: HTMLButtonElement | null = html.querySelector('button#end-recruitment');
 		const joinButton: HTMLButtonElement | null = html.querySelector('button#join');
@@ -208,7 +206,6 @@ describe('GamePlayersComponent', () => {
 
 		expect(recruitingElement).withContext('recruiting element').not.toBeNull();
 		expect(joinableElement).withContext('joinable element').not.toBeNull();
-		expect(playersElement).withContext('players element').not.toBeNull();
 		expect(playingElement).withContext('playing element').not.toBeNull();
 		expect(endRecuitmentButton).withContext('end-recuitment button').not.toBeNull();
 		expect(joinButton).withContext('join button').not.toBeNull();

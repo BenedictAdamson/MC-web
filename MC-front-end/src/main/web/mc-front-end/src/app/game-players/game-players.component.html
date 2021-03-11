@@ -20,11 +20,6 @@
    </div>
    </ng-template>
 
-   <p id="players" *ngIf="0 < (nPlayers$ | async); else noPlayers">This game has players.</p>
-   <ng-template #noPlayers>
-   <p id="players" >This game has no players.</p>
-   </ng-template>
-
    <p id="playing" *ngIf="playing$ | async; else notPlaying">You are playing this game.</p>
    <ng-template #notPlaying>
    <p id="playing" >You are not playing this game.</p>

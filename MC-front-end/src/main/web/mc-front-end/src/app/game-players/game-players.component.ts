@@ -130,12 +130,6 @@ export class GamePlayersComponent implements OnInit {
 		);
 	}
 
-	get nPlayers$(): Observable<number> {
-		return this.gamePlayers$.pipe(
-			map(gps => gps.users.size)
-		);
-	}
-
 	get players$(): Observable<Map<string, string>> {
 		return this.gamePlayers$.pipe(
 			map(gp => gp.users)
