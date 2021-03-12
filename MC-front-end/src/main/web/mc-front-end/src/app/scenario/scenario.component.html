@@ -1,7 +1,17 @@
 <section>
-<header>
-   <h2><a id="scenario" [routerLink]="['/scenario/',(id$ | async)]">Scenario: {{(scenario$ | async).title}}</a></h2>
-</header>
-<p>{{(scenario$ | async).description}}</p>
-<router-outlet></router-outlet>
+	<header>
+		<h2><a id="scenario" [routerLink]="['/scenario/',(id$ | async)]">Scenario: {{(scenario$ | async).title}}</a>
+		</h2>
+	</header>
+	<p>{{(scenario$ | async).description}}</p>
+
+	<section id="characters">
+		<header>
+			<h3>Characters</h3>
+		</header>
+		<ol>
+			<li *ngFor="let character of (scenario$ | async).characters">{{character.title}}</li>
+		</ol>
+	</section>
+	<router-outlet></router-outlet>
 </section>

@@ -73,11 +73,23 @@ describe('ScenarioComponent', () => {
 		expect(getScenario(component)).toBe(testScenario);
 
 		const html: HTMLElement = fixture.nativeElement;
-		const displayText: string = html.innerText;
 		const selfLink: HTMLAnchorElement | null = html.querySelector('a#scenario');
+		const charactersElement: HTMLElement | null = html.querySelector('#characters');
+
+		const displayText: string = html.innerText;
 		expect(displayText.includes(testScenario.title)).withContext('displayed text includes title').toBeTrue();
 		expect(displayText.includes(testScenario.description)).withContext('displayed text includes description').toBeTrue();
 		expect(selfLink).withContext('self link').not.toBeNull();
+		expect(charactersElement).withContext('characters element').not.toBeNull();
+		if (charactersElement) {
+			const characterEntries: NodeListOf<HTMLLIElement> = charactersElement.querySelectorAll('li');
+			expect(characterEntries.length).withContext('number of character entries').toEqual(testScenario.characters.length);
+			for (let i = 0; i < characterEntries.length; i++) {
+				const entry: HTMLLIElement = characterEntries.item(i);
+				const characterText: string = entry.innerText;
+				expect(characterText).withContext('character entry').toEqual(testScenario.characters[i].title);
+			}
+		}
 	};
 
 	it('can create [a]', () => {
