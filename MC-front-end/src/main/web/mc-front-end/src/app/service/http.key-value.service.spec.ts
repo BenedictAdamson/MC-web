@@ -61,9 +61,9 @@ describe('HttpKeyValueService', () => {
 	const VALUE_A: Value = { id: ID_A, data: DATA_A };
 	const VALUE_B: Value = { id: ID_B, data: DATA_B };
 
-	const setUp = function(
+	const setUp = (
 		allUrl: string | undefined,
-		addUrl: string | undefined) {
+		addUrl: string | undefined) => {
 		TestBed.configureTestingModule({
 			imports: [HttpClientTestingModule]
 		});
@@ -76,9 +76,9 @@ describe('HttpKeyValueService', () => {
 		service = new TestHttpKeyValueService(http, allUrl, addUrl);
 	};
 
-	const testConstructor = function(
+	const testConstructor = (
 		allUrl: string | undefined,
-		addUrl: string | undefined) {
+		addUrl: string | undefined) => {
 		setUp(allUrl, addUrl);
 
 		expect(service).toBeTruthy();
@@ -102,7 +102,7 @@ describe('HttpKeyValueService', () => {
 		expect(service.add(DATA_A)).withContext('add').not.toBeDefined();
 	});
 
-	const testGetAll = function(allUrl: string) {
+	const testGetAll = (allUrl: string) => {
 		setUp(allUrl, '/value?add');
 		const testValues: Value[] = [VALUE_A, VALUE_B];
 
@@ -124,7 +124,7 @@ describe('HttpKeyValueService', () => {
 		testGetAll('/values');
 	});
 
-	const testGet = function(testValue: Value) {
+	const testGet = (testValue: Value) => {
 		const id: Id = testValue.id;
 		const expectedPath: string = id.first + '/' + id.second;
 		setUp('/value', '/value?add');
@@ -143,7 +143,7 @@ describe('HttpKeyValueService', () => {
 		testGet(VALUE_B);
 	});
 
-	const testAdd = function(addUrl: string, value: Value) {
+	const testAdd = (addUrl: string, value: Value) => {
 		const specification: Data = value.data;
 		setUp('/value', addUrl);
 

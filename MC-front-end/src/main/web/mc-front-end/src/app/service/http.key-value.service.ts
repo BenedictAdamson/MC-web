@@ -2,9 +2,9 @@ import { Observable } from 'rxjs';
 
 import { HttpClient } from '@angular/common/http';
 
-import { AbstractKeyValueService } from './abstract.key-value.service'
+import { AbstractKeyValueService } from './abstract.key-value.service';
 
-export abstract class HttpKeyValueService<KEY, VALUE, SPECIFICATION, ADD_PAYLOAD>
+export abstract class HttpKeyValueService<KEY, VALUE, SPECIFICATION, ADDPAYLOAD>
 	extends AbstractKeyValueService<KEY, VALUE, SPECIFICATION> {
 
 
@@ -44,6 +44,6 @@ export abstract class HttpKeyValueService<KEY, VALUE, SPECIFICATION, ADD_PAYLOAD
 
 	protected abstract getAddUrl(specification: SPECIFICATION): string | undefined;
 
-	protected abstract getAddPayload(specification: SPECIFICATION): ADD_PAYLOAD;
+	protected abstract getAddPayload(specification: SPECIFICATION): ADDPAYLOAD;
 
 }
