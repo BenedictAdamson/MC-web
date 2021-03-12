@@ -6,8 +6,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 
 import { AbstractGamePlayersBackEndService } from './abstract.game-players.back-end.service';
-import { HttpGamePlayersBackEndService, getApiGamePlayersPath, getApiJoinGamePath, getApiGameEndRecuitmentPath }
- from './http.game-players.back-end.service';
+import { HttpGamePlayersBackEndService } from './http.game-players.back-end.service';
 import { GamePlayers } from '../game-players';
 import { GameIdentifier } from '../game-identifier';
 import { GamePlayersService } from './game-players.service';
@@ -51,7 +50,7 @@ describe('GamePlayersService', () => {
 	});
 
 	const testGet = (gamePlayers: GamePlayers) => {
-		const expectedPath: string = getApiGamePlayersPath(gamePlayers.game);
+		const expectedPath: string = HttpGamePlayersBackEndService.getApiGamePlayersPath(gamePlayers.game);
 		const service: GamePlayersService = setUp();
 
 		service.get(gamePlayers.game).subscribe(g => expect(g).toEqual(gamePlayers));
@@ -73,7 +72,7 @@ describe('GamePlayersService', () => {
 
 	const testJoinGame = (done: any, gamePlayers0: GamePlayers, user: string) => {
 		const game: GameIdentifier = gamePlayers0.game;
-		const expectedPath: string = getApiJoinGamePath(game);
+		const expectedPath: string = HttpGamePlayersBackEndService.getApiJoinGamePath(game);
 		const users: Map<string,string> = gamePlayers0.users;
 		users.set(CHARACTER_ID_A, user);
 		// Tough test: the reply identifier is not the same object
@@ -111,7 +110,7 @@ describe('GamePlayersService', () => {
 
 	const testEndRecuitment = (done: any, gamePlayers0: GamePlayers) => {
 		const game: GameIdentifier = gamePlayers0.game;
-		const path: string = getApiGameEndRecuitmentPath(game);
+		const path: string = HttpGamePlayersBackEndService.getApiGameEndRecuitmentPath(game);
 		const service: GamePlayersService = setUp();
 		// Tough test: the reply identifier is not the same object
 		const gamePlayersReply: GamePlayers = new GamePlayers(
@@ -150,7 +149,7 @@ describe('GamePlayersService', () => {
 		// Tough test: use two identifiers that are semantically equivalent, but not the same object.
 		const game1: GameIdentifier = gamePlayers.game;
 		const game2: GameIdentifier = { scenario: game1.scenario, created: game1.created };
-		const expectedPath: string = getApiGamePlayersPath(game1);
+		const expectedPath: string = HttpGamePlayersBackEndService.getApiGamePlayersPath(game1);
 		const service: GamePlayersService = setUp();
 
 		service.update(game1);
@@ -175,7 +174,7 @@ describe('GamePlayersService', () => {
 
 	const testUpdateAfterGet = (gamePlayers: GamePlayers) => {
 		const game: GameIdentifier = gamePlayers.game;
-		const expectedPath: string = getApiGamePlayersPath(game);
+		const expectedPath: string = HttpGamePlayersBackEndService.getApiGamePlayersPath(game);
 		const service: GamePlayersService = setUp();
 
 		service.get(game).subscribe(g => expect(g).toEqual(gamePlayers));
@@ -210,7 +209,7 @@ describe('GamePlayersService', () => {
 	) => {
 		const gamePlayers1: GamePlayers = new GamePlayers(game, recruiting1, users1);
 		const gamePlayers2: GamePlayers = new GamePlayers(game, recruiting2, users2);
-		const expectedPath: string = getApiGamePlayersPath(game);
+		const expectedPath: string = HttpGamePlayersBackEndService.getApiGamePlayersPath(game);
 		const service: GamePlayersService = setUp();
 		let n = 0;
 
@@ -251,7 +250,7 @@ describe('GamePlayersService', () => {
 
 	const testGetForUnchangedUpdate = (gamePlayers: GamePlayers) => {
 		const game: GameIdentifier = gamePlayers.game;
-		const expectedPath: string = getApiGamePlayersPath(game);
+		const expectedPath: string = HttpGamePlayersBackEndService.getApiGamePlayersPath(game);
 		const service: GamePlayersService = setUp();
 		let n = 0;
 
