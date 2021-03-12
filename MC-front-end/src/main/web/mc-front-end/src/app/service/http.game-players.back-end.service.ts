@@ -6,12 +6,12 @@ import { Injectable } from '@angular/core';
 import { AbstractGamePlayersBackEndService } from './abstract.game-players.back-end.service';
 import { GameIdentifier } from '../game-identifier';
 import { GamePlayers } from '../game-players';
-import { HttpKeyValueService } from './http.key-value.service';
+import { HttpSimpleKeyValueService } from './http.simple-key-value.service';
 import { getApiGamePath } from './http.game.back-end.service';
 
 
 
-class Delegate extends HttpKeyValueService<GameIdentifier, GamePlayers, void, void> {
+class Delegate extends HttpSimpleKeyValueService<GameIdentifier, GamePlayers, void, void> {
 
 	constructor(
 		http: HttpClient

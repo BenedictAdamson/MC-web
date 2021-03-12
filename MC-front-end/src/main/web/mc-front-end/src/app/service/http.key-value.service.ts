@@ -1,10 +1,11 @@
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { HttpClient } from '@angular/common/http';
 
 import { AbstractKeyValueService } from './abstract.key-value.service';
 
-export abstract class HttpKeyValueService<KEY, VALUE, SPECIFICATION, ADDPAYLOAD>
+export abstract class HttpKeyValueService<KEY, VALUE, ENCODEDVALUE, SPECIFICATION, ADDPAYLOAD>
 	extends AbstractKeyValueService<KEY, VALUE, SPECIFICATION> {
 
 
@@ -17,14 +18,18 @@ export abstract class HttpKeyValueService<KEY, VALUE, SPECIFICATION, ADDPAYLOAD>
 
 	getAll(): Observable<VALUE[]> | undefined {
 		if (this.allUrl) {
-			return this.http.get<VALUE[]>(this.allUrl as string);
+			return this.http.get<ENCODEDVALUE[]>(this.allUrl as string).pipe(
+				map(vs => vs.map(v => this.decode(v)))
+			);
 		} else {
 			return undefined;
 		}
 	}
 
 	get(id: KEY): Observable<VALUE | null> {
-		return this.http.get<VALUE>(this.getUrl(id));
+		return this.http.get<ENCODEDVALUE>(this.getUrl(id)).pipe(
+			map(v => this.decode(v))
+		);
 	}
 
 	add(specification: SPECIFICATION): Observable<VALUE> | undefined {
@@ -33,7 +38,9 @@ export abstract class HttpKeyValueService<KEY, VALUE, SPECIFICATION, ADDPAYLOAD>
 		 * The HttpClient or browser itself handles that redirect for us.
 		 */
 		if (url) {
-			return this.http.post<VALUE>(url as string, this.getAddPayload(specification));
+			return this.http.post<ENCODEDVALUE>(url as string, this.getAddPayload(specification)).pipe(
+				map(v => this.decode(v))
+			);
 		} else {
 			return undefined;
 		}
@@ -45,5 +52,7 @@ export abstract class HttpKeyValueService<KEY, VALUE, SPECIFICATION, ADDPAYLOAD>
 	protected abstract getAddUrl(specification: SPECIFICATION): string | undefined;
 
 	protected abstract getAddPayload(specification: SPECIFICATION): ADDPAYLOAD;
+
+	protected abstract decode(encodedValue: ENCODEDVALUE): VALUE;
 
 }

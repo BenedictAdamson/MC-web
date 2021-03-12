@@ -24,7 +24,14 @@ class Value {
 }// class
 
 
-class TestHttpKeyValueService extends HttpKeyValueService<Id, Value, Data, Data> {
+class EncodedValue {
+	id: Id;
+	data: Data;
+	extra: string;
+}// class
+
+
+class TestHttpKeyValueService extends HttpKeyValueService<Id, Value, EncodedValue, Data, Data> {
 
 	constructor(
 		http: HttpClient,
@@ -47,12 +54,16 @@ class TestHttpKeyValueService extends HttpKeyValueService<Id, Value, Data, Data>
 		return specification;
 	}
 
+	protected decode(encodedValue: EncodedValue): Value {
+		return { id: encodedValue.id, data: encodedValue.data };
+	}
+
 }
 
 
 describe('HttpKeyValueService', () => {
 	let httpTestingController: HttpTestingController;
-	let service: HttpKeyValueService<Id, Value, Data, Data>;
+	let service: HttpKeyValueService<Id, Value, EncodedValue, Data, Data>;
 
 	const ID_A: Id = { first: 'A', second: '1' };
 	const ID_B: Id = { first: 'B', second: '2' };
@@ -60,6 +71,8 @@ describe('HttpKeyValueService', () => {
 	const DATA_B: Data = { field: 'fieldB' };
 	const VALUE_A: Value = { id: ID_A, data: DATA_A };
 	const VALUE_B: Value = { id: ID_B, data: DATA_B };
+	const ENCODED_VALUE_A: EncodedValue = { id: ID_A, data: DATA_A, extra: 'extra1' };
+	const ENCODED_VALUE_B: EncodedValue = { id: ID_B, data: DATA_B, extra: 'extra2' };
 
 	const setUp = (
 		allUrl: string | undefined,
@@ -104,15 +117,16 @@ describe('HttpKeyValueService', () => {
 
 	const testGetAll = (allUrl: string) => {
 		setUp(allUrl, '/value?add');
-		const testValues: Value[] = [VALUE_A, VALUE_B];
+		const encodedValues: EncodedValue[] = [ENCODED_VALUE_A, ENCODED_VALUE_B];
+		const expectedValues: Value[] = [VALUE_A, VALUE_B];
 
 		const getAll: Observable<Value[]> | undefined = service.getAll();
 		expect(getAll).withContext('getAll').toBeDefined();
-		(getAll as Observable<Value[]>).subscribe(values => expect(values).toEqual(testValues));
+		(getAll as Observable<Value[]>).subscribe(values => expect(values).toEqual(expectedValues));
 
 		const request = httpTestingController.expectOne(allUrl);
 		expect(request.request.method).toEqual('GET');
-		request.flush(testValues);
+		request.flush(encodedValues);
 		httpTestingController.verify();
 	};
 
@@ -124,23 +138,24 @@ describe('HttpKeyValueService', () => {
 		testGetAll('/values');
 	});
 
-	const testGet = (testValue: Value) => {
-		const id: Id = testValue.id;
+	const testGet = (encodedValue: EncodedValue) => {
+		const expectedValue: Value = { id: encodedValue.id, data: encodedValue.data };
+		const id: Id = expectedValue.id;
 		const expectedPath: string = id.first + '/' + id.second;
 		setUp('/value', '/value?add');
 
-		service.get(id).subscribe(value => expect(value).toEqual(testValue));
+		service.get(id).subscribe(value => expect(value).toEqual(expectedValue));
 
 		const request = httpTestingController.expectOne(expectedPath);
 		expect(request.request.method).toEqual('GET');
-		request.flush(testValue);
+		request.flush(encodedValue);
 		httpTestingController.verify();
 	};
 	it('can get [A]', () => {
-		testGet(VALUE_A);
+		testGet(ENCODED_VALUE_A);
 	});
 	it('can get [B]', () => {
-		testGet(VALUE_B);
+		testGet(ENCODED_VALUE_B);
 	});
 
 	const testAdd = (addUrl: string, value: Value) => {
