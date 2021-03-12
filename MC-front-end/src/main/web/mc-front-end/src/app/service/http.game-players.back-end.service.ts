@@ -1,4 +1,5 @@
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -6,12 +7,19 @@ import { Injectable } from '@angular/core';
 import { AbstractGamePlayersBackEndService } from './abstract.game-players.back-end.service';
 import { GameIdentifier } from '../game-identifier';
 import { GamePlayers } from '../game-players';
-import { HttpSimpleKeyValueService } from './http.simple-key-value.service';
+import { HttpKeyValueService } from './http.key-value.service';
 import { getApiGamePath } from './http.game.back-end.service';
 
 
 
-class Delegate extends HttpSimpleKeyValueService<GameIdentifier, GamePlayers, void, void> {
+export class EncodedGamePlayers {
+	game: GameIdentifier;
+	recruiting: boolean;
+	// eslint-disable-next-line @typescript-eslint/ban-types
+	users: object;
+}
+
+class Delegate extends HttpKeyValueService<GameIdentifier, GamePlayers, EncodedGamePlayers, void, void> {
 
 	constructor(
 		http: HttpClient
@@ -33,11 +41,15 @@ class Delegate extends HttpSimpleKeyValueService<GameIdentifier, GamePlayers, vo
 	}
 
 	joinGame(game: GameIdentifier): Observable<GamePlayers> {
-		return this.http.post<GamePlayers>(HttpGamePlayersBackEndService.getApiJoinGamePath(game), '');
+		return this.http.post<GamePlayers>(HttpGamePlayersBackEndService.getApiJoinGamePath(game), '').pipe(
+			map(v => this.decode(v))
+		);
 	}
 
 	endRecruitment(game: GameIdentifier): Observable<GamePlayers> {
-		return this.http.post<GamePlayers>(HttpGamePlayersBackEndService.getApiGameEndRecuitmentPath(game), '');
+		return this.http.post<GamePlayers>(HttpGamePlayersBackEndService.getApiGameEndRecuitmentPath(game), '').pipe(
+			map(v => this.decode(v))
+		);
 	}
 
 
@@ -47,6 +59,11 @@ class Delegate extends HttpSimpleKeyValueService<GameIdentifier, GamePlayers, vo
 
 	protected getAddPayload(_specification: void): undefined {
 		return undefined;
+	}
+
+	protected decode(encodedValue: EncodedGamePlayers): GamePlayers {
+		const users: Map<string, string> = new Map(Object.entries(encodedValue.users).map(([k, v]) => ([k, v])));
+		return new GamePlayers(encodedValue.game, encodedValue.recruiting, users);
 	}
 
 

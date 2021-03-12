@@ -6,7 +6,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 
 import { AbstractGamePlayersBackEndService } from './abstract.game-players.back-end.service';
-import { HttpGamePlayersBackEndService } from './http.game-players.back-end.service';
+import { EncodedGamePlayers, HttpGamePlayersBackEndService } from './http.game-players.back-end.service';
 import { GamePlayers } from '../game-players';
 import { GameIdentifier } from '../game-identifier';
 import { GamePlayersService } from './game-players.service';
@@ -25,11 +25,11 @@ describe('GamePlayersService', () => {
 	const CREATED_B = '2020-12-31T23:59:59.999Z';
 	const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_A, created: CREATED_A };
 	const GAME_IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_B, created: CREATED_B };
-	const USERS_A: Map<string,string> = new Map([
+	const USERS_A: Map<string, string> = new Map([
 		[CHARACTER_ID_A, USER_ID_A],
 		[CHARACTER_ID_B, USER_ID_B]
 	]);
-	const USERS_B: Map<string,string> = new Map([]);
+	const USERS_B: Map<string, string> = new Map([]);
 	const GAME_PLAYERS_A: GamePlayers = new GamePlayers(GAME_IDENTIFIER_A, true, USERS_A);
 	const GAME_PLAYERS_B: GamePlayers = new GamePlayers(GAME_IDENTIFIER_B, false, USERS_B);
 
@@ -49,6 +49,13 @@ describe('GamePlayersService', () => {
 		expect(service).toBeTruthy();
 	});
 
+	const encode = (gamePlayers: GamePlayers): EncodedGamePlayers => {
+		const users = {};
+		gamePlayers.users.forEach((value, key) => users[key] = value);
+		const encoded: EncodedGamePlayers = { game: gamePlayers.game, recruiting: gamePlayers.recruiting, users };
+		return encoded;
+	};
+
 	const testGet = (gamePlayers: GamePlayers) => {
 		const expectedPath: string = HttpGamePlayersBackEndService.getApiGamePlayersPath(gamePlayers.game);
 		const service: GamePlayersService = setUp();
@@ -57,7 +64,7 @@ describe('GamePlayersService', () => {
 
 		const request = httpTestingController.expectOne(expectedPath);
 		expect(request.request.method).toEqual('GET');
-		request.flush(gamePlayers);
+		request.flush(encode(gamePlayers));
 		httpTestingController.verify();
 	};
 
@@ -73,7 +80,7 @@ describe('GamePlayersService', () => {
 	const testJoinGame = (done: any, gamePlayers0: GamePlayers, user: string) => {
 		const game: GameIdentifier = gamePlayers0.game;
 		const expectedPath: string = HttpGamePlayersBackEndService.getApiJoinGamePath(game);
-		const users: Map<string,string> = gamePlayers0.users;
+		const users: Map<string, string> = gamePlayers0.users;
 		users.set(CHARACTER_ID_A, user);
 		// Tough test: the reply identifier is not the same object
 		const gamePlayers1: GamePlayers = new GamePlayers(
@@ -87,7 +94,7 @@ describe('GamePlayersService', () => {
 
 		const request = httpTestingController.expectOne(expectedPath);
 		expect(request.request.method).toEqual('POST');
-		request.flush(gamePlayers1);
+		request.flush(encode(gamePlayers1));
 		httpTestingController.verify();
 
 		service.get(game).subscribe({
@@ -123,7 +130,7 @@ describe('GamePlayersService', () => {
 
 		const request = httpTestingController.expectOne(path);
 		expect(request.request.method).toEqual('POST');
-		request.flush(gamePlayersReply);
+		request.flush(encode(gamePlayersReply));
 		httpTestingController.verify();
 
 		service.get(game).subscribe({
@@ -158,7 +165,7 @@ describe('GamePlayersService', () => {
 		// Only one GET expected because should use the cached value.
 		const request = httpTestingController.expectOne(expectedPath);
 		expect(request.request.method).toEqual('GET');
-		request.flush(gamePlayers);
+		request.flush(encode(gamePlayers));
 		httpTestingController.verify();
 	};
 
@@ -183,9 +190,9 @@ describe('GamePlayersService', () => {
 		const requests: TestRequest[] = httpTestingController.match(expectedPath);
 		expect(requests.length).withContext('number of requests').toEqual(2);
 		expect(requests[0].request.method).toEqual('GET');
-		requests[0].flush(gamePlayers);
+		requests[0].flush(encode(gamePlayers));
 		expect(requests[1].request.method).toEqual('GET');
-		requests[1].flush(gamePlayers);
+		requests[1].flush(encode(gamePlayers));
 		httpTestingController.verify();
 	};
 
@@ -203,9 +210,9 @@ describe('GamePlayersService', () => {
 		done: any,
 		game: GameIdentifier,
 		recruiting1: boolean,
-		users1: Map<string,string>,
+		users1: Map<string, string>,
 		recruiting2: boolean,
-		users2: Map<string,string>
+		users2: Map<string, string>
 	) => {
 		const gamePlayers1: GamePlayers = new GamePlayers(game, recruiting1, users1);
 		const gamePlayers2: GamePlayers = new GamePlayers(game, recruiting2, users2);
@@ -215,12 +222,13 @@ describe('GamePlayersService', () => {
 
 		service.get(game).subscribe(
 			gamePlayers => {
-				expect(0 !== n || gamePlayers1 === gamePlayers).withContext('provides the first value').toBeTrue();
-				expect(1 !== n || gamePlayers2 === gamePlayers).withContext('provides the second value').toBeTrue();
-				n++;
-				if (n === 2) {
+				if (n === 0) {
+					expect(gamePlayers).withContext('first provided value').toEqual(gamePlayers1);
+					n++;
+				} else if (n === 1) {
+					expect(gamePlayers).withContext('second provided value').toEqual(gamePlayers2);
 					done();
-					}
+				}
 			}
 		);
 		service.update(game);
@@ -228,9 +236,9 @@ describe('GamePlayersService', () => {
 		const requests: TestRequest[] = httpTestingController.match(expectedPath);
 		expect(requests.length).withContext('number of requests').toEqual(2);
 		expect(requests[0].request.method).toEqual('GET');
-		requests[0].flush(gamePlayers1);
+		requests[0].flush(encode(gamePlayers1));
 		expect(requests[1].request.method).toEqual('GET');
-		requests[1].flush(gamePlayers2);
+		requests[1].flush(encode(gamePlayers2));
 		httpTestingController.verify();
 	};
 
@@ -243,7 +251,7 @@ describe('GamePlayersService', () => {
 			done, GAME_IDENTIFIER_B, true,
 			new Map([[CHARACTER_ID_A, USER_ID_A]]), true,
 			new Map([[CHARACTER_ID_B, USER_ID_B]])
-			);
+		);
 	});
 
 
@@ -252,13 +260,10 @@ describe('GamePlayersService', () => {
 		const game: GameIdentifier = gamePlayers.game;
 		const expectedPath: string = HttpGamePlayersBackEndService.getApiGamePlayersPath(game);
 		const service: GamePlayersService = setUp();
-		let n = 0;
 
 		service.get(game).subscribe(
 			gps => {
-				expect(gamePlayers === gps).withContext('provides the expected value').toBeTrue();
-				n++;
-				expect(n).withContext('number emitted').toEqual(1);
+				expect(gps).withContext('provided value').toEqual(gamePlayers);
 			}
 		);
 		service.update(game);
@@ -266,9 +271,9 @@ describe('GamePlayersService', () => {
 		const requests: TestRequest[] = httpTestingController.match(expectedPath);
 		expect(requests.length).withContext('number of requests').toEqual(2);
 		expect(requests[0].request.method).toEqual('GET');
-		requests[0].flush(gamePlayers);
+		requests[0].flush(encode(gamePlayers));
 		expect(requests[1].request.method).toEqual('GET');
-		requests[1].flush(gamePlayers);
+		requests[1].flush(encode(gamePlayers));
 		httpTestingController.verify();
 	};
 
