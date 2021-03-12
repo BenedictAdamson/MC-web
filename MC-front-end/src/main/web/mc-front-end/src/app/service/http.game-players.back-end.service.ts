@@ -47,11 +47,11 @@ class Delegate extends HttpKeyValueService<GameIdentifier, GamePlayers, void, vo
 	}
 
 	joinGame(game: GameIdentifier): Observable<GamePlayers> {
-		return this.http.post<GamePlayers>(getApiJoinGamePath(game), "");
+		return this.http.post<GamePlayers>(getApiJoinGamePath(game), '');
 	}
 
 	endRecruitment(game: GameIdentifier): Observable<GamePlayers> {
-		return this.http.post<GamePlayers>(getApiGameEndRecuitmentPath(game), "");
+		return this.http.post<GamePlayers>(getApiGameEndRecuitmentPath(game), '');
 	}
 
 
@@ -80,7 +80,7 @@ export class HttpGamePlayersBackEndService extends AbstractGamePlayersBackEndSer
 		http: HttpClient
 	) {
 		super();
-		this.delegate = new Delegate(http)
+		this.delegate = new Delegate(http);
 	}
 
 
