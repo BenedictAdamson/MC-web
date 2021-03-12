@@ -37,6 +37,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import uk.badamson.mc.presentation.HomePage;
 import uk.badamson.mc.presentation.LoginPage;
+import uk.badamson.mc.presentation.Page.NotReadyException;
 import uk.badamson.mc.presentation.UserPage;
 import uk.badamson.mc.presentation.UsersPage;
 
@@ -56,8 +57,6 @@ public class UserSteps extends Steps {
          throw new IllegalArgumentException("roleName " + role, e);
       }
    }
-
-   private User user;
 
    @Autowired
    public UserSteps(@Nonnull final World world) {
@@ -103,14 +102,21 @@ public class UserSteps extends Steps {
 
    @Given("logged in")
    public void logged_in() {
-      world.getHomePage();
-      tryToLogin();
+      logInCorrectly();
    }
 
    @When("log in using correct password")
    public void login_using_correct_password() {
-      world.getHomePage();
+      logInCorrectly();
+   }
+
+   private void logInCorrectly() {
       tryToLogin();
+      /*
+       * If the login failed, will still be on the login page rather than the
+       * home page.
+       */
+      world.getExpectedPage(HomePage.class).requireIsReady();
    }
 
    @Then("MC accepts the login")
@@ -132,9 +138,8 @@ public class UserSteps extends Steps {
    @Then("MC accepts the addition")
    public void mc_accepts_the_addition() {
       try {
-         world.getAndAssertExpectedPage(UsersPage.class)
-                  .awaitIsReadyOrErrorMessage();
-      } catch (final IllegalStateException e) {
+         world.getAndAssertExpectedPage(UsersPage.class).awaitIsReady();
+      } catch (final NotReadyException e) {
          throw new AssertionFailedError(e.getMessage(), e);
       }
    }
@@ -210,7 +215,8 @@ public class UserSteps extends Steps {
    }
 
    private UsersPage navigateToUsersPage() {
-      Objects.requireNonNull(user, "user");
+      final var user = world.getCurrentUser();
+      Objects.requireNonNull(user, "currentUser");
       final var authorities = user.getAuthorities();
       if (!(authorities.contains(Authority.ROLE_MANAGE_USERS)
                || authorities.contains(Authority.ROLE_PLAYER))) {
@@ -227,7 +233,7 @@ public class UserSteps extends Steps {
    @Given("not logged in")
    public void not_logged_in() {
       world.getHomePage();
-      world.setLoggedInUser(null);
+      world.setLoggedIn(false);
    }
 
    @Then("redirected to home-page")
@@ -250,7 +256,7 @@ public class UserSteps extends Steps {
 
    @When("try to login")
    public void try_to_login() {
-      world.getHomePage();
+      world.getHomePage().requireIsReady();
       tryToLogin();
    }
 
@@ -260,38 +266,41 @@ public class UserSteps extends Steps {
    }
 
    private void tryToLogin() {
-      Objects.requireNonNull(user, "user");
+      final var user = world.getCurrentUser();
+      Objects.requireNonNull(user, "currentUser");
+
       final var homePage = world.getExpectedPage(HomePage.class);
       final var loginPage = homePage.navigateToLoginPage();
       world.setExpectedPage(loginPage);
       loginPage.submitLoginForm(user.getUsername(), user.getPassword());
+
       homePage.awaitIsReadyOrErrorMessage();
       if (homePage.isCurrentPath()) {// success
          world.setExpectedPage(homePage);
-         world.setLoggedInUser(user);
+         world.setLoggedIn(true);
       } else {
-         world.setLoggedInUser(null);
+         world.setLoggedIn(false);
       }
    }
 
    @Given("unknown user")
    public void unknown_user() {
-      user = world.createUnknownUser();
+      world.currentUserIsUnknownUser();
    }
 
    @Given("user does not have the {string} role")
    public void user_does_not_have_role(final String roleName) {
-      user = world.createUserWithoutRole(parseRole(roleName));
+      world.currentUserDoesNotHaveRole(parseRole(roleName));
    }
 
    @Given("user has any role")
    public void user_has_any_role() {
-      user = world.createUserWithRoles(Set.of(Authority.values()[0]), Set.of());
+      world.currentUserHasRoles(Set.of(Authority.values()[0]), Set.of());
    }
 
    @Given("user has the {string} role")
    public void user_has_role(final String roleName) {
-      user = world.createUserWithRoles(Set.of(parseRole(roleName)), Set.of());
+      world.currentUserHasRoles(Set.of(parseRole(roleName)), Set.of());
    }
 
    @When("user has the {string} role but not the {string} role")
@@ -303,8 +312,8 @@ public class UserSteps extends Steps {
          throw new IllegalArgumentException("Contradictory role constraints");
       }
 
-      user = world.createUserWithRoles(Set.of(includedRole),
-               Set.of(excludedRole));
+      world.currentUserHasRoles(Set.of(includedRole), Set.of(excludedRole));
+      final var user = world.getCurrentUser();
 
       assert user != null && user.getAuthorities().contains(includedRole)
                && !user.getAuthorities().contains(excludedRole);
@@ -312,7 +321,7 @@ public class UserSteps extends Steps {
 
    @Given("user is the administrator")
    public void user_is_administrator() {
-      user = world.getAdministratorUser();
+      world.currentUserIsAdministrator();
    }
 
    @Then("The user page includes the user name")

@@ -34,7 +34,7 @@ export class ScenarioComponent implements OnInit {
 			mergeMap(id => this.scenarioService.get(id)),
 			filter(scenario => !!scenario),
 			map((scenario: Scenario | null) => scenario as Scenario)
-		)
+		);
 	}
 
 	ngOnInit() {

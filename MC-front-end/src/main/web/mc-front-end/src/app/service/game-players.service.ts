@@ -2,15 +2,21 @@ import { Injectable } from '@angular/core';
 
 import { AbstractGamePlayersBackEndService } from './abstract.game-players.back-end.service';
 import { CachingKeyValueService } from './caching.key-value.service';
-import { GameIdentifier } from '../game-identifier'
-import { GamePlayers } from '../game-players'
-import { GameService } from './game.service'
+import { GameIdentifier } from '../game-identifier';
+import { GamePlayers } from '../game-players';
+import { GameService } from './game.service';
 
 
 @Injectable({
 	providedIn: 'root'
 })
 export class GamePlayersService extends CachingKeyValueService<GameIdentifier, GamePlayers, void> {
+
+	constructor(
+		private gamePlayersBackEnd: AbstractGamePlayersBackEndService
+	) {
+		super(gamePlayersBackEnd);
+	}
 
 	static getApiGamePlayersPath(game: GameIdentifier): string {
 		return GameService.getApiGamePath(game) + '/players';
@@ -24,22 +30,7 @@ export class GamePlayersService extends CachingKeyValueService<GameIdentifier, G
 		return GamePlayersService.getApiGamePlayersPath(game) + '?endRecruitment';
 	}
 
-	constructor(
-		private gamePlayersBackEnd: AbstractGamePlayersBackEndService
-	) {
-		super(gamePlayersBackEnd);
-	}
 
-
-	protected createKeyString(id: GameIdentifier): string {
-		return id.scenario + '/' + id.created;
-	}
-
-	protected getKey(value: GamePlayers): GameIdentifier {
-		return value.game;
-	}
-	
-	
 	/**
 	 * Ask that the current user joins the game that has a given ID.
 	 *
@@ -78,5 +69,14 @@ export class GamePlayersService extends CachingKeyValueService<GameIdentifier, G
 		this.gamePlayersBackEnd.endRecruitment(game).subscribe(
 			gps => this.setValue(gps)
 		);
+	}
+
+
+	protected createKeyString(id: GameIdentifier): string {
+		return id.scenario + '/' + id.created;
+	}
+
+	protected getKey(value: GamePlayers): GameIdentifier {
+		return value.game;
 	}
 }

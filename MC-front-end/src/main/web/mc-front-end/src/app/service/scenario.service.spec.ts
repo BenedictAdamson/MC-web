@@ -14,12 +14,24 @@ import { Scenario } from '../scenario';
 describe('ScenarioService', () => {
 	let httpTestingController: HttpTestingController;
 
-	const IDENTIFIER_A: string = uuid();
-	const IDENTIFIER_B: string = uuid();
-	const SCENARIO_A: Scenario = { identifier: IDENTIFIER_A, title: 'Section Attack', description: 'Basic fire-and-movement tactical training.' };
-	const SCENARIO_B: Scenario = { identifier: IDENTIFIER_B, title: 'Beach Assault', description: 'Fast and deadly.' };
+	const SCENARIO_ID_A: string = uuid();
+	const SCENARIO_ID_B: string = uuid();
+	const CHARACTER_A: NamedUUID = { id: uuid(), title: 'Sergeant' };
+	const CHARACTER_B: NamedUUID = { id: uuid(), title: 'Private' };
+	const SCENARIO_A: Scenario = {
+		identifier: SCENARIO_ID_A,
+		title: 'Section Attack',
+		description: 'Basic fire-and-movement tactical training.',
+		characters: [CHARACTER_A]
+	};
+	const SCENARIO_B: Scenario = {
+		identifier: SCENARIO_ID_B,
+		title: 'Beach Assault',
+		description: 'Fast and deadly.',
+		characters: [CHARACTER_A, CHARACTER_B]
+	};
 
-	const setUp = function(): ScenarioService {
+	const setUp = (): ScenarioService => {
 		TestBed.configureTestingModule({
 			imports: [HttpClientTestingModule]
 		});
@@ -39,7 +51,9 @@ describe('ScenarioService', () => {
 
 	it('can get scenario identifiers', () => {
 		const scenarios: Scenario[] = [SCENARIO_A, SCENARIO_B];
-		const identifiers: NamedUUID[] = scenarios.map(scenario => { return { id: scenario.identifier, title: scenario.title }; });
+		const identifiers: NamedUUID[] = scenarios.map(
+			scenario => ({ id: scenario.identifier, title: scenario.title })
+		);
 		const service: ScenarioService = setUp();
 
 		service.getScenarioIdentifiers().subscribe(ids => expect(ids).toEqual(identifiers));
@@ -51,7 +65,7 @@ describe('ScenarioService', () => {
 	});
 
 
-	const canGetScenario = function(testScenario: Scenario) {
+	const canGetScenario = (testScenario: Scenario) => {
 		const id: string = testScenario.identifier;
 		const expectedPath: string = getApiScenarioPath(id);
 		const service: ScenarioService = setUp();

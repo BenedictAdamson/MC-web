@@ -4,8 +4,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { AbstractMayJoinGameBackEndService } from './abstract.may-join-game.back-end.service';
-import { GameIdentifier } from '../game-identifier'
-import { HttpKeyValueService } from './http.key-value.service';
+import { GameIdentifier } from '../game-identifier';
+import { HttpSimpleKeyValueService } from './http.simple-key-value.service';
 import { getApiGamePath } from './http.game.back-end.service';
 
 
@@ -14,7 +14,7 @@ export function getApiMayJoinGamePath(game: GameIdentifier): string {
 }
 
 
-class Delegate extends HttpKeyValueService<GameIdentifier, boolean, void, undefined> {
+class Delegate extends HttpSimpleKeyValueService<GameIdentifier, boolean, void, undefined> {
 
 	constructor(
 		http: HttpClient
@@ -58,7 +58,7 @@ export class HttpMayJoinGameBackEndService extends AbstractMayJoinGameBackEndSer
 		http: HttpClient
 	) {
 		super();
-		this.delegate = new Delegate(http)
+		this.delegate = new Delegate(http);
 	}
 
 	get(id: GameIdentifier): Observable<boolean | null> {

@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-21.
  *
  * This file is part of MC.
  *
@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -34,8 +35,12 @@ import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 
 import org.hamcrest.CustomTypeSafeMatcher;
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.StringDescription;
+import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -54,16 +59,33 @@ import uk.badamson.mc.McContainers;
 public abstract class Page {
 
    @SuppressWarnings("serial")
-   private final class NotReadyException extends IllegalStateException {
+   public final class NotReadyException extends IllegalStateException {
 
       public NotReadyException() {
-         this(null);
+         super(createNotReadyMessage());
+      }
+
+      public NotReadyException(final String message) {
+         super(message);
+      }
+
+      public NotReadyException(final String message, final Throwable cause) {
+         super(message, cause);
       }
 
       public NotReadyException(final Throwable cause) {
          super(createNotReadyMessage(), cause);
       }
 
+   }// class
+
+   protected static abstract class WebElementMatcher
+            extends TypeSafeDiagnosingMatcher<WebElement> {
+
+      @Override
+      public void describeTo(final Description description) {
+         description.appendText("Element matches");
+      }
    }// class
 
    /**
@@ -74,6 +96,20 @@ public abstract class Page {
    public static final By ERROR_LOCATOR = By.className("error");
 
    private static final By BODY_LOCATOR = By.tagName("body");
+
+   private static final Matcher<WebElement> HAS_ERROR_ELEMENT = new WebElementMatcher() {
+
+      @Override
+      public void describeTo(final Description description) {
+         description.appendText("Has an element with the error class");
+      }
+
+      @Override
+      protected boolean matchesSafely(final WebElement item,
+               final Description mismatchDescription) {
+         return !item.findElements(ERROR_LOCATOR).isEmpty();
+      }
+   };
 
    /**
     * <p>
@@ -278,16 +314,20 @@ public abstract class Page {
       // Do nothing
    }
 
-   public final void awaitIsReady() throws IllegalStateException {
-      awaitIsReady(body -> true);
+   public final void awaitIsReady() throws NotReadyException {
+      awaitIsReady(isA(WebElement.class));
    }
 
    protected final void awaitIsReady(
-            @Nonnull final Predicate<WebElement> satisfiesAdditionalConstraints)
+            @Nonnull final Matcher<WebElement> additionalBodyConstraints)
             throws IllegalStateException {
       try {
-         new WebDriverWait(webDriver, 17).until(
-                  driver -> isReady(driver, satisfiesAdditionalConstraints));
+         new WebDriverWait(webDriver, 17)
+                  .until(driver -> isReady(driver, additionalBodyConstraints));
+      } catch (final TimeoutException e) {
+         requireIsReady(); // throws NotReadyException, with good diagnostics,
+                           // if still not ready
+         // OK, the final check was OK, so *just* became ready in time
       } catch (final Exception e) {// give better diagnostics
          throw new NotReadyException(e);
       }
@@ -296,14 +336,19 @@ public abstract class Page {
    public final void awaitIsReadyOrErrorMessage() throws IllegalStateException {
       try {
          new WebDriverWait(webDriver, 17)
-                  .until(driver -> isReady(driver, body -> true)
-                           || !driver.findElements(ERROR_LOCATOR).isEmpty());
+                  .until(driver -> isReady(driver, isA(WebElement.class))
+                           || HAS_ERROR_ELEMENT
+                                    .matches(driver.findElement(BODY_LOCATOR)));
+      } catch (final TimeoutException e) {
+         try {
+            /* Use requireIsReady to get a good diagnostic exception */
+            requireIsReady();
+         } catch (final NotReadyException e2) {
+            throw new NotReadyException("Not ready and no error message", e2);
+         }
+         // OK, the final check was OK, so *just* became ready in time
       } catch (final Exception e) {// give better diagnostics
-         throw new IllegalStateException(
-                  "No indication of success or failure (awaiting "
-                           + getClass().getTypeName() + ", at "
-                           + getCurrentPath() + ")",
-                  e);
+         throw new NotReadyException(e);
       }
    }
 
@@ -384,40 +429,18 @@ public abstract class Page {
       return isValidPath(getCurrentPath());
    }
 
-   /**
-    * <p>
-    * Whether a given page is a page of this type in its ready (loaded) state.
-    * </p>
-    * <p>
-    * The provided implementation checks only that the given {@code path}
-    * {@linkplain #isValidPath(String) is a valid path for this type of page}.
-    * </p>
-    *
-    * @param path
-    *           The {@linkplain URI#getPath() path component} of the
-    *           {@linkplain URI URI} of the page.
-    * @param title
-    *           The page (window) title of the page.
-    * @param body
-    *           the body of the page
-    * @return whether ready.
-    * @throws NullPointerException
-    *            <ul>
-    *            <li>If {@code path} is null.</li>
-    *            <li>If {@code title} is null.</li>
-    *            <li>If {@code body} is null.</li>
-    *            </ul>
-    */
-   protected boolean isReady(@Nonnull final String path,
-            @Nonnull final String title, final @Nonnull WebElement body) {
-      return isValidPath(path);
-   }
-
    private boolean isReady(final WebDriver driver,
-            final Predicate<WebElement> satisfiesAdditionalConstraints) {
+            final Matcher<WebElement> additionalRequirements) {
       final var body = driver.findElement(BODY_LOCATOR);
-      return isReady(getPathOfUrl(driver.getCurrentUrl()), driver.getTitle(),
-               body) && satisfiesAdditionalConstraints.test(body);
+      try {
+         requireIsReady(getPathOfUrl(driver.getCurrentUrl()), driver.getTitle(),
+                  body);
+         requireForReady("Additional body constraints", body,
+                  additionalRequirements);
+      } catch (final NotReadyException e) {
+         return false;
+      }
+      return true;
    }
 
    /**
@@ -435,9 +458,57 @@ public abstract class Page {
     */
    protected abstract boolean isValidPath(@Nonnull String path);
 
-   public final void requireIsReady() throws IllegalStateException {
-      if (!isReady(webDriver, body -> true)) {
-         throw new NotReadyException();
+   protected <T> void requireForReady(final String requirementDescription,
+            final T value, final Matcher<T> requirement)
+            throws NotReadyException {
+      if (!requirement.matches(value)) {
+         final Description description = new StringDescription();
+         description.appendText("Not ready because requires ")
+                  .appendText(System.lineSeparator())
+                  .appendText(requirementDescription)
+                  .appendText(System.lineSeparator())
+                  .appendDescriptionOf(requirement)
+                  .appendText(System.lineSeparator()).appendText("     but: ");
+         requirement.describeMismatch(value, description);
+         throw new NotReadyException(description.toString());
+      }
+   }
+
+   public final void requireIsReady() throws NotReadyException {
+      requireIsReady(getCurrentPath(), getTitle(), getBody());
+   }
+
+   /**
+    * <p>
+    * Throw an exception if a given page is not a page of this type in its ready
+    * (loaded) state.
+    * </p>
+    * <p>
+    * The provided implementation checks only that the given {@code path}
+    * {@linkplain #isValidPath(String) is a valid path for this type of page}.
+    * </p>
+    *
+    * @param path
+    *           The {@linkplain URI#getPath() path component} of the
+    *           {@linkplain URI URI} of the page.
+    * @param title
+    *           The page (window) title of the page.
+    * @param body
+    *           the body of the page
+    * @throws NullPointerException
+    *            <ul>
+    *            <li>If {@code path} is null.</li>
+    *            <li>If {@code title} is null.</li>
+    *            <li>If {@code body} is null.</li>
+    *            </ul>
+    * @throws NotReadyException
+    *            If, and only if, the page is not ready
+    */
+   protected void requireIsReady(@Nonnull final String path,
+            @Nonnull final String title, final @Nonnull WebElement body)
+            throws NotReadyException {
+      if (!isValidPath(path)) {
+         throw new NotReadyException("Invalid path " + path);
       }
    }
 }

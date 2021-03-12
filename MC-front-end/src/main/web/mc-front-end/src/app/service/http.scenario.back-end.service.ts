@@ -4,19 +4,19 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { AbstractScenarioBackEndService } from './abstract.scenario.back-end.service';
-import { HttpKeyValueService } from './http.key-value.service';
+import { HttpSimpleKeyValueService } from './http.simple-key-value.service';
 import { NamedUUID } from '../named-uuid';
 import { Scenario } from '../scenario';
 
 
-const apiScenariosPath: string = '/api/scenario';
+const apiScenariosPath = '/api/scenario';
 
 export function getApiScenarioPath(scenario: string): string {
 	return apiScenariosPath + '/' + scenario;
 }
 
 
-class Delegate extends HttpKeyValueService<string, Scenario, string, null> {
+class Delegate extends HttpSimpleKeyValueService<string, Scenario, string, null> {
 
 	constructor(
 		http: HttpClient
@@ -61,7 +61,7 @@ export class HttpScenarioBackEndService extends AbstractScenarioBackEndService {
 		http: HttpClient
 	) {
 		super();
-		this.delegate = new Delegate(http)
+		this.delegate = new Delegate(http);
 	}
 
 

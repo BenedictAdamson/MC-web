@@ -3,6 +3,7 @@ import { of } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
 import { AbstractScenarioBackEndService } from '../service/abstract.scenario.back-end.service';
+import { NamedUUID } from '../named-uuid';
 import { Scenario } from '../scenario';
 import { ScenarioComponent } from './scenario.component';
 
@@ -15,15 +16,27 @@ describe('ScenarioComponent', () => {
 	let component: ScenarioComponent;
 	let fixture: ComponentFixture<ScenarioComponent>;
 
-	const IDENTIFIER_A: string = uuid();
-	const IDENTIFIER_B: string = uuid();
-	const SCENARIO_A: Scenario = { identifier: IDENTIFIER_A, title: 'Section Attack', description: 'Basic fire-and-movement tactical training.' };
-	const SCENARIO_B: Scenario = { identifier: IDENTIFIER_B, title: 'Beach Assault', description: 'Fast and deadly.' };
+	const SCENARIO_ID_A: string = uuid();
+	const SCENARIO_ID_B: string = uuid();
+	const CHARACTER_A: NamedUUID = { id: uuid(), title: 'Sergeant' };
+	const CHARACTER_B: NamedUUID = { id: uuid(), title: 'Private' };
+	const SCENARIO_A: Scenario = {
+		identifier: SCENARIO_ID_A,
+		title: 'Section Attack',
+		description: 'Basic fire-and-movement tactical training.',
+		characters: [CHARACTER_A]
+	};
+	const SCENARIO_B: Scenario = {
+		identifier: SCENARIO_ID_B,
+		title: 'Beach Assault',
+		description: 'Fast and deadly.',
+		characters: [CHARACTER_A, CHARACTER_B]
+	};
 
 
-	const getScenario = function(component: ScenarioComponent): Scenario | null {
-		var scenario: Scenario | null = null;
-		component.scenario$.subscribe({
+	const getScenario = (sc: ScenarioComponent): Scenario | null => {
+		let scenario: Scenario | null = null;
+		sc.scenario$.subscribe({
 			next: (s) => scenario = s,
 			error: (err) => fail(err),
 			complete: () => { }
@@ -32,7 +45,7 @@ describe('ScenarioComponent', () => {
 	};
 
 
-	const setUpForNgInit = function(testScenario: Scenario,) {
+	const setUpForNgInit = (testScenario: Scenario,) => {
 		const scenarioBackEndService: AbstractScenarioBackEndService = new MockScenarioBackEndService([testScenario]);
 
 		TestBed.configureTestingModule({
@@ -60,11 +73,23 @@ describe('ScenarioComponent', () => {
 		expect(getScenario(component)).toBe(testScenario);
 
 		const html: HTMLElement = fixture.nativeElement;
-		const displayText: string = html.innerText;
 		const selfLink: HTMLAnchorElement | null = html.querySelector('a#scenario');
-		expect(displayText.includes(testScenario.title)).withContext("displayed text includes title").toBeTrue();
-		expect(displayText.includes(testScenario.description)).withContext("displayed text includes description").toBeTrue();
-		expect(selfLink).withContext("self link").not.toBeNull();
+		const charactersElement: HTMLElement | null = html.querySelector('#characters');
+
+		const displayText: string = html.innerText;
+		expect(displayText.includes(testScenario.title)).withContext('displayed text includes title').toBeTrue();
+		expect(displayText.includes(testScenario.description)).withContext('displayed text includes description').toBeTrue();
+		expect(selfLink).withContext('self link').not.toBeNull();
+		expect(charactersElement).withContext('characters element').not.toBeNull();
+		if (charactersElement) {
+			const characterEntries: NodeListOf<HTMLLIElement> = charactersElement.querySelectorAll('li');
+			expect(characterEntries.length).withContext('number of character entries').toEqual(testScenario.characters.length);
+			for (let i = 0; i < characterEntries.length; i++) {
+				const entry: HTMLLIElement = characterEntries.item(i);
+				const characterText: string = entry.innerText;
+				expect(characterText).withContext('character entry').toEqual(testScenario.characters[i].title);
+			}
+		}
 	};
 
 	it('can create [a]', () => {

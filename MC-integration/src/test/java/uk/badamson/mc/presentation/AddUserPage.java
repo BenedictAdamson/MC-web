@@ -66,6 +66,8 @@ public final class AddUserPage extends Page {
       getBody().findElement(By.xpath("//input[@type='password']"))
                .sendKeys(password);
       getBody().findElement(By.xpath("//button[@type='submit']")).submit();
+
+      /* Must either transition to the Users' Page, or report an error. */
       usersPage.awaitIsReadyOrErrorMessage();
       if (usersPage.isCurrentPath()) {
          return usersPage;

@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { AbstractGamesOfScenarioBackEndService } from './abstract.games-of-scenario.back-end.service';
-import { HttpKeyValueService } from './http.key-value.service';
+import { HttpSimpleKeyValueService } from './http.simple-key-value.service';
 
 
 
@@ -13,7 +13,7 @@ export function getApiGamesPath(scenario: string): string {
 }
 
 
-class Delegate extends HttpKeyValueService<string, string[], void, void> {
+class Delegate extends HttpSimpleKeyValueService<string, string[], void, void> {
 
 	constructor(
 		http: HttpClient
@@ -60,7 +60,7 @@ export class HttpGamesOfScenarioBackEndService extends AbstractGamesOfScenarioBa
 		http: HttpClient
 	) {
 		super();
-		this.delegate = new Delegate(http)
+		this.delegate = new Delegate(http);
 	}
 
 

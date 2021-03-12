@@ -1,5 +1,5 @@
 # MC-integration
-© Copyright Benedict Adamson 2018-20.
+© Copyright Benedict Adamson 2018-21.
 
 Packaging and integration testing of the complete Mission Command game,
 and integration testing of sub assemblies of its components.

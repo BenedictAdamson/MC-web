@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-21.
  *
  * This file is part of MC.
  *
@@ -25,6 +25,7 @@ import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -33,6 +34,7 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -66,33 +68,44 @@ public final class GamePage extends Page {
             "You are playing this game");
    private static final Matcher<String> INDICATES_IS_NOT_PLAYING = containsString(
             "You are not playing this game");
+   private static final Matcher<String> INDICATES_CHARACTER_PLAYED = containsString(
+            " as character ");
    private static final Matcher<String> INDICATES_JOINING_NFORMATION = anyOf(
             INDICATES_IS_JOINABLE, INDICATES_IS_NOT_JOINABLE);
-   private static final Matcher<String> INDICATES_HAS_NO_PLAYERS = containsString(
-            "This game has no players");
-   private static final Matcher<String> INDICATES_HAS_PLAYERS = containsString(
-            "This game has players");
 
    private static final By SCENARIO_LINK_LOCATOR = By.id("scenario");
    private static final By RECRUITING_ELEMENT_LOCATOR = By.id("recruiting");
-   private static final By PLAYERS_ELEMENT_LOCATOR = By.id("players");
    private static final By PLAYING_ELEMENT_LOCATOR = By.id("playing");
    private static final By JOINABLE_ELEMENT_LOCATOR = By.id("joinable");
    private static final By END_RECRUITMENT_BUTTON_LOCATOR = By
             .id("end-recruitment");
    private static final By JOIN_BUTTON_LOCATOR = By.id("join");
+   private static final By PLAYED_CHARACTERS_ELEMENT_LOCATOR = By
+            .id("played-characters");
 
-   private static boolean hasEndedRecruitment(final WebElement body) {
-      final var elements = body.findElements(RECRUITING_ELEMENT_LOCATOR);
-      return elements.size() == 1 && INDICATES_IS_NOT_RECRUITING_PLAYERS
-               .matches(elements.get(0).getText());
-   }
+   private static final Matcher<WebElement> HAS_ENDED_RECUITMENT = new WebElementMatcher() {
 
-   private static boolean isPlayingGame(final WebElement body) {
-      final var elements = body.findElements(PLAYING_ELEMENT_LOCATOR);
-      return elements.size() == 1
-               && INDICATES_IS_PLAYING.matches(elements.get(0).getText());
-   }
+      @Override
+      protected boolean matchesSafely(final WebElement body,
+               final Description mismatchDescription) {
+         final var elements = body.findElements(RECRUITING_ELEMENT_LOCATOR);
+         return elements.size() == 1 && INDICATES_IS_NOT_RECRUITING_PLAYERS
+                  .matches(elements.get(0).getText());
+      }
+
+   };
+
+   private static final Matcher<WebElement> IS_PLAYING_GAME = new WebElementMatcher() {
+
+      @Override
+      protected boolean matchesSafely(final WebElement body,
+               final Description mismatchDescription) {
+         final var elements = body.findElements(PLAYING_ELEMENT_LOCATOR);
+         return elements.size() == 1
+                  && INDICATES_IS_PLAYING.matches(elements.get(0).getText());
+      }
+
+   };
 
    private final ScenarioPage scenarioPage;
 
@@ -122,13 +135,14 @@ public final class GamePage extends Page {
       includesScenarioTitile = containsString(scenarioPage.getScenarioTitle());
    }
 
-   private WebElement assertHasJoinableElement(final WebElement body) {
-      return assertHasElement(body, JOINABLE_ELEMENT_LOCATOR);
+   public void assertDoesNotIndicateWhichCharactersPlayedByOtherUsers() {
+      assertThat("Does not list characters",
+               getBody().findElements(PLAYED_CHARACTERS_ELEMENT_LOCATOR),
+               empty());
    }
 
-   private WebElement assertHasPlayersElement(final WebElement body) {
-      return assertHasElement("Has a players element", body,
-               PLAYERS_ELEMENT_LOCATOR);
+   private WebElement assertHasJoinableElement(final WebElement body) {
+      return assertHasElement(body, JOINABLE_ELEMENT_LOCATOR);
    }
 
    private WebElement assertHasPlayingElement(final WebElement body) {
@@ -149,16 +163,12 @@ public final class GamePage extends Page {
                includesScenarioTitile);
    }
 
-   public void assertIndicatesGameHasNoPlayers() {
-      final var players = assertHasPlayersElement(getBody());
-      assertThat("Players element reports that has no players",
-               players.getText(), INDICATES_HAS_NO_PLAYERS);
-   }
-
-   public void assertIndicatesGameHasPlayers() {
-      final var players = assertHasPlayersElement(getBody());
-      assertThat("Players element reports that has players", players.getText(),
-               INDICATES_HAS_PLAYERS);
+   public void assertIndicatesGameHasNoPlayedCharacters() {
+      final var playedCharacters = assertHasElement(getBody(),
+               PLAYED_CHARACTERS_ELEMENT_LOCATOR);
+      final var playedCharacterTitles = playedCharacters
+               .findElements(By.tagName("li"));
+      assertThat("played character titles", playedCharacterTitles, empty());
    }
 
    public void assertIndicatesIsNotRecruitingPlayers() {
@@ -201,12 +211,6 @@ public final class GamePage extends Page {
 
    }
 
-   private void assertIndicatesWhetherGameHasPlayers(final WebElement body) {
-      final var players = assertHasPlayersElement(body);
-      assertThat("Players text provides information", players.getText(),
-               either(INDICATES_HAS_NO_PLAYERS).or(INDICATES_HAS_PLAYERS));
-   }
-
    public void assertIndicatesWhetherRecruitingPlayers() {
       assertIndicatesWhetherRecruitingPlayers(getBody());
    }
@@ -243,6 +247,17 @@ public final class GamePage extends Page {
                joinable.getText(), INDICATES_JOINING_NFORMATION);
    }
 
+   public void assertIndicatesWhichCharacterIfAnyUserIsPlaying() {
+      final var playing = assertHasPlayingElement(getBody());
+      assertThat("Indicates which character (if any) user is playing",
+               playing.getText(),
+               either(INDICATES_CHARACTER_PLAYED).or(INDICATES_IS_NOT_PLAYING));
+   }
+
+   public void assertIndicatesWhichCharactersPlayedByWhichUsers() {
+      assertHasElement(getBody(), PLAYED_CHARACTERS_ELEMENT_LOCATOR);
+   }
+
    private void assertJoinButtonConsistentWithJoinableText(
             final WebElement body) {
       final var button = assertHasElement("has a join button", body,
@@ -256,7 +271,6 @@ public final class GamePage extends Page {
    @Override
    protected void assertValidBody(@Nonnull final WebElement body) {
       assertAll(() -> assertIndicatesWhetherUserMayJoinGame(body),
-               () -> assertIndicatesWhetherGameHasPlayers(body),
                () -> assertIndicatesWhetherUserIsPlayingGame(body),
                () -> assertJoinButtonConsistentWithJoinableText(body),
                () -> assertValidBodyText(body, body.getText()));
@@ -284,18 +298,12 @@ public final class GamePage extends Page {
                   "Button [" + button + "] is not enabled");
       }
       button.click();
-      awaitIsReady(GamePage::hasEndedRecruitment);
+      awaitIsReady(HAS_ENDED_RECUITMENT);
    }
 
    public boolean isEndRecruitmentEnabled() {
       requireIsReady();
       return isEnabled(getBody().findElement(END_RECRUITMENT_BUTTON_LOCATOR));
-   }
-
-   @Override
-   protected boolean isReady(@Nonnull final String path,
-            @Nonnull final String title, final @Nonnull WebElement body) {
-      return isValidPath(path) && INDICATES_IS_A_GAME.matches(body.getText());
    }
 
    @Override
@@ -312,7 +320,7 @@ public final class GamePage extends Page {
                   "Button [" + button + "] is not enabled");
       }
       button.click();
-      awaitIsReady(GamePage::isPlayingGame);
+      awaitIsReady(IS_PLAYING_GAME);
    }
 
    public ScenarioPage navigateToScenarioPage() {
@@ -337,5 +345,14 @@ public final class GamePage extends Page {
       if (!INDICATES_IS_RECRUITING_PLAYERS.matches(text)) {
          throw new IllegalStateException("Wrong text (" + text + ")");
       }
+   }
+
+   @Override
+   protected void requireIsReady(@Nonnull final String path,
+            @Nonnull final String title, final @Nonnull WebElement body)
+            throws NotReadyException {
+      super.requireIsReady(path, title, body);
+      requireForReady("Indicates is a game", body.getText(),
+               INDICATES_IS_A_GAME);
    }
 }

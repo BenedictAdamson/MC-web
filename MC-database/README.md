@@ -1,5 +1,5 @@
 # MC-database
-© Copyright Benedict Adamson 2018-20.
+© Copyright Benedict Adamson 2018-21.
 
 MC-database is the game database server of the Mission Command game.
 It is a [mongoDB](https://www.mongodb.com/) document database server.

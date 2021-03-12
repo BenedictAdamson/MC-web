@@ -4,19 +4,19 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { AbstractUserBackEndService } from './abstract.user.back-end.service';
-import { HttpKeyValueService } from './http.key-value.service';
+import { HttpSimpleKeyValueService } from './http.simple-key-value.service';
 import { User } from '../user';
 import { UserDetails } from '../user-details';
 
 
-export const apiUsersPath: string = '/api/user';
+export const apiUsersPath = '/api/user';
 
 export function getApiUserPath(id: string): string {
 	return apiUsersPath + '/' + id;
 }
 
 
-class Delegate extends HttpKeyValueService<string, User, UserDetails, UserDetails> {
+class Delegate extends HttpSimpleKeyValueService<string, User, UserDetails, UserDetails> {
 
 	constructor(
 		http: HttpClient
@@ -60,7 +60,7 @@ export class HttpUserBackEndService extends AbstractUserBackEndService {
 		http: HttpClient
 	) {
 		super();
-		this.delegate = new Delegate(http)
+		this.delegate = new Delegate(http);
 	}
 
 

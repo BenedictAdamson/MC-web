@@ -1,4 +1,5 @@
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -11,21 +12,14 @@ import { getApiGamePath } from './http.game.back-end.service';
 
 
 
-export function getApiGamePlayersPath(game: GameIdentifier): string {
-	return getApiGamePath(game) + '/players';
+export class EncodedGamePlayers {
+	game: GameIdentifier;
+	recruiting: boolean;
+	// eslint-disable-next-line @typescript-eslint/ban-types
+	users: object;
 }
 
-export function getApiJoinGamePath(game: GameIdentifier): string {
-	return getApiGamePlayersPath(game) + '?join';
-}
-
-export function getApiGameEndRecuitmentPath(game: GameIdentifier): string {
-	return getApiGamePlayersPath(game) + '?endRecruitment';
-}
-
-
-
-class Delegate extends HttpKeyValueService<GameIdentifier, GamePlayers, void, void> {
+class Delegate extends HttpKeyValueService<GameIdentifier, GamePlayers, EncodedGamePlayers, void, void> {
 
 	constructor(
 		http: HttpClient
@@ -35,7 +29,7 @@ class Delegate extends HttpKeyValueService<GameIdentifier, GamePlayers, void, vo
 
 
 	getUrl(id: GameIdentifier): string {
-		return getApiGamePlayersPath(id);
+		return HttpGamePlayersBackEndService.getApiGamePlayersPath(id);
 	}
 
 	getAll(): undefined {
@@ -47,11 +41,15 @@ class Delegate extends HttpKeyValueService<GameIdentifier, GamePlayers, void, vo
 	}
 
 	joinGame(game: GameIdentifier): Observable<GamePlayers> {
-		return this.http.post<GamePlayers>(getApiJoinGamePath(game), "");
+		return this.http.post<GamePlayers>(HttpGamePlayersBackEndService.getApiJoinGamePath(game), '').pipe(
+			map(v => this.decode(v))
+		);
 	}
 
 	endRecruitment(game: GameIdentifier): Observable<GamePlayers> {
-		return this.http.post<GamePlayers>(getApiGameEndRecuitmentPath(game), "");
+		return this.http.post<GamePlayers>(HttpGamePlayersBackEndService.getApiGameEndRecuitmentPath(game), '').pipe(
+			map(v => this.decode(v))
+		);
 	}
 
 
@@ -61,6 +59,11 @@ class Delegate extends HttpKeyValueService<GameIdentifier, GamePlayers, void, vo
 
 	protected getAddPayload(_specification: void): undefined {
 		return undefined;
+	}
+
+	protected decode(encodedValue: EncodedGamePlayers): GamePlayers {
+		const users: Map<string, string> = new Map(Object.entries(encodedValue.users).map(([k, v]) => ([k, v])));
+		return new GamePlayers(encodedValue.game, encodedValue.recruiting, users);
 	}
 
 
@@ -80,7 +83,19 @@ export class HttpGamePlayersBackEndService extends AbstractGamePlayersBackEndSer
 		http: HttpClient
 	) {
 		super();
-		this.delegate = new Delegate(http)
+		this.delegate = new Delegate(http);
+	}
+
+	static getApiGamePlayersPath(game: GameIdentifier): string {
+		return getApiGamePath(game) + '/players';
+	}
+
+	static getApiJoinGamePath(game: GameIdentifier): string {
+		return HttpGamePlayersBackEndService.getApiGamePlayersPath(game) + '?join';
+	}
+
+	static getApiGameEndRecuitmentPath(game: GameIdentifier): string {
+		return HttpGamePlayersBackEndService.getApiGamePlayersPath(game) + '?endRecruitment';
 	}
 
 

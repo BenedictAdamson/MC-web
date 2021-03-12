@@ -4,12 +4,12 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { AbstractGameBackEndService } from './abstract.game.back-end.service';
-import { HttpKeyValueService } from './http.key-value.service';
+import { HttpSimpleKeyValueService } from './http.simple-key-value.service';
 import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
 
 
-const apiScenariosPath: string = '/api/scenario/';
+const apiScenariosPath = '/api/scenario/';
 
 export function getApiGamesPath(scenario: string): string {
 	return apiScenariosPath + scenario + '/game/';
@@ -20,7 +20,7 @@ export function getApiGamePath(id: GameIdentifier): string {
 }
 
 
-class Delegate extends HttpKeyValueService<GameIdentifier, Game, string, null> {
+class Delegate extends HttpSimpleKeyValueService<GameIdentifier, Game, string, null> {
 
 	constructor(
 		http: HttpClient
@@ -61,7 +61,7 @@ export class HttpGameBackEndService extends AbstractGameBackEndService {
 		http: HttpClient
 	) {
 		super();
-		this.delegate = new Delegate(http)
+		this.delegate = new Delegate(http);
 	}
 
 
