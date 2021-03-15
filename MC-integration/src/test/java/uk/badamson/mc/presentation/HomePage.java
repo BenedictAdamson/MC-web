@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-21.
  *
  * This file is part of MC.
  *
@@ -20,6 +20,7 @@ package uk.badamson.mc.presentation;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 
 import java.util.Objects;
@@ -57,6 +58,9 @@ public final class HomePage extends Page {
 
    private static final By USERS_LINK_LOCATOR = By.xpath("//a[@id='users']");
 
+   private static final By CURRENT_GAME_LINK_LOCATOR = By
+            .xpath("//a[@id='current-game']");
+
    /**
     * <p>
     * Construct a page object using a given web driver interface.
@@ -69,6 +73,11 @@ public final class HomePage extends Page {
     */
    public HomePage(final WebDriver webDriver) {
       super(webDriver);
+   }
+
+   public void assertDoesNotIndicateUserHasCurrentGame() {
+      assertThat("No link to current game",
+               getBody().findElements(CURRENT_GAME_LINK_LOCATOR), empty());
    }
 
    public void assertHeadingIncludesNameOfGame() {

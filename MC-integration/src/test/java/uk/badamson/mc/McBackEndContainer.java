@@ -24,6 +24,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -81,6 +82,18 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    private static final UriTemplate GAME_URI_TEMPLATE = new UriTemplate(
             "/api/scenario/{scenario}/game/{game}");
+
+   private static final DateTimeFormatter URI_DATETIME_FORMATTER = DateTimeFormatter.ISO_INSTANT;
+
+   private static String createGamePath(final Game.Identifier game) {
+      Objects.requireNonNull(game, "game");
+      return createGamesListPath(game.getScenario())
+               + URI_DATETIME_FORMATTER.format(game.getCreated());
+   }
+
+   private static String createGamePlayersPath(final Game.Identifier game) {
+      return createGamePath(game) + "/players";
+   }
 
    private static String createGamesListPath(final UUID scenario) {
       Objects.requireNonNull(scenario, "scenario");
@@ -248,6 +261,19 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
                .headers(headers -> headers.setBasicAuth(username, password));
    }
 
+   private RequestBodySpec createJoinGameRequest(final Game.Identifier game,
+            final User user, final MultiValueMap<String, HttpCookie> cookies) {
+      Objects.requireNonNull(game, "game");
+      Objects.requireNonNull(user, "user");
+      Objects.requireNonNull(cookies, "cookies");
+
+      final var path = createGamePlayersPath(game);
+      final var request = connectWebTestClient(path).post()
+               .accept(MediaType.APPLICATION_JSON);
+      secure(request, user, cookies);
+      return request;
+   }
+
    public User getAdministrator() {
       return administrator;
    }
@@ -278,6 +304,18 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
    public Stream<NamedUUID> getScenarios() {
       return getJson("/api/scenario").returnResult(NamedUUID.class)
                .getResponseBody().toStream();
+   }
+
+   public void joinGame(final Game.Identifier game, final User user) {
+      Objects.requireNonNull(game, "game");
+      Objects.requireNonNull(user, "user");
+
+      final var cookies = login(user);
+      final var request = createJoinGameRequest(game, user, cookies);
+      final var response = request.exchange();
+      logout(user, cookies);
+
+      response.expectStatus().isFound();
    }
 
    MultiValueMap<String, HttpCookie> login(final BasicUserDetails user) {

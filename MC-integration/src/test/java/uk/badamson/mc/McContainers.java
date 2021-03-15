@@ -260,6 +260,10 @@ public class McContainers
       return browser.getWebDriver();
    }
 
+   public void joinGame(final Game.Identifier game, final User user) {
+      be.joinGame(game, user);
+   }
+
    private void requireBroswer() {
       if (browser == null) {
          throw new IllegalStateException("no browser");
