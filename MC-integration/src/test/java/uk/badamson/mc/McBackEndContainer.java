@@ -100,10 +100,6 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       return "/api/scenario/" + scenario + "/game";
    }
 
-   private static String createJoinGamePath(final Game.Identifier game) {
-      return createGamePlayersPath(game) + "?join";
-   }
-
    private static String encodeAsJson(final Object obj) {
       try {
          final var mapper = new ObjectMapper();
@@ -219,10 +215,13 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
    }
 
    public WebTestClient connectWebTestClient(final String path) {
+      return connectWebTestClient(path, null, null);
+   }
+
+   private WebTestClient connectWebTestClient(final String path,
+            final String query, final String fragment) {
       final var scheme = "http";
       final String userInfo = null;
-      final String query = null;
-      final String fragment = null;
       final var host = getContainerIpAddress();
       final int port = getMappedPort(PORT);
       final URI uri;
@@ -271,8 +270,10 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       Objects.requireNonNull(user, "user");
       Objects.requireNonNull(cookies, "cookies");
 
-      final var path = createJoinGamePath(game);
-      final var request = connectWebTestClient(path).post()
+      final var path = createGamePlayersPath(game);
+      final var query = "join";
+      final String fragment = null;
+      final var request = connectWebTestClient(path, query, fragment).post()
                .accept(MediaType.APPLICATION_JSON);
       secure(request, user, cookies);
       return request;
