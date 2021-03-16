@@ -57,7 +57,7 @@ class Delegate extends HttpKeyValueService<GameIdentifier, GamePlayers, EncodedG
 
 	getCurrentGameId(): Observable<GameIdentifier | null> {
 		return this.http.get<Game>(CURRENTGAMEPATH).pipe(
-			catchError(err => of(null)),
+			catchError(() => of(null)),
 			map(g => g ? g.identifier : null)
 		);
 	}
