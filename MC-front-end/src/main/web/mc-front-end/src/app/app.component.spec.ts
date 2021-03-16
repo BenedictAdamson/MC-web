@@ -30,15 +30,16 @@ describe('AppComponent', () => {
 		}).compileComponents();
 	};
 
-	const testSetUp = (authorities: string[], expectMayListUsers: boolean) => {
+	const testSetUp = (authorities: string[], expectMayListUsers: boolean, expectMayExamineCurrentGame: boolean) => {
 		setUp(authorities);
 		const fixture = TestBed.createComponent(AppComponent);
 		const app = fixture.debugElement.componentInstance;
 		fixture.detectChanges();
 
 		const html: HTMLElement = fixture.debugElement.nativeElement;
-		const usersLink: HTMLAnchorElement | null = html.querySelector('a[id="users"]');
+		const currentGameLink: HTMLAnchorElement | null = html.querySelector('a[id="current-game"]');
 		const scenariosLink: HTMLAnchorElement | null = html.querySelector('a[id="scenarios"]');
+		const usersLink: HTMLAnchorElement | null = html.querySelector('a[id="users"]');
 		const header: HTMLElement | null = html.querySelector('h1');
 
 		const headerText: string | null = header ? header.textContent : null;
@@ -47,19 +48,24 @@ describe('AppComponent', () => {
 		expect(app).toBeTruthy();
 
 		expect(headerText).withContext('h1 text').toContain('Mission Command');
+		expect(scenariosLink).withContext('scenarios link element').not.toBeNull();
+		expect(scenariosLinkText).withContext('scenarios link text').toContain('Scenarios');
+
 		expect(usersLink != null).withContext('has users link element').toBe(expectMayListUsers);
 		if (usersLink != null) {
 			expect(usersLink.textContent).withContext('users link text').toContain('Users');
 		}
-		expect(scenariosLink).withContext('scenarios link element').not.toBeNull();
-		expect(scenariosLinkText).withContext('scenarios link text').toContain('Scenarios');
+		expect(currentGameLink != null).withContext('has current-game link element').toBe(expectMayExamineCurrentGame);
+		if (currentGameLink != null) {
+			expect(currentGameLink.textContent).withContext('current-game link text').toContain('Current game');
+		}
 	};
 
 	it('can be constructed [no roles]', () => {
-		testSetUp([], false);
+		testSetUp([], false, false);
 	});
 
 	it('can be constructed [player]', () => {
-		testSetUp(['ROLE_PLAYER'], true);
+		testSetUp(['ROLE_PLAYER'], true, false);
 	});
 });
