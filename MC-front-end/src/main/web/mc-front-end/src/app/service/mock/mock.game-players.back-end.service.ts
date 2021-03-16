@@ -1,4 +1,4 @@
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 
 import { AbstractGamePlayersBackEndService } from '../abstract.game-players.back-end.service';
 import { GameIdentifier } from '../../game-identifier';
@@ -6,16 +6,16 @@ import { GamePlayers } from '../../game-players';
 
 export class MockGamePlayersBackEndService extends AbstractGamePlayersBackEndService {
 
-	private gamePlayers: GamePlayers;
-	private game: GameIdentifier;
+	private gamePlayers: GamePlayers | null;
+	private game: GameIdentifier | null;
 
 	constructor(
-		gamePlayersServer: GamePlayers,
+		gamePlayers: GamePlayers | null,
 		private self: string
 	) {
 		super();
-		this.game = gamePlayersServer.game;
-		this.gamePlayers = gamePlayersServer;
+		this.game = gamePlayers ? gamePlayers.game : null;
+		this.gamePlayers = gamePlayers;
 	};
 
 
@@ -25,7 +25,9 @@ export class MockGamePlayersBackEndService extends AbstractGamePlayersBackEndSer
 	}
 
 	joinGame(game: GameIdentifier): Observable<GamePlayers> {
-		this.expectGameIdentifier(game, 'joinGame');
+		if (!this.gamePlayers) {
+			this.gamePlayers = new GamePlayers(game, true, new Map());
+		}
 		if (!this.gamePlayers.isPlaying(this.self)) {
 			this.gamePlayers.users.set('FIXME', this.self);
 		}
@@ -34,19 +36,25 @@ export class MockGamePlayersBackEndService extends AbstractGamePlayersBackEndSer
 
 	endRecruitment(game: GameIdentifier): Observable<GamePlayers> {
 		this.expectGameIdentifier(game, 'endRecuitment');
-		this.gamePlayers.recruiting = false;
+		if (this.gamePlayers) {
+			this.gamePlayers.recruiting = false;
+		}
 		return this.copy();
 	}
 
-	getCurrentGameId(): Observable<GameIdentifier|null> {
+	getCurrentGameId(): Observable<GameIdentifier | null> {
 		return of(this.game);
 	}
 
-	private expectGameIdentifier(game: GameIdentifier, method: string): void {
+	private expectGameIdentifier(game: GameIdentifier | null, method: string): void {
 		expect(game).withContext('MockGamePlayersService.' + method + '(game)').toEqual(this.game);
 	}
 
 	private copy(): Observable<GamePlayers> {
-		return of(new GamePlayers(this.gamePlayers.game, this.gamePlayers.recruiting, this.gamePlayers.users));
+		if (this.gamePlayers) {
+			return of(new GamePlayers(this.gamePlayers.game, this.gamePlayers.recruiting, this.gamePlayers.users));
+		} else {
+			return throwError('No current game');
+		}
 	}
 }
