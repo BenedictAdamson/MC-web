@@ -6,5 +6,6 @@
 <nav>
   <a id="scenarios" routerLink="scenario">Scenarios</a>
   <a id="users" routerLink="user" *ngIf="mayListUsers$ | async">Users</a>
+  <a id="current-game" [routerLink]="['/scenario',currentGameScenario$ | async,'game',currentGameCreated$ | async]" *ngIf="(currentGameId$ | async) !== null">Current game</a>
 </nav>
 <router-outlet></router-outlet>
