@@ -35,19 +35,24 @@ describe('AppComponent', () => {
 		const fixture = TestBed.createComponent(AppComponent);
 		const app = fixture.debugElement.componentInstance;
 		fixture.detectChanges();
-		const html = fixture.debugElement.nativeElement;
-		const usersLink = html.querySelector('a[id="users"]');
-		const scenariosLink = html.querySelector('a[id="scenarios"]');
+
+		const html: HTMLElement = fixture.debugElement.nativeElement;
+		const usersLink: HTMLAnchorElement | null = html.querySelector('a[id="users"]');
+		const scenariosLink: HTMLAnchorElement | null = html.querySelector('a[id="scenarios"]');
+		const header: HTMLElement | null = html.querySelector('h1');
+
+		const headerText: string | null = header ? header.textContent : null;
+		const scenariosLinkText: string | null = scenariosLink ? scenariosLink.textContent : null;
 
 		expect(app).toBeTruthy();
 
-		expect(html.querySelector('h1').textContent).withContext('h1 text').toContain('Mission Command');
+		expect(headerText).withContext('h1 text').toContain('Mission Command');
 		expect(usersLink != null).withContext('has users link element').toBe(expectMayListUsers);
 		if (usersLink != null) {
 			expect(usersLink.textContent).withContext('users link text').toContain('Users');
 		}
 		expect(scenariosLink).withContext('scenarios link element').not.toBeNull();
-		expect(scenariosLink.textContent).withContext('scenarios link text').toContain('Scenarios');
+		expect(scenariosLinkText).withContext('scenarios link text').toContain('Scenarios');
 	};
 
 	it('can be constructed [no roles]', () => {
