@@ -87,7 +87,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    private static String createGamePath(final Game.Identifier game) {
       Objects.requireNonNull(game, "game");
-      return createGamesListPath(game.getScenario())
+      return createGamesListPath(game.getScenario()) + "/"
                + URI_DATETIME_FORMATTER.format(game.getCreated());
    }
 
