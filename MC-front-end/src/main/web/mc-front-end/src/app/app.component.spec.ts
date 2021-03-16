@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
 
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { AbstractSelfService } from './service/abstract.self.service';
@@ -12,6 +12,8 @@ import { User } from './user';
 
 
 describe('AppComponent', () => {
+	let component: AppComponent;
+	let fixture: ComponentFixture<AppComponent>;
 	let selfService: AbstractSelfService;
 
 	const setUp = (authorities: string[]) => {
@@ -27,13 +29,14 @@ describe('AppComponent', () => {
 				)
 			],
 			providers: [{ provide: AbstractSelfService, useValue: selfService }]
-		}).compileComponents();
+		});
+
+		fixture = TestBed.createComponent(AppComponent);
+		component = fixture.componentInstance;
 	};
 
 	const testSetUp = (authorities: string[], expectMayListUsers: boolean, expectMayExamineCurrentGame: boolean) => {
 		setUp(authorities);
-		const fixture = TestBed.createComponent(AppComponent);
-		const app = fixture.debugElement.componentInstance;
 		fixture.detectChanges();
 
 		const html: HTMLElement = fixture.debugElement.nativeElement;
@@ -45,7 +48,7 @@ describe('AppComponent', () => {
 		const headerText: string | null = header ? header.textContent : null;
 		const scenariosLinkText: string | null = scenariosLink ? scenariosLink.textContent : null;
 
-		expect(app).toBeTruthy();
+		expect(component).toBeTruthy();
 
 		expect(headerText).withContext('h1 text').toContain('Mission Command');
 		expect(scenariosLink).withContext('scenarios link element').not.toBeNull();
