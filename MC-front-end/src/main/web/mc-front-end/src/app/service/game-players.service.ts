@@ -48,7 +48,13 @@ export class GamePlayersService extends CachingKeyValueService<GameIdentifier, G
 	 */
 	joinGame(game: GameIdentifier): void {
 		this.gamePlayersBackEnd.joinGame(game).subscribe(
-			gps => this.setValue(gps)
+			gps => {
+				this.setValue(gps);
+				if (!this.currentGameId) {
+					this.currentGameId = new ReplaySubject(1);
+				};
+				this.currentGameId.next(game);
+			}
 		);
 	}
 

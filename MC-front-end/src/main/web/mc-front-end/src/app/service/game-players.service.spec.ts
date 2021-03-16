@@ -323,7 +323,7 @@ describe('GamePlayersService', () => {
 	});
 
 
-	it('can caches current game ID [A]', () => {
+	it('caches current game ID [A]', () => {
 		const currentGame: Game = GAME_A;
 		const expectedPath: string = CURRENTGAMEPATH;
 		const service: GamePlayersService = setUp();
@@ -335,5 +335,44 @@ describe('GamePlayersService', () => {
 		expect(request.request.method).toEqual('GET');
 		request.flush(currentGame);
 		httpTestingController.verify();
+	});
+
+
+	const testGetCurrentGameIdAfterJoinGame = (done: any, gamePlayers0: GamePlayers, user: string) => {
+		const game: GameIdentifier = gamePlayers0.game;
+		const expectedPath: string = HttpGamePlayersBackEndService.getApiJoinGamePath(game);
+		const users: Map<string, string> = gamePlayers0.users;
+		users.set(CHARACTER_ID_A, user);
+		// Tough test: the reply identifier is not the same object
+		const gamePlayers1: GamePlayers = new GamePlayers(
+			{ scenario: game.scenario, created: game.created },
+			gamePlayers0.recruiting,
+			users
+		);
+		const service: GamePlayersService = setUp();
+
+		service.joinGame(game);
+
+		const request = httpTestingController.expectOne(expectedPath);// should cache the ID
+		expect(request.request.method).toEqual('POST');
+		request.flush(encode(gamePlayers1));
+		httpTestingController.verify();
+
+		service.getCurrentGameId().subscribe({
+			next: (g) => {
+				expect(g).toEqual(game);
+				done();
+			},
+			error: (e) => { fail(e); },
+			complete: () => { }
+		});
+	};
+
+	it('can get current game ID after join game [A]', (done) => {
+		testGetCurrentGameIdAfterJoinGame(done, GAME_PLAYERS_A, USER_ID_A);
+	});
+
+	it('can get current game ID after join game [B]', (done) => {
+		testGetCurrentGameIdAfterJoinGame(done, GAME_PLAYERS_B, USER_ID_B);
 	});
 });
