@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { Component } from '@angular/core';
 
 import { AbstractSelfService } from './service/abstract.self.service';
+import { GamePlayersService } from './service/game-players.service';
 
 @Component({
 	selector: 'app-root',
@@ -19,7 +20,8 @@ export class AppComponent {
 	 * because they will not then have to login again.
 	 */
 	constructor(
-		private readonly selfService: AbstractSelfService
+		private readonly selfService: AbstractSelfService,
+		private readonly gamePlayersService: GamePlayersService
 	) {
 		this.checkForCurrentAuthentication();
 	}

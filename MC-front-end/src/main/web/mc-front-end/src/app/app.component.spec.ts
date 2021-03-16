@@ -3,12 +3,17 @@ import { v4 as uuid } from 'uuid';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { AbstractGamePlayersBackEndService } from './service/abstract.game-players.back-end.service';
 import { AbstractSelfService } from './service/abstract.self.service';
 import { AppComponent } from './app.component';
+import { GamePlayers } from './game-players';
+import { GamePlayersService } from './service/game-players.service';
 import { HomeComponent } from './home/home.component';
 import { MockSelfService } from './service/mock/mock.self.service';
 import { SelfComponent } from './self/self.component';
 import { User } from './user';
+
+import { MockGamePlayersBackEndService } from './service/mock/mock.game-players.back-end.service';
 
 
 describe('AppComponent', () => {
@@ -17,8 +22,11 @@ describe('AppComponent', () => {
 	let selfService: AbstractSelfService;
 
 	const setUp = (authorities: string[]) => {
+		const gamePlayers: GamePlayers | null = null;
 		const self: User = { id: uuid(), username: 'Benedict', password: null, authorities };
 		selfService = new MockSelfService(self);
+		const gamePlayersBackEndService: AbstractGamePlayersBackEndService = new MockGamePlayersBackEndService(gamePlayers, self.id);
+		const gamePlayersService: GamePlayersService = new GamePlayersService(gamePlayersBackEndService);
 		TestBed.configureTestingModule({
 			declarations: [
 				AppComponent, SelfComponent
@@ -28,7 +36,10 @@ describe('AppComponent', () => {
 					[{ path: '', component: HomeComponent }]
 				)
 			],
-			providers: [{ provide: AbstractSelfService, useValue: selfService }]
+			providers: [
+				{ provide: GamePlayersService, useValue: gamePlayersService },
+				{ provide: AbstractSelfService, useValue: selfService }
+			]
 		});
 
 		fixture = TestBed.createComponent(AppComponent);
