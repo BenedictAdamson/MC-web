@@ -154,6 +154,21 @@ public final class HomePage extends Page {
       awaitIsReady();
    }
 
+   public GamePage navigateToCurrentGamePage() {
+      final WebElement currentGameLink;
+      try {
+         requireIsReady();
+         currentGameLink = getBody().findElement(CURRENT_GAME_LINK_LOCATOR);
+      } catch (IllegalStateException | NoSuchElementException e) {
+         throw new IllegalStateException(
+                  "Not ready to navigate to current-game page", e);
+      }
+      currentGameLink.click();
+      final var gamePage = new GamePage(this);
+      gamePage.awaitIsReady();
+      return gamePage;
+   }
+
    public LoginPage navigateToLoginPage() {
       requireIsReady();
       getBody().findElement(LOGIN_LINK_LOCATOR).click();

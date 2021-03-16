@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -112,6 +113,13 @@ public final class GamePage extends Page {
    private final Matcher<String> includesCreationTime;
 
    private final Matcher<String> includesScenarioTitile;
+
+   public GamePage(final HomePage homePage) {
+      super(homePage);
+      this.scenarioPage = null;
+      includesCreationTime = null;
+      includesScenarioTitile = isA(String.class);
+   }
 
    /**
     * <p>
@@ -324,6 +332,9 @@ public final class GamePage extends Page {
    }
 
    public ScenarioPage navigateToScenarioPage() {
+      if (scenarioPage == null) {
+         throw new IllegalStateException("Unknown scenario page");
+      }
       requireIsReady();
       final var link = getBody().findElement(SCENARIO_LINK_LOCATOR);
       link.click();

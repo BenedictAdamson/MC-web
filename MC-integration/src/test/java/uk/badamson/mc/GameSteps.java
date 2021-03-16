@@ -242,6 +242,11 @@ public class GameSteps extends Steps {
       world.getAndAssertExpectedPage(GamePage.class).assertInvariants();
    }
 
+   @When("navigate to the current-game page")
+   public void navigate_to_current_game_page() {
+      world.getHomePage().navigateToCurrentGamePage();
+   }
+
    @When("Navigate to one game page")
    public void navigate_to_one_game_page() {
       final var scenarioPage = world.getExpectedPage(ScenarioPage.class);
