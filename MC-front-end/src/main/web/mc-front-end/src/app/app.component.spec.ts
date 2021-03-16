@@ -14,8 +14,8 @@ import { User } from './user';
 describe('AppComponent', () => {
 	let selfService: AbstractSelfService;
 
-	const setUp = function(authorities: string[]) {
-		const self: User = { id: uuid(), username: 'Benedict', password: null, authorities: authorities };
+	const setUp = (authorities: string[]) => {
+		const self: User = { id: uuid(), username: 'Benedict', password: null, authorities };
 		selfService = new MockSelfService(self);
 		TestBed.configureTestingModule({
 			declarations: [
@@ -30,7 +30,7 @@ describe('AppComponent', () => {
 		}).compileComponents();
 	};
 
-	const testSetUp = function(authorities: string[], expectMayListUsers: boolean) {
+	const testSetUp = (authorities: string[], expectMayListUsers: boolean) => {
 		setUp(authorities);
 		const fixture = TestBed.createComponent(AppComponent);
 		const app = fixture.debugElement.componentInstance;
