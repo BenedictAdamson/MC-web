@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { Observable, ReplaySubject } from 'rxjs';
 
 import { Injectable } from '@angular/core';
 
@@ -13,6 +13,8 @@ import { GameService } from './game.service';
 	providedIn: 'root'
 })
 export class GamePlayersService extends CachingKeyValueService<GameIdentifier, GamePlayers, void> {
+
+	private currentGameId: ReplaySubject<GameIdentifier | null> | null = null;
 
 	constructor(
 		private gamePlayersBackEnd: AbstractGamePlayersBackEndService
@@ -50,9 +52,17 @@ export class GamePlayersService extends CachingKeyValueService<GameIdentifier, G
 		);
 	}
 
-	getCurrentGameId(): Observable<GameIdentifier|null> {
-		// TODO cache value
-		return this.gamePlayersBackEnd.getCurrentGameId();
+	getCurrentGameId(): Observable<GameIdentifier | null> {
+		if (this.currentGameId) {
+			return this.currentGameId.asObservable();
+		} else {
+			const currentGameId: ReplaySubject<GameIdentifier | null> = new ReplaySubject(1);
+			this.currentGameId = currentGameId;
+			this.gamePlayersBackEnd.getCurrentGameId().subscribe(
+				g => currentGameId.next(g)
+			);
+			return currentGameId.asObservable();
+		};
 	}
 
 

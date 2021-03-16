@@ -33,8 +33,8 @@ describe('GamePlayersService', () => {
 	const USERS_B: Map<string, string> = new Map([]);
 	const GAME_PLAYERS_A: GamePlayers = new GamePlayers(GAME_IDENTIFIER_A, true, USERS_A);
 	const GAME_PLAYERS_B: GamePlayers = new GamePlayers(GAME_IDENTIFIER_B, false, USERS_B);
-	const GAME_A: Game = {identifier: GAME_IDENTIFIER_A};
-	const GAME_B: Game = {identifier: GAME_IDENTIFIER_B};
+	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A };
+	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B };
 
 	const setUp = (): GamePlayersService => {
 		TestBed.configureTestingModule({
@@ -319,6 +319,21 @@ describe('GamePlayersService', () => {
 		const request = httpTestingController.expectOne(expectedPath);
 		expect(request.request.method).toEqual('GET');
 		request.flush('', { status: 404, statusText: 'Not Found' });
+		httpTestingController.verify();
+	});
+
+
+	it('can caches current game ID [A]', () => {
+		const currentGame: Game = GAME_A;
+		const expectedPath: string = CURRENTGAMEPATH;
+		const service: GamePlayersService = setUp();
+
+		service.getCurrentGameId().subscribe(g => expect(g).toEqual(currentGame.identifier));
+		service.getCurrentGameId().subscribe(g => expect(g).toEqual(currentGame.identifier));
+
+		const request = httpTestingController.expectOne(expectedPath);// does not repeat GET
+		expect(request.request.method).toEqual('GET');
+		request.flush(currentGame);
 		httpTestingController.verify();
 	});
 });
