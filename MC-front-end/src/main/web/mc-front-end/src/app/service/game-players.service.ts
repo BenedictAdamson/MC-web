@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs';
+
 import { Injectable } from '@angular/core';
 
 import { AbstractGamePlayersBackEndService } from './abstract.game-players.back-end.service';
@@ -44,8 +46,13 @@ export class GamePlayersService extends CachingKeyValueService<GameIdentifier, G
 	 */
 	joinGame(game: GameIdentifier): void {
 		this.gamePlayersBackEnd.joinGame(game).subscribe(
-			gps => this.setValue( gps)
+			gps => this.setValue(gps)
 		);
+	}
+
+	getCurrentGameId(): Observable<GameIdentifier|null> {
+		// TODO cache value
+		return this.gamePlayersBackEnd.getCurrentGameId();
 	}
 
 

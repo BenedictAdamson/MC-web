@@ -38,6 +38,10 @@ export class MockGamePlayersBackEndService extends AbstractGamePlayersBackEndSer
 		return this.copy();
 	}
 
+	getCurrentGameId(): Observable<GameIdentifier|null> {
+		return of(this.game);
+	}
+
 	private expectGameIdentifier(game: GameIdentifier, method: string): void {
 		expect(game).withContext('MockGamePlayersService.' + method + '(game)').toEqual(this.game);
 	}

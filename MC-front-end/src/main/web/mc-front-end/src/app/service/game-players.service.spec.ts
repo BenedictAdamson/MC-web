@@ -6,7 +6,8 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 
 import { AbstractGamePlayersBackEndService } from './abstract.game-players.back-end.service';
-import { EncodedGamePlayers, HttpGamePlayersBackEndService } from './http.game-players.back-end.service';
+import { CURRENTGAMEPATH, EncodedGamePlayers, HttpGamePlayersBackEndService } from './http.game-players.back-end.service';
+import { Game } from '../game';
 import { GamePlayers } from '../game-players';
 import { GameIdentifier } from '../game-identifier';
 import { GamePlayersService } from './game-players.service';
@@ -32,6 +33,8 @@ describe('GamePlayersService', () => {
 	const USERS_B: Map<string, string> = new Map([]);
 	const GAME_PLAYERS_A: GamePlayers = new GamePlayers(GAME_IDENTIFIER_A, true, USERS_A);
 	const GAME_PLAYERS_B: GamePlayers = new GamePlayers(GAME_IDENTIFIER_B, false, USERS_B);
+	const GAME_A: Game = {identifier: GAME_IDENTIFIER_A};
+	const GAME_B: Game = {identifier: GAME_IDENTIFIER_B};
 
 	const setUp = (): GamePlayersService => {
 		TestBed.configureTestingModule({
@@ -283,5 +286,39 @@ describe('GamePlayersService', () => {
 
 	it('provides distinct game players [B]', () => {
 		testGetForUnchangedUpdate(GAME_PLAYERS_B);
+	});
+
+
+
+	const testGetCurrentGameId = (currentGame: Game) => {
+		const expectedPath: string = CURRENTGAMEPATH;
+		const service: GamePlayersService = setUp();
+
+		service.getCurrentGameId().subscribe(g => expect(g).toEqual(currentGame.identifier));
+
+		const request = httpTestingController.expectOne(expectedPath);
+		expect(request.request.method).toEqual('GET');
+		request.flush(currentGame);
+		httpTestingController.verify();
+	};
+
+	it('can get current game ID [A]', () => {
+		testGetCurrentGameId(GAME_A);
+	});
+
+	it('can get current game ID [B]', () => {
+		testGetCurrentGameId(GAME_B);
+	});
+
+	it('can indicate have no current game ID', () => {
+		const expectedPath: string = CURRENTGAMEPATH;
+		const service: GamePlayersService = setUp();
+
+		service.getCurrentGameId().subscribe(g => expect(g).toBeNull());
+
+		const request = httpTestingController.expectOne(expectedPath);
+		expect(request.request.method).toEqual('GET');
+		request.flush('', { status: 404, statusText: 'Not Found' });
+		httpTestingController.verify();
 	});
 });
