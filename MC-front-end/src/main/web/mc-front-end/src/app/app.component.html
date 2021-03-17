@@ -5,7 +5,10 @@
 
 <nav>
    <a id="scenarios" routerLink="scenario">Scenarios</a>
-   <a id="users" routerLink="user" *ngIf="mayListUsers$ | async">Users</a>
+   <a id="users" routerLink="user" *ngIf="mayListUsers$ | async; else mayNotListUsers">Users</a>
+   <ng-template #mayNotListUsers>
+      <span id="users" class="disable">Users</span>
+   </ng-template>
    <a id="current-game" [routerLink]="['/scenario',currentGameScenario$ | async,'game',currentGameCreated$ | async]"
       *ngIf="(currentGameId$ | async) !== null; else noCurrentGame">Current game</a>
    <ng-template #noCurrentGame>
