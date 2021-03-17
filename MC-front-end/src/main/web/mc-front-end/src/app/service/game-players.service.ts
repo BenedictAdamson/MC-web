@@ -71,6 +71,10 @@ export class GamePlayersService extends CachingKeyValueService<GameIdentifier, G
 		};
 	}
 
+   updateCurrentGameId() {
+      //FIXME
+   }
+
 
 	/**
 	 * Change a game so it is no longer [[Game.recruiting|recruiting]] players.
