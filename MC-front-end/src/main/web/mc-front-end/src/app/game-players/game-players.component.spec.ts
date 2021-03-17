@@ -149,9 +149,10 @@ describe('GamePlayersComponent', () => {
 
 
 	const setUp = function(gamePlayers: GamePlayers, self: User, mayJoinGame: boolean, scenario: Scenario) {
+      selfService = new MockSelfService(self);
 		const game: GameIdentifier = gamePlayers.game;
 		const gamePlayersBackEndService: AbstractGamePlayersBackEndService = new MockGamePlayersBackEndService(gamePlayers, self.id);
-		gamePlayersService = new GamePlayersService(gamePlayersBackEndService);
+		gamePlayersService = new GamePlayersService(selfService, gamePlayersBackEndService);
 		const mayJoinGameBackEnd: AbstractMayJoinGameBackEndService = new MockMayJoinGameBackEndService(mayJoinGame);
 		mayJoinGameService = new MayJoinGameService(mayJoinGameBackEnd);
 		const scenarioBackEndService: AbstractScenarioBackEndService = new MockScenarioBackEndService([scenario]);
@@ -180,7 +181,7 @@ describe('GamePlayersComponent', () => {
 			},
 			{ provide: GamePlayersService, useValue: gamePlayersService },
 			{ provide: MayJoinGameService, useValue: mayJoinGameService },
-			{ provide: AbstractSelfService, useFactory: () => new MockSelfService(self) },
+			{ provide: AbstractSelfService, useValue: selfService },
 			{ provide: ScenarioService, useValue: scenarioService }]
 		});
 

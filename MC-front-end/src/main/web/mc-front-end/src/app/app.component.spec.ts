@@ -32,7 +32,7 @@ describe('AppComponent', () => {
       const gamePlayers: GamePlayers | null = currentGame ? new GamePlayers(currentGame, true, new Map([[uuid(), self.id]])) : null;
       selfService = new MockSelfService(self);
       const gamePlayersBackEndService: AbstractGamePlayersBackEndService = new MockGamePlayersBackEndService(gamePlayers, self.id);
-      const gamePlayersService: GamePlayersService = new GamePlayersService(gamePlayersBackEndService);
+      const gamePlayersService: GamePlayersService = new GamePlayersService(selfService, gamePlayersBackEndService);
       TestBed.configureTestingModule({
          declarations: [
             AppComponent, SelfComponent

@@ -20,6 +20,7 @@ import { MockSelfService } from './mock/mock.self.service';
 
 describe('GamePlayersService', () => {
    let httpTestingController: HttpTestingController;
+   let selfService: AbstractSelfService;
 
    const SCENARIO_A: string = uuid();
    const SCENARIO_B: string = uuid();
@@ -52,7 +53,7 @@ describe('GamePlayersService', () => {
          imports: [HttpClientTestingModule]
       });
 
-      const selfService: AbstractSelfService = new MockSelfService(self);
+      selfService = new MockSelfService(self);
       const httpClient: HttpClient = TestBed.inject(HttpClient);
       httpTestingController = TestBed.inject(HttpTestingController);
       const backEnd: AbstractGamePlayersBackEndService = new HttpGamePlayersBackEndService(httpClient);
@@ -395,7 +396,7 @@ describe('GamePlayersService', () => {
 
       service.updateCurrentGameId();
 
-      const request = httpTestingController.expectOne(expectedPath);// should use cached value
+      const request = httpTestingController.expectOne(expectedPath);
       expect(request.request.method).toEqual('GET');
       request.flush(currentGame);
       httpTestingController.verify();
@@ -429,5 +430,27 @@ describe('GamePlayersService', () => {
 
    it('can get after update of current game ID [B]', () => {
       testGetAfterUpdateCurrentGameId(GAME_B);
+   });
+
+
+   const testChangeUser = (currentGame: Game, userA: User, userB: User) => {
+      const expectedPath: string = CURRENTGAMEPATH;
+      setUp(userA);
+
+      selfService.setUser(userB, true);
+
+      // Should update the (cached) currentGameId
+      const request = httpTestingController.expectOne(expectedPath);
+      expect(request.request.method).toEqual('GET');
+      request.flush(currentGame);
+      httpTestingController.verify();
+   };
+
+   it('updates current game ID when user changes [A]', () => {
+      testChangeUser(GAME_A, USER_A, USER_B);
+   });
+
+   it('updates current game ID when user changes [B]', () => {
+      testChangeUser(GAME_B, USER_B, USER_A);
    });
 });
