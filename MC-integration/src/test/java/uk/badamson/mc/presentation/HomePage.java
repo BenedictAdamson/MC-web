@@ -28,6 +28,7 @@ import java.util.Optional;
 
 import javax.annotation.concurrent.Immutable;
 
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -60,6 +61,16 @@ public final class HomePage extends Page {
 
    private static final By CURRENT_GAME_LINK_LOCATOR = By
             .xpath("//a[@id='current-game']");
+
+   private static final Matcher<WebElement> HAS_CURRENT_GAME_LINK = new WebElementMatcher() {
+
+      @Override
+      protected boolean matchesSafely(final WebElement body,
+               final Description mismatchDescription) {
+         return !body.findElements(CURRENT_GAME_LINK_LOCATOR).isEmpty();
+      }
+
+   };
 
    /**
     * <p>
@@ -157,6 +168,7 @@ public final class HomePage extends Page {
    public GamePage navigateToCurrentGamePage() {
       final WebElement currentGameLink;
       try {
+         awaitIsReady(HAS_CURRENT_GAME_LINK);
          requireIsReady();
          currentGameLink = getBody().findElement(CURRENT_GAME_LINK_LOCATOR);
       } catch (IllegalStateException | NoSuchElementException e) {
