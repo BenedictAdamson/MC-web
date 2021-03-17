@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-21.
  *
  * This file is part of MC.
  *
@@ -20,6 +20,7 @@ package uk.badamson.mc.presentation;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 
 import java.util.Objects;
@@ -27,6 +28,7 @@ import java.util.Optional;
 
 import javax.annotation.concurrent.Immutable;
 
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -57,6 +59,19 @@ public final class HomePage extends Page {
 
    private static final By USERS_LINK_LOCATOR = By.xpath("//a[@id='users']");
 
+   private static final By CURRENT_GAME_LINK_LOCATOR = By
+            .xpath("//a[@id='current-game']");
+
+   private static final Matcher<WebElement> HAS_CURRENT_GAME_LINK = new WebElementMatcher() {
+
+      @Override
+      protected boolean matchesSafely(final WebElement body,
+               final Description mismatchDescription) {
+         return !body.findElements(CURRENT_GAME_LINK_LOCATOR).isEmpty();
+      }
+
+   };
+
    /**
     * <p>
     * Construct a page object using a given web driver interface.
@@ -69,6 +84,11 @@ public final class HomePage extends Page {
     */
    public HomePage(final WebDriver webDriver) {
       super(webDriver);
+   }
+
+   public void assertDoesNotIndicateUserHasCurrentGame() {
+      assertThat("No link to current game",
+               getBody().findElements(CURRENT_GAME_LINK_LOCATOR), empty());
    }
 
    public void assertHeadingIncludesNameOfGame() {
@@ -143,6 +163,22 @@ public final class HomePage extends Page {
       final var button = getBody().findElement(LOGOUT_BUTTON_LOCATOR);
       button.click();
       awaitIsReady();
+   }
+
+   public GamePage navigateToCurrentGamePage() {
+      final WebElement currentGameLink;
+      try {
+         awaitIsReady(HAS_CURRENT_GAME_LINK);
+         requireIsReady();
+         currentGameLink = getBody().findElement(CURRENT_GAME_LINK_LOCATOR);
+      } catch (IllegalStateException | NoSuchElementException e) {
+         throw new IllegalStateException(
+                  "Not ready to navigate to current-game page", e);
+      }
+      currentGameLink.click();
+      final var gamePage = new GamePage(this);
+      gamePage.awaitIsReady();
+      return gamePage;
    }
 
    public LoginPage navigateToLoginPage() {

@@ -18,6 +18,8 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -45,6 +47,8 @@ public class GameSteps extends Steps {
    private int gameIndex;
 
    private int nGames0;
+
+   private String gamePagePath;
 
    @Autowired
    public GameSteps(@Nonnull final World world) {
@@ -113,6 +117,12 @@ public class GameSteps extends Steps {
    public void game_page_includes_time_set_up() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIncludesCreationTime();
+   }
+
+   @Then("The game page indicates that the current game is the game joined")
+   public void game_page_indicates_current_game_is_game_joined() {
+      assertThat("Current URL Path is the path of the game joined",
+               world.getCurrentUrlPath(), is(gamePagePath));
    }
 
    @Then("The game page indicates that the game has no players")
@@ -232,6 +242,11 @@ public class GameSteps extends Steps {
       world.getAndAssertExpectedPage(GamePage.class).assertInvariants();
    }
 
+   @When("navigate to the current-game page")
+   public void navigate_to_current_game_page() {
+      world.setExpectedPage(world.getHomePage().navigateToCurrentGamePage());
+   }
+
    @When("Navigate to one game page")
    public void navigate_to_one_game_page() {
       final var scenarioPage = world.getExpectedPage(ScenarioPage.class);
@@ -246,13 +261,22 @@ public class GameSteps extends Steps {
 
    @When("the user joins the game")
    public void user_joins_game() {
-      world.getExpectedPage(GamePage.class).joinGame();
+      final var gamePage = world.getExpectedPage(GamePage.class);
+      gamePagePath = world.getCurrentUrlPath();
+      gamePage.joinGame();
    }
 
    @Given("user is not playing any games")
    public void user_not_playing_games() {
       /* Create each test user afresh, so this is guaranteed to be true. */
       Objects.requireNonNull(world.getLoggedInUser(), "loggedInUser");
+   }
+
+   @Given("user is playing a game")
+   public void user_playing_game() {
+      final var scenario = world.getScenarios().findFirst().get().getId();
+      final var gameId = world.createGame(scenario);
+      world.joinGame(gameId);
    }
 
    @Given("viewing a game that is recruiting players")
@@ -271,5 +295,4 @@ public class GameSteps extends Steps {
       gamePage.requireIndicatesIsRecruitingPlayers();
       world.setExpectedPage(gamePage);
    }
-
 }

@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2020.
+ * © Copyright Benedict Adamson 2020-1.
  *
  * This file is part of MC.
  *
@@ -235,6 +235,10 @@ public final class World implements AutoCloseable {
 
    public Game.Identifier createGame(final UUID scenario) {
       return containers.createGame(scenario);
+   }
+
+   public void joinGame(Game.Identifier game) {
+      containers.joinGame(game, currentUser);
    }
 
    private User createUser(final Set<Authority> authoritites) {
