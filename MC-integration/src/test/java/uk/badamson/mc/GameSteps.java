@@ -244,7 +244,7 @@ public class GameSteps extends Steps {
 
    @When("navigate to the current-game page")
    public void navigate_to_current_game_page() {
-      world.getHomePage().navigateToCurrentGamePage();
+      world.setExpectedPage(world.getHomePage().navigateToCurrentGamePage());
    }
 
    @When("Navigate to one game page")
