@@ -382,7 +382,6 @@ describe('GamePlayersService', () => {
       const service: GamePlayersService = setUp();
 
       service.updateCurrentGameId();
-      service.getCurrentGameId().subscribe(g => expect(g).toEqual(currentGame.identifier));
 
       const request = httpTestingController.expectOne(expectedPath);// should use cached value
       expect(request.request.method).toEqual('GET');
@@ -396,5 +395,27 @@ describe('GamePlayersService', () => {
 
    it('can update current game ID [B]', () => {
       testUpdateCurrentGameId(GAME_B);
+   });
+
+
+   const testGetAfterUpdateCurrentGameId = (currentGame: Game) => {
+      const expectedPath: string = CURRENTGAMEPATH;
+      const service: GamePlayersService = setUp();
+
+      service.updateCurrentGameId();
+      service.getCurrentGameId().subscribe(g => expect(g).toEqual(currentGame.identifier));
+
+      const request = httpTestingController.expectOne(expectedPath);// should use cached value
+      expect(request.request.method).toEqual('GET');
+      request.flush(currentGame);
+      httpTestingController.verify();
+   };
+
+   it('can get after update of current game ID [A]', () => {
+      testGetAfterUpdateCurrentGameId(GAME_A);
+   });
+
+   it('can get after update of current game ID [B]', () => {
+      testGetAfterUpdateCurrentGameId(GAME_B);
    });
 });
