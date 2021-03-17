@@ -3,6 +3,7 @@ import { Observable, ReplaySubject } from 'rxjs';
 import { Injectable } from '@angular/core';
 
 import { AbstractGamePlayersBackEndService } from './abstract.game-players.back-end.service';
+import { AbstractSelfService } from './abstract.self.service';
 import { CachingKeyValueService } from './caching.key-value.service';
 import { GameIdentifier } from '../game-identifier';
 import { GamePlayers } from '../game-players';
@@ -17,6 +18,7 @@ export class GamePlayersService extends CachingKeyValueService<GameIdentifier, G
    private currentGameId: ReplaySubject<GameIdentifier | null> | null = null;
 
    constructor(
+      private readonly selfService: AbstractSelfService,
       private gamePlayersBackEnd: AbstractGamePlayersBackEndService
    ) {
       super(gamePlayersBackEnd);
