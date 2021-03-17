@@ -6,11 +6,16 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 
 import { AbstractGamePlayersBackEndService } from './abstract.game-players.back-end.service';
+import { AbstractSelfService } from './abstract.self.service';
 import { CURRENTGAMEPATH, EncodedGamePlayers, HttpGamePlayersBackEndService } from './http.game-players.back-end.service';
 import { Game } from '../game';
 import { GamePlayers } from '../game-players';
 import { GameIdentifier } from '../game-identifier';
 import { GamePlayersService } from './game-players.service';
+import { User } from '../user';
+import { UserDetails } from '../user-details';
+
+import { MockSelfService } from './mock/mock.self.service';
 
 
 describe('GamePlayersService', () => {
@@ -36,19 +41,26 @@ describe('GamePlayersService', () => {
    const GAME_A: Game = { identifier: GAME_IDENTIFIER_A };
    const GAME_B: Game = { identifier: GAME_IDENTIFIER_B };
 
-   const setUp = (): GamePlayersService => {
+   const USER_DETAILS_A: UserDetails = { username: 'User A', password: 'passwordA', authorities: ['ROLE_PLAYER'] };
+   const USER_DETAILS_B: UserDetails = { username: 'User B', password: 'passwordB', authorities: ['ROLE_PLAYER', 'ROLE_MANAGE_GAMES'] };
+   const USER_A: User = new User(USER_ID_A, USER_DETAILS_A);
+   const USER_B: User = new User(USER_ID_B, USER_DETAILS_B);
+
+   const setUp = (
+      self: User | null): GamePlayersService => {
       TestBed.configureTestingModule({
          imports: [HttpClientTestingModule]
       });
 
+      const selfService: AbstractSelfService = new MockSelfService(self);
       const httpClient: HttpClient = TestBed.inject(HttpClient);
       httpTestingController = TestBed.inject(HttpTestingController);
       const backEnd: AbstractGamePlayersBackEndService = new HttpGamePlayersBackEndService(httpClient);
-      return new GamePlayersService(backEnd);
+      return new GamePlayersService(selfService, backEnd);
    };
 
    it('should be created', () => {
-      const service: GamePlayersService = setUp();
+      const service: GamePlayersService = setUp(USER_A);
       expect(service).toBeTruthy();
    });
 
@@ -61,7 +73,7 @@ describe('GamePlayersService', () => {
 
    const testGet = (gamePlayers: GamePlayers) => {
       const expectedPath: string = HttpGamePlayersBackEndService.getApiGamePlayersPath(gamePlayers.game);
-      const service: GamePlayersService = setUp();
+      const service: GamePlayersService = setUp(USER_A);
 
       service.get(gamePlayers.game).subscribe(g => expect(g).toEqual(gamePlayers));
 
@@ -80,18 +92,18 @@ describe('GamePlayersService', () => {
    });
 
 
-   const testJoinGame = (done: any, gamePlayers0: GamePlayers, user: string) => {
+   const testJoinGame = (done: any, gamePlayers0: GamePlayers, user: User) => {
       const game: GameIdentifier = gamePlayers0.game;
       const expectedPath: string = HttpGamePlayersBackEndService.getApiJoinGamePath(game);
       const users: Map<string, string> = gamePlayers0.users;
-      users.set(CHARACTER_ID_A, user);
+      users.set(CHARACTER_ID_A, user.id);
       // Tough test: the reply identifier is not the same object
       const gamePlayers1: GamePlayers = new GamePlayers(
          { scenario: game.scenario, created: game.created },
          gamePlayers0.recruiting,
          users
       );
-      const service: GamePlayersService = setUp();
+      const service: GamePlayersService = setUp(user);
 
       service.joinGame(game);
 
@@ -110,18 +122,18 @@ describe('GamePlayersService', () => {
    };
 
    it('can join game [A]', (done) => {
-      testJoinGame(done, GAME_PLAYERS_A, USER_ID_A);
+      testJoinGame(done, GAME_PLAYERS_A, USER_A);
    });
 
    it('can join game [B]', (done) => {
-      testJoinGame(done, GAME_PLAYERS_B, USER_ID_B);
+      testJoinGame(done, GAME_PLAYERS_B, USER_B);
    });
 
 
    const testEndRecuitment = (done: any, gamePlayers0: GamePlayers) => {
       const game: GameIdentifier = gamePlayers0.game;
       const path: string = HttpGamePlayersBackEndService.getApiGameEndRecuitmentPath(game);
-      const service: GamePlayersService = setUp();
+      const service: GamePlayersService = setUp(USER_B);
       // Tough test: the reply identifier is not the same object
       const gamePlayersReply: GamePlayers = new GamePlayers(
          { scenario: game.scenario, created: game.created },
@@ -160,7 +172,7 @@ describe('GamePlayersService', () => {
       const game1: GameIdentifier = gamePlayers.game;
       const game2: GameIdentifier = { scenario: game1.scenario, created: game1.created };
       const expectedPath: string = HttpGamePlayersBackEndService.getApiGamePlayersPath(game1);
-      const service: GamePlayersService = setUp();
+      const service: GamePlayersService = setUp(USER_A);
 
       service.update(game1);
       service.get(game2).subscribe(g => expect(g).toEqual(gamePlayers));
@@ -185,7 +197,7 @@ describe('GamePlayersService', () => {
    const testUpdateAfterGet = (gamePlayers: GamePlayers) => {
       const game: GameIdentifier = gamePlayers.game;
       const expectedPath: string = HttpGamePlayersBackEndService.getApiGamePlayersPath(game);
-      const service: GamePlayersService = setUp();
+      const service: GamePlayersService = setUp(USER_A);
 
       service.get(game).subscribe(g => expect(g).toEqual(gamePlayers));
       service.update(game);
@@ -220,7 +232,7 @@ describe('GamePlayersService', () => {
       const gamePlayers1: GamePlayers = new GamePlayers(game, recruiting1, users1);
       const gamePlayers2: GamePlayers = new GamePlayers(game, recruiting2, users2);
       const expectedPath: string = HttpGamePlayersBackEndService.getApiGamePlayersPath(game);
-      const service: GamePlayersService = setUp();
+      const service: GamePlayersService = setUp(USER_A);
       let n = 0;
 
       service.get(game).subscribe(
@@ -262,7 +274,7 @@ describe('GamePlayersService', () => {
    const testGetForUnchangedUpdate = (gamePlayers: GamePlayers) => {
       const game: GameIdentifier = gamePlayers.game;
       const expectedPath: string = HttpGamePlayersBackEndService.getApiGamePlayersPath(game);
-      const service: GamePlayersService = setUp();
+      const service: GamePlayersService = setUp(USER_A);
 
       service.get(game).subscribe(
          gps => {
@@ -292,7 +304,7 @@ describe('GamePlayersService', () => {
 
    const testGetCurrentGameId = (currentGame: Game) => {
       const expectedPath: string = CURRENTGAMEPATH;
-      const service: GamePlayersService = setUp();
+      const service: GamePlayersService = setUp(USER_A);
 
       service.getCurrentGameId().subscribe(g => expect(g).toEqual(currentGame.identifier));
 
@@ -312,7 +324,7 @@ describe('GamePlayersService', () => {
 
    it('can indicate have no current game ID', () => {
       const expectedPath: string = CURRENTGAMEPATH;
-      const service: GamePlayersService = setUp();
+      const service: GamePlayersService = setUp(USER_A);
 
       service.getCurrentGameId().subscribe(g => expect(g).toBeNull());
 
@@ -326,7 +338,7 @@ describe('GamePlayersService', () => {
    it('caches current game ID [A]', () => {
       const currentGame: Game = GAME_A;
       const expectedPath: string = CURRENTGAMEPATH;
-      const service: GamePlayersService = setUp();
+      const service: GamePlayersService = setUp(USER_A);
 
       service.getCurrentGameId().subscribe(g => expect(g).toEqual(currentGame.identifier));
       service.getCurrentGameId().subscribe(g => expect(g).toEqual(currentGame.identifier));
@@ -349,7 +361,7 @@ describe('GamePlayersService', () => {
          gamePlayers0.recruiting,
          users
       );
-      const service: GamePlayersService = setUp();
+      const service: GamePlayersService = setUp(USER_A);
 
       service.joinGame(game);
 
@@ -379,7 +391,7 @@ describe('GamePlayersService', () => {
 
    const testUpdateCurrentGameId = (currentGame: Game) => {
       const expectedPath: string = CURRENTGAMEPATH;
-      const service: GamePlayersService = setUp();
+      const service: GamePlayersService = setUp(USER_A);
 
       service.updateCurrentGameId();
 
@@ -400,7 +412,7 @@ describe('GamePlayersService', () => {
 
    const testGetAfterUpdateCurrentGameId = (currentGame: Game) => {
       const expectedPath: string = CURRENTGAMEPATH;
-      const service: GamePlayersService = setUp();
+      const service: GamePlayersService = setUp(USER_A);
 
       service.updateCurrentGameId();
       service.getCurrentGameId().subscribe(g => expect(g).toEqual(currentGame.identifier));
