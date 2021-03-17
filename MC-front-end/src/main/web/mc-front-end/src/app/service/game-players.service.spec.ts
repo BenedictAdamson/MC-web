@@ -433,24 +433,30 @@ describe('GamePlayersService', () => {
    });
 
 
-   const testChangeUser = (currentGame: Game, userA: User, userB: User) => {
+   const testChangeUser = (currentGameA: Game, userA: User, currentGameB: Game, userB: User) => {
       const expectedPath: string = CURRENTGAMEPATH;
-      setUp(userA);
+      const service: GamePlayersService = setUp(userA);
+      service.getCurrentGameId().subscribe(
+         g => expect(g === currentGameA.identifier || g === currentGameB.identifier).toBeTrue()
+         );
 
       selfService.setUser(userB, true);
 
       // Should update the (cached) currentGameId
-      const request = httpTestingController.expectOne(expectedPath);
-      expect(request.request.method).toEqual('GET');
-      request.flush(currentGame);
+      const requests: TestRequest[] = httpTestingController.match(expectedPath);
+      expect(requests.length).withContext('number of requests').toEqual(2);
+      expect(requests[0].request.method).toEqual('GET');
+      requests[0].flush(currentGameA);
+      expect(requests[1].request.method).toEqual('GET');
+      requests[1].flush(currentGameB);
       httpTestingController.verify();
    };
 
    it('updates current game ID when user changes [A]', () => {
-      testChangeUser(GAME_A, USER_A, USER_B);
+      testChangeUser(GAME_A, USER_A, GAME_B, USER_B);
    });
 
    it('updates current game ID when user changes [B]', () => {
-      testChangeUser(GAME_B, USER_B, USER_A);
+      testChangeUser(GAME_B, USER_B, GAME_A, USER_A);
    });
 });

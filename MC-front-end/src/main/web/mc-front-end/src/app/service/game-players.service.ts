@@ -22,6 +22,12 @@ export class GamePlayersService extends CachingKeyValueService<GameIdentifier, G
       private gamePlayersBackEnd: AbstractGamePlayersBackEndService
    ) {
       super(gamePlayersBackEnd);
+      /* When the user ID changes, the current game changes. */
+      this.selfService.id$.subscribe(() => {
+         if (this.currentGameId) {
+            this.updateCurrentGameId();
+         }
+      });
    }
 
    static getApiGamePlayersPath(game: GameIdentifier): string {
