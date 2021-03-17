@@ -58,12 +58,15 @@ describe('AppComponent', () => {
 
 		const html: HTMLElement = fixture.debugElement.nativeElement;
 		const currentGameLink: HTMLAnchorElement | null = html.querySelector('a[id="current-game"]');
+		const currentGameSpan: HTMLElement | null = html.querySelector('span[id="current-game"]');
 		const scenariosLink: HTMLAnchorElement | null = html.querySelector('a[id="scenarios"]');
 		const usersLink: HTMLAnchorElement | null = html.querySelector('a[id="users"]');
 		const header: HTMLElement | null = html.querySelector('h1');
 
 		const headerText: string | null = header ? header.textContent : null;
 		const scenariosLinkText: string | null = scenariosLink ? scenariosLink.textContent : null;
+		const currentGameText: string | null = currentGameLink ? currentGameLink.textContent :
+			(currentGameSpan ? currentGameSpan.textContent : null);
 
 		expect(component).toBeTruthy();
 
@@ -75,10 +78,11 @@ describe('AppComponent', () => {
 		if (usersLink != null) {
 			expect(usersLink.textContent).withContext('users link text').toContain('Users');
 		}
+
+		expect((currentGameLink != null) !== (currentGameSpan != null))
+			.withContext('has either current-game link or span, but not both').toBeTrue();
 		expect(currentGameLink != null).withContext('has current-game link element').toBe(currentGame !== null);
-		if (currentGameLink != null) {
-			expect(currentGameLink.textContent).withContext('current-game link text').toContain('Current game');
-		}
+		expect(currentGameText).withContext('current-game text').toContain('urrent game');
 	};
 
 	it('can be constructed [no roles, not playing]', () => {

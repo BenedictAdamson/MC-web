@@ -1,11 +1,15 @@
 <header>
-<h1>Mission Command</h1>
-<app-self></app-self>
+   <h1>Mission Command</h1>
+   <app-self></app-self>
 </header>
 
 <nav>
-  <a id="scenarios" routerLink="scenario">Scenarios</a>
-  <a id="users" routerLink="user" *ngIf="mayListUsers$ | async">Users</a>
-  <a id="current-game" [routerLink]="['/scenario',currentGameScenario$ | async,'game',currentGameCreated$ | async]" *ngIf="(currentGameId$ | async) !== null">Current game</a>
+   <a id="scenarios" routerLink="scenario">Scenarios</a>
+   <a id="users" routerLink="user" *ngIf="mayListUsers$ | async">Users</a>
+   <a id="current-game" [routerLink]="['/scenario',currentGameScenario$ | async,'game',currentGameCreated$ | async]"
+      *ngIf="(currentGameId$ | async) !== null; else noCurrentGame">Current game</a>
+   <ng-template #noCurrentGame>
+      <span id="current-game" class="disable">Current game</span>
+   </ng-template>
 </nav>
 <router-outlet></router-outlet>
