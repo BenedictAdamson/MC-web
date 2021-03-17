@@ -20,7 +20,7 @@ export class EncodedGamePlayers {
 	users: object;
 }
 
-export const CURRENTGAMEPATH = '/self/current-game';
+export const CURRENTGAMEPATH = '/api/self/current-game';
 
 class Delegate extends HttpKeyValueService<GameIdentifier, GamePlayers, EncodedGamePlayers, void, void> {
 
