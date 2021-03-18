@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-21.
  *
  * This file is part of MC.
  *
@@ -207,7 +207,7 @@ public class UserSteps extends Steps {
       world.getAndAssertExpectedPage(UsersPage.class).assertInvariants();
    }
 
-   @When("Navigate to one user page")
+   @When("navigate to one user page")
    public void navigate_to_one_user_page() {
       final var usersPage = world.getExpectedPage(UsersPage.class);
       world.setExpectedPage(usersPage.navigateToUserPage(0));
@@ -260,7 +260,7 @@ public class UserSteps extends Steps {
       tryToLogin();
    }
 
-   @When("Trying to navigate to a user page")
+   @When("trying to navigate to a user page")
    public void trying_to_navigate_to_user_page() {
       world.getExpectedPage(UsersPage.class).requireIsReady();
    }
@@ -324,17 +324,17 @@ public class UserSteps extends Steps {
       world.currentUserIsAdministrator();
    }
 
-   @Then("The user page includes the user name")
+   @Then("the user page includes the user name")
    public void user_page_includes_user_name() {
       world.getAndAssertExpectedPage(UserPage.class).assertIncludesUserName();
    }
 
-   @Then("The user page lists the roles of the user")
+   @Then("the user page lists the roles of the user")
    public void user_page_lists_roles_of_user() {
       world.getAndAssertExpectedPage(UserPage.class).assertListsRolesOfUser();
    }
 
-   @Given("Viewing the list of users")
+   @Given("viewing the list of users")
    public void viewing_list_of_users() {
       navigateToUsersPage();
    }
