@@ -77,6 +77,12 @@ public class GameSteps extends Steps {
       world.setExpectedPage(scenarioPage.createGame());
    }
 
+   @When("it does not indicate that the user has a current game")
+   public void does_not_indicate_user_has_current_game() {
+      assertThat(world.getAndAssertExpectedPage(HomePage.class)
+               .doesIndicateUserHasCurrentGame(), is(false));
+   }
+
    @When("examine the current-game")
    public void examine_current_game() {
       final var currentGamePage = world.getHomePage()
@@ -264,10 +270,10 @@ public class GameSteps extends Steps {
       assertFalse(gamePage.isEndRecruitmentEnabled());
    }
 
-   @When("it does not indicate that the user has a current game")
-   public void oes_not_indicate_user_has_current_game() {
-      assertThat(world.getAndAssertExpectedPage(HomePage.class)
-               .doesIndicateUserHasCurrentGame(), is(false));
+   @Given("has a game")
+   public void scenario_has_a_game() {
+      final var scenario = world.getScenarios().findFirst().get().getId();
+      world.createGame(scenario);
    }
 
    @When("user ends recruitment for the game")

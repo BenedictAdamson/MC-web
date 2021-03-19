@@ -41,9 +41,13 @@ public class ScenarioSteps extends Steps {
       super(world);
    }
 
-   @When("examining scenario")
-   public void examining_scenario() {
-      navigateToScenario().requireIsReady();
+   @When("examine the scenario")
+   public void examine_scenario() {
+      navigateToScenariosPage();
+      final var scenariosPage = world.getExpectedPage(ScenariosPage.class);
+      final var index = 0;
+      world.setExpectedPage(scenariosPage.navigateToScenario(index));
+      world.getExpectedPage(ScenarioPage.class).assertInvariants();
    }
 
    @When("examine scenarios")
@@ -52,16 +56,9 @@ public class ScenarioSteps extends Steps {
       world.getAndAssertExpectedPage(ScenariosPage.class).assertInvariants();
    }
 
-   @When("MC serves the scenario")
-   public void mc_serves_scenario_page() {
-      world.getExpectedPage(ScenarioPage.class).assertInvariants();
-   }
-
-   @When("navigate to a scenario with games")
-   public void navigate_to_scenario_with_games() {
-      final var scenariosPage = world.getExpectedPage(ScenariosPage.class);
-      final var index = 0;
-      world.setExpectedPage(scenariosPage.navigateToScenario(index));
+   @When("examining scenario")
+   public void examining_scenario() {
+      navigateToScenario().requireIsReady();
    }
 
    private ScenarioPage navigateToScenario() {
@@ -81,16 +78,15 @@ public class ScenarioSteps extends Steps {
                .assertHasListOfScenarios();
    }
 
-   @When("a scenario has games")
-   public void scenario_has_games() {
+   @When("a scenario that has a game")
+   public void scenario_has_game() {
       final var scenario = world.getScenarios().findFirst().get().getId();
       scenarioIndex = 0;
       world.createGame(scenario);
    }
 
    @Then("the scenario allows navigation to game pages")
-   public void scenario_allows_navigation_to_game_pages()
-            throws Exception {
+   public void scenario_allows_navigation_to_game_pages() throws Exception {
       // FIXME
 
    }
@@ -115,10 +111,5 @@ public class ScenarioSteps extends Steps {
    public void scenario_includes_the_list_of_playable_characters_of_that_scenario() {
       world.getAndAssertExpectedPage(ScenarioPage.class)
                .assertHasListOfCharacters();
-   }
-
-   @When("viewing the scenarios")
-   public void viewing_scenarios() {
-      navigateToScenariosPage();
    }
 }
