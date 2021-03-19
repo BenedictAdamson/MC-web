@@ -121,11 +121,6 @@ public class ScenarioSteps extends Steps {
                .assertHasListOfCharacters();
    }
 
-   @When("viewing the games of the scenario")
-   public void viewing_games_of_scenario() {
-      navigateToScenario().requireIsReady();
-   }
-
    @When("viewing the scenarios")
    public void viewing_scenarios() {
       navigateToScenariosPage();

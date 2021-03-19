@@ -77,6 +77,26 @@ public class GameSteps extends Steps {
       world.setExpectedPage(scenarioPage.createGame());
    }
 
+   @When("examine the current-game")
+   public void examine_current_game() {
+      final var currentGamePage = world.getHomePage()
+               .navigateToCurrentGamePage();
+      currentGamePage.assertInvariants();
+      world.setExpectedPage(currentGamePage);
+   }
+
+   @When("examine a game")
+   public void examine_game() {
+      final var scenarioIndex = 0;
+      final var scenarioPage = world.getHomePage().navigateToScenariosPage()
+               .navigateToScenario(scenarioIndex);
+      scenarioPage.requireIsReady();
+      gameIndex = 0;
+      final var gamePage = scenarioPage.navigateToGamePage(gameIndex);
+      gamePage.assertInvariants();
+      world.setExpectedPage(gamePage);
+   }
+
    @When("examine whether have a current game")
    public void examine_whether_have_current_game() {
       world.getHomePage();
@@ -98,6 +118,7 @@ public class GameSteps extends Steps {
       world.setExpectedPage(scenarioPage);
       nGames0 = scenarioPage.getNumberOfGamesListed();
       final var gamePage = scenarioPage.navigateToGamePage(nGames0 - 1);
+      gamePage.assertInvariants();
       gamePage.requireIndicatesIsRecruitingPlayers();
       world.setExpectedPage(gamePage);
    }
@@ -241,23 +262,6 @@ public class GameSteps extends Steps {
    public void mc_does_not_allow_ending_recuitement_for_game() {
       final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
       assertFalse(gamePage.isEndRecruitmentEnabled());
-   }
-
-   @Then("it provides a game")
-   public void provides_game() {
-      world.getAndAssertExpectedPage(GamePage.class).assertInvariants();
-   }
-
-   @When("examine the current-game")
-   public void examine_current_game() {
-      world.setExpectedPage(world.getHomePage().navigateToCurrentGamePage());
-   }
-
-   @When("navigate to one game")
-   public void navigate_to_one_game_page() {
-      final var scenarioPage = world.getExpectedPage(ScenarioPage.class);
-      gameIndex = 0;
-      world.setExpectedPage(scenarioPage.navigateToGamePage(gameIndex));
    }
 
    @When("it does not indicate that the user has a current game")
