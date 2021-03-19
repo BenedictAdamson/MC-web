@@ -46,19 +46,15 @@ public class ScenarioSteps extends Steps {
       navigateToScenario().requireIsReady();
    }
 
-   @When("getting the scenarios")
-   public void getting_scenarios() {
+   @When("examine scenarios")
+   public void examine_scenarios() {
       navigateToScenariosPage();
+      world.getAndAssertExpectedPage(ScenariosPage.class).assertInvariants();
    }
 
    @When("MC serves the scenario")
    public void mc_serves_scenario_page() {
       world.getExpectedPage(ScenarioPage.class).assertInvariants();
-   }
-
-   @Then("MC serves the scenarios page")
-   public void mc_serves_scenarios_page() {
-      world.getAndAssertExpectedPage(ScenariosPage.class).assertInvariants();
    }
 
    @When("navigate to a scenario with games")
