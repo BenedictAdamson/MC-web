@@ -51,7 +51,7 @@ public class ScenarioSteps extends Steps {
       navigateToScenariosPage();
    }
 
-   @When("MC serves the scenario page")
+   @When("MC serves the scenario")
    public void mc_serves_scenario_page() {
       world.getExpectedPage(ScenarioPage.class).assertInvariants();
    }
@@ -92,31 +92,31 @@ public class ScenarioSteps extends Steps {
       world.createGame(scenario);
    }
 
-   @Then("the scenario page allows navigation to game pages")
-   public void scenario_page_allows_navigation_to_game_pages()
+   @Then("the scenario allows navigation to game pages")
+   public void scenario_allows_navigation_to_game_pages()
             throws Exception {
       // FIXME
 
    }
 
-   @Then("the scenario page does not allow navigation to game pages")
-   public void scenario_page_does_not_allow_navigation_to_game_pages()
+   @Then("the scenario does not allow navigation to game pages")
+   public void scenario_does_not_allow_navigation_to_game_pages()
             throws Exception {
       // FIXME
    }
 
-   @Then("the scenario page includes the list of games of that scenario")
-   public void scenario_page_includes_list_of_games_of_scenario() {
+   @Then("the scenario includes the list of games of that scenario")
+   public void scenario_includes_list_of_games_of_scenario() {
       world.getAndAssertExpectedPage(ScenarioPage.class).assertHasListOfGames();
    }
 
-   @Then("the scenario page includes the scenario description")
-   public void scenario_page_includes_scenario_description() {
+   @Then("the scenario includes the scenario description")
+   public void scenario_includes_scenario_description() {
       // Hard to test
    }
 
-   @Then("the scenario page includes the list of playable characters of that scenario")
-   public void scenario_page_includes_the_list_of_playable_characters_of_that_scenario() {
+   @Then("the scenario includes the list of playable characters of that scenario")
+   public void scenario_includes_the_list_of_playable_characters_of_that_scenario() {
       world.getAndAssertExpectedPage(ScenarioPage.class)
                .assertHasListOfCharacters();
    }
