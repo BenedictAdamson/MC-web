@@ -163,7 +163,7 @@ public class UserSteps extends Steps {
       assertTrue(homePage.isLogoutEnabled());
    }
 
-   @Then("MC does not allow navigating to a user page")
+   @Then("MC does not allow navigating to a user")
    public void mc_does_not_alllow_navigating_to_user_page() {
       final var usersPage = world.getAndAssertExpectedPage(UsersPage.class);
       assertEquals(0, usersPage.getNumberOfUserLinks(),
@@ -195,19 +195,19 @@ public class UserSteps extends Steps {
       world.getAndAssertExpectedPage(LoginPage.class).assertRejectedLogin();
    }
 
-   @Then("MC serves the user page")
+   @Then("MC serves the user")
    public void mc_serves_user_page() {
       final var userPage = world.getAndAssertExpectedPage(UserPage.class);
       userPage.assertInvariants();
       userPage.assertNoErrorMessages();
    }
 
-   @Then("MC serves the users page")
-   public void mc_serves_users_page() {
+   @Then("it serves the users")
+   public void serves_users() {
       world.getAndAssertExpectedPage(UsersPage.class).assertInvariants();
    }
 
-   @When("navigate to one user page")
+   @When("navigate to one user")
    public void navigate_to_one_user_page() {
       final var usersPage = world.getExpectedPage(UsersPage.class);
       world.setExpectedPage(usersPage.navigateToUserPage(0));
@@ -260,7 +260,7 @@ public class UserSteps extends Steps {
       tryToLogin();
    }
 
-   @When("trying to navigate to a user page")
+   @When("trying to navigate to a user")
    public void trying_to_navigate_to_user_page() {
       world.getExpectedPage(UsersPage.class).requireIsReady();
    }
@@ -324,13 +324,13 @@ public class UserSteps extends Steps {
       world.currentUserIsAdministrator();
    }
 
-   @Then("the user page includes the user name")
-   public void user_page_includes_user_name() {
+   @Then("the user includes the user name")
+   public void user_includes_user_name() {
       world.getAndAssertExpectedPage(UserPage.class).assertIncludesUserName();
    }
 
-   @Then("the user page lists the roles of the user")
-   public void user_page_lists_roles_of_user() {
+   @Then("the user lists the roles of the user")
+   public void user_lists_roles_of_user() {
       world.getAndAssertExpectedPage(UserPage.class).assertListsRolesOfUser();
    }
 
