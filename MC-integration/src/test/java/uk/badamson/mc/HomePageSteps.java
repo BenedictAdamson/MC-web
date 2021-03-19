@@ -42,17 +42,6 @@ public class HomePageSteps extends Steps {
       super(world);
    }
 
-   @When("examine home page")
-   public void examine_home_page() {
-      world.getHomePage();
-   }
-
-   @When("the home-page does not indicate that the user has a current game")
-   public void home_page_does_not_indicate_user_has_current_game() {
-      world.getAndAssertExpectedPage(HomePage.class)
-               .assertDoesNotIndicateUserHasCurrentGame();
-   }
-
    @Then("the home page header includes the name of the game")
    public void home_page_header_includes_name_of_game() {
       world.getAndAssertExpectedPage(HomePage.class)

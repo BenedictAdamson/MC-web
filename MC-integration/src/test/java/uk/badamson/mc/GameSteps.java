@@ -35,6 +35,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import uk.badamson.mc.presentation.GamePage;
+import uk.badamson.mc.presentation.HomePage;
 import uk.badamson.mc.presentation.ScenarioPage;
 
 /**
@@ -74,6 +75,11 @@ public class GameSteps extends Steps {
       final var scenarioPage = world.getExpectedPage(ScenarioPage.class);
       nGames0 = scenarioPage.getNumberOfGamesListed();
       world.setExpectedPage(scenarioPage.createGame());
+   }
+
+   @When("examine whether have a current game")
+   public void examine_whether_have_current_game() {
+      world.getHomePage();
    }
 
    @Given("examining a game recruiting players")
@@ -237,13 +243,13 @@ public class GameSteps extends Steps {
       assertFalse(gamePage.isEndRecruitmentEnabled());
    }
 
-   @Then("MC provides a game page")
-   public void mc_provides_game_page() {
+   @Then("it provides a game")
+   public void provides_game() {
       world.getAndAssertExpectedPage(GamePage.class).assertInvariants();
    }
 
-   @When("navigate to the current-game page")
-   public void navigate_to_current_game_page() {
+   @When("examine the current-game")
+   public void examine_current_game() {
       world.setExpectedPage(world.getHomePage().navigateToCurrentGamePage());
    }
 
@@ -252,6 +258,12 @@ public class GameSteps extends Steps {
       final var scenarioPage = world.getExpectedPage(ScenarioPage.class);
       gameIndex = 0;
       world.setExpectedPage(scenarioPage.navigateToGamePage(gameIndex));
+   }
+
+   @When("it does not indicate that the user has a current game")
+   public void oes_not_indicate_user_has_current_game() {
+      assertThat(world.getAndAssertExpectedPage(HomePage.class)
+               .doesIndicateUserHasCurrentGame(), is(false));
    }
 
    @When("user ends recruitment for the game")
