@@ -60,6 +60,16 @@ describe('SelfService', () => {
       return may;
    };
 
+   const mayExamineGame = (s: SelfService): boolean | null => {
+      let may: boolean | null = null;
+      s.mayExamineGame$.subscribe({
+         next: (m) => may = m,
+         error: (err) => fail(err),
+         complete: () => { }
+      });
+      return may;
+   };
+
    const getUsername = (s: SelfService): string | null => {
       let username: string | null = null;
       s.username$.subscribe({
@@ -97,7 +107,8 @@ describe('SelfService', () => {
       const play: boolean | null = mayPlay(s);
       const manageUsers: boolean | null = mayManageUsers(s);
       const listUsers: boolean | null = mayListUsers(s);
-      const anyAuthority = manageGames || play || manageUsers || listUsers;
+      const examineGame: boolean | null = mayExamineGame(s);
+      const anyAuthority = manageGames || play || manageUsers || listUsers || examineGame;
 
       expect(authenticated && username == null).withContext('Not authenticated if username is null').toEqual(false);
       expect(!authenticated && anyAuthority).withContext('A user that has not been authenticated has no authorities').toEqual(false);
@@ -243,7 +254,10 @@ describe('SelfService', () => {
    });
 
    const testAuthenticationSuccessForUserWithRole =
-      (done: any, role: string, expectManageGames: boolean, expectPlay: boolean, expectManageUsers: boolean, expectListUsers: boolean) => {
+      (done: any, role: string,
+         expectManageGames: boolean, expectPlay: boolean, expectManageUsers: boolean,
+         expectListUsers: boolean, expectExamineGame: boolean
+      ) => {
          const user: User = { id: uuid(), username: 'Administrator', password: 'letmein', authorities: [role] };
 
          testAuthenticationSuccess(done, user);
@@ -252,22 +266,24 @@ describe('SelfService', () => {
          const play: boolean | null = mayPlay(service);
          const manageUsers: boolean | null = mayManageUsers(service);
          const listUsers: boolean | null = mayListUsers(service);
+         const examineGame: boolean | null = mayExamineGame(service);
          expect(manageGames).withContext('manageGames').toBe(expectManageGames);
          expect(play).withContext('play').toBe(expectPlay);
          expect(manageUsers).withContext('manageUsers').toBe(expectManageUsers);
+         expect(examineGame).withContext('examineGame').toBe(expectExamineGame);
          expect(listUsers).withContext('listUsers').toBe(expectListUsers);
       };
 
    it('handles authentication success for user with role [ROLE_MANAGE_GAMES]', (done) => {
-      testAuthenticationSuccessForUserWithRole(done, 'ROLE_MANAGE_GAMES', true, false, false, false);
+      testAuthenticationSuccessForUserWithRole(done, 'ROLE_MANAGE_GAMES', true, false, false, false, true);
    });
 
    it('handles authentication success for user with role [ROLE_MANAGE_USERS]', (done) => {
-      testAuthenticationSuccessForUserWithRole(done, 'ROLE_MANAGE_USERS', false, false, true, true);
+      testAuthenticationSuccessForUserWithRole(done, 'ROLE_MANAGE_USERS', false, false, true, true, false);
    });
 
    it('handles authentication success for user with role [ROLE_PLAYER]', (done) => {
-      testAuthenticationSuccessForUserWithRole(done, 'ROLE_PLAYER', false, true, false, true);
+      testAuthenticationSuccessForUserWithRole(done, 'ROLE_PLAYER', false, true, false, true, true);
    });
 
    const mockHttpLogout = () => {

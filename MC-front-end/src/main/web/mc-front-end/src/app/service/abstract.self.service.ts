@@ -261,6 +261,13 @@ export abstract class AbstractSelfService {
 			)
 		);
 	}
+   get mayExamineGame$(): Observable<boolean> {
+      return this.authorities$.pipe(
+         map(
+            authorities => authorities.includes('ROLE_PLAYER') || authorities.includes('ROLE_MANAGE_GAMES')//FIXME
+         )
+      );
+   }
 
 	protected abstract getUserDetails(username: string | null, password: string | null): Observable<User | null>;
 
