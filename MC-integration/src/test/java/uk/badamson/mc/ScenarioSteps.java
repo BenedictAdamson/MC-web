@@ -41,6 +41,18 @@ public class ScenarioSteps extends Steps {
       super(world);
    }
 
+   @Then("it allows examination of games of the scenario")
+   public void allows_examination_of_games_of_scenario() throws Exception {
+      // FIXME
+
+   }
+
+   @Then("it does not allow examination of games of the scenario")
+   public void does_not_allow_examination_of_games_of_scenario()
+            throws Exception {
+      // FIXME
+   }
+
    @When("examine the scenario")
    public void examine_scenario() {
       navigateToScenariosPage();
@@ -83,18 +95,6 @@ public class ScenarioSteps extends Steps {
       final var scenario = world.getScenarios().findFirst().get().getId();
       scenarioIndex = 0;
       world.createGame(scenario);
-   }
-
-   @Then("the scenario allows navigation to game pages")
-   public void scenario_allows_navigation_to_game_pages() throws Exception {
-      // FIXME
-
-   }
-
-   @Then("the scenario does not allow navigation to game pages")
-   public void scenario_does_not_allow_navigation_to_game_pages()
-            throws Exception {
-      // FIXME
    }
 
    @Then("the scenario includes the list of games of that scenario")
