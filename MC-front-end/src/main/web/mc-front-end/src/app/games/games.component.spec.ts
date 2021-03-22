@@ -27,8 +27,9 @@ describe('GamesComponent', () => {
    let component: GamesComponent;
    let fixture: ComponentFixture<GamesComponent>;
 
-   const USER_ADMIN: User = { id: uuid(), username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
-   const USER_NORMAL: User = { id: uuid(), username: 'Benedict', password: null, authorities: [] };
+   const USER_MANAGE_GAMES: User = { id: uuid(), username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
+   const USER_PLAYER: User = { id: uuid(), username: 'Benedict', password: null, authorities: ['ROLE_PLAYER'] };
+   const USER_NO_ROLES: User = { id: uuid(), username: 'Charlie', password: null, authorities: [] };
 
    const SCENARIO_A: string = uuid();
    const SCENARIO_B: string = uuid();
@@ -110,21 +111,30 @@ describe('GamesComponent', () => {
       expect(createGameButtonText).withContext('#create-game button text').toEqual('Create game');
 
       expect(gamesList).withContext('games list').not.toBeNull();
+   };
+
+   const assertHasGameLinks = (expected: boolean) => {
+      const html: HTMLElement = fixture.nativeElement;
+      const gamesList: HTMLUListElement | null = html.querySelector('#games');
+
+      expect(gamesList).withContext('games list').not.toBeNull();
       if (gamesList) {
          const gameEntries: NodeListOf<HTMLLIElement> = gamesList.querySelectorAll('li');
          for (let i = 0; i < gameEntries.length; i++) {
             const entry: HTMLLIElement = gameEntries.item(i);
             const link: HTMLAnchorElement | null = entry.querySelector('a');
-            expect(link).withContext('entry has link').not.toBeNull();
+            expect(link == null).withContext('entry has link').not.toEqual(expected);
          }
       }
    };
 
 
    const testNgInit = (self: User, scenario: string, gamesOfScenario: string[]) => {
+      const expectHasGameLinks: boolean = self.authorities.includes('ROLE_MANAGE_GAMES') || self.authorities.includes('ROLE_PLAYER');
       setUpForNgInit(self, scenario, gamesOfScenario);
 
       assertInvariants();
+      assertHasGameLinks(expectHasGameLinks);
       expect(getScenario(component)).withContext('scenario$').toEqual(scenario);
       expect(getGames(component)).withContext('games$').toEqual(gamesOfScenario);
 
@@ -137,17 +147,22 @@ describe('GamesComponent', () => {
          for (let i = 0; i < gameEntries.length; i++) {
             const expectedGame: string = gamesOfScenario[i];
             const entry: HTMLLIElement = gameEntries.item(i);
-            const link: HTMLAnchorElement | null = entry.querySelector('a');
-            const linkText: string | null = link ? link.textContent : null;
-            expect(linkText).withContext('entry link text contains game title').toContain(expectedGame);
+            if (expectHasGameLinks) {
+               const link: HTMLAnchorElement | null = entry.querySelector('a');
+               const linkText: string | null = link ? link.textContent : null;
+               expect(linkText).withContext('entry link text contains game title').toContain(expectedGame);
+            }
          }
       }
    };
    it('can initialize [a]', () => {
-      testNgInit(USER_ADMIN, SCENARIO_A, GAMES_0);
+      testNgInit(USER_MANAGE_GAMES, SCENARIO_A, GAMES_0);
    });
    it('can initialize [b]', () => {
-      testNgInit(USER_NORMAL, SCENARIO_B, GAMES_2);
+      testNgInit(USER_PLAYER, SCENARIO_B, GAMES_2);
+   });
+   it('can initialize [c]', () => {
+      testNgInit(USER_NO_ROLES, SCENARIO_B, GAMES_2);
    });
 
 
@@ -179,7 +194,7 @@ describe('GamesComponent', () => {
          { provide: AbstractGamesOfScenarioBackEndService, useValue: userServiceStub },
          { provide: GameService, useValue: gameServiceSpy },
          { provide: Router, useValue: routerSpy },
-         { provide: AbstractSelfService, useFactory: () => new MockSelfService(USER_ADMIN) }]
+         { provide: AbstractSelfService, useFactory: () => new MockSelfService(USER_MANAGE_GAMES) }]
       });
 
       fixture = TestBed.createComponent(GamesComponent);
@@ -212,7 +227,7 @@ describe('GamesComponent', () => {
    }));
 
    it('disables create game button for normal users', () => {
-      setUpForNgInit(USER_NORMAL, SCENARIO_A, []);
+      setUpForNgInit(USER_NO_ROLES, SCENARIO_A, []);
 
       assertInvariants();
       const html: HTMLElement = fixture.nativeElement;
@@ -223,7 +238,7 @@ describe('GamesComponent', () => {
    });
 
    it('enables create game button for an administrator', () => {
-      setUpForNgInit(USER_ADMIN, SCENARIO_A, []);
+      setUpForNgInit(USER_MANAGE_GAMES, SCENARIO_A, []);
 
       assertInvariants();
       const html: HTMLElement = fixture.nativeElement;

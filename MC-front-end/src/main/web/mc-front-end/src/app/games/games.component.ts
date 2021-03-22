@@ -58,6 +58,10 @@ export class GamesComponent implements OnInit {
       ).subscribe();
    }
 
+   get mayExamineGame$(): Observable<boolean> {
+      return this.selfService.mayExamineGame$;
+   }
+
    /**
     * @description
     * Whether the current user does not have permission to create games.

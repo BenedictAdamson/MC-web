@@ -1,12 +1,15 @@
-<button id="create-game" type=button  [disabled]="isDisabledCreateGame$ | async" (click)="createGame()">Create game</button>
+<button id="create-game" type=button [disabled]="isDisabledCreateGame$ | async" (click)="createGame()">Create
+   game</button>
 <nav>
-<h3>Games of this scenario</h3>
+   <h3>Games of this scenario</h3>
 
-<ul id="games">
-    <li *ngFor="let game of games$ | async">
-        <a [routerLink]="['/scenario',scenario$ | async,'game',game]">
+   <ul id="games">
+      <li *ngFor="let game of games$ | async">
+         <a [routerLink]="['/scenario',scenario$ | async,'game',game]"
+            *ngIf="mayExamineGame$ | async; else mayNotExamineGame">
             {{game}}
-        </a>
-    </li>
-</ul>
+         </a>
+         <ng-template #mayNotExamineGame>{{game}}</ng-template>
+      </li>
+   </ul>
 </nav>
