@@ -18,6 +18,8 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import javax.annotation.Nonnull;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,15 +44,15 @@ public class ScenarioSteps extends Steps {
    }
 
    @Then("it allows examination of games of the scenario")
-   public void allows_examination_of_games_of_scenario() throws Exception {
-      // FIXME
-
+   public void allows_examination_of_games_of_scenario() {
+      assertThat("Has links to games", world
+               .getAndAssertExpectedPage(ScenarioPage.class).hasLinksToGames());
    }
 
    @Then("it does not allow examination of games of the scenario")
-   public void does_not_allow_examination_of_games_of_scenario()
-            throws Exception {
-      // FIXME
+   public void does_not_allow_examination_of_games_of_scenario() {
+      assertThat("Does not have links to games", !world
+               .getAndAssertExpectedPage(ScenarioPage.class).hasLinksToGames());
    }
 
    @When("examine the scenario")
