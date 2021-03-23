@@ -219,14 +219,14 @@ public class GameSteps extends Steps {
                .assertIndicatesUserMayNotJoinGame();
    }
 
-   @Then("the game indicates whether the game has players")
-   public void game_indicates_whether_game_has_players() {
+   @Then("the game indicates whether it has players")
+   public void game_indicates_whether_has_players() {
       final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
       gamePage.assertIndicatesWhetherGameHasPlayers();
    }
 
-   @Then("the game indicates whether the game is recruiting players")
-   public void game_indicates_whether_game_recuiting_players() {
+   @Then("the game indicates whether it is recruiting players")
+   public void game_indicates_whether_recuiting_players() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesWhetherRecruitingPlayers();
    }
