@@ -177,19 +177,19 @@ public class GameSteps extends Steps {
                world.getCurrentUrlPath(), is(gamePagePath));
    }
 
-   @Then("the game indicates that the game has no players")
+   @Then("the game indicates that it has no players")
    public void game_indicates_game_has_no_players() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesGameHasNoPlayedCharacters();
    }
 
-   @Then("the game indicates that the game is not recruiting players")
+   @Then("the game indicates that it is not recruiting players")
    public void game_indicates_game_not_recuiting_players() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesIsNotRecruitingPlayers();
    }
 
-   @Then("the game indicates that the game is recruiting players")
+   @Then("the game indicates that it is recruiting players")
    public void game_indicates_that_game_recuiring_players() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesIsRecruitingPlayers();
