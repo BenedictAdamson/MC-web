@@ -10,77 +10,83 @@ import { GameService } from '../service/game.service';
 import { GamesOfScenarioService } from '../service/games-of-scenario.service';
 
 @Component({
-	selector: 'app-scenario',
-	templateUrl: './games.component.html',
-	styleUrls: ['./games.component.css']
+   selector: 'app-scenario',
+   templateUrl: './games.component.html',
+   styleUrls: ['./games.component.css']
 })
 export class GamesComponent implements OnInit {
 
-	static getGamePagePath(game: GameIdentifier) {
-		return '/scenario/' + game.scenario + '/game/' + game.created;
-	}
+   constructor(
+      private route: ActivatedRoute,
+      private readonly router: Router,
+      private selfService: AbstractSelfService,
+      private gameService: GameService,
+      private gamesOfScenarioService: GamesOfScenarioService
+   ) { }
 
-	get scenario$(): Observable<string> {
-		if (!this.route.parent) throw new Error('missing this.route.parent');
-		return this.route.parent.paramMap.pipe(
-			map(params => params.get('scenario')),
-			filter(scenario => !!scenario),
-			map((scenario: string | null) => scenario as string)
-		);
-	}
+   static getGamePagePath(game: GameIdentifier) {
+      return '/scenario/' + game.scenario + '/game/' + game.created;
+   }
 
-	get games$(): Observable<string[]> {
-		return this.scenario$.pipe(
-			mergeMap(scenario => this.gamesOfScenarioService.get(scenario)),
-			map((games: string[] | null) => {
-				if (games) {
-					return games;
-				} else {
-					return [];
-				}
-			})
-		);
-	}
+   get scenario$(): Observable<string> {
+      if (!this.route.parent) {
+         throw new Error('missing this.route.parent');
+      }
+      return this.route.parent.paramMap.pipe(
+         map(params => params.get('scenario')),
+         filter(scenario => !!scenario),
+         map((scenario: string | null) => scenario as string)
+      );
+   }
 
-	constructor(
-		private route: ActivatedRoute,
-		private readonly router: Router,
-		private selfService: AbstractSelfService,
-		private gameService: GameService,
-		private gamesOfScenarioService: GamesOfScenarioService
-	) { }
+   get games$(): Observable<string[]> {
+      return this.scenario$.pipe(
+         mergeMap(scenario => this.gamesOfScenarioService.get(scenario)),
+         map((games: string[] | null) => {
+            if (games) {
+               return games;
+            } else {
+               return [];
+            }
+         })
+      );
+   }
 
-	ngOnInit() {
-		this.scenario$.pipe(
-			tap(scenario => this.gamesOfScenarioService.update(scenario))
-		).subscribe();
-	}
+   ngOnInit() {
+      this.scenario$.pipe(
+         tap(scenario => this.gamesOfScenarioService.update(scenario))
+      ).subscribe();
+   }
 
-	/**
-	 * @description
-	 * Whether the current user does not have permission to create games.
-	 *
-	 * A user that has not been authenticated does not have that permission.
-	 */
-	get isDisabledCreateGame$(): Observable<boolean> {
-		return this.selfService.mayManageGames$.pipe(
-			map(mayManage => !mayManage)
-		);
-	}
+   get mayExamineGame$(): Observable<boolean> {
+      return this.selfService.mayExamineGame$;
+   }
 
-	/**
-	 * Attempts to create a new game for the scenario of this games list.
-	 * On completion, redirects to the the game page for that game.
-	 */
-	createGame(): void {
-		this.scenario$.pipe(
-			first(),// create only 1 game
-			mergeMap(scenario => this.gameService.createGame(scenario)),
-			map(game => game.identifier),
-			tap(gameIdentifier => {
-				this.gamesOfScenarioService.update(gameIdentifier.scenario);
-				this.router.navigateByUrl(GamesComponent.getGamePagePath(gameIdentifier));
-			})
-		).subscribe();
-	}
+   /**
+    * @description
+    * Whether the current user does not have permission to create games.
+    *
+    * A user that has not been authenticated does not have that permission.
+    */
+   get isDisabledCreateGame$(): Observable<boolean> {
+      return this.selfService.mayManageGames$.pipe(
+         map(mayManage => !mayManage)
+      );
+   }
+
+   /**
+    * Attempts to create a new game for the scenario of this games list.
+    * On completion, redirects to the the game page for that game.
+    */
+   createGame(): void {
+      this.scenario$.pipe(
+         first(),// create only 1 game
+         mergeMap(scenario => this.gameService.createGame(scenario)),
+         map(game => game.identifier),
+         tap(gameIdentifier => {
+            this.gamesOfScenarioService.update(gameIdentifier.scenario);
+            this.router.navigateByUrl(GamesComponent.getGamePagePath(gameIdentifier));
+         })
+      ).subscribe();
+   }
 }

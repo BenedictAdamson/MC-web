@@ -20,7 +20,6 @@ package uk.badamson.mc.presentation;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 
 import java.util.Objects;
@@ -86,11 +85,6 @@ public final class HomePage extends Page {
       super(webDriver);
    }
 
-   public void assertDoesNotIndicateUserHasCurrentGame() {
-      assertThat("No link to current game",
-               getBody().findElements(CURRENT_GAME_LINK_LOCATOR), empty());
-   }
-
    public void assertHeadingIncludesNameOfGame() {
       assertHeadingIncludesNameOfGame(getBody());
    }
@@ -126,6 +120,10 @@ public final class HomePage extends Page {
    @Override
    protected void assertValidTitle(final String title) {
       assertTitleIncludesNameOfGame(title);
+   }
+
+   public boolean doesIndicateUserHasCurrentGame() {
+      return !getBody().findElements(CURRENT_GAME_LINK_LOCATOR).isEmpty();
    }
 
    @Override

@@ -35,6 +35,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import uk.badamson.mc.presentation.GamePage;
+import uk.badamson.mc.presentation.HomePage;
 import uk.badamson.mc.presentation.ScenarioPage;
 
 /**
@@ -76,6 +77,37 @@ public class GameSteps extends Steps {
       world.setExpectedPage(scenarioPage.createGame());
    }
 
+   @When("it does not indicate that the user has a current game")
+   public void does_not_indicate_user_has_current_game() {
+      assertThat(world.getAndAssertExpectedPage(HomePage.class)
+               .doesIndicateUserHasCurrentGame(), is(false));
+   }
+
+   @When("examine the current-game")
+   public void examine_current_game() {
+      final var currentGamePage = world.getHomePage()
+               .navigateToCurrentGamePage();
+      currentGamePage.assertInvariants();
+      world.setExpectedPage(currentGamePage);
+   }
+
+   @When("examine a game")
+   public void examine_game() {
+      final var scenarioIndex = 0;
+      final var scenarioPage = world.getHomePage().navigateToScenariosPage()
+               .navigateToScenario(scenarioIndex);
+      scenarioPage.requireIsReady();
+      gameIndex = 0;
+      final var gamePage = scenarioPage.navigateToGamePage(gameIndex);
+      gamePage.assertInvariants();
+      world.setExpectedPage(gamePage);
+   }
+
+   @When("examine whether have a current game")
+   public void examine_whether_have_current_game() {
+      world.getHomePage();
+   }
+
    @Given("examining a game recruiting players")
    public void examining_game_recruiting_players() {
       /*
@@ -92,113 +124,114 @@ public class GameSteps extends Steps {
       world.setExpectedPage(scenarioPage);
       nGames0 = scenarioPage.getNumberOfGamesListed();
       final var gamePage = scenarioPage.navigateToGamePage(nGames0 - 1);
+      gamePage.assertInvariants();
       gamePage.requireIndicatesIsRecruitingPlayers();
       world.setExpectedPage(gamePage);
    }
 
-   @Then("The game page does not indicate which characters are played by which \\(other) users")
-   public void game_page_does_not_indicate_which_characters_are_played_by_other_users() {
+   @Then("the game does not indicate which characters are played by which \\(other) users")
+   public void game_does_not_indicate_which_characters_are_played_by_other_users() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertDoesNotIndicateWhichCharactersPlayedByOtherUsers();
    }
 
-   @Then("The game page includes the scenario description")
-   public void game_page_includes_scenario_description() {
+   @Then("the game includes the scenario description")
+   public void game_includes_scenario_description() {
       // hard to test
    }
 
-   @Then("The game page includes the scenario title")
-   public void game_page_includes_scenario_title() {
+   @Then("the game includes the scenario title")
+   public void game_includes_scenario_title() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIncludesScenarioTitle();
    }
 
-   @Then("The game page includes the date and time that the game was set up")
-   public void game_page_includes_time_set_up() {
+   @Then("the game includes the date and time that the game was set up")
+   public void game_includes_time_set_up() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIncludesCreationTime();
    }
 
-   @Then("The game page indicates that the current game is the game joined")
-   public void game_page_indicates_current_game_is_game_joined() {
+   @Then("the game indicates that the current game is the game joined")
+   public void game_indicates_current_game_is_game_joined() {
       assertThat("Current URL Path is the path of the game joined",
                world.getCurrentUrlPath(), is(gamePagePath));
    }
 
-   @Then("The game page indicates that the game has no players")
-   public void game_page_indicates_game_has_no_players() {
+   @Then("the game indicates that the game has no players")
+   public void game_indicates_game_has_no_players() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesGameHasNoPlayedCharacters();
    }
 
-   @Then("the game page indicates that the game is not recruiting players")
-   public void game_page_indicates_game_not_recuiting_players() {
+   @Then("the game indicates that the game is not recruiting players")
+   public void game_indicates_game_not_recuiting_players() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesIsNotRecruitingPlayers();
    }
 
-   @Then("the game page indicates that the game is recruiting players")
-   public void game_page_indicates_that_game_recuiring_players() {
+   @Then("the game indicates that the game is recruiting players")
+   public void game_indicates_that_game_recuiring_players() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesIsRecruitingPlayers();
    }
 
-   @Then("The game page indicates that the user is not playing the game")
-   public void game_page_indicates_user_is_not_playing_game() {
+   @Then("the game indicates that the user is not playing the game")
+   public void game_indicates_user_is_not_playing_game() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesUserIsNotPlayingGame();
    }
 
-   @Then("The game page indicates that the user is playing the game")
-   public void game_page_indicates_user_is_playing_game() {
+   @Then("the game indicates that the user is playing the game")
+   public void game_indicates_user_is_playing_game() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesUserIsPlayingGame();
    }
 
-   @Then("the game page indicates that the user may join the game")
-   public void game_page_indicates_user_may_join_game() {
+   @Then("the game indicates that the user may join the game")
+   public void game_indicates_user_may_join_game() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesUserMayJoinGame();
    }
 
-   @Then("The game page indicates that the user may not join the game")
-   public void game_page_indicates_user_may_not_join_game() {
+   @Then("the game indicates that the user may not join the game")
+   public void game_indicates_user_may_not_join_game() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesUserMayNotJoinGame();
    }
 
-   @Then("The game page indicates whether the game has players")
-   public void game_page_indicates_whether_game_has_players() {
+   @Then("the game indicates whether the game has players")
+   public void game_indicates_whether_game_has_players() {
       final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
       gamePage.assertIndicatesWhetherGameHasPlayers();
    }
 
-   @Then("The game page indicates whether the game is recruiting players")
-   public void game_page_indicates_whether_game_recuiting_players() {
+   @Then("the game indicates whether the game is recruiting players")
+   public void game_indicates_whether_game_recuiting_players() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesWhetherRecruitingPlayers();
    }
 
-   @Then("The game page indicates whether the user is playing the game")
-   public void game_page_indicates_whether_user_is_playing_game() {
+   @Then("the game indicates whether the user is playing the game")
+   public void game_indicates_whether_user_is_playing_game() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesWhetherUserIsPlayingGame();
    }
 
-   @Then("The game page indicates whether the user may join the game")
-   public void game_page_indicates_whether_user_may_join_game() {
+   @Then("the game indicates whether the user may join the game")
+   public void game_indicates_whether_user_may_join_game() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesWhetherUserMayJoinGame();
    }
 
-   @Then("The game page indicates which character \\(if any) the user is playing")
-   public void game_page_indicates_which_character_user_is_playing() {
+   @Then("the game indicates which character \\(if any) the user is playing")
+   public void game_indicates_which_character_user_is_playing() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesWhichCharacterIfAnyUserIsPlaying();
    }
 
-   @Then("The game page indicates which characters are played by which users")
-   public void game_page_indicates_which_characters_are_played_by_which_users() {
+   @Then("the game indicates which characters are played by which users")
+   public void game_indicates_which_characters_are_played_by_which_users() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesWhichCharactersPlayedByWhichUsers();
    }
@@ -237,21 +270,10 @@ public class GameSteps extends Steps {
       assertFalse(gamePage.isEndRecruitmentEnabled());
    }
 
-   @Then("MC provides a game page")
-   public void mc_provides_game_page() {
-      world.getAndAssertExpectedPage(GamePage.class).assertInvariants();
-   }
-
-   @When("navigate to the current-game page")
-   public void navigate_to_current_game_page() {
-      world.setExpectedPage(world.getHomePage().navigateToCurrentGamePage());
-   }
-
-   @When("Navigate to one game page")
-   public void navigate_to_one_game_page() {
-      final var scenarioPage = world.getExpectedPage(ScenarioPage.class);
-      gameIndex = 0;
-      world.setExpectedPage(scenarioPage.navigateToGamePage(gameIndex));
+   @Given("has a game")
+   public void scenario_has_a_game() {
+      final var scenario = world.getScenarios().findFirst().get().getId();
+      world.createGame(scenario);
    }
 
    @When("user ends recruitment for the game")

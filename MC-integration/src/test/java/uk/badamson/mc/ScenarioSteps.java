@@ -18,6 +18,8 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import javax.annotation.Nonnull;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,31 +43,36 @@ public class ScenarioSteps extends Steps {
       super(world);
    }
 
-   @When("examining scenario")
-   public void examining_scenario() {
-      navigateToScenario().requireIsReady();
+   @Then("it allows examination of games of the scenario")
+   public void allows_examination_of_games_of_scenario() {
+      assertThat("Has links to games", world
+               .getAndAssertExpectedPage(ScenarioPage.class).hasLinksToGames());
    }
 
-   @When("getting the scenarios")
-   public void getting_scenarios() {
+   @Then("it does not allow examination of games of the scenario")
+   public void does_not_allow_examination_of_games_of_scenario() {
+      assertThat("Does not have links to games", !world
+               .getAndAssertExpectedPage(ScenarioPage.class).hasLinksToGames());
+   }
+
+   @When("examine the scenario")
+   public void examine_scenario() {
       navigateToScenariosPage();
-   }
-
-   @When("MC serves the scenario page")
-   public void mc_serves_scenario_page() {
-      world.getExpectedPage(ScenarioPage.class).assertInvariants();
-   }
-
-   @Then("MC serves the scenarios page")
-   public void mc_serves_scenarios_page() {
-      world.getAndAssertExpectedPage(ScenariosPage.class).assertInvariants();
-   }
-
-   @When("Navigate to a scenario with games")
-   public void navigate_to_scenario_with_games() {
       final var scenariosPage = world.getExpectedPage(ScenariosPage.class);
       final var index = 0;
       world.setExpectedPage(scenariosPage.navigateToScenario(index));
+      world.getExpectedPage(ScenarioPage.class).assertInvariants();
+   }
+
+   @When("examine scenarios")
+   public void examine_scenarios() {
+      navigateToScenariosPage();
+      world.getAndAssertExpectedPage(ScenariosPage.class).assertInvariants();
+   }
+
+   @When("examining scenario")
+   public void examining_scenario() {
+      navigateToScenario().requireIsReady();
    }
 
    private ScenarioPage navigateToScenario() {
@@ -85,49 +92,26 @@ public class ScenarioSteps extends Steps {
                .assertHasListOfScenarios();
    }
 
-   @When("A scenario has games")
-   public void scenario_has_games() {
+   @When("a scenario that has a game")
+   public void scenario_has_game() {
       final var scenario = world.getScenarios().findFirst().get().getId();
       scenarioIndex = 0;
       world.createGame(scenario);
    }
 
-   @Then("The scenario page allows navigation to game pages")
-   public void scenario_page_allows_navigation_to_game_pages()
-            throws Exception {
-      // FIXME
-
-   }
-
-   @Then("The scenario page does not allow navigation to game pages")
-   public void scenario_page_does_not_allow_navigation_to_game_pages()
-            throws Exception {
-      // FIXME
-   }
-
-   @Then("The scenario page includes the list of games of that scenario")
-   public void scenario_page_includes_list_of_games_of_scenario() {
+   @Then("the scenario includes the list of games of that scenario")
+   public void scenario_includes_list_of_games_of_scenario() {
       world.getAndAssertExpectedPage(ScenarioPage.class).assertHasListOfGames();
    }
 
-   @Then("The scenario page includes the scenario description")
-   public void scenario_page_includes_scenario_description() {
+   @Then("the scenario includes the scenario description")
+   public void scenario_includes_scenario_description() {
       // Hard to test
    }
 
-   @Then("The scenario page includes the list of playable characters of that scenario")
-   public void scenario_page_includes_the_list_of_playable_characters_of_that_scenario() {
+   @Then("the scenario includes the list of playable characters of that scenario")
+   public void scenario_includes_the_list_of_playable_characters_of_that_scenario() {
       world.getAndAssertExpectedPage(ScenarioPage.class)
                .assertHasListOfCharacters();
-   }
-
-   @When("Viewing the games of the scenario")
-   public void viewing_games_of_scenario() {
-      navigateToScenario().requireIsReady();
-   }
-
-   @When("Viewing the scenarios")
-   public void viewing_scenarios() {
-      navigateToScenariosPage();
    }
 }

@@ -119,6 +119,12 @@ public final class ScenarioPage extends Page {
       return scenarioTitle;
    }
 
+   public boolean hasLinksToGames() {
+      requireIsReady();
+      return !getBody().findElement(GAMES_LIST_LOCATOR)
+               .findElements(By.tagName("a")).isEmpty();
+   }
+
    public boolean isGameButtonEnabled() {
       return isEnabled(getBody().findElement(CREATE_GAME_LOCATOR));
    }

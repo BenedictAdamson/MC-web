@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-21.
  *
  * This file is part of MC.
  *
@@ -40,17 +40,6 @@ public class HomePageSteps extends Steps {
    @Autowired
    public HomePageSteps(@Nonnull final World world) {
       super(world);
-   }
-
-   @When("examine home page")
-   public void examine_home_page() {
-      world.getHomePage();
-   }
-
-   @When("The home-page does not indicate that the user has a current game")
-   public void home_page_does_not_indicate_user_has_current_game() {
-      world.getAndAssertExpectedPage(HomePage.class)
-               .assertDoesNotIndicateUserHasCurrentGame();
    }
 
    @Then("the home page header includes the name of the game")
