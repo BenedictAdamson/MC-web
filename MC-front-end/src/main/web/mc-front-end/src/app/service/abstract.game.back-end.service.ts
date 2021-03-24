@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 
-import { AbstractKeyValueService } from './abstract.key-value.service'
+import { AbstractKeyValueService } from './abstract.key-value.service';
 import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
 
@@ -12,5 +12,7 @@ export abstract class AbstractGameBackEndService extends AbstractKeyValueService
 	}
 
 	abstract add(scenario: string): Observable<Game>;
+
+   abstract startGame(game: GameIdentifier): Observable<Game>;
 
 }

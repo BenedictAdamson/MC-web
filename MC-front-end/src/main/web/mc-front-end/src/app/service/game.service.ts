@@ -27,6 +27,10 @@ export class GameService extends CachingKeyValueService<GameIdentifier, Game, st
 		return GameService.getApiGamesPath(id.scenario) + id.created;
 	}
 
+   static getApiStartGamePath(game: GameIdentifier): string {
+      return GameService.getApiGamePath(game) + '?start';
+   }
+
 	/**
 	 * Create a new game for a given scenario.
 	 *
@@ -43,6 +47,16 @@ export class GameService extends CachingKeyValueService<GameIdentifier, Game, st
 		 */
 		return this.add(scenario) as Observable<Game>;
 	}
+
+   startGame(game: GameIdentifier): void {
+      /* FIXME
+      this.backEnd.startGame(game).subscribe(
+         g => {
+            this.setValue(g);
+         }
+      );
+      */
+   }
 
 	getAll(): undefined {
 		return undefined;
