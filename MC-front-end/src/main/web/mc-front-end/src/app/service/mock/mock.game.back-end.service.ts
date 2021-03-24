@@ -7,7 +7,7 @@ import { GameIdentifier } from '../../game-identifier';
 
 export class MockGameBackEndService extends AbstractGameBackEndService {
 
-	private created: number = 0;
+	private created = 0;
 
 	constructor(
 		public games: Game[]
@@ -17,15 +17,15 @@ export class MockGameBackEndService extends AbstractGameBackEndService {
 
 
 	get(id: GameIdentifier): Observable<Game | null> {
-		for (let game of this.games) {
-			if (game.identifier.scenario == id.scenario && game.identifier.created == id.created) return of(game);
+		for (const game of this.games) {
+			if (game.identifier.scenario === id.scenario && game.identifier.created === id.created) {return of(game);}
 		}
 		return of(null);
 	}
 
 	add(scenario: string): Observable<Game> {
-		const id: GameIdentifier = { scenario: scenario, created: '2021-01-01T00:00:00.' + ++this.created };
-		const game: Game = { identifier: id };
+		const id: GameIdentifier = { scenario, created: '2021-01-01T00:00:00.' + ++this.created };
+		const game: Game = { identifier: id, runState: 'WAITIBG_TO_START' };
 		this.games.push(game);
 		return of(game);
 
