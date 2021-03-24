@@ -1,5 +1,6 @@
 <section>
    <h3><a id="game" [routerLink]="['/scenario/',(scenario$ | async),'game',(created$ | async)]">Game created
          {{created$ | async}}</a></h3>
+   <p id="run-state">{{runState$ | async}}</p>
    <router-outlet></router-outlet>
 </section>

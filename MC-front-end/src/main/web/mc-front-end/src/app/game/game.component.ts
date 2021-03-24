@@ -21,6 +21,15 @@ export class GameComponent implements OnInit {
 	) { }
 
 
+private static displayedGameState(state: string): string {
+   switch(state) {
+      case 'WAITING_TO_START': return 'waiting to start';
+      case 'RUNNING': return 'running';
+      case 'STOPPED': return 'stopped';
+   };
+   return '?';// never happens
+}
+
 
 	get scenario$(): Observable<string> {
 		if (!this.route.parent) {throw new Error('missing this.route.parent');}
@@ -59,6 +68,14 @@ export class GameComponent implements OnInit {
 			map((game: Game | null) => game as Game)
 		);
 	}
+
+   get runState$(): Observable<string> {
+      return this.game$.pipe(
+         map(game => game.runState),
+         distinctUntilChanged(), // don't spam identical values
+         map(state => GameComponent.displayedGameState(state))
+      );
+   };
 
 	ngOnInit(): void {
 		// Do nothing
