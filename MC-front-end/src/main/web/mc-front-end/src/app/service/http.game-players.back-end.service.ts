@@ -9,7 +9,7 @@ import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
 import { GamePlayers } from '../game-players';
 import { HttpKeyValueService } from './http.key-value.service';
-import { getApiGamePath } from './http.game.back-end.service';
+import { HttpGameBackEndService } from './http.game.back-end.service';
 
 
 
@@ -97,7 +97,7 @@ export class HttpGamePlayersBackEndService extends AbstractGamePlayersBackEndSer
 	}
 
 	static getApiGamePlayersPath(game: GameIdentifier): string {
-		return getApiGamePath(game) + '/players';
+		return HttpGameBackEndService.getApiGamePath(game) + '/players';
 	}
 
 	static getApiJoinGamePath(game: GameIdentifier): string {

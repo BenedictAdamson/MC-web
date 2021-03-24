@@ -87,4 +87,33 @@ describe('GameService', () => {
 		testCreateGame(GAME_B);
 	});
 
+
+   const testStartGame = (done: any, identifier: GameIdentifier) => {
+      const game: Game = {identifier, runState: 'RUNNING'};
+      const service: GameService = setUp();
+
+      service.startGame(identifier);
+
+      const request = httpTestingController.expectOne(HttpGameBackEndService.getApiStartGamePath(identifier));
+      expect(request.request.method).toEqual('POST');
+      request.flush(game);
+      httpTestingController.verify();
+
+      service.get(identifier).subscribe({
+         next: (g) => {
+            expect(g).withContext('game').not.toBeNull();
+            expect(g).withContext('game').toEqual(game);
+            done();
+         }, error: (e) => { fail(e); }, complete: () => { }
+      });
+   };
+
+   it('can start game [A]', (done) => {
+      testStartGame(done, GAME_IDENTIFIER_A);
+   });
+
+   it('can start game [B]', (done) => {
+      testStartGame(done, GAME_IDENTIFIER_B);
+   });
+
 });

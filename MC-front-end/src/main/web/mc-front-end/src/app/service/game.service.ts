@@ -14,9 +14,9 @@ import { GameIdentifier } from '../game-identifier';
 export class GameService extends CachingKeyValueService<GameIdentifier, Game, string> {
 
    constructor(
-      backEnd: AbstractGameBackEndService
+      private gameBackEndService: AbstractGameBackEndService
    ) {
-      super(backEnd);
+      super(gameBackEndService);
    }
 
 	static getApiGamesPath(scenario: string): string {
@@ -26,10 +26,6 @@ export class GameService extends CachingKeyValueService<GameIdentifier, Game, st
 	static getApiGamePath(id: GameIdentifier): string {
 		return GameService.getApiGamesPath(id.scenario) + id.created;
 	}
-
-   static getApiStartGamePath(game: GameIdentifier): string {
-      return GameService.getApiGamePath(game) + '?start';
-   }
 
 	/**
 	 * Create a new game for a given scenario.
@@ -49,13 +45,11 @@ export class GameService extends CachingKeyValueService<GameIdentifier, Game, st
 	}
 
    startGame(game: GameIdentifier): void {
-      /* FIXME
-      this.backEnd.startGame(game).subscribe(
+      this.gameBackEndService.startGame(game).subscribe(
          g => {
             this.setValue(g);
          }
       );
-      */
    }
 
 	getAll(): undefined {
