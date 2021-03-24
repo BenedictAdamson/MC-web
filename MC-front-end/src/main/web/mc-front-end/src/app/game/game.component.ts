@@ -23,7 +23,7 @@ export class GameComponent implements OnInit {
 
 
 	get scenario$(): Observable<string> {
-		if (!this.route.parent) throw new Error('missing this.route.parent');
+		if (!this.route.parent) {throw new Error('missing this.route.parent');}
 		return this.route.parent.paramMap.pipe(
 			map(params => params.get('scenario')),
 			filter(scenario => !!scenario),
@@ -32,7 +32,7 @@ export class GameComponent implements OnInit {
 	};
 
 	get created$(): Observable<string> {
-		if (!this.route) throw new Error('missing this.route.parent');
+		if (!this.route) {throw new Error('missing this.route.parent');}
 		return this.route.paramMap.pipe(
 			map(params => params.get('created')),
 			filter(created => !!created),
@@ -41,7 +41,7 @@ export class GameComponent implements OnInit {
 	};
 
 	private static createIdentifier(scenario: string, created: string): GameIdentifier {
-		return { scenario: scenario, created: created };
+		return { scenario, created };
 	}
 
 	get identifier$(): Observable<GameIdentifier> {

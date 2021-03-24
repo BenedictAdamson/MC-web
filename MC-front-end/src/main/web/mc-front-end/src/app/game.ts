@@ -1,4 +1,4 @@
-import { GameIdentifier } from './game-identifier'
+import { GameIdentifier } from './game-identifier';
 
 /**
  * <p>
