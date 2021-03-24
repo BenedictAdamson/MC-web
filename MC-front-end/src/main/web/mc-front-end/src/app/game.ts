@@ -10,4 +10,5 @@ import { GameIdentifier } from './game-identifier';
  */
 export class Game {
 	identifier: GameIdentifier;
+   runState: string;
 }
