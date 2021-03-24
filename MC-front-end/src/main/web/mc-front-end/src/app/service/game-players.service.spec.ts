@@ -39,8 +39,8 @@ describe('GamePlayersService', () => {
    const USERS_B: Map<string, string> = new Map([]);
    const GAME_PLAYERS_A: GamePlayers = new GamePlayers(GAME_IDENTIFIER_A, true, USERS_A);
    const GAME_PLAYERS_B: GamePlayers = new GamePlayers(GAME_IDENTIFIER_B, false, USERS_B);
-   const GAME_A: Game = { identifier: GAME_IDENTIFIER_A };
-   const GAME_B: Game = { identifier: GAME_IDENTIFIER_B };
+   const GAME_A: Game = { identifier: GAME_IDENTIFIER_A, runState: 'WAITING_TO_START' };
+   const GAME_B: Game = { identifier: GAME_IDENTIFIER_B, runState: 'RUNNING' };
 
    const USER_DETAILS_A: UserDetails = { username: 'User A', password: 'passwordA', authorities: ['ROLE_PLAYER'] };
    const USER_DETAILS_B: UserDetails = { username: 'User B', password: 'passwordB', authorities: ['ROLE_PLAYER', 'ROLE_MANAGE_GAMES'] };
