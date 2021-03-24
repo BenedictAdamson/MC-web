@@ -6,16 +6,25 @@ import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 
 import { AbstractGameBackEndService } from '../service/abstract.game.back-end.service';
+import { AbstractSelfService } from '../service/abstract.self.service';
 import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
 import { GameComponent } from './game.component';
+import { User } from '../user';
 
 import { MockGameBackEndService } from '../service/mock/mock.game.back-end.service';
+import { MockSelfService } from '../service/mock/mock.self.service';
 
 
 describe('GameComponent', () => {
    let component: GameComponent;
    let fixture: ComponentFixture<GameComponent>;
+   let selfService: AbstractSelfService;
+
+   const USER_ID_A: string = uuid();
+   const USER_ID_B: string = uuid();
+   const USER_ADMIN: User = { id: USER_ID_A, username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
+   const USER_PLAYER: User = { id: USER_ID_B, username: 'Benedict', password: null, authorities: ['ROLE_PLAYER'] };
 
    const SCENARIO_ID_A: string = uuid();
    const SCENARIO_ID_B: string = uuid();
@@ -40,8 +49,9 @@ describe('GameComponent', () => {
    };
 
 
-   const setUpForNgInit = (game: Game) => {
+   const setUp = (self: User, game: Game) => {
       const gameServiceStub: AbstractGameBackEndService = new MockGameBackEndService([game]);
+      selfService = new MockSelfService(self);
 
       const identifier: GameIdentifier = game.identifier;
       TestBed.configureTestingModule({
@@ -55,7 +65,9 @@ describe('GameComponent', () => {
                paramMap: of(convertToParamMap({ created: identifier.created }))
             }
          },
-         { provide: AbstractGameBackEndService, useValue: gameServiceStub }]
+         { provide: AbstractGameBackEndService, useValue: gameServiceStub },
+         { provide: AbstractSelfService, useValue: selfService }
+         ]
       });
 
       fixture = TestBed.createComponent(GameComponent);
@@ -76,8 +88,8 @@ describe('GameComponent', () => {
    };
 
 
-   const canCreate = (game: Game, expectedRunStateText: string) => {
-      setUpForNgInit(game);
+   const canCreate = (self: User, game: Game, expectedRunStateText: string) => {
+      setUp(self, game);
       tick();
       fixture.detectChanges();
 
@@ -97,15 +109,15 @@ describe('GameComponent', () => {
    };
 
    it('can create [A]', fakeAsync(() => {
-      canCreate(GAME_A, 'waiting to start');
+      canCreate(USER_ADMIN, GAME_A, 'waiting to start');
    }));
 
    it('can create [B]', fakeAsync(() => {
-      canCreate(GAME_B, 'running');
+      canCreate(USER_PLAYER, GAME_B, 'running');
    }));
 
    it('can create [C]', fakeAsync(() => {
-      canCreate(GAME_C, 'stopped');
+      canCreate(USER_ADMIN, GAME_C, 'stopped');
    }));
 
 });

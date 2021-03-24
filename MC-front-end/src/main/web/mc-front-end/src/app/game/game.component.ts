@@ -4,6 +4,7 @@ import { distinctUntilChanged, filter, map, mergeMap } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
+import { AbstractSelfService } from '../service/abstract.self.service';
 import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
 import { GameService } from '../service/game.service';
@@ -17,7 +18,8 @@ export class GameComponent implements OnInit {
 
 	constructor(
 		private route: ActivatedRoute,
-		private gameService: GameService
+		private gameService: GameService,
+      private selfService: AbstractSelfService
 	) { }
 
 
