@@ -22,8 +22,8 @@ describe('GameService', () => {
 	const CREATED_B = '2020-12-31T23:59:59.999Z';
 	const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_A, created: CREATED_A };
 	const GAME_IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_B, created: CREATED_B };
-	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A };
-	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B };
+	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A, runState: 'WAITING_TO_START' };
+	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B, runState: 'RUNNING' };
 
 	const setUp = (): GameService => {
 		TestBed.configureTestingModule({
