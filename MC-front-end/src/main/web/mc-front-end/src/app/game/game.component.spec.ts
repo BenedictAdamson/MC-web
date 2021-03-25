@@ -183,4 +183,43 @@ describe('GameComponent', () => {
       canCreate(USER_PLAYER, GAME_IDENTIFIER_A, 'STOPPED', 'stopped', false, false, false);
    }));
 
+
+
+   const testStartGame = (gameIdentifier: GameIdentifier) => {
+      const self: User = USER_ADMIN;
+      const runState0 = 'WAITING_TO_START';
+      const game0: Game = { identifier: gameIdentifier, runState: runState0 };
+      setUp(self, game0);
+
+      component.startGame();
+      tick();
+      fixture.detectChanges();
+
+      assertInvariants();
+
+      const game: Game | null = getGame(component);
+      const runState: string | null = game ? game.runState : null;
+      expect(game).withContext('game').not.toBeNull();
+      expect(runState).withContext('runState').toBe('RUNNING');
+      expect(getMayStart(component)).withContext('mayStart').toEqual(false);
+      expect(getMayStop(component)).withContext('mayStop').toEqual(true);
+
+      const html: HTMLElement = fixture.nativeElement;
+      const runStateElement: HTMLElement | null = html.querySelector('#run-state');
+      const startButton: HTMLButtonElement | null = html.querySelector('button#start');
+      const stopButton: HTMLButtonElement | null = html.querySelector('button#stop');
+
+      expect(runStateElement).withContext('run-state element').not.toBeNull();
+      expect(startButton != null).withContext('has start button').toBeFalse();
+      expect(stopButton != null).withContext('has stop button').toBeTrue();
+   };
+
+   it('can start [A]', fakeAsync(() => {
+      testStartGame(GAME_IDENTIFIER_A);
+   }));
+
+   it('can start [B]', fakeAsync(() => {
+      testStartGame(GAME_IDENTIFIER_B);
+   }));
+
 });

@@ -3,7 +3,7 @@
          {{created$ | async}}</a></h3>
    <section>
       <p id="run-state">{{displayedRunState$ | async}}</p>
-      <button id="start" *ngIf="mayStart$ | async">Start</button>
+      <button id="start" *ngIf="mayStart$ | async" (click)="startGame()">Start</button>
       <button id="stop" *ngIf="mayStop$ | async">Stop</button>
    </section>
    <router-outlet></router-outlet>

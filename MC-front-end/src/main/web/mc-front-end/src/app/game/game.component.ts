@@ -1,5 +1,5 @@
 import { Observable, combineLatest } from 'rxjs';
-import { distinctUntilChanged, filter, map, mergeMap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, mergeMap, tap } from 'rxjs/operators';
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -104,6 +104,13 @@ export class GameComponent implements OnInit {
          ),
          distinctUntilChanged() // don't spam identical values
       );
+   }
+
+   startGame(): void {
+      this.identifier$.pipe(
+         first(),// do the operation only once
+         tap(id => this.gameService.startGame(id))
+      ).subscribe();
    }
 
    ngOnInit(): void {
