@@ -285,7 +285,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       Objects.requireNonNull(user, "user");
       Objects.requireNonNull(cookies, "cookies");
 
-      final var path = createGamePlayersPath(game);
+      final var path = createGamePath(game);
       final var query = "start";
       final String fragment = null;
       final var request = connectWebTestClient(path, query, fragment).post()
