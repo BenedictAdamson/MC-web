@@ -32,9 +32,6 @@ describe('GameComponent', () => {
    const CREATED_B = '2020-12-31T23:59:59.999Z';
    const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_ID_A, created: CREATED_A };
    const GAME_IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_ID_B, created: CREATED_B };
-   const GAME_A: Game = { identifier: GAME_IDENTIFIER_A, runState: 'WAITING_TO_START' };
-   const GAME_B: Game = { identifier: GAME_IDENTIFIER_B, runState: 'RUNNING' };
-   const GAME_C: Game = { identifier: GAME_IDENTIFIER_A, runState: 'STOPPED' };
 
 
 
@@ -46,6 +43,36 @@ describe('GameComponent', () => {
          complete: () => { }
       });
       return game;
+   };
+
+   const getMayManageGames = (gc: GameComponent): boolean => {
+      let may = false;
+      gc.mayManageGames$.subscribe({
+         next: (m) => may = m,
+         error: (err) => fail(err),
+         complete: () => { }
+      });
+      return may;
+   };
+
+   const getMayStart = (gc: GameComponent): boolean => {
+      let may = false;
+      gc.mayStart$.subscribe({
+         next: (m) => may = m,
+         error: (err) => fail(err),
+         complete: () => { }
+      });
+      return may;
+   };
+
+   const getMayStop = (gc: GameComponent): boolean => {
+      let may = false;
+      gc.mayStop$.subscribe({
+         next: (m) => may = m,
+         error: (err) => fail(err),
+         complete: () => { }
+      });
+      return may;
    };
 
 
@@ -72,6 +99,8 @@ describe('GameComponent', () => {
 
       fixture = TestBed.createComponent(GameComponent);
       component = fixture.componentInstance;
+      selfService = TestBed.inject(AbstractSelfService);
+      selfService.checkForCurrentAuthentication().subscribe();
       fixture.detectChanges();
    };
 
@@ -88,7 +117,9 @@ describe('GameComponent', () => {
    };
 
 
-   const canCreate = (self: User, game: Game, expectedRunStateText: string) => {
+   const canCreate = (self: User, gameIdentifier: GameIdentifier, runState: string,
+      expectedRunStateText: string, expectMayManageGames: boolean, expectMayStart: boolean, expectMayStop: boolean) => {
+      const game: Game = { identifier: gameIdentifier, runState };
       setUp(self, game);
       tick();
       fixture.detectChanges();
@@ -96,28 +127,60 @@ describe('GameComponent', () => {
       assertInvariants();
 
       expect(getGame(component)).withContext('game').toBe(game);
+      expect(getMayManageGames(component)).withContext('mayManageGames').toEqual(expectMayManageGames);
+      expect(getMayStart(component)).withContext('mayStart').toEqual(expectMayStart);
+      expect(getMayStop(component)).withContext('mayStop').toEqual(expectMayStop);
 
       const html: HTMLElement = fixture.nativeElement;
-      const runState: HTMLElement | null = html.querySelector('#run-state');
+      const runStateElement: HTMLElement | null = html.querySelector('#run-state');
+      const startButton: HTMLButtonElement | null = html.querySelector('button#start');
+      const stopButton: HTMLButtonElement | null = html.querySelector('button#stop');
+
+      expect(runStateElement).withContext('run-state element').not.toBeNull();
+      expect(startButton != null).withContext('has start button').toEqual(expectMayStart);
+      expect(stopButton != null).withContext('has stop button').toEqual(expectMayStop);
+
       const displayText: string = html.innerText;
-      const runStateText: string | null = runState ? runState.innerText : null;
+      const runStateText: string | null = runStateElement ? runStateElement.innerText : null;
+      const startButtonText: string | null = startButton ? startButton.innerText : null;
+      const stopButtonText: string | null = stopButton ? stopButton.innerText : null;
 
       expect(displayText.includes(game.identifier.created))
          .withContext('The game page includes the date and time that the game was set up').toBeTrue();
       expect(runStateText)
          .withContext('Run-state text').toEqual(expectedRunStateText);
+      if (expectMayStart) {
+         expect(startButtonText)
+            .withContext('Start-button text text').toEqual('Start');
+      }
+      if (expectMayStop) {
+         expect(stopButtonText)
+            .withContext('Stop-button text text').toEqual('Stop');
+      }
    };
 
-   it('can create [A]', fakeAsync(() => {
-      canCreate(USER_ADMIN, GAME_A, 'waiting to start');
+   it('can create [admin, waiting to start]', fakeAsync(() => {
+      canCreate(USER_ADMIN, GAME_IDENTIFIER_A, 'WAITING_TO_START', 'waiting to start', true, true, false);
    }));
 
-   it('can create [B]', fakeAsync(() => {
-      canCreate(USER_PLAYER, GAME_B, 'running');
+   it('can create [player, waiting to start]', fakeAsync(() => {
+      canCreate(USER_PLAYER, GAME_IDENTIFIER_B, 'WAITING_TO_START', 'waiting to start', false, false, false);
    }));
 
-   it('can create [C]', fakeAsync(() => {
-      canCreate(USER_ADMIN, GAME_C, 'stopped');
+   it('can create [admin, running]', fakeAsync(() => {
+      canCreate(USER_ADMIN, GAME_IDENTIFIER_A, 'RUNNING', 'running', true, false, true);
+   }));
+
+   it('can create [player, running]', fakeAsync(() => {
+      canCreate(USER_PLAYER, GAME_IDENTIFIER_A, 'RUNNING', 'running', false, false, false);
+   }));
+
+   it('can create [admin, stopped]', fakeAsync(() => {
+      canCreate(USER_ADMIN, GAME_IDENTIFIER_A, 'STOPPED', 'stopped', true, false, false);
+   }));
+
+   it('can create [player, stopped]', fakeAsync(() => {
+      canCreate(USER_PLAYER, GAME_IDENTIFIER_A, 'STOPPED', 'stopped', false, false, false);
    }));
 
 });
