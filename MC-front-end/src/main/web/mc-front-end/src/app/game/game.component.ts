@@ -113,6 +113,13 @@ export class GameComponent implements OnInit {
       ).subscribe();
    }
 
+   stopGame(): void {
+      this.identifier$.pipe(
+         first(),// do the operation only once
+         tap(id => this.gameService.stopGame(id))
+      ).subscribe();
+   }
+
    ngOnInit(): void {
       // Do nothing
    }
