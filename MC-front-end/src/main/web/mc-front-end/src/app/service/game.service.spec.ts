@@ -8,8 +8,8 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 
 import { AbstractGameBackEndService } from './abstract.game.back-end.service';
 import { HttpGameBackEndService } from './http.game.back-end.service';
-import { Game } from '../game'
-import { GameIdentifier } from '../game-identifier'
+import { Game } from '../game';
+import { GameIdentifier } from '../game-identifier';
 import { GameService } from './game.service';
 
 
@@ -18,14 +18,14 @@ describe('GameService', () => {
 
 	const SCENARIO_A: string = uuid();
 	const SCENARIO_B: string = uuid();
-	const CREATED_A: string = '1970-01-01T00:00:00.000Z';
-	const CREATED_B: string = '2020-12-31T23:59:59.999Z';
+	const CREATED_A = '1970-01-01T00:00:00.000Z';
+	const CREATED_B = '2020-12-31T23:59:59.999Z';
 	const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_A, created: CREATED_A };
 	const GAME_IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_B, created: CREATED_B };
-	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A };
-	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B };
+	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A, runState: 'WAITING_TO_START' };
+	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B, runState: 'RUNNING' };
 
-	const setUp = function(): GameService {
+	const setUp = (): GameService => {
 		TestBed.configureTestingModule({
 			imports: [HttpClientTestingModule]
 		});
@@ -42,7 +42,7 @@ describe('GameService', () => {
 	});
 
 
-	const testGetGame = function(game: Game) {
+	const testGetGame = (game: Game) => {
 		const service: GameService = setUp();
 
 		service.get(game.identifier).subscribe(g => expect(g).toEqual(game));
@@ -55,13 +55,13 @@ describe('GameService', () => {
 
 	it('can get game [A]', () => {
 		testGetGame(GAME_A);
-	})
+	});
 
 	it('can get game [B]', () => {
 		testGetGame(GAME_B);
-	})
+	});
 
-	const testCreateGame = function(createdGame: Game) {
+	const testCreateGame = (createdGame: Game) => {
 		const scenario: string = createdGame.identifier.scenario;
 		const service: GameService = setUp();
 
@@ -77,14 +77,73 @@ describe('GameService', () => {
 		expect(request.request.method).toEqual('POST');
 		request.flush(createdGame);
 		httpTestingController.verify();
-	}
+	};
 
 	it('can create game [A]', () => {
 		testCreateGame(GAME_A);
-	})
+	});
 
 	it('can create game [B]', () => {
 		testCreateGame(GAME_B);
-	})
+	});
+
+
+   const testStartGame = (done: any, identifier: GameIdentifier) => {
+      const game: Game = {identifier, runState: 'RUNNING'};
+      const service: GameService = setUp();
+
+      service.startGame(identifier);
+
+      const request = httpTestingController.expectOne(HttpGameBackEndService.getApiStartGamePath(identifier));
+      expect(request.request.method).toEqual('POST');
+      request.flush(game);
+      httpTestingController.verify();
+
+      service.get(identifier).subscribe({
+         next: (g) => {
+            expect(g).withContext('game').not.toBeNull();
+            expect(g).withContext('game').toEqual(game);
+            done();
+         }, error: (e) => { fail(e); }, complete: () => { }
+      });
+   };
+
+   it('can start game [A]', (done) => {
+      testStartGame(done, GAME_IDENTIFIER_A);
+   });
+
+   it('can start game [B]', (done) => {
+      testStartGame(done, GAME_IDENTIFIER_B);
+   });
+
+
+
+   const testStopGame = (done: any, identifier: GameIdentifier) => {
+      const game: Game = {identifier, runState: 'STOPPED'};
+      const service: GameService = setUp();
+
+      service.stopGame(identifier);
+
+      const request = httpTestingController.expectOne(HttpGameBackEndService.getApiStopGamePath(identifier));
+      expect(request.request.method).toEqual('POST');
+      request.flush(game);
+      httpTestingController.verify();
+
+      service.get(identifier).subscribe({
+         next: (g) => {
+            expect(g).withContext('game').not.toBeNull();
+            expect(g).withContext('game').toEqual(game);
+            done();
+         }, error: (e) => { fail(e); }, complete: () => { }
+      });
+   };
+
+   it('can stop game [A]', (done) => {
+      testStopGame(done, GAME_IDENTIFIER_A);
+   });
+
+   it('can stop game [B]', (done) => {
+      testStopGame(done, GAME_IDENTIFIER_B);
+   });
 
 });

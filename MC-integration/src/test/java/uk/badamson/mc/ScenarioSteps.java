@@ -19,6 +19,7 @@ package uk.badamson.mc;
  */
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import javax.annotation.Nonnull;
 
@@ -90,6 +91,12 @@ public class ScenarioSteps extends Steps {
    public void response_is_list_of_scenarios() {
       world.getAndAssertExpectedPage(ScenariosPage.class)
                .assertHasListOfScenarios();
+   }
+
+   @Then("the scenario does not allow creating a game")
+   public void scenario_does_not_allow_creating_a_game() {
+      final var scenarioPage = world.getExpectedPage(ScenarioPage.class);
+      assertFalse(scenarioPage.isGameButtonEnabled());
    }
 
    @When("a scenario that has a game")

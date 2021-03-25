@@ -11,71 +11,95 @@ import { GameIdentifier } from '../game-identifier';
 
 const apiScenariosPath = '/api/scenario/';
 
-export function getApiGamesPath(scenario: string): string {
-	return apiScenariosPath + scenario + '/game/';
-}
-
-export function getApiGamePath(id: GameIdentifier): string {
-	return getApiGamesPath(id.scenario) + id.created;
-}
-
 
 class Delegate extends HttpSimpleKeyValueService<GameIdentifier, Game, string, null> {
 
-	constructor(
-		http: HttpClient
-	) {
-		super(http, undefined);
-	}
+   constructor(
+      http: HttpClient
+   ) {
+      super(http, undefined);
+   }
 
 
-	getUrl(id: GameIdentifier): string {
-		return getApiGamePath(id);
-	}
+   getUrl(id: GameIdentifier): string {
+      return HttpGameBackEndService.getApiGamePath(id);
+   }
 
-	getAll(): undefined {
-		return undefined;
-	}
+   getAll(): undefined {
+      return undefined;
+   }
+
+   startGame(id: GameIdentifier): Observable<Game> {
+      return this.http.post<Game>(HttpGameBackEndService.getApiStartGamePath(id), '');
+   }
+
+   stopGame(id: GameIdentifier): Observable<Game> {
+      return this.http.post<Game>(HttpGameBackEndService.getApiStopGamePath(id), '');
+   }
 
 
-	protected getAddUrl(scenario: string): string {
-		return getApiGamesPath(scenario);
-	}
+   protected getAddUrl(scenario: string): string {
+      return HttpGameBackEndService.getApiGamesPath(scenario);
+   }
 
-	protected getAddPayload(_scenario: string): null {
-		return null;
-	}
+   protected getAddPayload(_scenario: string): null {
+      return null;
+   }
 
 }// class
 
 
 @Injectable({
-	providedIn: 'root'
+   providedIn: 'root'
 })
 export class HttpGameBackEndService extends AbstractGameBackEndService {
 
-	private delegate: Delegate;
+   private delegate: Delegate;
 
 
-	constructor(
-		http: HttpClient
-	) {
-		super();
-		this.delegate = new Delegate(http);
-	}
+   constructor(
+      http: HttpClient
+   ) {
+      super();
+      this.delegate = new Delegate(http);
+   }
+
+   static getApiGamesPath(scenario: string): string {
+      return apiScenariosPath + scenario + '/game/';
+   }
+
+   static getApiGamePath(id: GameIdentifier): string {
+      return HttpGameBackEndService.getApiGamesPath(id.scenario) + id.created;
+   }
+
+   static getApiStartGamePath(id: GameIdentifier): string {
+      return HttpGameBackEndService.getApiGamePath(id) + '?start';
+   }
+
+   static getApiStopGamePath(id: GameIdentifier): string {
+      return HttpGameBackEndService.getApiGamePath(id) + '?stop';
+   }
 
 
-	getAll(): undefined {
-		return undefined;
-	}
+   getAll(): undefined {
+      return undefined;
+   }
 
-	get(id: GameIdentifier): Observable<Game | null> {
-		return this.delegate.get(id);
-	}
+   get(id: GameIdentifier): Observable<Game | null> {
+      return this.delegate.get(id);
+   }
 
-	add(scenario: string): Observable<Game> {
-		return this.delegate.add(scenario) as Observable<Game>;
-	}
+   add(scenario: string): Observable<Game> {
+      return this.delegate.add(scenario) as Observable<Game>;
+   }
+
+   startGame(id: GameIdentifier): Observable<Game> {
+      return this.delegate.startGame(id);
+   }
+
+   stopGame(id: GameIdentifier): Observable<Game> {
+      return this.delegate.stopGame(id);
+   }
 
 }// class
 

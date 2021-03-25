@@ -4,14 +4,20 @@ import { Injectable } from '@angular/core';
 
 import { AbstractGameBackEndService } from './abstract.game.back-end.service';
 import { CachingKeyValueService } from './caching.key-value.service';
-import { Game } from '../game'
-import { GameIdentifier } from '../game-identifier'
+import { Game } from '../game';
+import { GameIdentifier } from '../game-identifier';
 
 
 @Injectable({
 	providedIn: 'root'
 })
 export class GameService extends CachingKeyValueService<GameIdentifier, Game, string> {
+
+   constructor(
+      private gameBackEndService: AbstractGameBackEndService
+   ) {
+      super(gameBackEndService);
+   }
 
 	static getApiGamesPath(scenario: string): string {
 		return '/api/scenario/' + scenario + '/game/';
@@ -21,12 +27,6 @@ export class GameService extends CachingKeyValueService<GameIdentifier, Game, st
 		return GameService.getApiGamesPath(id.scenario) + id.created;
 	}
 
-	constructor(
-		backEnd: AbstractGameBackEndService
-	) {
-		super(backEnd);
-	}
-	
 	/**
 	 * Create a new game for a given scenario.
 	 *
@@ -43,6 +43,22 @@ export class GameService extends CachingKeyValueService<GameIdentifier, Game, st
 		 */
 		return this.add(scenario) as Observable<Game>;
 	}
+
+   startGame(game: GameIdentifier): void {
+      this.gameBackEndService.startGame(game).subscribe(
+         g => {
+            this.setValue(g);
+         }
+      );
+   }
+
+   stopGame(game: GameIdentifier): void {
+      this.gameBackEndService.stopGame(game).subscribe(
+         g => {
+            this.setValue(g);
+         }
+      );
+   }
 
 	getAll(): undefined {
 		return undefined;

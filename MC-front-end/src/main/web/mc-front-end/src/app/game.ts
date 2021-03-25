@@ -1,4 +1,4 @@
-import { GameIdentifier } from './game-identifier'
+import { GameIdentifier } from './game-identifier';
 
 /**
  * <p>
@@ -10,4 +10,5 @@ import { GameIdentifier } from './game-identifier'
  */
 export class Game {
 	identifier: GameIdentifier;
+   runState: string;
 }
