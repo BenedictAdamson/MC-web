@@ -241,6 +241,10 @@ public final class World implements AutoCloseable {
       containers.joinGame(game, currentUser);
    }
 
+   public void startGame(Game.Identifier game) {
+      containers.startGame(game);
+   }
+
    private User createUser(final Set<Authority> authoritites) {
       final var userDetails = generateBasicUserDetails(authoritites);
       final var id = containers.addUser(userDetails);

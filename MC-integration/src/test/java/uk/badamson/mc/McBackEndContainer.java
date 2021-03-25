@@ -279,6 +279,21 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       return request;
    }
 
+   private RequestBodySpec createStartGameRequest(final Game.Identifier game,
+            final User user, final MultiValueMap<String, HttpCookie> cookies) {
+      Objects.requireNonNull(game, "game");
+      Objects.requireNonNull(user, "user");
+      Objects.requireNonNull(cookies, "cookies");
+
+      final var path = createGamePlayersPath(game);
+      final var query = "start";
+      final String fragment = null;
+      final var request = connectWebTestClient(path, query, fragment).post()
+               .accept(MediaType.APPLICATION_JSON);
+      secure(request, user, cookies);
+      return request;
+   }
+
    public User getAdministrator() {
       return administrator;
    }
@@ -347,5 +362,16 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       secure(request, user, cookies);
       final var response = request.exchange();
       response.expectStatus().is2xxSuccessful();
+   }
+
+   public void startGame(final Game.Identifier game) {
+      Objects.requireNonNull(game, "game");
+
+      final var cookies = login(administrator);
+      final var request = createStartGameRequest(game, administrator, cookies);
+      final var response = request.exchange();
+      logout(administrator, cookies);
+
+      response.expectStatus().isFound();
    }
 }

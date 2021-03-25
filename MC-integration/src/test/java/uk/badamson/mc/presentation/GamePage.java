@@ -27,6 +27,8 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.isA;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -71,16 +73,21 @@ public final class GamePage extends Page {
             "You are not playing this game");
    private static final Matcher<String> INDICATES_CHARACTER_PLAYED = containsString(
             " as character ");
+   private static final Matcher<String> INDICATES_IS_RUNNING = matchesPattern(
+            "[Rr]unning");
    private static final Matcher<String> INDICATES_JOINING_NFORMATION = anyOf(
             INDICATES_IS_JOINABLE, INDICATES_IS_NOT_JOINABLE);
 
    private static final By SCENARIO_LINK_LOCATOR = By.id("scenario");
    private static final By RECRUITING_ELEMENT_LOCATOR = By.id("recruiting");
+   private static final By RUN_STATE_ELEMENT_LOCATOR = By.id("run-state");
    private static final By PLAYING_ELEMENT_LOCATOR = By.id("playing");
    private static final By JOINABLE_ELEMENT_LOCATOR = By.id("joinable");
-   private static final By END_RECRUITMENT_BUTTON_LOCATOR = By
+   private static final By END_RECRUITMENT_ELEMENT_LOCATOR = By
             .id("end-recruitment");
    private static final By JOIN_BUTTON_LOCATOR = By.id("join");
+   private static final By START_BUTTON_LOCATOR = By.id("start");
+   private static final By STOP_BUTTON_LOCATOR = By.id("stop");
    private static final By PLAYED_CHARACTERS_ELEMENT_LOCATOR = By
             .id("played-characters");
 
@@ -104,6 +111,18 @@ public final class GamePage extends Page {
          final var elements = body.findElements(PLAYING_ELEMENT_LOCATOR);
          return elements.size() == 1
                   && INDICATES_IS_PLAYING.matches(elements.get(0).getText());
+      }
+
+   };
+
+   private static final Matcher<WebElement> IS_RUNNING = new WebElementMatcher() {
+
+      @Override
+      protected boolean matchesSafely(final WebElement body,
+               final Description mismatchDescription) {
+         final var elements = body.findElements(RUN_STATE_ELEMENT_LOCATOR);
+         return elements.size() == 1
+                  && INDICATES_IS_RUNNING.matches(elements.get(0).getText());
       }
 
    };
@@ -191,6 +210,28 @@ public final class GamePage extends Page {
       assertThat(element.getText(), INDICATES_IS_RECRUITING_PLAYERS);
    }
 
+   public void assertIndicatesNotRunning() {
+      assertIndicatesNotRunning(getBody());
+   }
+
+   private void assertIndicatesNotRunning(final WebElement body)
+            throws MultipleFailuresError {
+      final var element = assertHasElement(body, RUN_STATE_ELEMENT_LOCATOR);
+      assertThat("Run-state element text", element.getText(),
+               not(INDICATES_IS_RUNNING));
+   }
+
+   public void assertIndicatesRunning() {
+      assertIndicatesRunning(getBody());
+   }
+
+   private void assertIndicatesRunning(final WebElement body)
+            throws MultipleFailuresError {
+      final var element = assertHasElement(body, RUN_STATE_ELEMENT_LOCATOR);
+      assertThat("Run-state element text", element.getText(),
+               INDICATES_IS_RUNNING);
+   }
+
    public void assertIndicatesUserIsNotPlayingGame() {
       final var playing = assertHasPlayingElement(getBody());
       assertThat("Indicates is not playing the game", playing.getText(),
@@ -216,7 +257,7 @@ public final class GamePage extends Page {
    }
 
    public void assertIndicatesWhetherGameHasPlayers() {
-
+      // FIXME
    }
 
    public void assertIndicatesWhetherRecruitingPlayers() {
@@ -233,6 +274,15 @@ public final class GamePage extends Page {
                () -> assertThat("Element text indicates something", elementText,
                         either(INDICATES_IS_RECRUITING_PLAYERS)
                                  .or(INDICATES_IS_NOT_RECRUITING_PLAYERS)));
+   }
+
+   public void assertIndicatesWhetherRunning() {
+      assertIndicatesWhetherRunning(getBody());
+   }
+
+   private void assertIndicatesWhetherRunning(final WebElement body)
+            throws MultipleFailuresError {
+      assertHasElement(body, RUN_STATE_ELEMENT_LOCATOR);
    }
 
    public void assertIndicatesWhetherUserIsPlayingGame() {
@@ -300,7 +350,7 @@ public final class GamePage extends Page {
 
    public void endRecruitement() {
       requireIsReady();
-      final var button = getBody().findElement(END_RECRUITMENT_BUTTON_LOCATOR);
+      final var button = getBody().findElement(END_RECRUITMENT_ELEMENT_LOCATOR);
       if (!isEnabled(button)) {
          throw new IllegalStateException(
                   "Button [" + button + "] is not enabled");
@@ -311,7 +361,27 @@ public final class GamePage extends Page {
 
    public boolean isEndRecruitmentEnabled() {
       requireIsReady();
-      return isEnabled(getBody().findElement(END_RECRUITMENT_BUTTON_LOCATOR));
+      return isEnabled(getBody().findElement(END_RECRUITMENT_ELEMENT_LOCATOR));
+   }
+
+   public boolean isStartingEnabled() {
+      requireIsReady();
+      final var elements = getBody().findElements(START_BUTTON_LOCATOR);
+      if (elements.isEmpty()) {
+         return false;
+      } else {
+         return isEnabled(elements.get(0));
+      }
+   }
+
+   public boolean isStoppingEnabled() {
+      requireIsReady();
+      final var elements = getBody().findElements(STOP_BUTTON_LOCATOR);
+      if (elements.isEmpty()) {
+         return false;
+      } else {
+         return isEnabled(elements.get(0));
+      }
    }
 
    @Override
@@ -365,5 +435,27 @@ public final class GamePage extends Page {
       super.requireIsReady(path, title, body);
       requireForReady("Indicates is a game", body.getText(),
                INDICATES_IS_A_GAME);
+   }
+
+   public void startGame() {
+      requireIsReady();
+      final var button = getBody().findElement(START_BUTTON_LOCATOR);
+      if (!isEnabled(button)) {
+         throw new IllegalStateException(
+                  "Button [" + button + "] is not enabled");
+      }
+      button.click();
+      awaitIsReady(IS_RUNNING);
+   }
+
+   public void stopGame() {
+      requireIsReady();
+      final var button = getBody().findElement(STOP_BUTTON_LOCATOR);
+      if (!isEnabled(button)) {
+         throw new IllegalStateException(
+                  "Button [" + button + "] is not enabled");
+      }
+      button.click();
+      awaitIsReady(IS_RUNNING);
    }
 }

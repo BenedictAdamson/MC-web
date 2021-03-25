@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
@@ -44,6 +45,12 @@ import uk.badamson.mc.presentation.ScenarioPage;
  * </p>
  */
 public class GameSteps extends Steps {
+
+   private int scenarioIndex;
+
+   private UUID scenarioId;
+
+   private Game.Identifier gameId;
 
    private int gameIndex;
 
@@ -68,6 +75,14 @@ public class GameSteps extends Steps {
                .navigateToScenarioPage();
       scenarioPage.assertHasListOfGames();
       world.setExpectedPage(scenarioPage);
+   }
+
+   private void createGame() {
+      scenarioId = world.getScenarios().map(namedId -> namedId.getId())
+               .findFirst().get();
+      scenarioIndex = 0;
+      gameId = world.createGame(scenarioId);
+      nGames0 = (int) world.getGameCreationTimes(scenarioId).count();
    }
 
    @When("creating a game")
@@ -142,10 +157,32 @@ public class GameSteps extends Steps {
       assertIsOkGamePage();
    }
 
+   @Then("the game accepts starting")
+   public void game_accepts_starting() {
+      assertIsOkGamePage();
+   }
+
+   @Then("the game accepts stopping")
+   public void game_accepts_stopping() {
+      assertIsOkGamePage();
+   }
+
    @Then("the game does not allow ending recruitment")
    public void game_does_not_allow_ending_recuitement() {
       final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
       assertFalse(gamePage.isEndRecruitmentEnabled());
+   }
+
+   @Then("the game does not allow starting")
+   public void game_does_not_allow_starting() {
+      final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
+      assertFalse(gamePage.isStartingEnabled());
+   }
+
+   @Then("the game does not allow stopping")
+   public void game_does_not_allow_stopping() {
+      final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
+      assertFalse(gamePage.isStoppingEnabled());
    }
 
    @Then("the game does not indicate which characters are played by which \\(other) users")
@@ -187,6 +224,18 @@ public class GameSteps extends Steps {
    public void game_indicates_game_not_recuiting_players() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesIsNotRecruitingPlayers();
+   }
+
+   @Then("the game indicates that it is not running")
+   public void game_indicates_not_running() {
+      final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
+      gamePage.assertIndicatesNotRunning();
+   }
+
+   @Then("the game indicates that it is running")
+   public void game_indicates_running() {
+      final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
+      gamePage.assertIndicatesRunning();
    }
 
    @Then("the game indicates that it is recruiting players")
@@ -231,6 +280,12 @@ public class GameSteps extends Steps {
                .assertIndicatesWhetherRecruitingPlayers();
    }
 
+   @Then("the game indicates whether it is running")
+   public void game_indicates_whether_running() {
+      final var gamePage = world.getAndAssertExpectedPage(GamePage.class);
+      gamePage.assertIndicatesWhetherRunning();
+   }
+
    @Then("the game indicates whether the user is playing the game")
    public void game_indicates_whether_user_is_playing_game() {
       world.getAndAssertExpectedPage(GamePage.class)
@@ -257,19 +312,19 @@ public class GameSteps extends Steps {
 
    @Given("a game is recruiting players")
    public void game_recuiting_players() {
-      final var scenario = world.getScenarios().map(namedId -> namedId.getId())
-               .findFirst().get();
-      final var scenarioIndex = 0;
-      world.createGame(scenario);
-      nGames0 = (int) world.getGameCreationTimes(scenario).count();
+      navigateToNewGamePage();
+   }
 
-      final var scenarioPage = world.getHomePage().navigateToScenariosPage()
-               .navigateToScenario(scenarioIndex);
-      world.setExpectedPage(scenarioPage);
-      final var gamePage = scenarioPage.navigateToGamePage(nGames0 - 1);
-      gamePage.requireIsReady();
-      gamePage.requireIndicatesIsRecruitingPlayers();
-      world.setExpectedPage(gamePage);
+   @Given("a game is running")
+   public void game_running() {
+      createGame();
+      world.startGame(gameId);
+      navigateToGamePage();
+   }
+
+   @Given("a game is waiting to start")
+   public void game_waiting_to_start() {
+      navigateToNewGamePage();
    }
 
    @Then("the list of games includes the new game")
@@ -282,6 +337,21 @@ public class GameSteps extends Steps {
    @Then("MC accepts the creation of the game")
    public void mc_accepts_creation_of_game() {
       assertIsOkGamePage();
+   }
+
+   private void navigateToGamePage() {
+      final var scenarioPage = world.getHomePage().navigateToScenariosPage()
+               .navigateToScenario(scenarioIndex);
+      world.setExpectedPage(scenarioPage);
+      final var gamePage = scenarioPage.navigateToGamePage(nGames0 - 1);
+      gamePage.requireIsReady();
+      gamePage.requireIndicatesIsRecruitingPlayers();
+      world.setExpectedPage(gamePage);
+   }
+
+   private void navigateToNewGamePage() {
+      createGame();
+      navigateToGamePage();
    }
 
    @Given("has a game")
@@ -313,5 +383,19 @@ public class GameSteps extends Steps {
       final var scenario = world.getScenarios().findFirst().get().getId();
       final var gameId = world.createGame(scenario);
       world.joinGame(gameId);
+   }
+
+   @When("user starts the game")
+   public void user_starts_game() {
+      final var gamePage = world.getExpectedPage(GamePage.class);
+      gamePagePath = world.getCurrentUrlPath();
+      gamePage.startGame();
+   }
+
+   @When("user stops the game")
+   public void user_stops_game() {
+      final var gamePage = world.getExpectedPage(GamePage.class);
+      gamePagePath = world.getCurrentUrlPath();
+      gamePage.stopGame();
    }
 }

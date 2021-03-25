@@ -264,6 +264,10 @@ public class McContainers
       be.joinGame(game, user);
    }
 
+   public void startGame(final Game.Identifier game) {
+      be.startGame(game);
+   }
+
    private void requireBroswer() {
       if (browser == null) {
          throw new IllegalStateException("no browser");
