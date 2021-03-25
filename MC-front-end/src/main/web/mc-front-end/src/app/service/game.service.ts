@@ -52,6 +52,14 @@ export class GameService extends CachingKeyValueService<GameIdentifier, Game, st
       );
    }
 
+   stopGame(game: GameIdentifier): void {
+      this.gameBackEndService.stopGame(game).subscribe(
+         g => {
+            this.setValue(g);
+         }
+      );
+   }
+
 	getAll(): undefined {
 		return undefined;
 	}

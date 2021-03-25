@@ -116,4 +116,34 @@ describe('GameService', () => {
       testStartGame(done, GAME_IDENTIFIER_B);
    });
 
+
+
+   const testStopGame = (done: any, identifier: GameIdentifier) => {
+      const game: Game = {identifier, runState: 'STOPPED'};
+      const service: GameService = setUp();
+
+      service.stopGame(identifier);
+
+      const request = httpTestingController.expectOne(HttpGameBackEndService.getApiStopGamePath(identifier));
+      expect(request.request.method).toEqual('POST');
+      request.flush(game);
+      httpTestingController.verify();
+
+      service.get(identifier).subscribe({
+         next: (g) => {
+            expect(g).withContext('game').not.toBeNull();
+            expect(g).withContext('game').toEqual(game);
+            done();
+         }, error: (e) => { fail(e); }, complete: () => { }
+      });
+   };
+
+   it('can stop game [A]', (done) => {
+      testStopGame(done, GAME_IDENTIFIER_A);
+   });
+
+   it('can stop game [B]', (done) => {
+      testStopGame(done, GAME_IDENTIFIER_B);
+   });
+
 });

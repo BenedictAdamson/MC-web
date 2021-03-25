@@ -33,6 +33,10 @@ class Delegate extends HttpSimpleKeyValueService<GameIdentifier, Game, string, n
       return this.http.post<Game>(HttpGameBackEndService.getApiStartGamePath(id), '');
    }
 
+   stopGame(id: GameIdentifier): Observable<Game> {
+      return this.http.post<Game>(HttpGameBackEndService.getApiStopGamePath(id), '');
+   }
+
 
    protected getAddUrl(scenario: string): string {
       return HttpGameBackEndService.getApiGamesPath(scenario);
@@ -69,7 +73,11 @@ export class HttpGameBackEndService extends AbstractGameBackEndService {
    }
 
    static getApiStartGamePath(id: GameIdentifier): string {
-      return HttpGameBackEndService.getApiGamePath(id) + '?join';
+      return HttpGameBackEndService.getApiGamePath(id) + '?start';
+   }
+
+   static getApiStopGamePath(id: GameIdentifier): string {
+      return HttpGameBackEndService.getApiGamePath(id) + '?stop';
    }
 
 
@@ -87,6 +95,10 @@ export class HttpGameBackEndService extends AbstractGameBackEndService {
 
    startGame(id: GameIdentifier): Observable<Game> {
       return this.delegate.startGame(id);
+   }
+
+   stopGame(id: GameIdentifier): Observable<Game> {
+      return this.delegate.stopGame(id);
    }
 
 }// class

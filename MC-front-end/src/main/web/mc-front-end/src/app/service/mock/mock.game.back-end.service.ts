@@ -47,5 +47,22 @@ export class MockGameBackEndService extends AbstractGameBackEndService {
       }
       return throwError('Not Found');
    }
+
+   stopGame(id: GameIdentifier): Observable<Game> {
+      for (const game of this.games) {
+         if (game.identifier.scenario === id.scenario && game.identifier.created === id.created) {
+            switch (game.runState) {
+               case 'WAITING_TO_START':
+               case 'RUNNING':
+                  game.runState = 'STOPPED';
+                  return of(game);
+               case 'STOPPED':
+                  return of(game);
+            }
+            return of(game);
+         }
+      }
+      return throwError('Not Found');
+   }
 }
 
