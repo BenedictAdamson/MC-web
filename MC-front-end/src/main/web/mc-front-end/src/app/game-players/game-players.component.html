@@ -1,35 +1,37 @@
 <section>
-<h4>Players</h4>
+   <h4>Players</h4>
 
-<section>
-   <p id="recruiting" *ngIf="recruiting$ | async; else notRecruiting">This game is recruiting players.</p>
-   <ng-template #notRecruiting>
-   <p id="recruiting" >This game is not recruiting players.</p>
-   </ng-template>
+   <section>
+      <p id="recruiting" *ngIf="recruiting$ | async; else notRecruiting">This game is recruiting players.</p>
+      <ng-template #notRecruiting>
+         <p id="recruiting">This game is not recruiting players.</p>
+      </ng-template>
 
-   <button id="end-recruitment" [disabled]="isEndRecruitmentDisabled$ | async" (click)="endRecruitment()">End recruitment</button>
+      <button id="end-recruitment" [disabled]="isEndRecruitmentDisabled$ | async" (click)="endRecruitment()">End
+         recruitment</button>
 
-   <div  *ngIf="mayJoinGame$ | async; else notJoinable">
-      <p id="joinable">You may join this game.</p>
-      <button id="join" (click)="joinGame()">Join</button>
-   </div>
-   <ng-template #notJoinable>
-   <div>
-      <p id="joinable" >You may not join this game.</p>
-      <button id="join" disabled>Join</button>
-   </div>
-   </ng-template>
+      <div *ngIf="mayJoinGame$ | async; else notJoinable">
+         <p id="joinable">You may join this game.</p>
+         <button id="join" (click)="joinGame()">Join</button>
+      </div>
+      <ng-template #notJoinable>
+         <div>
+            <p id="joinable">You may not join this game.</p>
+            <button id="join" disabled>Join</button>
+         </div>
+      </ng-template>
 
-   <p id="playing" *ngIf="playing$ | async; else notPlaying">You are playing this game.</p>
-   <ng-template #notPlaying>
-   <p id="playing" >You are not playing this game.</p>
-   </ng-template>
+      <p id="playing" *ngIf="playing$ | async; else notPlaying">You are playing this game as
+         {{characterNameForUser$ | async}}</p>
+      <ng-template #notPlaying>
+         <p id="playing">You are not playing this game.</p>
+      </ng-template>
 
-   <section id="played-characters" *ngIf="mayManageGames$ | async">
-   <ol>
-     <li *ngFor="let character of playedCharacters$ | async">{{character}}</li>
-   </ol>
+      <section id="played-characters" *ngIf="mayManageGames$ | async">
+         <ol>
+            <li *ngFor="let character of playedCharacters$ | async">{{character}}</li>
+         </ol>
+      </section>
    </section>
-</section>
 
 </section>

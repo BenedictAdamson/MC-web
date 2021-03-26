@@ -67,10 +67,6 @@ export class GamePlayersComponent implements OnInit {
       return !gamePlayers || !gamePlayers.recruiting || !mayManageGames;
    }
 
-   private static isPlaying(id: string | null, gamePlayers: GamePlayers): boolean {
-      return id ? gamePlayers.isPlaying(id) : false;
-   }
-
 
    get identifier$(): Observable<GameIdentifier> {
       return combineLatest([this.scenarioId$, this.created$]).pipe(
@@ -106,6 +102,13 @@ export class GamePlayersComponent implements OnInit {
    private get characterOfUser$(): Observable<string | null> {
       return combineLatest([this.selfService.id$, this.gamePlayers$]).pipe(
          map(([id, gamePlayers]) => id ? gamePlayers.characterOfUser(id) : null),
+         distinctUntilChanged() // don't spam identical values
+      );
+   }
+
+   get characterNameForUser$(): Observable<string | null> {
+      return combineLatest([this.characterOfUser$, this.scenario$]).pipe(
+         map(([character, scenario]) => character ? scenario.characterWithId(character) : null),
          distinctUntilChanged() // don't spam identical values
       );
    }

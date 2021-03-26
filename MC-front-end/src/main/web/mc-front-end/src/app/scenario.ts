@@ -9,20 +9,26 @@ import { NamedUUID } from './named-uuid';
  * </p>
  */
 export class Scenario {
-	identifier: string;// typically a UUID
-	title: string;
-	description: string;
+   constructor(
+      public identifier: string,// typically a UUID
+      public title: string,
+      public description: string,
+      /**
+       * <p>
+       * The names and IDs of the persons in this scenario that
+       * players can play.
+       * </p>
+       * <ul>
+       * <li>The list of characters is in descending order of selection priority:
+       * with all else equal, players should be allocated characters near the start
+       * of the list.</li>
+       * </ul>
+       */
+      public characters: NamedUUID[]
+   ) { };
 
-	/**
-	 * <p>
-	 * The names and IDs of the persons in this scenario that
-	 * players can play.
-	 * </p>
-	 * <ul>
-	 * <li>The list of characters is in descending order of selection priority:
-	 * with all else equal, players should be allocated characters near the start
-	 * of the list.</li>
-	 * </ul>
-	 */
-	characters: NamedUUID[];
+   characterWithId(id: string): string | null {
+      const v = this.characters.find(c => c.id === id);
+      return v ? v.title : null;
+   }
 }

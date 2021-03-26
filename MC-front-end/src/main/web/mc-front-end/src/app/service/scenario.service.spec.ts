@@ -18,18 +18,18 @@ describe('ScenarioService', () => {
 	const SCENARIO_ID_B: string = uuid();
 	const CHARACTER_A: NamedUUID = { id: uuid(), title: 'Sergeant' };
 	const CHARACTER_B: NamedUUID = { id: uuid(), title: 'Private' };
-	const SCENARIO_A: Scenario = {
-		identifier: SCENARIO_ID_A,
-		title: 'Section Attack',
-		description: 'Basic fire-and-movement tactical training.',
-		characters: [CHARACTER_A]
-	};
-	const SCENARIO_B: Scenario = {
-		identifier: SCENARIO_ID_B,
-		title: 'Beach Assault',
-		description: 'Fast and deadly.',
-		characters: [CHARACTER_A, CHARACTER_B]
-	};
+	const SCENARIO_A: Scenario = new Scenario(
+		SCENARIO_ID_A,
+		'Section Attack',
+		'Basic fire-and-movement tactical training.',
+		[CHARACTER_A]
+	);
+	const SCENARIO_B: Scenario = new Scenario(
+		SCENARIO_ID_B,
+		'Beach Assault',
+		'Fast and deadly.',
+		[CHARACTER_A, CHARACTER_B]
+	);
 
 	const setUp = (): ScenarioService => {
 		TestBed.configureTestingModule({
