@@ -106,9 +106,11 @@ export class GamePlayersComponent implements OnInit {
       );
    }
 
-   get characterNameForUser$(): Observable<string | null> {
+   get characterNameForUser$(): Observable<string> {
       return combineLatest([this.characterOfUser$, this.scenario$]).pipe(
          map(([character, scenario]) => character ? scenario.characterWithId(character) : null),
+         filter(c => !!c),
+         map(c => c as string),
          distinctUntilChanged() // don't spam identical values
       );
    }
