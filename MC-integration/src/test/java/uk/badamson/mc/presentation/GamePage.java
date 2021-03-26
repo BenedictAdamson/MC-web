@@ -316,6 +316,12 @@ public final class GamePage extends Page {
       assertHasElement(getBody(), PLAYED_CHARACTERS_ELEMENT_LOCATOR);
    }
 
+   public void assertIndicatesWhichCharacterUserIsPlaying() {
+      final var playing = assertHasPlayingElement(getBody());
+      assertThat("Indicates which character user is playing", playing.getText(),
+               INDICATES_CHARACTER_PLAYED);
+   }
+
    private void assertJoinButtonConsistentWithJoinableText(
             final WebElement body) {
       final var button = assertHasElement("has a join button", body,
