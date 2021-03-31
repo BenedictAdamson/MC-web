@@ -1,5 +1,6 @@
 # mc.pkr.hcl
 # packer template for building a virtual machine image for running the Mission Command server
+# Can take 15 minutes to run
 
 source "qemu" "mc" {
   iso_url           = "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-10.9.0-amd64-netinst.iso"

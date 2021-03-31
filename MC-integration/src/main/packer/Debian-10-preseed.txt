@@ -77,6 +77,7 @@ d-i pkgsel/upgrade select full-upgrade
 # Grub is the default boot loader
 d-i grub-installer/only_debian boolean true
 d-i grub-installer/with_other_os boolean true
+d-i grub-installer/bootdev  string default
 
 # Avoid that last message about the install being complete.
 d-i finish-install/reboot_in_progress note
