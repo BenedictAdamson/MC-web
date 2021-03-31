@@ -33,5 +33,5 @@ RUN rm missioncommand-db.deb
 ENV MONGO_INITDB_DATABASE=mc MONGO_INITDB_ROOT_USERNAME=admin
 RUN mkdir /data/db/home-monogdb
 RUN ln -s  /data/db/home-monogdb /home/monogdb
-COPY src/main/resources/docker-entrypoint-initdb.d/initdb-mc.js /docker-entrypoint-initdb.d/initdb-mc.js
-COPY src/main/resources/docker-entrypoint-initdb.d/inituser-mc.sh /docker-entrypoint-initdb.d/inituser-mc.sh
+RUN ln -s /usr/share/missioncommand-db/initdb-mc.js /docker-entrypoint-initdb.d/initdb-mc.js
+RUN ln -s /usr/share/missioncommand-db/inituser-mc.sh /docker-entrypoint-initdb.d/inituser-mc.sh

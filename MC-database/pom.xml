@@ -34,6 +34,23 @@
                   <configuration>
                      <deb>${project.build.directory}/missioncommand-db_${debian-package.version}_all.deb</deb>
                      <dataSet>
+                        <data>
+                           <type>file</type>
+                           <src>${project.basedir}/src/main/resources/initdb-mc.js</src>
+                           <mapper>
+                              <type>perm</type>
+                              <prefix>/usr/share/missioncommand-db</prefix>
+                           </mapper>
+                        </data>
+                        <data>
+                           <type>file</type>
+                           <src>${project.basedir}/src/main/resources/inituser-mc.sh</src>
+                           <mapper>
+                              <type>perm</type>
+                              <prefix>/usr/share/missioncommand-db</prefix>
+                              <filemode>755</filemode>
+                           </mapper>
+                        </data>
                      </dataSet>
                   </configuration>
                </execution>
