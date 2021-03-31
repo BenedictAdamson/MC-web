@@ -8,7 +8,6 @@
       <version>2.21.0-SNAPSHOT</version>
    </parent>
    <artifactId>MC-database</artifactId>
-   <packaging>pom</packaging>
    <build>
       <resources>
          <resource>
@@ -24,6 +23,24 @@
       </testResources>
       <plugins>
          <plugin>
+            <artifactId>jdeb</artifactId>
+            <groupId>org.vafer</groupId>
+            <executions>
+               <execution>
+                  <phase>package</phase>
+                  <goals>
+                     <goal>jdeb</goal>
+                  </goals>
+                  <configuration>
+                     <deb>${project.build.directory}/missioncommand-db_${debian-package.version}_all.deb</deb>
+                     <dataSet>
+                     </dataSet>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+         <plugin>
+            <!-- This MUST be after jdeb, so it can use the .deb package. -->
             <groupId>com.spotify</groupId>
             <artifactId>dockerfile-maven-plugin</artifactId>
             <executions>
@@ -41,6 +58,7 @@
                <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
                <buildArgs>
                   <VERSION>${project.version}</VERSION>
+                  <PACKAGEVERSION>${debian-package.version}</PACKAGEVERSION>
                </buildArgs>
             </configuration>
          </plugin>
