@@ -30,6 +30,8 @@ COPY target/missioncommand-db_${PACKAGEVERSION}_all.deb missioncommand-db.deb
 # so dpkg will complain of a missing dependency unless we tell it to --force-depends
 RUN dpkg -i --force-depends missioncommand-db.deb
 RUN rm missioncommand-db.deb
+# The Debian package installs files that are not useful within a Docker container; remove them to save space:
+RUN rm -rf /etc/mission-command
 ENV MONGO_INITDB_DATABASE=mc MONGO_INITDB_ROOT_USERNAME=admin
 RUN mkdir /data/db/home-monogdb
 RUN ln -s  /data/db/home-monogdb /home/monogdb
