@@ -35,4 +35,4 @@ RUN rm -rf /etc/mission-command
 ENV MONGO_INITDB_DATABASE=mc MONGO_INITDB_ROOT_USERNAME=admin
 RUN mkdir /data/db/home-monogdb
 RUN ln -s  /data/db/home-monogdb /home/monogdb
-RUN ln -s /usr/share/missioncommand-db/bin/init-mcdb /docker-entrypoint-initdb.d/inituser-mc.sh
+RUN ln -s /usr/share/missioncommand-db/bin/init-mcdb /docker-entrypoint-initdb.d/init-mcdb.sh
