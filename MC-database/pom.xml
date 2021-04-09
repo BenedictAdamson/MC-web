@@ -36,18 +36,10 @@
                      <dataSet>
                         <data>
                            <type>file</type>
-                           <src>${project.basedir}/src/main/resources/initdb-mc.js</src>
+                           <src>${project.basedir}/src/main/resources/init-mcdb</src>
                            <mapper>
                               <type>perm</type>
-                              <prefix>/usr/share/missioncommand-db</prefix>
-                           </mapper>
-                        </data>
-                        <data>
-                           <type>file</type>
-                           <src>${project.basedir}/src/main/resources/inituser-mc.sh</src>
-                           <mapper>
-                              <type>perm</type>
-                              <prefix>/usr/share/missioncommand-db</prefix>
+                              <prefix>/usr/share/missioncommand-db/bin</prefix>
                               <filemode>755</filemode>
                            </mapper>
                         </data>
