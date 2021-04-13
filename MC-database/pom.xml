@@ -36,7 +36,34 @@
                      <dataSet>
                         <data>
                            <type>file</type>
-                           <src>${project.basedir}/src/main/resources/init-mcdb</src>
+                           <src>${project.basedir}/src/main/resources/init-mc</src>
+                           <mapper>
+                              <type>perm</type>
+                              <prefix>/usr/share/missioncommand-db/bin</prefix>
+                              <filemode>755</filemode>
+                           </mapper>
+                        </data>
+                        <data>
+                           <type>file</type>
+                           <src>${project.basedir}/src/main/resources/init-mc-admin</src>
+                           <mapper>
+                              <type>perm</type>
+                              <prefix>/usr/share/missioncommand-db/bin</prefix>
+                              <filemode>755</filemode>
+                           </mapper>
+                        </data>
+                        <data>
+                           <type>file</type>
+                           <src>${project.basedir}/src/main/resources/init-mc-db</src>
+                           <mapper>
+                              <type>perm</type>
+                              <prefix>/usr/share/missioncommand-db/bin</prefix>
+                              <filemode>755</filemode>
+                           </mapper>
+                        </data>
+                        <data>
+                           <type>file</type>
+                           <src>${project.basedir}/src/main/resources/init-mc-user</src>
                            <mapper>
                               <type>perm</type>
                               <prefix>/usr/share/missioncommand-db/bin</prefix>

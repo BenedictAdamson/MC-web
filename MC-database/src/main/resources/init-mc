@@ -1,21 +1,6 @@
 #!/bin/sh
-# init-mcdb
+# init-mc
 
-if [ -z "${MC_INIT_PASSWORD-}" ]; then
-   echo "MC_INIT_PASSWORD not set; not creating mc user"
-else
-mongo <<EOF
-   use mc
-   db.initinfo.insert({ creator: 'MC-database init-mcdb' })
-   print('Initialisation of mc db complete')
-   
-   use admin
-   db.createUser(
-      {
-         user: "mc",
-         pwd: "$MC_INIT_PASSWORD",
-         roles: [ { role: "readWrite", db: "mc" } ]
-      }
-   )
-EOF
-fi
+/usr/share/missioncommand-db/bin/init-mc-db
+/usr/share/missioncommand-db/bin/init-mc-admin
+/usr/share/missioncommand-db/bin/init-mc-user
