@@ -115,6 +115,40 @@
             </executions>
          </plugin>
          <plugin>
+            <artifactId>jdeb</artifactId>
+            <groupId>org.vafer</groupId>
+            <executions>
+               <execution>
+                  <phase>package</phase>
+                  <goals>
+                     <goal>jdeb</goal>
+                  </goals>
+                  <configuration>
+                     <deb>${project.build.directory}/missioncommand-fe_${debian-package.version}_all.deb</deb>
+                     <dataSet>
+                        <data>
+                           <src>${project.build.directory}/classes/etc/nginx/conf.d</src>
+                           <type>directory</type>
+                           <mapper>
+                              <type>perm</type>
+                              <prefix>/usr/share/missioncommand-fe/etc</prefix>
+                           </mapper>
+                        </data>
+                        <data>
+                           <src>${project.build.directory}/ng-dist/mc-front-end</src>
+                           <type>directory</type>
+                           <mapper>
+                              <type>perm</type>
+                              <prefix>/usr/share/missioncommand-fe/html</prefix>
+                           </mapper>
+                        </data>
+                     </dataSet>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+         <plugin>
+            <!-- This MUST be after jdeb, so it can use the .deb package. -->
             <groupId>com.spotify</groupId>
             <artifactId>dockerfile-maven-plugin</artifactId>
             <executions>
