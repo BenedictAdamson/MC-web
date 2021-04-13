@@ -14,6 +14,10 @@ configure) # preinst was successful and files have been unpacked
   else
     HAVE_CONFIG_FILES=N
   fi
+  if which systemctl; then
+    # a systemd installation (rather than Docker)
+    /usr/share/missioncommand-db/bin/init-mc
+  fi
   ;;
 abort-upgrade) # "prerm upgrade" failed during an upgrade
   NEW_VERSION="$1"

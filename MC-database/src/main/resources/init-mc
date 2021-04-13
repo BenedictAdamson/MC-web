@@ -1,6 +1,19 @@
 #!/bin/sh
 # init-mc
 
+generate-psswd () {
+  hexdump -v -e '"%02X"' -n 16 /dev/random
+}
+
+(
+  umask 600
+  generate-psswd > /etc/mission-command/mongodb-admin-psswd.secret
+  generate-psswd > /etc/mission-command/mongodb-mc-psswd.secret
+)
+    
 /usr/share/missioncommand-db/bin/init-mc-db
-/usr/share/missioncommand-db/bin/init-mc-admin
-/usr/share/missioncommand-db/bin/init-mc-user
+
+MONGO_INITDB_ROOT_PASSWORD=`cat /etc/mission-command/mongodb-admin-psswd.secret` \
+  /usr/share/missioncommand-db/bin/init-mc-admin
+MC_INIT_PASSWORD=`cat /etc/mission-command/mongodb-mc-psswd.secret` \
+  /usr/share/missioncommand-db/bin/init-mc-user
