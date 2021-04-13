@@ -166,6 +166,10 @@
                <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
                <contextDirectory>${project.build.directory}</contextDirectory>
                <dockerfile>${project.build.directory}/docker/Dockerfile</dockerfile>
+               <buildArgs>
+                  <VERSION>${project.version}</VERSION>
+                  <PACKAGEVERSION>${debian-package.version}</PACKAGEVERSION>
+               </buildArgs>
             </configuration>
          </plugin>
       </plugins>

@@ -24,12 +24,18 @@ LABEL description="The Mission Command game front-end server."
 LABEL maintainer="badamson@spamcop.net"
 
 ARG VERSION
+ARG PACKAGEVERSION
 LABEL version="${VERSION}"
 
 EXPOSE 80
 
-RUN rm -r /usr/share/nginx/html/*
+COPY missioncommand-fe_${PACKAGEVERSION}_all.deb missioncommand-fe.deb
+# Although the nginx base image provides Nginx, it might not do so by installing a .deb,
+# so dpkg will complain of a missing dependency unless we tell it to --force-depends
+RUN dpkg -i --force-depends missioncommand-fe.deb
+RUN rm missioncommand-fe.deb
 
+RUN rm -rf /usr/share/nginx/html
 RUN rm /etc/nginx/conf.d/default.conf
-COPY classes/etc/nginx/conf.d/*.conf /etc/nginx/conf.d/
-COPY ng-dist/mc-front-end/ /usr/share/nginx/html
+RUN ln -s /usr/share/missioncommand-fe/etc/ng.conf /etc/nginx/conf.d/ng.conf
+RUN ln -s /usr/share/missioncommand-fe/html /usr/share/nginx/html
