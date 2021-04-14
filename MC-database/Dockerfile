@@ -21,11 +21,20 @@
 
 FROM mongo:4.2
 ARG VERSION
+ARG PACKAGEVERSION
 LABEL version="${VERSION}"
 LABEL description="The Mission Command game database server."
 LABEL maintainer="badamson@spamcop.net"
+COPY target/missioncommand-db_${PACKAGEVERSION}_all.deb missioncommand-db.deb
+# Although the mongo base image provides MongoDB, it might not do so by installing a .deb,
+# so dpkg will complain of a missing dependency unless we tell it to --force-depends
+RUN dpkg -i --force-depends missioncommand-db.deb
+RUN rm missioncommand-db.deb
+# The Debian package installs files that are not useful within a Docker container; remove them to save space:
+RUN rm -rf /etc/mission-command
+RUN rm -f /usr/share/missioncommand-db/bin/init-mc-admin
 ENV MONGO_INITDB_DATABASE=mc MONGO_INITDB_ROOT_USERNAME=admin
 RUN mkdir /data/db/home-monogdb
 RUN ln -s  /data/db/home-monogdb /home/monogdb
-COPY src/main/resources/docker-entrypoint-initdb.d/initdb-mc.js /docker-entrypoint-initdb.d/initdb-mc.js
-COPY src/main/resources/docker-entrypoint-initdb.d/inituser-mc.sh /docker-entrypoint-initdb.d/inituser-mc.sh
+RUN ln -s /usr/share/missioncommand-db/bin/init-mc-db /docker-entrypoint-initdb.d/init-mc-db.sh
+RUN ln -s /usr/share/missioncommand-db/bin/init-mc-user /docker-entrypoint-initdb.d/init-mc-user.sh

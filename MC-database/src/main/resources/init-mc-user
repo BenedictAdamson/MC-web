@@ -1,5 +1,5 @@
 #!/bin/sh
-# inituser-mc.sh
+# init-mc-user
 
 if [ -z "${MC_INIT_PASSWORD-}" ]; then
    echo "MC_INIT_PASSWORD not set; not creating mc user"
