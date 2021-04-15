@@ -6,4 +6,5 @@ Architecture: all
 Maintainer: Benedict Adamson <badamson@spamcop.net>
 Description: front-end of the MC game server
 Distribution: stable
-Depends: nginx-core
+Depends: nginx
+Suggests: nginx-full
