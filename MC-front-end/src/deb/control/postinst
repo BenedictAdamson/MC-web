@@ -24,6 +24,10 @@ configure) # preinst was successful and files have been unpacked
   if [ ! -e /usr/share/missioncommand-fe/etc/ng.conf ]; then
     ln -s /usr/share/missioncommand-fe/etc/ng.conf /etc/nginx/conf.d/ng.conf
   fi
+  
+  if which systemctl && systemctl is-active nginx; then
+    systemctl restart nginx
+  fi
   ;;
 abort-upgrade) # "prerm upgrade" failed during an upgrade
   NEW_VERSION="$1"
