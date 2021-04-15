@@ -5,7 +5,10 @@ generate_psswd () {
   hexdump -v -e '"%02X"' -n 16 /dev/random
 }
 
-mkdir /etc/mission-command/
+if [ ! -d /etc/mission-command/ ]; then
+  mkdir /etc/mission-command
+fi
+
 (
   umask 600
   generate_psswd > /etc/mission-command/mongodb-admin-psswd.secret
@@ -27,7 +30,7 @@ MC_INIT_PASSWORD=`cat /etc/mission-command/mongodb-mc-psswd.secret` \
   /usr/share/missioncommand-db/bin/init-mc-user
   
   
-if [ "$WAS_ACTIVE" -eq N ]; then
+if [ "$WAS_ACTIVE" = N ]; then
   systemctl stop mongod
 fi
   
