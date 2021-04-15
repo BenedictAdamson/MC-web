@@ -7,4 +7,4 @@ Maintainer: Benedict Adamson <badamson@spamcop.net>
 Description: database of the MC game server
 Distribution: stable
 Depends: mongodb-org-server
-Recommends: mongodb-prg
+Recommends: mongodb-org
