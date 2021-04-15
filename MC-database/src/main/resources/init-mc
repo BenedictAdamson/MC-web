@@ -1,14 +1,15 @@
 #!/bin/sh
 # init-mc
 
-generate-psswd () {
+generate_psswd () {
   hexdump -v -e '"%02X"' -n 16 /dev/random
 }
 
+mkdir /etc/mission-command/
 (
   umask 600
-  generate-psswd > /etc/mission-command/mongodb-admin-psswd.secret
-  generate-psswd > /etc/mission-command/mongodb-mc-psswd.secret
+  generate_psswd > /etc/mission-command/mongodb-admin-psswd.secret
+  generate_psswd > /etc/mission-command/mongodb-mc-psswd.secret
 )
     
 /usr/share/missioncommand-db/bin/init-mc-db
