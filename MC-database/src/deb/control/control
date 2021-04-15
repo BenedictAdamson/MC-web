@@ -6,5 +6,5 @@ Architecture: all
 Maintainer: Benedict Adamson <badamson@spamcop.net>
 Description: database of the MC game server
 Distribution: stable
-Depends: mongodb-server
-Recommends: mongodb
+Depends: mongodb-org-server
+Recommends: mongodb-prg
