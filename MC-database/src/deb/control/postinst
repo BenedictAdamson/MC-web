@@ -17,6 +17,10 @@ configure) # preinst was successful and files have been unpacked
   if which systemctl > /dev/null; then
     # a systemd installation (rather than Docker)
     /usr/share/missioncommand-db/bin/init-mc
+  else
+    # do not need conf files used by systemd installation
+    rm /etc/mission-command/mongodb-admin-psswd.secret
+    rm /etc/mission-command/mongodb-mc-psswd.secret
   fi
   ;;
 abort-upgrade) # "prerm upgrade" failed during an upgrade
