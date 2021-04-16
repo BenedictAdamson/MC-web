@@ -14,7 +14,7 @@ configure) # preinst was successful and files have been unpacked
   else
     HAVE_CONFIG_FILES=N
   fi
-  if which systemctl; then
+  if which systemctl > /dev/null; then
     # a systemd installation (rather than Docker)
     /usr/share/missioncommand-db/bin/init-mc
   fi

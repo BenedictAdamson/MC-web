@@ -28,7 +28,7 @@ configure) # preinst was successful and files have been unpacked
     ln -s /usr/share/missioncommand-fe/etc/ng.conf /etc/nginx/conf.d/ng.conf
   fi
   
-  if which systemctl && systemctl is-active nginx; then
+  if which systemctl  > /dev/null && systemctl is-active nginx; then
     systemctl restart nginx
   fi
   ;;
