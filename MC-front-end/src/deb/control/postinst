@@ -24,7 +24,7 @@ configure) # preinst was successful and files have been unpacked
   if [ -e /etc/nginx/sites-enabled/default ]; then
     rm /etc/nginx/sites-enabled/default
   fi
-  if [ ! -e /usr/share/missioncommand-fe/etc/ng.conf ]; then
+  if [ ! -e /etc/nginx/conf.d/ng.conf ]; then
     ln -s /usr/share/missioncommand-fe/etc/ng.conf /etc/nginx/conf.d/ng.conf
   fi
   
