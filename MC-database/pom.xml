@@ -5,7 +5,7 @@
    <parent>
       <groupId>uk.badamson.mc</groupId>
       <artifactId>MC</artifactId>
-      <version>2.21.0-SNAPSHOT</version>
+      <version>2.21.0</version>
    </parent>
    <artifactId>MC-database</artifactId>
    <build>
@@ -68,6 +68,26 @@
                               <type>perm</type>
                               <prefix>/usr/share/missioncommand-db/bin</prefix>
                               <filemode>755</filemode>
+                           </mapper>
+                        </data>
+                        <data>
+                           <type>file</type>
+                           <src>${project.basedir}/src/main/resources/mongodb-admin-psswd.secret</src>
+                           <conffile>true</conffile>
+                           <mapper>
+                              <type>perm</type>
+                              <prefix>/etc/mission-command</prefix>
+                              <filemode>600</filemode>
+                           </mapper>
+                        </data>
+                        <data>
+                           <type>file</type>
+                           <src>${project.basedir}/src/main/resources/mongodb-mc-psswd.secret</src>
+                           <conffile>true</conffile>
+                           <mapper>
+                              <type>perm</type>
+                              <prefix>/etc/mission-command</prefix>
+                              <filemode>600</filemode>
                            </mapper>
                         </data>
                      </dataSet>
