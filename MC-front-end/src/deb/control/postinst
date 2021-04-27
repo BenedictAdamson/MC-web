@@ -1,0 +1,48 @@
+#!/bin/sh
+# missioncommand-fe .deb postinst
+
+MODE="$1"
+shift
+case "$MODE" in
+configure) # preinst was successful and files have been unpacked
+  if [ $# -gt 0 ]; then
+    # upgrading, or installing from the "Config Files" state
+    # (package was installed, then removed, but not purged)
+    OLD_VERSION="$1"
+    shift
+    HAVE_CONFIG_FILES=Y
+  else
+    HAVE_CONFIG_FILES=N
+  fi
+  
+  rm -rf /usr/share/nginx/html
+  ln -s /usr/share/missioncommand-fe/html /usr/share/nginx/html
+  
+  if [ -e /etc/nginx/conf.d/default.conf ]; then
+    rm /etc/nginx/conf.d/default.conf
+  fi
+  if [ -e /etc/nginx/sites-enabled/default ]; then
+    rm /etc/nginx/sites-enabled/default
+  fi
+  if [ ! -e /etc/nginx/conf.d/ng.conf ]; then
+    ln -s /usr/share/missioncommand-fe/etc/ng.conf /etc/nginx/conf.d/ng.conf
+  fi
+  
+  if which systemctl  > /dev/null && systemctl is-active nginx; then
+    systemctl restart nginx
+  fi
+  ;;
+abort-upgrade) # "prerm upgrade" failed during an upgrade
+  NEW_VERSION="$1"
+  shift
+  # Do nothing
+  ;;
+abort-remove) # "prerm remove" failed during a remove or remove+purge
+  NEW_VERSION="$1"
+  shift
+  # Do nothing
+  ;;
+*)
+  echo "unrecognised postinst mode \"$MODE\"" 1>&2
+  exit 2;;
+esac

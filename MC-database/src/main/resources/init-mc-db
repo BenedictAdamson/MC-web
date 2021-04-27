@@ -1,0 +1,8 @@
+#!/bin/sh
+# init-mc-db
+
+mongo <<EOF
+   use mc
+   db.initinfo.insert({ creator: 'MC-database init-mc-db' })
+   print('Initialisation of mc db complete')
+EOF

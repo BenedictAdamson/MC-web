@@ -1,0 +1,13 @@
+#!/bin/sh
+# init-mc-admin
+
+mongo <<EOF
+   use admin
+   db.createUser(
+      {
+         user: "admin",
+         pwd: "$MONGO_INITDB_ROOT_PASSWORD",
+         roles: [ { role: "root", db: "admin" } ]
+      }
+   )
+EOF

@@ -1,0 +1,41 @@
+#!/bin/sh
+# init-mc
+
+generate_psswd () {
+  if [ ! -e "$1" ]; then
+    hexdump -v -e '"%02X"' -n 16 /dev/random > "$1"
+  fi
+}
+
+if [ ! -d /etc/mission-command/ ]; then
+  mkdir /etc/mission-command
+fi
+
+(
+  umask go-rwx
+  generate_psswd /etc/mission-command/mongodb-admin-psswd.secret
+  generate_psswd /etc/mission-command/mongodb-mc-psswd.secret
+)
+
+if systemctl is-active mongod; then
+  WAS_ACTIVE=Y
+else
+  WAS_ACTIVE=N
+  systemctl start mongod
+  while ! systemctl is-active mongod; do
+    sleep 2
+  done
+fi
+    
+/usr/share/missioncommand-db/bin/init-mc-db
+
+MONGO_INITDB_ROOT_PASSWORD=`cat /etc/mission-command/mongodb-admin-psswd.secret` \
+  /usr/share/missioncommand-db/bin/init-mc-admin
+MC_INIT_PASSWORD=`cat /etc/mission-command/mongodb-mc-psswd.secret` \
+  /usr/share/missioncommand-db/bin/init-mc-user
+  
+  
+if [ "$WAS_ACTIVE" = N ]; then
+  systemctl stop mongod
+fi
+  
