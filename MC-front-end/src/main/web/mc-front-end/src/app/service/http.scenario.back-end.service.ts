@@ -11,67 +11,71 @@ import { Scenario } from '../scenario';
 
 const apiScenariosPath = '/api/scenario';
 
-export function getApiScenarioPath(scenario: string): string {
-	return apiScenariosPath + '/' + scenario;
-}
-
 
 class Delegate extends HttpSimpleKeyValueService<string, Scenario, string, null> {
 
-	constructor(
-		http: HttpClient
-	) {
-		super(http, undefined);
-	}
+   constructor(
+      http: HttpClient
+   ) {
+      super(http, undefined);
+   }
+
+   static getApiScenarioPath(scenario: string): string {
+      return apiScenariosPath + '/' + scenario;
+   }
 
 
-	getUrl(id: string): string {
-		return getApiScenarioPath(id);
-	}
+   getUrl(id: string): string {
+      return Delegate.getApiScenarioPath(id);
+   }
 
-	getAll(): undefined {
-		return undefined;
-	}
+   getAll(): undefined {
+      return undefined;
+   }
 
-	getScenarioIdentifiers(): Observable<NamedUUID[]> {
-		return this.http.get<NamedUUID[]>(apiScenariosPath);
-	}
+   getScenarioIdentifiers(): Observable<NamedUUID[]> {
+      return this.http.get<NamedUUID[]>(apiScenariosPath);
+   }
 
 
-	protected getAddUrl(_scenario: string): undefined {
-		return undefined;
-	}
+   protected getAddUrl(_scenario: string): undefined {
+      return undefined;
+   }
 
-	protected getAddPayload(_scenario: string): null {
-		return null;
-	}
+   protected getAddPayload(_scenario: string): null {
+      return null;
+   }
 
 }// class
 
 
 @Injectable({
-	providedIn: 'root'
+   providedIn: 'root'
 })
 export class HttpScenarioBackEndService extends AbstractScenarioBackEndService {
 
-	private delegate: Delegate;
+   private delegate: Delegate;
 
 
-	constructor(
-		http: HttpClient
-	) {
-		super();
-		this.delegate = new Delegate(http);
-	}
+   constructor(
+      http: HttpClient
+   ) {
+      super();
+      this.delegate = new Delegate(http);
+   }
+
+   static getApiScenarioPath(scenario: string): string {
+      return Delegate.getApiScenarioPath(scenario);
+   }
 
 
-	get(id: string): Observable<Scenario | null> {
-		return this.delegate.get(id);
-	}
+   get(id: string): Observable<Scenario | null> {
+      return this.delegate.get(id);
+   }
 
-	getScenarioIdentifiers(): Observable<NamedUUID[]> {
-		return this.delegate.getScenarioIdentifiers();
-	}
+   getScenarioIdentifiers(): Observable<NamedUUID[]> {
+      return this.delegate.getScenarioIdentifiers();
+   }
 
 }// class
 
