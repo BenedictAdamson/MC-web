@@ -1,4 +1,5 @@
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -12,7 +13,15 @@ import { Scenario } from '../scenario';
 const apiScenariosPath = '/api/scenario';
 
 
-class Delegate extends HttpSimpleKeyValueService<string, Scenario, string, null> {
+class EncodedScenario {
+   public identifier: string;
+   public title: string;
+   public description: string;
+   public characters: NamedUUID[];
+};
+
+
+class Delegate extends HttpSimpleKeyValueService<string, EncodedScenario, string, null> {
 
    constructor(
       http: HttpClient
@@ -68,9 +77,19 @@ export class HttpScenarioBackEndService extends AbstractScenarioBackEndService {
       return Delegate.getApiScenarioPath(scenario);
    }
 
+   private static decode(encoded: EncodedScenario): Scenario {
+      return new Scenario(
+         encoded.identifier,
+         encoded.title,
+         encoded.description,
+         encoded.characters);
+   }
+
 
    get(id: string): Observable<Scenario | null> {
-      return this.delegate.get(id);
+      return this.delegate.get(id).pipe(
+         map(encoded => encoded ? HttpScenarioBackEndService.decode(encoded) : null)
+      );
    }
 
    getScenarioIdentifiers(): Observable<NamedUUID[]> {
