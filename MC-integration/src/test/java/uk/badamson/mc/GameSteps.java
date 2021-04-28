@@ -299,9 +299,15 @@ public class GameSteps extends Steps {
    }
 
    @Then("the game indicates which character \\(if any) the user is playing")
-   public void game_indicates_which_character_user_is_playing() {
+   public void game_indicates_which_character_if_any_user_is_playing() {
       world.getAndAssertExpectedPage(GamePage.class)
                .assertIndicatesWhichCharacterIfAnyUserIsPlaying();
+   }
+
+   @Then("the game indicates which character the user is playing")
+   public void game_indicates_which_character_user_is_playing() {
+      world.getAndAssertExpectedPage(GamePage.class)
+               .assertIndicatesWhichCharacterUserIsPlaying();
    }
 
    @Then("the game indicates which characters are played by which users")
