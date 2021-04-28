@@ -72,7 +72,7 @@ public final class GamePage extends Page {
    private static final Matcher<String> INDICATES_IS_NOT_PLAYING = containsString(
             "You are not playing this game");
    private static final Matcher<String> INDICATES_CHARACTER_PLAYED = containsString(
-            " as character ");
+            "You are playing this game as ");
    private static final Matcher<String> INDICATES_IS_RUNNING = matchesPattern(
             "[Rr]unning");
    private static final Matcher<String> INDICATES_JOINING_NFORMATION = anyOf(
