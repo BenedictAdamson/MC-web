@@ -58,7 +58,7 @@
     "karma-jasmine": "~4.0.1",
     "karma-jasmine-html-reporter": "^1.6.0",
     "karma-junit-reporter": "^2.0.1",
-    "node-gyp": "^7.1.2",
+    "node-gyp": "^8.0.0",
     "nopt": "^5.0.0",
     "protractor": "~7.0.0",
     "sass-graph": "^3.0.5",
