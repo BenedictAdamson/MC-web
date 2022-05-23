@@ -18,10 +18,10 @@
 # along with MC.  If not, see <https://www.gnu.org/licenses/>.
 #
 apiVersion: v2
-appVersion: 2.22.2
+appVersion: 2.22.3
 description: The Mission Command game.
 name: mc
-version: 2.22.2
+version: 2.22.3
 sources:
   - https://github.com/BenedictAdamson/MC
 maintainers:
