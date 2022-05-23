@@ -24,13 +24,13 @@
       </testResources>
       <plugins>
          <plugin>
-            <groupId>com.kiwigrid</groupId>
+            <groupId>io.kokuwa.maven</groupId>
             <artifactId>helm-maven-plugin</artifactId>
             <extensions>true</extensions> <!-- Allow POM to have helm packaging -->
             <configuration>
                <chartDirectory>${project.basedir}/src/main/helm</chartDirectory>
                <chartVersion>${project.version}</chartVersion>
-               <useLocalHelmBinary>true</useLocalHelmBinary>
+               <useLocalHelmBinary>false</useLocalHelmBinary>
                <uploadRepoStable>
                   <name>stable-helm-repo</name>
                   <url>http://localhost:8082/api/charts</url>
