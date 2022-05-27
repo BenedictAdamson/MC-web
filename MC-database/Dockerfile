@@ -19,7 +19,7 @@
 # along with MC-des.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-FROM mongo:4.2
+FROM mongo:4.4
 ARG VERSION
 ARG PACKAGEVERSION
 LABEL version="${VERSION}"
