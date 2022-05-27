@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-22.
  *
  * This file is part of MC.
  *
@@ -45,6 +45,7 @@ import org.testcontainers.lifecycle.Startable;
 import org.testcontainers.lifecycle.TestDescription;
 import org.testcontainers.lifecycle.TestLifecycleAware;
 
+import org.testcontainers.utility.DockerImageName;
 import uk.badamson.mc.presentation.McFrontEndContainer;
 import uk.badamson.mc.presentation.McReverseProxyContainer;
 import uk.badamson.mc.repository.McDatabaseContainer;
@@ -78,6 +79,8 @@ public class McContainers
    private static final String DB_ROOT_PASSWORD = "secret2";
    private static final String DB_USER_PASSWORD = "secret3";
    public static final String ADMINISTARTOR_PASSWORD = "secret4";
+
+   private static final DockerImageName BROWSER_IMAGE_NAME = DockerImageName.parse("selenium/standalone-firefox:4.1.4");
 
    private static void assertThatNoErrorMessagesLogged(final String container,
             final String logs) {
@@ -209,7 +212,7 @@ public class McContainers
    }
 
    private void createAndStartBrowser() {
-      browser = new BrowserWebDriverContainer<>();
+      browser = new BrowserWebDriverContainer<>(BROWSER_IMAGE_NAME);
       browser.withCapabilities(new FirefoxOptions().addPreference(
                "security.insecure_field_warning.contextual.enabled", false))
                .withNetwork(network);
