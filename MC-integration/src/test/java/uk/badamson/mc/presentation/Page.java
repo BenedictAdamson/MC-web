@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-21.
+ * © Copyright Benedict Adamson 2019-22.
  *
  * This file is part of MC.
  *
@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
@@ -322,7 +323,7 @@ public abstract class Page {
             @Nonnull final Matcher<WebElement> additionalBodyConstraints)
             throws IllegalStateException {
       try {
-         new WebDriverWait(webDriver, 17)
+         new WebDriverWait(webDriver, Duration.ofSeconds(17))
                   .until(driver -> isReady(driver, additionalBodyConstraints));
       } catch (final TimeoutException e) {
          requireIsReady(); // throws NotReadyException, with good diagnostics,
@@ -335,7 +336,7 @@ public abstract class Page {
 
    public final void awaitIsReadyOrErrorMessage() throws IllegalStateException {
       try {
-         new WebDriverWait(webDriver, 17)
+         new WebDriverWait(webDriver, Duration.ofSeconds(17))
                   .until(driver -> isReady(driver, isA(WebElement.class))
                            || HAS_ERROR_ELEMENT
                                     .matches(driver.findElement(BODY_LOCATOR)));

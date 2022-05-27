@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2020-1.
+ * © Copyright Benedict Adamson 2020-22.
  *
  * This file is part of MC.
  *
@@ -23,6 +23,7 @@ import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URI;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.EnumSet;
 import java.util.NoSuchElementException;
@@ -175,7 +176,7 @@ public final class World implements AutoCloseable {
       final var webDriver = getWebDriver();
       final var currentPath = new AtomicReference<String>();
       try {
-         new WebDriverWait(webDriver, 17).until(driver -> {
+         new WebDriverWait(webDriver, Duration.ofSeconds(17)).until(driver -> {
             currentPath.set(getPathOfUrl(driver.getCurrentUrl()));
             return expectedSuccessUrlPath.equals(currentPath.get())
                      || !driver.findElements(By.className("error")).isEmpty();
@@ -604,7 +605,7 @@ public final class World implements AutoCloseable {
             throws TimeoutException {
       final var current = new AtomicReference<String>();
       try {
-         new WebDriverWait(getWebDriver(), timeout).until(driver -> {
+         new WebDriverWait(getWebDriver(), Duration.ofSeconds(timeout)).until(driver -> {
             final var p = getPathOfUrl(driver.getCurrentUrl());
             current.set(p);
             return p.equals(path);
