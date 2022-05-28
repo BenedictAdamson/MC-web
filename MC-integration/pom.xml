@@ -210,6 +210,18 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
          </plugin>
+         <plugin>
+            <groupId>org.codehaus.gmavenplus</groupId>
+            <artifactId>gmavenplus-plugin</artifactId>
+            <executions>
+               <execution>
+                  <goals>
+                     <goal>compile</goal>
+                     <goal>compileTests</goal>
+                  </goals>
+               </execution>
+            </executions>
+         </plugin>
       </plugins>
    </build>
    <reporting>
@@ -281,6 +293,11 @@
          <!-- Because use Spring WebTestClient -->
       </dependency>
       <dependency>
+         <groupId>org.codehaus.groovy</groupId>
+         <artifactId>groovy</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
          <groupId>org.junit.jupiter</groupId>
          <artifactId>junit-jupiter-api</artifactId>
          <scope>test</scope>
@@ -299,6 +316,11 @@
       <!-- Do not depend on junit-platform-runner. It is for JUnit 4 tests; 
          if it is in the classpath, the Surefire plugin will think we want to run 
          onlt JUnit 4 tests, and will therefore ignore all the JUnit 5 tests. -->
+      <dependency>
+         <groupId>org.mock-server</groupId>
+         <artifactId>mockserver-client-java</artifactId>
+         <scope>test</scope>
+      </dependency>
       <dependency>
          <groupId>org.opentest4j</groupId>
          <artifactId>opentest4j</artifactId>
@@ -335,6 +357,11 @@
          <scope>test</scope>
       </dependency>
       <dependency>
+         <groupId>org.spockframework</groupId>
+         <artifactId>spock-core</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
          <groupId>org.springframework</groupId>
          <artifactId>spring-webflux</artifactId>
          <scope>test</scope>
@@ -352,7 +379,17 @@
       </dependency>
       <dependency>
          <groupId>org.testcontainers</groupId>
+         <artifactId>mockserver</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.testcontainers</groupId>
          <artifactId>selenium</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.testcontainers</groupId>
+         <artifactId>spock</artifactId>
          <scope>test</scope>
       </dependency>
    </dependencies>

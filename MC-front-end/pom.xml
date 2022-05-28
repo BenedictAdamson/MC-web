@@ -115,8 +115,8 @@
             </executions>
          </plugin>
          <plugin>
-            <artifactId>jdeb</artifactId>
             <groupId>org.vafer</groupId>
+            <artifactId>jdeb</artifactId>
             <executions>
                <execution>
                   <phase>package</phase>
