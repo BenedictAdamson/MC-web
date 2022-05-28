@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-20,22.
  *
  * This file is part of MC.
  *
@@ -158,6 +158,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
       withEnv("SPRING_DATA_MONGODB_PASSWORD", mongoDbPassword);
       withEnv("ADMINISTRATOR_PASSWORD", administratorPassword);
       withCommand("--spring.data.mongodb.host=" + mongoDbHost);
+      addExposedPort(PORT);
    }
 
    public UUID addUser(final BasicUserDetails userDetails) {

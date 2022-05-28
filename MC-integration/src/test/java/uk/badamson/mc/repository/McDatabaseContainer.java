@@ -1,6 +1,6 @@
 package uk.badamson.mc.repository;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-20,22.
  *
  * This file is part of MC.
  *
@@ -83,6 +83,7 @@ public final class McDatabaseContainer
       withEnv("MC_INIT_PASSWORD", userPassword);
       withCommand("--bind_ip", "0.0.0.0");
       waitingFor(WAIT_STRATEGY);
+      addExposedPort(PORT);
    }
 
    public MongoClient createClient(final MongoCredential credentials) {
