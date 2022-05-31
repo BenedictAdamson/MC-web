@@ -418,4 +418,8 @@ final class MockedBeWorld implements Startable {
                     + current.get() + ") to become " + path)
         }
     }
+
+    void navigateToScenariosPage() {
+        setExpectedPage(getHomePage().navigateToScenariosPage())
+    }
 }

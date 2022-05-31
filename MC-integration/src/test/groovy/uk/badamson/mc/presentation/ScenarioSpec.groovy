@@ -50,7 +50,11 @@ class ScenarioSpec extends Specification {
 
   def "List scenarios"() {
     when: "examine scenarios"
+    world.navigateToScenariosPage()
     then: "the response is a list of scenarios"
+    def scenariosPage = world.getAndAssertExpectedPage(ScenariosPage.class)
+    scenariosPage.assertInvariants()
+    scenariosPage.assertHasListOfScenarios()
   }
 
   def "Examine scenario anonymously"() {
