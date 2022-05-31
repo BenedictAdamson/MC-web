@@ -36,6 +36,10 @@ class HomePageTest extends Specification {
     @Shared
     MockedBeWorld world = new MockedBeWorld()
 
+    void setupSpec() {
+        world.start()
+    }
+
     void setup() {
         world.setup()
     }
@@ -45,6 +49,7 @@ class HomePageTest extends Specification {
     }
 
     void cleanupSpec() {
+        world.stop()
         world.close()
     }
 

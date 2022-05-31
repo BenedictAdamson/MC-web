@@ -1,5 +1,6 @@
 package mc
 
+import org.testcontainers.lifecycle.Startable
 import uk.badamson.mc.Authority
 import uk.badamson.mc.BasicUserDetails
 import uk.badamson.mc.User
@@ -45,7 +46,7 @@ import java.time.Duration
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicReference
 
-final class MockedBeWorld implements AutoCloseable {
+final class MockedBeWorld implements Startable {
    private static final String FE_HOST = "fe"
    private static final String INGRESS_HOST = "in"
    private static final URI BASE_INGRESS_URI = new URI('http', INGRESS_HOST, null, null)
@@ -180,6 +181,11 @@ final class MockedBeWorld implements AutoCloseable {
       currentUser = null
    }
 
+   @Override
+   void start() {
+      backEnd.start()
+   }
+
    void setup() {
       createAndStartBrowser()
    }
@@ -194,6 +200,12 @@ final class MockedBeWorld implements AutoCloseable {
          browser.close()
          browser = null
       }
+   }
+
+   @Override
+   void stop() {
+     cleanup()
+      backEnd.stop()
    }
 
    private BasicUserDetails generateBasicUserDetails(

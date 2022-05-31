@@ -26,6 +26,7 @@ import org.mockserver.model.HttpStatusCode
 import org.mockserver.model.MediaType
 import org.testcontainers.containers.MockServerContainer
 import org.testcontainers.containers.Network
+import org.testcontainers.lifecycle.Startable
 import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException
 import org.testcontainers.utility.DockerImageName
 import uk.badamson.mc.BasicUserDetails
@@ -45,7 +46,7 @@ import static org.mockserver.model.Header.header
 import static org.mockserver.model.HttpResponse.notFoundResponse
 import static org.mockserver.model.HttpResponse.response
 
-final class MockMcBackEnd implements AutoCloseable {
+final class MockMcBackEnd implements Startable {
     private static final String BE_HOST = 'be'
 
     private static final DockerImageName MOCKSERVER_IMAGE =
@@ -87,12 +88,26 @@ final class MockMcBackEnd implements AutoCloseable {
     }
 
     private final MockServerContainer mockServer
-    private final MockServerClient mockServerClient
+    private MockServerClient mockServerClient
 
     MockMcBackEnd(Network network) {
         mockServer = new MockServerContainer(MOCKSERVER_IMAGE)
                 .withNetwork(network).withNetworkAliases(BE_HOST)
+    }
+
+    @Override
+    void start() {
+        mockServer.start()
         mockServerClient = new MockServerClient(mockServer.getHost(), mockServer.getServerPort())
+    }
+
+    @Override
+    void stop() {
+        if (mockServerClient != null) {
+            mockServerClient.stop()
+            mockServerClient = null
+        }
+        mockServer.stop()
     }
 
     private static HttpRequest acceptJson(HttpRequest request) {
@@ -514,15 +529,5 @@ final class MockMcBackEnd implements AutoCloseable {
         response()
                 .withCookie('JSESSIONID', sessionCookie)
                 .withCookie('XSRF-TOKEN', xsrfToken)
-    }
-
-    void setUp() {
-        mockServerClient.reset()
-    }
-
-    @Override
-    void close()  {
-        mockServerClient.close()
-        mockServer.close()
     }
 }
