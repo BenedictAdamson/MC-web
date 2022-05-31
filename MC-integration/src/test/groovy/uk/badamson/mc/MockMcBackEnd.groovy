@@ -1,4 +1,27 @@
 package uk.badamson.mc
+
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.mockserver.client.MockServerClient
+import org.mockserver.model.HttpRequest
+import org.mockserver.model.HttpResponse
+import org.mockserver.model.HttpStatusCode
+import org.mockserver.model.MediaType
+import org.testcontainers.containers.MockServerContainer
+import org.testcontainers.containers.Network
+import org.testcontainers.lifecycle.Startable
+import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException
+import org.testcontainers.utility.DockerImageName
+
+import javax.annotation.Nonnull
+import javax.annotation.Nullable
+import java.time.Instant
+import java.time.format.DateTimeFormatter
+import java.util.stream.Collectors
+
+import static org.mockserver.model.Header.header
+import static org.mockserver.model.HttpResponse.notFoundResponse
+import static org.mockserver.model.HttpResponse.response
+
 /*
  * © Copyright Benedict Adamson 2019-20,22.
  *
@@ -17,34 +40,6 @@ package uk.badamson.mc
  * You should have received a copy of the GNU Affero General Public License
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-import com.fasterxml.jackson.databind.ObjectMapper
-import org.mockserver.client.MockServerClient
-import org.mockserver.model.HttpRequest
-import org.mockserver.model.HttpResponse
-import org.mockserver.model.HttpStatusCode
-import org.mockserver.model.MediaType
-import org.testcontainers.containers.MockServerContainer
-import org.testcontainers.containers.Network
-import org.testcontainers.lifecycle.Startable
-import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException
-import org.testcontainers.utility.DockerImageName
-import uk.badamson.mc.BasicUserDetails
-import uk.badamson.mc.Game
-import uk.badamson.mc.GamePlayers
-import uk.badamson.mc.NamedUUID
-import uk.badamson.mc.Scenario
-import uk.badamson.mc.User
-
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
-import java.time.Instant
-import java.time.format.DateTimeFormatter
-import java.util.stream.Collectors
-
-import static org.mockserver.model.Header.header
-import static org.mockserver.model.HttpResponse.notFoundResponse
-import static org.mockserver.model.HttpResponse.response
 
 final class MockMcBackEnd implements Startable {
     private static final String BE_HOST = 'be'

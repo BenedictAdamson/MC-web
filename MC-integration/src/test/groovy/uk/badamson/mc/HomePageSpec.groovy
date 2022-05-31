@@ -1,9 +1,9 @@
 package uk.badamson.mc
 
-
 import org.testcontainers.spock.Testcontainers
 import spock.lang.Shared
 import spock.lang.Specification
+import uk.badamson.mc.presentation.HomePage
 
 /**
  * © Copyright Benedict Adamson 2019-22.
@@ -23,8 +23,6 @@ import spock.lang.Specification
  * You should have received a copy of the GNU Affero General Public License
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-import uk.badamson.mc.presentation.HomePage
 
 /**
  * It should be easy for users to access the home-page of an MC server, and know they have got the right page.
