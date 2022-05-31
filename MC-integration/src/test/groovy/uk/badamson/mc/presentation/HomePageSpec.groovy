@@ -56,9 +56,7 @@ class HomePageSpec extends Specification {
         given: "the DNS name, example.com, of an MC server"
         // do nothing
         and: "not logged in"
-        world.setLoggedIn(false)
-        world.currentUserIsUnknownUser()
-        world.backEnd.mockGetSelfUnauthenticated()
+        world.notLoggedIn()
         and: "not resuming a session"
         // do nothing
         when: "the potential user gives the obvious URL http://example.com/ to a web browser"

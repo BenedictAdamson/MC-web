@@ -371,10 +371,6 @@ final class MockedBeWorld implements Startable {
         this.expectedPage = Objects.requireNonNull(expectedPage, "expectedPage")
     }
 
-    void setLoggedIn(final boolean loggedIn) {
-        this.loggedIn = loggedIn
-    }
-
     /**
      * <p>
      * Indicate that the next web operation on the SUT will be for the URL that
@@ -417,6 +413,12 @@ final class MockedBeWorld implements Startable {
             throw new TimeoutException("Timeout while waiting URL path (currently "
                     + current.get() + ") to become " + path)
         }
+    }
+
+    void notLoggedIn() {
+        this.loggedIn = false
+        currentUserIsUnknownUser()
+        backEnd.mockGetSelfUnauthenticated()
     }
 
     void navigateToScenariosPage() {
