@@ -1,9 +1,6 @@
-package mc
+package uk.badamson.mc
 
 import org.testcontainers.lifecycle.Startable
-import uk.badamson.mc.Authority
-import uk.badamson.mc.BasicUserDetails
-import uk.badamson.mc.User
 import uk.badamson.mc.presentation.McReverseProxyContainer
 
 /*

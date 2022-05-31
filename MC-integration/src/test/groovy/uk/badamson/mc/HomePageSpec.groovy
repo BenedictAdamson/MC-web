@@ -1,10 +1,9 @@
-package mc
+package uk.badamson.mc
 
 
 import org.testcontainers.spock.Testcontainers
 import spock.lang.Shared
 import spock.lang.Specification
-import uk.badamson.mc.NamedUUID
 
 /**
  * © Copyright Benedict Adamson 2019-22.
