@@ -66,7 +66,8 @@ class HomePageTest extends Specification {
         world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(UUID.randomUUID(), 'Squad assault')))
         world.getHomePage()
         then: "MC serves the home page"
-        HomePage homePage = world.getAndAssertExpectedPage(HomePage.class).assertInvariants()
+        HomePage homePage = world.getAndAssertExpectedPage(HomePage.class)
+        homePage.assertInvariants()
         and: "the home page title includes the name of the game"
         homePage.assertTitleIncludesNameOfGame()
         and: "the home page header includes the name of the game"
