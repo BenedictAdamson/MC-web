@@ -109,6 +109,7 @@
             <configuration>
                <includes>
                   <include>**/*IT.java</include>
+                  <include>**/*Spec.class</include>
                </includes>
                <excludes>
                   <!-- Will run the expensive Cucumber integration tests 
