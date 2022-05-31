@@ -1,8 +1,10 @@
-package uk.badamson.mc
+package uk.badamson.mc.presentation
 
 import org.testcontainers.spock.Testcontainers
 import spock.lang.Shared
 import spock.lang.Specification
+import uk.badamson.mc.MockedBeWorld
+import uk.badamson.mc.NamedUUID
 import uk.badamson.mc.presentation.HomePage
 
 /**
