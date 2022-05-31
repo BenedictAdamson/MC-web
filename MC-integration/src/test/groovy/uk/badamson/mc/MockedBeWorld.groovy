@@ -132,7 +132,6 @@ final class MockedBeWorld implements Startable {
                 .withNetwork(network)
         browser.start()
         webDriver = browser.getWebDriver()
-        getHomePage()
     }
 
     @Override

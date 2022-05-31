@@ -1,6 +1,7 @@
 package uk.badamson.mc
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.mockserver.client.MockServerClient
 import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpResponse
@@ -21,7 +22,6 @@ import java.util.stream.Collectors
 import static org.mockserver.model.Header.header
 import static org.mockserver.model.HttpResponse.notFoundResponse
 import static org.mockserver.model.HttpResponse.response
-
 /*
  * © Copyright Benedict Adamson 2019-20,22.
  *
@@ -50,6 +50,10 @@ final class MockMcBackEnd implements Startable {
     private static final DateTimeFormatter URI_DATETIME_FORMATTER = DateTimeFormatter.ISO_INSTANT
 
     private static final ObjectMapper MAPPER = new ObjectMapper()
+    static {
+        MAPPER = new ObjectMapper()
+        MAPPER.registerModule(new JavaTimeModule());
+    }
 
     private static String gamePath(final Game.Identifier game) {
         Objects.requireNonNull(game, 'game')
@@ -367,7 +371,7 @@ final class MockMcBackEnd implements Startable {
 
     private static HttpRequest mayJoinGameRequest(@Nonnull final Game.Identifier game) {
         def request = HttpRequest.request(gamePlayersPath(game))
-                .withPathParameter('mayJoin', null)
+                .withPathParameter('mayJoin')
                 .withMethod('GET')
         acceptJson(request)
         request

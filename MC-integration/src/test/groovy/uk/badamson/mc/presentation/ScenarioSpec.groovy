@@ -3,7 +3,12 @@ package uk.badamson.mc.presentation
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
+import uk.badamson.mc.Game
 import uk.badamson.mc.MockedBeWorld
+import uk.badamson.mc.NamedUUID
+import uk.badamson.mc.Scenario
+
+import java.time.Instant
 
 /** © Copyright Benedict Adamson 2019,20,22.
  *
@@ -27,6 +32,12 @@ import uk.badamson.mc.MockedBeWorld
  * The Mission Command game provides multiple scenarios that can be played.
  */
 class ScenarioSpec extends Specification {
+  private static final def scenarioId = UUID.randomUUID()
+  private static final List<NamedUUID> characters = List.of(new NamedUUID(UUID.randomUUID(), 'Squad leader'))
+  private static final def scenario = new Scenario(scenarioId, 'Squad assault', 'Basic fire and movement tactics', characters)
+  private static final def gameCreationTime = Instant.parse('2022-05-31T20:00:00Z')
+  private static final def gameId = new Game.Identifier(scenarioId, gameCreationTime)
+  private static final def game = new Game(gameId, Game.RunState.RUNNING)
 
   @Shared
   MockedBeWorld world = new MockedBeWorld()
@@ -50,7 +61,10 @@ class ScenarioSpec extends Specification {
 
   def "List scenarios"() {
     when: "examine scenarios"
+    world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(scenarioId, 'Squad assault')))
+    world.getHomePage()
     world.navigateToScenariosPage()
+
     then: "the response is a list of scenarios"
     def scenariosPage = world.getAndAssertExpectedPage(ScenariosPage.class)
     scenariosPage.assertInvariants()
@@ -59,12 +73,34 @@ class ScenarioSpec extends Specification {
 
   def "Examine scenario anonymously"() {
     given: "a scenario that has a game"
+    world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(scenarioId, 'Squad assault')))
+    world.backEnd.mockGetScenario(scenario)
+    world.backEnd.mockGetGameCreationTimes(scenarioId, Set.of(gameCreationTime))
+    world.backEnd.mockGetGame(game)
+    world.backEnd.mockMayJoinGame(gameId, false)
+
     and: "not logged in"
+    world.notLoggedIn()
+
     when: "examine the scenario"
+    world.navigateToScenariosPage()
+    final def scenariosPage = world.getExpectedPage(ScenariosPage.class)
+    final int index = 0
+    world.setExpectedPage(scenariosPage.navigateToScenario(index))
+
     then: "the scenario includes the scenario description"
+    def scenarioPage = world.getExpectedPage(ScenarioPage.class)
+    scenarioPage.assertInvariants()
+    //TODO test presence of description
+
     and: "the scenario includes the list of playable characters of that scenario"
+    scenarioPage.assertHasListOfCharacters()
+
     and: "the scenario includes the list of games of that scenario"
+    scenarioPage.assertHasListOfGames()
+
     and: "it does not allow examination of games of the scenario"
+    !scenarioPage.hasLinksToGames()
   }
 
   @Unroll
