@@ -31,7 +31,7 @@ import uk.badamson.mc.presentation.HomePage
  * It should be easy for users to access the home-page of an MC server, and know they have got the right page.
  */
 @Testcontainers
-class HomePageTest extends Specification {
+class HomePageSpec extends Specification {
 
     @Shared
     MockedBeWorld world = new MockedBeWorld()
