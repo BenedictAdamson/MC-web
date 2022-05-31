@@ -1,9 +1,6 @@
 package uk.badamson.mc
 
-import org.openqa.selenium.By
-import org.openqa.selenium.WebDriver
-import org.openqa.selenium.WebDriverException
-import org.openqa.selenium.WebElement
+import org.openqa.selenium.*
 import org.openqa.selenium.firefox.FirefoxOptions
 import org.openqa.selenium.remote.RemoteWebDriver
 import org.openqa.selenium.support.ui.WebDriverWait
@@ -19,10 +16,13 @@ import uk.badamson.mc.presentation.Page
 
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
+import java.nio.file.Files
+import java.nio.file.Path
+import java.text.SimpleDateFormat
 import java.time.Duration
+import java.util.NoSuchElementException
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicReference
-
 /*
  * © Copyright Benedict Adamson 2019-22.
  *
@@ -45,7 +45,9 @@ import java.util.concurrent.atomic.AtomicReference
 final class MockedBeWorld implements Startable {
     private static final String FE_HOST = "fe"
     private static final String INGRESS_HOST = "in"
+
     private static final URI BASE_INGRESS_URI = new URI('http', INGRESS_HOST, null, null)
+    private static final Path DEFAULT_FAILURE_RECORDING_DIRECTORY = Path.of('.', 'target')
 
     static String getPathOfUrl(final String url) {
         return URI.create(url).getPath()
@@ -59,6 +61,7 @@ final class MockedBeWorld implements Startable {
 
     private static final DockerImageName BROWSER_IMAGE_NAME = DockerImageName.parse("selenium/standalone-firefox:4.1.4")
 
+    private final Path failureRecordingDirectory
     private final Network network = Network.newNetwork()
     private final McFrontEndContainer fe = new McFrontEndContainer()
             .withNetwork(network).withNetworkAliases(FE_HOST)
@@ -80,6 +83,10 @@ final class MockedBeWorld implements Startable {
     private User currentUser
 
     private boolean loggedIn
+
+    MockedBeWorld(@Nullable final Path failureRecordingDirectory = DEFAULT_FAILURE_RECORDING_DIRECTORY) {
+        this.failureRecordingDirectory = failureRecordingDirectory
+    }
 
     MockMcBackEnd getBackEnd() {
         be
@@ -130,6 +137,15 @@ final class MockedBeWorld implements Startable {
         browser.withCapabilities(new FirefoxOptions().addPreference(
                 "security.insecure_field_warning.contextual.enabled", false))
                 .withNetwork(network)
+        if (failureRecordingDirectory != null) {
+            try {
+                Files.createDirectories(failureRecordingDirectory)
+            } catch (final IOException e) {
+                throw new IllegalArgumentException(e)
+            }
+            browser.withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.RECORD_FAILING,
+                    failureRecordingDirectory.toFile())
+        }
         browser.start()
         webDriver = browser.getWebDriver()
     }
@@ -137,9 +153,8 @@ final class MockedBeWorld implements Startable {
     @Override
     void close() {
         cleanup()
-        ingress.close()
-        be.close()
-        fe.close()
+        stop()
+        network.close()
     }
 
     private User createUser(final Set<Authority> authorities) {
@@ -195,6 +210,19 @@ final class MockedBeWorld implements Startable {
         if (browser != null) {
             browser.close()
             browser = null
+        }
+    }
+
+    void retainScreenshot(@Nonnull final String baseFileName) {
+        if (failureRecordingDirectory != null && webDriver != null) {
+            final var leafName = "${baseFileName}.png"
+            final var path = failureRecordingDirectory.resolve(leafName)
+            try {
+                final var bytes = webDriver.getScreenshotAs(OutputType.BYTES)
+                Files.write(path, bytes)
+            } catch (final Exception e) {
+                throw new RuntimeException(e)
+            }
         }
     }
 

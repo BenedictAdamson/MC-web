@@ -31,6 +31,10 @@ import uk.badamson.mc.presentation.HomePage
  */
 @Testcontainers
 class HomePageSpec extends Specification {
+    
+    private static final def SPEC_NAME = 'HomePageSpec'
+
+    private static int testIndex = 0
 
     @Shared
     MockedBeWorld world = new MockedBeWorld()
@@ -40,10 +44,12 @@ class HomePageSpec extends Specification {
     }
 
     void setup() {
+        ++testIndex
         world.setup()
     }
 
     void cleanup() {
+        world.retainScreenshot("${SPEC_NAME}-${testIndex}")
         world.cleanup()
     }
 

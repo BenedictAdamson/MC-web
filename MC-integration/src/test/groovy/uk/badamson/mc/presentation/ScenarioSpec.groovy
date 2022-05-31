@@ -1,5 +1,6 @@
 package uk.badamson.mc.presentation
 
+import org.testcontainers.spock.Testcontainers
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -31,13 +32,19 @@ import java.time.Instant
 /**
  * The Mission Command game provides multiple scenarios that can be played.
  */
+@Testcontainers
 class ScenarioSpec extends Specification {
+
+  private static final def SPEC_NAME = 'ScenarioSpec'
+
   private static final def scenarioId = UUID.randomUUID()
   private static final List<NamedUUID> characters = List.of(new NamedUUID(UUID.randomUUID(), 'Squad leader'))
   private static final def scenario = new Scenario(scenarioId, 'Squad assault', 'Basic fire and movement tactics', characters)
   private static final def gameCreationTime = Instant.parse('2022-05-31T20:00:00Z')
   private static final def gameId = new Game.Identifier(scenarioId, gameCreationTime)
   private static final def game = new Game(gameId, Game.RunState.RUNNING)
+
+  private static int testIndex = 0
 
   @Shared
   MockedBeWorld world = new MockedBeWorld()
@@ -47,10 +54,12 @@ class ScenarioSpec extends Specification {
   }
 
   void setup() {
+    ++testIndex
     world.setup()
   }
 
   void cleanup() {
+    world.retainScreenshot("${SPEC_NAME}-${testIndex}")
     world.cleanup()
   }
 
