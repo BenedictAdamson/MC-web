@@ -183,7 +183,9 @@ final class MockedBeWorld implements Startable {
 
    @Override
    void start() {
-      backEnd.start()
+      be.start()
+      fe.start()
+      ingress.start()
    }
 
    void setup() {
@@ -204,8 +206,10 @@ final class MockedBeWorld implements Startable {
 
    @Override
    void stop() {
-     cleanup()
-      backEnd.stop()
+      cleanup()
+      ingress.stop()
+      fe.stop()
+      be.stop()
    }
 
    private BasicUserDetails generateBasicUserDetails(
