@@ -1,7 +1,9 @@
 package uk.badamson.mc.presentation
 
+import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
+import uk.badamson.mc.MockedBeWorld
 
 /** © Copyright Benedict Adamson 2019,20,22.
  *
@@ -25,6 +27,26 @@ import spock.lang.Unroll
  * The Mission Command game provides multiple scenarios that can be played.
  */
 class ScenarioSpec extends Specification {
+
+  @Shared
+  MockedBeWorld world = new MockedBeWorld()
+
+  void setupSpec() {
+    world.start()
+  }
+
+  void setup() {
+    world.setup()
+  }
+
+  void cleanup() {
+    world.cleanup()
+  }
+
+  void cleanupSpec() {
+    world.stop()
+    world.close()
+  }
 
   def "List scenarios"() {
     when: "examine scenarios"
