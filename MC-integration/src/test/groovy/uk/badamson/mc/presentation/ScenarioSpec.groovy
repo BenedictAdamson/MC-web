@@ -50,9 +50,11 @@ class ScenarioSpec extends MockedBeSpecification {
     }
 
     def "List scenarios"() {
-        when: "examine scenarios"
+        given: "back-end can provide a list of scenarios"
         world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, SCENARIO_TITLE)))
         world.backEnd.mockGetScenario(SCENARIO)
+
+        when: "examine scenarios"
         world.getHomePage()
         world.navigateToScenariosPage()
 
