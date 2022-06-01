@@ -6,6 +6,7 @@ import org.openqa.selenium.remote.RemoteWebDriver
 import org.openqa.selenium.support.ui.WebDriverWait
 import org.opentest4j.AssertionFailedError
 import org.testcontainers.containers.BrowserWebDriverContainer
+import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.Network
 import org.testcontainers.lifecycle.Startable
 import org.testcontainers.lifecycle.TestDescription
@@ -18,6 +19,7 @@ import uk.badamson.mc.presentation.Page
 
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
@@ -46,6 +48,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 final class MockedBeWorld implements Startable, TestLifecycleAware {
     private static final String FE_HOST = "fe"
+    private static final String BE_HOST = MockMcBackEnd.BE_HOST
     private static final String INGRESS_HOST = "in"
 
     private static final URI BASE_INGRESS_URI = new URI('http', INGRESS_HOST, null, null)
@@ -224,6 +227,23 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
         }
     }
 
+    private void retainLogFiles(@Nonnull final String baseFileName) {
+        retainLogFile(failureRecordingDirectory, baseFileName, BE_HOST, be.container)
+        retainLogFile(failureRecordingDirectory, baseFileName, FE_HOST, fe)
+        retainLogFile(failureRecordingDirectory, baseFileName, INGRESS_HOST, ingress)
+    }
+
+    private static void retainLogFile(final Path directory, final String baseFileName, final String host,
+                                      final GenericContainer<?> container) {
+        final var leafName = baseFileName + '-' + host + '.log'
+        final var path = directory.resolve(leafName)
+        try {
+            Files.writeString(path, container.getLogs(), StandardCharsets.UTF_8)
+        } catch (final IOException e) {
+            throw new RuntimeException(e)
+        }
+    }
+
     @Override
     void stop() {
         cleanup()
@@ -244,7 +264,9 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
                    final Optional<Throwable> throwable) {
         browser.afterTest(description, throwable)
         if (failureRecordingDirectory != null) {
-            retainScreenshot(description.getFilesystemFriendlyName())
+            def baseFileName = description.getFilesystemFriendlyName()
+            retainLogFiles(baseFileName)
+            retainScreenshot(baseFileName)
         }
         cleanup()
     }

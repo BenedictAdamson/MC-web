@@ -7,6 +7,7 @@ import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpResponse
 import org.mockserver.model.HttpStatusCode
 import org.mockserver.model.MediaType
+import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.MockServerContainer
 import org.testcontainers.containers.Network
 import org.testcontainers.lifecycle.Startable
@@ -42,7 +43,7 @@ import static org.mockserver.model.HttpResponse.response
  */
 
 final class MockMcBackEnd implements Startable {
-    private static final String BE_HOST = 'be'
+    static final String BE_HOST = 'be'
 
     private static final DockerImageName MOCKSERVER_IMAGE =
             DockerImageName.parse('mockserver/mockserver:5.13.2')
@@ -92,6 +93,10 @@ final class MockMcBackEnd implements Startable {
     MockMcBackEnd(Network network) {
         mockServer = new MockServerContainer(MOCKSERVER_IMAGE)
                 .withNetwork(network).withNetworkAliases(BE_HOST)
+    }
+
+    GenericContainer<?> getContainer() {
+        mockServer
     }
 
     @Override
