@@ -33,12 +33,12 @@ import java.time.Instant
 @Testcontainers
 class ScenarioSpec extends MockedBeSpecification {
 
-    private static final def scenarioId = UUID.randomUUID()
-    private static final List<NamedUUID> characters = List.of(new NamedUUID(UUID.randomUUID(), 'Squad leader'))
-    private static final def scenario = new Scenario(scenarioId, 'Squad assault', 'Basic fire and movement tactics', characters)
-    private static final def gameCreationTime = Instant.parse('2022-05-31T20:00:00Z')
-    private static final def gameId = new Game.Identifier(scenarioId, gameCreationTime)
-    private static final def game = new Game(gameId, Game.RunState.RUNNING)
+    private static final def SCENARIO_ID = UUID.randomUUID()
+    private static final List<NamedUUID> CHARACTERS = List.of(new NamedUUID(UUID.randomUUID(), 'Squad leader'))
+    private static final def SCENARIO = new Scenario(SCENARIO_ID, 'Squad assault', 'Basic fire and movement tactics', CHARACTERS)
+    private static final def GAME_CREATION_TIME = Instant.parse('2022-05-31T20:00:00Z')
+    private static final def GAME_ID = new Game.Identifier(SCENARIO_ID, GAME_CREATION_TIME)
+    private static final def GAME = new Game(GAME_ID, Game.RunState.RUNNING)
 
     @Override
     protected final String getSpecificationName() {
@@ -47,7 +47,7 @@ class ScenarioSpec extends MockedBeSpecification {
 
     def "List scenarios"() {
         when: "examine scenarios"
-        world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(scenarioId, 'Squad assault')))
+        world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, 'Squad assault')))
         world.getHomePage()
         world.navigateToScenariosPage()
 
@@ -59,11 +59,11 @@ class ScenarioSpec extends MockedBeSpecification {
 
     def "Examine scenario anonymously"() {
         given: "a scenario that has a game"
-        world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(scenarioId, 'Squad assault')))
-        world.backEnd.mockGetScenario(scenario)
-        world.backEnd.mockGetGameCreationTimes(scenarioId, Set.of(gameCreationTime))
-        world.backEnd.mockGetGame(game)
-        world.backEnd.mockMayJoinGame(gameId, false)
+        world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, 'Squad assault')))
+        world.backEnd.mockGetScenario(SCENARIO)
+        world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME))
+        world.backEnd.mockGetGame(GAME)
+        world.backEnd.mockMayJoinGame(GAME_ID, false)
 
         and: "not logged in"
         world.notLoggedIn()
