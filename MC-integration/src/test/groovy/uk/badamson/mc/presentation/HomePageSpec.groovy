@@ -1,11 +1,11 @@
 package uk.badamson.mc.presentation
 
+import org.testcontainers.lifecycle.TestDescription
 import org.testcontainers.spock.Testcontainers
 import spock.lang.Shared
 import spock.lang.Specification
 import uk.badamson.mc.MockedBeWorld
 import uk.badamson.mc.NamedUUID
-import uk.badamson.mc.presentation.HomePage
 
 /**
  * © Copyright Benedict Adamson 2019-22.
@@ -31,10 +31,22 @@ import uk.badamson.mc.presentation.HomePage
  */
 @Testcontainers
 class HomePageSpec extends Specification {
-    
+
     private static final def SPEC_NAME = 'HomePageSpec'
 
     private static int testIndex = 0
+
+    private TestDescription description = new TestDescription() {
+        @Override
+        String getTestId() {
+            "${SPEC_NAME}-${testIndex}"
+        }
+
+        @Override
+        String getFilesystemFriendlyName() {
+            getTestId()
+        }
+    }
 
     @Shared
     MockedBeWorld world = new MockedBeWorld()
@@ -45,12 +57,11 @@ class HomePageSpec extends Specification {
 
     void setup() {
         ++testIndex
-        world.setup()
+        world.beforeTest(description)
     }
 
     void cleanup() {
-        world.retainScreenshot("${SPEC_NAME}-${testIndex}")
-        world.cleanup()
+        world.afterTest(description, Optional.empty())
     }
 
     void cleanupSpec() {

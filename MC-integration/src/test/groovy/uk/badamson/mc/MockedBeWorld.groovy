@@ -8,6 +8,8 @@ import org.opentest4j.AssertionFailedError
 import org.testcontainers.containers.BrowserWebDriverContainer
 import org.testcontainers.containers.Network
 import org.testcontainers.lifecycle.Startable
+import org.testcontainers.lifecycle.TestDescription
+import org.testcontainers.lifecycle.TestLifecycleAware
 import org.testcontainers.utility.DockerImageName
 import uk.badamson.mc.presentation.HomePage
 import uk.badamson.mc.presentation.McFrontEndContainer
@@ -18,11 +20,11 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 import java.nio.file.Files
 import java.nio.file.Path
-import java.text.SimpleDateFormat
 import java.time.Duration
 import java.util.NoSuchElementException
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicReference
+
 /*
  * © Copyright Benedict Adamson 2019-22.
  *
@@ -42,7 +44,7 @@ import java.util.concurrent.atomic.AtomicReference
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-final class MockedBeWorld implements Startable {
+final class MockedBeWorld implements Startable, TestLifecycleAware {
     private static final String FE_HOST = "fe"
     private static final String INGRESS_HOST = "in"
 
@@ -197,11 +199,7 @@ final class MockedBeWorld implements Startable {
         ingress.start()
     }
 
-    void setup() {
-        createAndStartBrowser()
-    }
-
-    void cleanup() {
+    private void cleanup() {
         expectedPage = null// expectedPage holds reference to webDriver
         if (webDriver != null) {
             webDriver.close()
@@ -232,6 +230,23 @@ final class MockedBeWorld implements Startable {
         ingress.stop()
         fe.stop()
         be.stop()
+    }
+
+
+    @Override
+    void beforeTest(final TestDescription description) {
+        createAndStartBrowser()
+        browser.beforeTest(description)
+    }
+
+    @Override
+    void afterTest(final TestDescription description,
+                   final Optional<Throwable> throwable) {
+        browser.afterTest(description, throwable)
+        if (failureRecordingDirectory != null) {
+            retainScreenshot(description.getFilesystemFriendlyName())
+        }
+        cleanup()
     }
 
     private BasicUserDetails generateBasicUserDetails(

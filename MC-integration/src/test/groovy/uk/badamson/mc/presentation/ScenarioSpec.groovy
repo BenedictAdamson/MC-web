@@ -1,5 +1,6 @@
 package uk.badamson.mc.presentation
 
+import org.testcontainers.lifecycle.TestDescription
 import org.testcontainers.spock.Testcontainers
 import spock.lang.Shared
 import spock.lang.Specification
@@ -35,95 +36,107 @@ import java.time.Instant
 @Testcontainers
 class ScenarioSpec extends Specification {
 
-  private static final def SPEC_NAME = 'ScenarioSpec'
+    private static final def SPEC_NAME = 'ScenarioSpec'
 
-  private static final def scenarioId = UUID.randomUUID()
-  private static final List<NamedUUID> characters = List.of(new NamedUUID(UUID.randomUUID(), 'Squad leader'))
-  private static final def scenario = new Scenario(scenarioId, 'Squad assault', 'Basic fire and movement tactics', characters)
-  private static final def gameCreationTime = Instant.parse('2022-05-31T20:00:00Z')
-  private static final def gameId = new Game.Identifier(scenarioId, gameCreationTime)
-  private static final def game = new Game(gameId, Game.RunState.RUNNING)
+    private static final def scenarioId = UUID.randomUUID()
+    private static final List<NamedUUID> characters = List.of(new NamedUUID(UUID.randomUUID(), 'Squad leader'))
+    private static final def scenario = new Scenario(scenarioId, 'Squad assault', 'Basic fire and movement tactics', characters)
+    private static final def gameCreationTime = Instant.parse('2022-05-31T20:00:00Z')
+    private static final def gameId = new Game.Identifier(scenarioId, gameCreationTime)
+    private static final def game = new Game(gameId, Game.RunState.RUNNING)
 
-  private static int testIndex = 0
+    private static int testIndex = 0
 
-  @Shared
-  MockedBeWorld world = new MockedBeWorld()
+    private TestDescription description = new TestDescription() {
+        @Override
+        String getTestId() {
+            "${SPEC_NAME}-${testIndex}"
+        }
 
-  void setupSpec() {
-    world.start()
-  }
+        @Override
+        String getFilesystemFriendlyName() {
+            getTestId()
+        }
+    }
 
-  void setup() {
-    ++testIndex
-    world.setup()
-  }
+    @Shared
+    MockedBeWorld world = new MockedBeWorld()
 
-  void cleanup() {
-    world.retainScreenshot("${SPEC_NAME}-${testIndex}")
-    world.cleanup()
-  }
+    void setupSpec() {
+        world.start()
+    }
 
-  void cleanupSpec() {
-    world.stop()
-    world.close()
-  }
+    void setup() {
+        ++testIndex
+        world.beforeTest(description)
+    }
 
-  def "List scenarios"() {
-    when: "examine scenarios"
-    world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(scenarioId, 'Squad assault')))
-    world.getHomePage()
-    world.navigateToScenariosPage()
+    void cleanup() {
+        world.afterTest(description, Optional.empty())
+    }
 
-    then: "the response is a list of scenarios"
-    def scenariosPage = world.getAndAssertExpectedPage(ScenariosPage.class)
-    scenariosPage.assertInvariants()
-    scenariosPage.assertHasListOfScenarios()
-  }
+    void cleanupSpec() {
+        world.stop()
+        world.close()
+    }
 
-  def "Examine scenario anonymously"() {
-    given: "a scenario that has a game"
-    world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(scenarioId, 'Squad assault')))
-    world.backEnd.mockGetScenario(scenario)
-    world.backEnd.mockGetGameCreationTimes(scenarioId, Set.of(gameCreationTime))
-    world.backEnd.mockGetGame(game)
-    world.backEnd.mockMayJoinGame(gameId, false)
+    def "List scenarios"() {
+        when: "examine scenarios"
+        world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(scenarioId, 'Squad assault')))
+        world.getHomePage()
+        world.navigateToScenariosPage()
 
-    and: "not logged in"
-    world.notLoggedIn()
+        then: "the response is a list of scenarios"
+        def scenariosPage = world.getAndAssertExpectedPage(ScenariosPage.class)
+        scenariosPage.assertInvariants()
+        scenariosPage.assertHasListOfScenarios()
+    }
 
-    when: "examine the scenario"
-    world.navigateToScenariosPage()
-    final def scenariosPage = world.getExpectedPage(ScenariosPage.class)
-    final int index = 0
-    world.setExpectedPage(scenariosPage.navigateToScenario(index))
+    def "Examine scenario anonymously"() {
+        given: "a scenario that has a game"
+        world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(scenarioId, 'Squad assault')))
+        world.backEnd.mockGetScenario(scenario)
+        world.backEnd.mockGetGameCreationTimes(scenarioId, Set.of(gameCreationTime))
+        world.backEnd.mockGetGame(game)
+        world.backEnd.mockMayJoinGame(gameId, false)
 
-    then: "the scenario includes the scenario description"
-    def scenarioPage = world.getExpectedPage(ScenarioPage.class)
-    scenarioPage.assertInvariants()
-    //TODO test presence of description
+        and: "not logged in"
+        world.notLoggedIn()
 
-    and: "the scenario includes the list of playable characters of that scenario"
-    scenarioPage.assertHasListOfCharacters()
+        when: "examine the scenario"
+        world.navigateToScenariosPage()
+        final def scenariosPage = world.getExpectedPage(ScenariosPage.class)
+        final int index = 0
+        world.setExpectedPage(scenariosPage.navigateToScenario(index))
 
-    and: "the scenario includes the list of games of that scenario"
-    scenarioPage.assertHasListOfGames()
+        then: "the scenario includes the scenario description"
+        def scenarioPage = world.getExpectedPage(ScenarioPage.class)
+        scenarioPage.assertInvariants()
+        //TODO test presence of description
 
-    and: "it does not allow examination of games of the scenario"
-    !scenarioPage.hasLinksToGames()
-  }
+        and: "the scenario includes the list of playable characters of that scenario"
+        scenarioPage.assertHasListOfCharacters()
 
-  @Unroll
-  def "Examine scenario with authorization"() {
-    given: "a scenario that has a game"
-    and: "user has the $role role"
-    and: "logged in"
-    when: "examine the scenario"
-    then: "the scenario includes the scenario description"
-    and: "the scenario includes the list of playable characters of that scenario"
-    and: "the scenario includes the list of games of that scenario"
-    and: "it allows examination of games of the scenario"
+        and: "the scenario includes the list of games of that scenario"
+        scenarioPage.assertHasListOfGames()
 
-    where:
-    role << ['player', 'manage games']
-  }
+        and: "it does not allow examination of games of the scenario"
+        !scenarioPage.hasLinksToGames()
+    }
+
+    @Unroll
+    def "Examine scenario with authorization"() {
+        given: "a scenario that has a game"
+        and:
+        "user has the $role role"
+        and: "logged in"
+        when: "examine the scenario"
+        then: "the scenario includes the scenario description"
+        and: "the scenario includes the list of playable characters of that scenario"
+        and: "the scenario includes the list of games of that scenario"
+        and: "it allows examination of games of the scenario"
+
+        where:
+        role << ['player', 'manage games']
+    }
 }
