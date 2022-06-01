@@ -47,7 +47,7 @@ final class MockedBeWorld implements Startable {
     private static final String INGRESS_HOST = "in"
 
     private static final URI BASE_INGRESS_URI = new URI('http', INGRESS_HOST, null, null)
-    private static final Path DEFAULT_FAILURE_RECORDING_DIRECTORY = Path.of('.', 'target')
+    private static final Path DEFAULT_FAILURE_RECORDING_DIRECTORY = Path.of('.', 'target', 'test-logs')
 
     static String getPathOfUrl(final String url) {
         return URI.create(url).getPath()
