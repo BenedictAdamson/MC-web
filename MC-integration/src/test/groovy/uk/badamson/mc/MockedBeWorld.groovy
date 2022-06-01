@@ -143,7 +143,7 @@ final class MockedBeWorld implements Startable {
             } catch (final IOException e) {
                 throw new IllegalArgumentException(e)
             }
-            browser.withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.RECORD_FAILING,
+            browser.withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.RECORD_ALL,
                     failureRecordingDirectory.toFile())
         }
         browser.start()
