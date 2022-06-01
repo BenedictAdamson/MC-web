@@ -52,10 +52,11 @@ class ScenarioSpec extends MockedBeSpecification {
     def "List scenarios"() {
         when: "examine scenarios"
         world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, SCENARIO_TITLE)))
+        world.backEnd.mockGetScenario(SCENARIO)
         world.getHomePage()
         world.navigateToScenariosPage()
 
-        then: "the response is a list of scenarios"
+        then: "the response is the list of scenarios"
         def scenariosPage = world.getAndAssertExpectedPage(ScenariosPage.class)
         scenariosPage.assertInvariants()
         scenariosPage.assertHasListOfScenarios()
@@ -64,7 +65,7 @@ class ScenarioSpec extends MockedBeSpecification {
 
     def "Examine scenario anonymously"() {
         given: "a scenario that has a game"
-        world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, 'Squad assault')))
+        world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, SCENARIO_TITLE)))
         world.backEnd.mockGetScenario(SCENARIO)
         world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME))
         world.backEnd.mockGetGame(GAME)
