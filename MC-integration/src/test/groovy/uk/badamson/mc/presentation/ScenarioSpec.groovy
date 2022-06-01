@@ -1,12 +1,9 @@
 package uk.badamson.mc.presentation
 
-import org.testcontainers.lifecycle.TestDescription
+
 import org.testcontainers.spock.Testcontainers
-import spock.lang.Shared
-import spock.lang.Specification
 import spock.lang.Unroll
 import uk.badamson.mc.Game
-import uk.badamson.mc.MockedBeWorld
 import uk.badamson.mc.NamedUUID
 import uk.badamson.mc.Scenario
 
@@ -34,9 +31,7 @@ import java.time.Instant
  * The Mission Command game provides multiple scenarios that can be played.
  */
 @Testcontainers
-class ScenarioSpec extends Specification {
-
-    private static final def SPEC_NAME = 'ScenarioSpec'
+class ScenarioSpec extends MockedBeSpecification {
 
     private static final def scenarioId = UUID.randomUUID()
     private static final List<NamedUUID> characters = List.of(new NamedUUID(UUID.randomUUID(), 'Squad leader'))
@@ -45,39 +40,9 @@ class ScenarioSpec extends Specification {
     private static final def gameId = new Game.Identifier(scenarioId, gameCreationTime)
     private static final def game = new Game(gameId, Game.RunState.RUNNING)
 
-    private static int testIndex = 0
-
-    private TestDescription description = new TestDescription() {
-        @Override
-        String getTestId() {
-            "${SPEC_NAME}-${testIndex}"
-        }
-
-        @Override
-        String getFilesystemFriendlyName() {
-            getTestId()
-        }
-    }
-
-    @Shared
-    MockedBeWorld world = new MockedBeWorld()
-
-    void setupSpec() {
-        world.start()
-    }
-
-    void setup() {
-        ++testIndex
-        world.beforeTest(description)
-    }
-
-    void cleanup() {
-        world.afterTest(description, Optional.empty())
-    }
-
-    void cleanupSpec() {
-        world.stop()
-        world.close()
+    @Override
+    protected final String getSpecificationName() {
+        'ScenarioSpec'
     }
 
     def "List scenarios"() {

@@ -29,44 +29,11 @@ import uk.badamson.mc.NamedUUID
 /**
  * It should be easy for users to access the home-page of an MC server, and know they have got the right page.
  */
-@Testcontainers
-class HomePageSpec extends Specification {
+class HomePageSpec extends MockedBeSpecification {
 
-    private static final def SPEC_NAME = 'HomePageSpec'
-
-    private static int testIndex = 0
-
-    private TestDescription description = new TestDescription() {
-        @Override
-        String getTestId() {
-            "${SPEC_NAME}-${testIndex}"
-        }
-
-        @Override
-        String getFilesystemFriendlyName() {
-            getTestId()
-        }
-    }
-
-    @Shared
-    MockedBeWorld world = new MockedBeWorld()
-
-    void setupSpec() {
-        world.start()
-    }
-
-    void setup() {
-        ++testIndex
-        world.beforeTest(description)
-    }
-
-    void cleanup() {
-        world.afterTest(description, Optional.empty())
-    }
-
-    void cleanupSpec() {
-        world.stop()
-        world.close()
+    @Override
+    protected final String getSpecificationName() {
+        'HomePageSpec'
     }
 
     def "Potential user accesses an MC server using a simple URL with the root path"() {
