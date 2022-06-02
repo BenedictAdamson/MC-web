@@ -3,6 +3,7 @@ package uk.badamson.mc.presentation
 
 import org.testcontainers.spock.Testcontainers
 import spock.lang.Unroll
+import uk.badamson.mc.Authority
 import uk.badamson.mc.Game
 import uk.badamson.mc.NamedUUID
 import uk.badamson.mc.Scenario
@@ -103,16 +104,36 @@ class ScenarioSpec extends MockedBeSpecification {
     @Unroll
     def "Examine scenario with authorization"() {
         given: "a scenario that has a game"
-        and:
-        "user has the $role role"
-        and: "logged in"
+        world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, SCENARIO_TITLE)))
+        world.backEnd.mockGetScenario(SCENARIO)
+        world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME))
+        world.backEnd.mockGetGame(GAME)
+        world.backEnd.mockMayJoinGame(GAME_ID, false)
+
+        and: "logged in as a user with the $role role"
+        world.logInAsUserWithTheRole(role)
+
         when: "examine the scenario"
+        world.navigateToScenariosPage()
+        final def scenariosPage = world.getExpectedPage(ScenariosPage.class)
+        final int index = 0
+        world.setExpectedPage(scenariosPage.navigateToScenario(index))
+
         then: "the scenario includes the scenario description"
+        def scenarioPage = world.getExpectedPage(ScenarioPage.class)
+        scenarioPage.assertInvariants()
+        //TODO test presence of description
+
         and: "the scenario includes the list of playable characters of that scenario"
+        scenarioPage.assertHasListOfCharacters()
+
         and: "the scenario includes the list of games of that scenario"
+        scenarioPage.assertHasListOfGames()
+
         and: "it allows examination of games of the scenario"
+        scenarioPage.hasLinksToGames()
 
         where:
-        role << ['player', 'manage games']
+        role << [Authority.ROLE_PLAYER, Authority.ROLE_MANAGE_GAMES]
     }
 }

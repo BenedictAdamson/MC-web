@@ -54,7 +54,7 @@ final class MockMcBackEnd extends MockServerContainer {
 
     private static String gamePath(final Game.Identifier game) {
         Objects.requireNonNull(game, 'game')
-        return gamesListPath(game.getScenario()) + '/' + URI_DATETIME_FORMATTER.format(game.getCreated())
+        return gamesListPath(game.getScenario()) + URI_DATETIME_FORMATTER.format(game.getCreated())
     }
 
     private static String gamePlayersPath(final Game.Identifier game) {
@@ -62,7 +62,7 @@ final class MockMcBackEnd extends MockServerContainer {
     }
 
     private static String gamesListPath(final UUID scenario) {
-        scenarioPath(scenario) + '/game'
+        scenarioPath(scenario) + '/game/'
     }
 
     private static String scenarioPath(final UUID scenario) {

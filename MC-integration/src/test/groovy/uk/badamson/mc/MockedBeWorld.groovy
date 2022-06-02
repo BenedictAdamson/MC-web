@@ -82,7 +82,7 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
 
     private Page expectedPage
 
-    private User currentUser
+    private User currentLoggedInUser
 
     private boolean loggedIn
 
@@ -160,7 +160,7 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
         Objects.requireNonNull(role, "role")
 
         final var authorities = EnumSet.complementOf(EnumSet.of(role))
-        currentUser = createUser(authorities)
+        currentLoggedInUser = createUser(authorities)
     }
 
     void currentUserHasRoles(final Set<Authority> included,
@@ -171,16 +171,12 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
             throw new IllegalArgumentException("Contradictory role constraints")
         }
 
-        currentUser = createUser(included)
+        currentLoggedInUser = createUser(included)
     }
 
     void currentUserIsAdministrator() {
         Objects.requireNonNull(administratorUser, "administratorUser")
-        currentUser = administratorUser
-    }
-
-    void currentUserIsUnknownUser() {
-        currentUser = null
+        currentLoggedInUser = administratorUser
     }
 
     @Override
@@ -313,7 +309,7 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
 
     @Nullable
     User getCurrentUser() {
-        return currentUser
+        return currentLoggedInUser
     }
 
     /**
@@ -355,17 +351,8 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
         return homePage
     }
 
-    /**
-     * <p>
-     * The currently logged-in user.
-     * </p>
-     * <p>
-     * Or null if no user is currently logged-in.</li>
-     *
-     * @return the user
-     */
     User getLoggedInUser() {
-        return loggedIn ? currentUser : null
+        currentLoggedInUser
     }
 
     /**
@@ -462,9 +449,15 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
     }
 
     void notLoggedIn() {
-        this.loggedIn = false
-        currentUserIsUnknownUser()
+        currentLoggedInUser = null
         backEnd.mockGetSelfUnauthenticated()
+    }
+
+    HomePage logInAsUserWithTheRole(final Authority role) {
+        currentLoggedInUser = createUser(EnumSet.of(role))
+        backEnd.mockLogin(UUID.randomUUID().toString(), UUID.randomUUID().toString())
+        backEnd.mockGetSelf(currentLoggedInUser)
+        getHomePage()
     }
 
     void navigateToScenariosPage() {
