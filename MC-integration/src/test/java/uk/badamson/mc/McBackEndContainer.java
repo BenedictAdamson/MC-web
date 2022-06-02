@@ -62,7 +62,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
    public static final String HEALTHCHECK_PATH = "/actuator/health";
 
-   public static final int PORT = 80;
+   public static final int PORT = 8080;
 
    public static final String VERSION = Version.VERSION;
 

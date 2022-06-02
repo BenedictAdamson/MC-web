@@ -1,6 +1,6 @@
 # Helm resource file for the MC project,
 # declaring part of the MC application in a cluster.
-# © Copyright Benedict Adamson 2019-20,22.
+# © Copyright Benedict Adamson 2019-20.
 #
 # This file is part of MC.
 #
@@ -41,7 +41,7 @@ spec:
       - name: mc-back-end
         image: benedictadamson/mc-back-end:{{ .Chart.AppVersion }}
         ports:
-        - containerPort: 80
+        - containerPort: 8080
         args:
         - --spring.data.mongodb.host={{ .Release.Name }}-db-svc
         env:
@@ -58,12 +58,12 @@ spec:
         readinessProbe:
           httpGet:
             path: /actuator/health/readiness
-            port: 80
+            port: 8080
           initialDelaySeconds: 13
           periodSeconds: 5
         livenessProbe:
           httpGet:
             path: /actuator/health/liveness
-            port: 80
+            port: 8080
           initialDelaySeconds: 20
           periodSeconds: 59

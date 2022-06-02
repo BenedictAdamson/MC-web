@@ -31,4 +31,4 @@ spec:
     provides: be
   ports:
   - protocol: TCP
-    port: 80
+    port: 8080
