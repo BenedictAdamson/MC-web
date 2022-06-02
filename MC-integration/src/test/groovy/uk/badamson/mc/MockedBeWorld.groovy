@@ -84,8 +84,6 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
 
     private User currentLoggedInUser
 
-    private boolean loggedIn
-
     MockedBeWorld(@Nullable final Path failureRecordingDirectory = DEFAULT_FAILURE_RECORDING_DIRECTORY) {
         fe.withNetwork(network).withNetworkAliases(FE_HOST)
         ms.withNetwork(network).withNetworkAliases(MS_HOST)
@@ -148,6 +146,10 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
         cleanup()
         stop()
         network.close()
+    }
+
+    User createUserWithRole(Authority role) {
+        createUser(EnumSet.of(role))
     }
 
     private User createUser(final Set<Authority> authorities) {
@@ -308,11 +310,6 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
         return getPathOfUrl(getWebDriver().getCurrentUrl())
     }
 
-    @Nullable
-    User getCurrentUser() {
-        return currentLoggedInUser
-    }
-
     /**
      * <p>
      * Get the current expected page, which is expected to be of a given class.
@@ -352,6 +349,7 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
         return homePage
     }
 
+    @Nullable
     User getLoggedInUser() {
         currentLoggedInUser
     }
@@ -455,7 +453,16 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
     }
 
     HomePage logInAsUserWithTheRole(final Authority role) {
-        currentLoggedInUser = createUser(EnumSet.of(role))
+        logInAsUser(createUser(EnumSet.of(role)))
+    }
+
+    HomePage logInAsUserWithoutTheRole(final Authority role) {
+        final Set<Authority> roles = EnumSet.complementOf(EnumSet.of(role))
+        logInAsUser(createUser(roles))
+    }
+
+    HomePage logInAsUser(final User user) {
+        currentLoggedInUser = user
         backEnd.mockLogin(UUID.randomUUID().toString(), UUID.randomUUID().toString())
         backEnd.mockGetSelf(currentLoggedInUser)
         getHomePage()

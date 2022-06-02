@@ -3,6 +3,7 @@ package uk.badamson.mc
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.mockserver.client.MockServerClient
+import org.mockserver.matchers.Times
 import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpResponse
 import org.mockserver.model.HttpStatusCode
@@ -152,9 +153,9 @@ final class MockMcBackEnd extends MockServerContainer {
                 .withStatusCode(HttpStatusCode.UNAUTHORIZED_401.code())
     }
 
-    void mockGetGameCreationTimes(@Nonnull UUID scenario, @Nonnull Set<Instant> times) {
-        mockServerClient.when(getGameCreationTimesRequest(scenario))
-                .respond(getGameCreationTimesResponse(times))
+    void mockGetGameCreationTimes(@Nonnull UUID scenario, @Nonnull Set<Instant> gameCreationTimes, Times times = Times.unlimited()) {
+        mockServerClient.when(getGameCreationTimesRequest(scenario), times)
+                .respond(getGameCreationTimesResponse(gameCreationTimes))
     }
 
     void mockGetGameCreationTimesForNoSuchGame(@Nonnull UUID scenario) {
@@ -184,8 +185,8 @@ final class MockMcBackEnd extends MockServerContainer {
                 .withBody(encodeAsJson(body))
     }
 
-    void mockGetGame(@Nonnull final Game game) {
-        mockServerClient.when(getGameRequest(game.identifier))
+    void mockGetGame(@Nonnull final Game game, Times times = Times.unlimited()) {
+        mockServerClient.when(getGameRequest(game.identifier), times)
                 .respond(getGameResponse(game))
     }
 
@@ -225,7 +226,7 @@ final class MockMcBackEnd extends MockServerContainer {
 
     private static HttpRequest startGameRequest(@Nonnull final Game.Identifier game) {
         HttpRequest.request(gamePath(game))
-                .withPathParameter('start')
+                .withQueryStringParameter('start', '')
                 .withMethod('POST')
     }
 
@@ -250,7 +251,7 @@ final class MockMcBackEnd extends MockServerContainer {
 
     private static HttpRequest stopGameRequest(@Nonnull final Game.Identifier game) {
         HttpRequest.request(gamePath(game))
-                .withPathParameter('stop')
+                .withQueryStringParameter('stop', '')
                 .withMethod('POST')
     }
 
@@ -275,7 +276,7 @@ final class MockMcBackEnd extends MockServerContainer {
 
     private static HttpRequest endRecruitmentRequest(@Nonnull final Game.Identifier game) {
         HttpRequest.request(gamePlayersPath(game))
-                .withPathParameter('endRecruitment')
+                .withQueryStringParameter('endRecruitment', '')
                 .withMethod('POST')
     }
 
@@ -303,8 +304,8 @@ final class MockMcBackEnd extends MockServerContainer {
         foundResponse(gamePath(game))
     }
 
-    void mockGetGamePlayers(@Nonnull GamePlayers players) {
-        mockServerClient.when(getGamePlayersRequest(players.game))
+    void mockGetGamePlayers(@Nonnull GamePlayers players, Times times = Times.unlimited()) {
+        mockServerClient.when(getGamePlayersRequest(players.game), times)
                 .respond(getGamePlayersResponse(players))
     }
 
@@ -321,6 +322,7 @@ final class MockMcBackEnd extends MockServerContainer {
     private static HttpRequest getGamePlayersRequest(@Nonnull final Game.Identifier game) {
         HttpRequest.request(gamePlayersPath(game))
                 .withMethod('GET')
+                .withQueryStringParameter('!mayJoin')
     }
 
     private static HttpResponse getGamePlayersResponse(@Nonnull GamePlayers players) {
@@ -344,7 +346,7 @@ final class MockMcBackEnd extends MockServerContainer {
 
     private static HttpRequest joinGameRequest(@Nonnull final Game.Identifier game) {
         HttpRequest.request(gamePlayersPath(game))
-                .withPathParameter('join', null)
+                .withQueryStringParameter('join', '')
                 .withMethod('POST')
     }
 
@@ -364,7 +366,7 @@ final class MockMcBackEnd extends MockServerContainer {
 
     private static HttpRequest mayJoinGameRequest(@Nonnull final Game.Identifier game) {
         HttpRequest.request(gamePlayersPath(game))
-                .withPathParameter('mayJoin')
+                .withQueryStringParameter('mayJoin', '')
                 .withMethod('GET')
     }
 
@@ -455,13 +457,13 @@ final class MockMcBackEnd extends MockServerContainer {
         jsonResponse(users)
     }
 
-    void mockGetSelf(@Nonnull final User user) {
-        mockServerClient.when(getSelfRequest())
+    void mockGetSelf(@Nonnull final User user, Times times = Times.unlimited()) {
+        mockServerClient.when(getSelfRequest(), times)
                 .respond(getSelfResponse(user))
     }
 
-    void mockGetSelfUnauthenticated() {
-        mockServerClient.when(getSelfRequest())
+    void mockGetSelfUnauthenticated(Times times = Times.unlimited()) {
+        mockServerClient.when(getSelfRequest(), times)
                 .respond(unauthorisedResponse())
     }
 

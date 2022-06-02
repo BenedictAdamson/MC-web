@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-20,22.
  *
  * This file is part of MC.
  *
@@ -125,7 +125,7 @@ public final class ScenarioPage extends Page {
                .findElements(By.tagName("a")).isEmpty();
    }
 
-   public boolean isGameButtonEnabled() {
+   public boolean isCreateGameButtonEnabled() {
       return isEnabled(getBody().findElement(CREATE_GAME_LOCATOR));
    }
 

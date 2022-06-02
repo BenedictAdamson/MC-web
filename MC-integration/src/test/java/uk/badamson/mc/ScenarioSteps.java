@@ -96,7 +96,7 @@ public class ScenarioSteps extends Steps {
    @Then("the scenario does not allow creating a game")
    public void scenario_does_not_allow_creating_a_game() {
       final var scenarioPage = world.getExpectedPage(ScenarioPage.class);
-      assertFalse(scenarioPage.isGameButtonEnabled());
+      assertFalse(scenarioPage.isCreateGameButtonEnabled());
    }
 
    @When("a scenario that has a game")
