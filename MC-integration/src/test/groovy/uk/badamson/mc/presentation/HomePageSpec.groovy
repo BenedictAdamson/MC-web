@@ -1,12 +1,7 @@
 package uk.badamson.mc.presentation
 
-import org.testcontainers.lifecycle.TestDescription
-import org.testcontainers.spock.Testcontainers
-import spock.lang.Shared
-import spock.lang.Specification
-import uk.badamson.mc.MockedBeWorld
-import uk.badamson.mc.NamedUUID
 
+import uk.badamson.mc.NamedUUID
 /**
  * © Copyright Benedict Adamson 2019-22.
  *
