@@ -54,6 +54,9 @@ class ScenarioSpec extends MockedBeSpecification {
         world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, SCENARIO_TITLE)))
         world.backEnd.mockGetScenario(SCENARIO)
 
+        and: "not logged in"
+        world.notLoggedIn()
+
         when: "examine scenarios"
         world.getHomePage()
         world.navigateToScenariosPage()

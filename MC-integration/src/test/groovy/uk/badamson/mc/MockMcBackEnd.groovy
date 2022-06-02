@@ -23,6 +23,7 @@ import java.util.stream.Collectors
 import static org.mockserver.model.Header.header
 import static org.mockserver.model.HttpResponse.notFoundResponse
 import static org.mockserver.model.HttpResponse.response
+
 /*
  * © Copyright Benedict Adamson 2019-20,22.
  *
@@ -50,10 +51,10 @@ final class MockMcBackEnd implements Startable {
 
     private static final DateTimeFormatter URI_DATETIME_FORMATTER = DateTimeFormatter.ISO_INSTANT
 
-    private static final ObjectMapper MAPPER = new ObjectMapper()
+    private static final ObjectMapper MAPPER
     static {
         MAPPER = new ObjectMapper()
-        MAPPER.registerModule(new JavaTimeModule());
+        MAPPER.registerModule(new JavaTimeModule())
     }
 
     private static String gamePath(final Game.Identifier game) {
@@ -79,9 +80,9 @@ final class MockMcBackEnd implements Startable {
         "/api/user/$id"
     }
 
-    private static byte[] encodeAsJson(final Object obj) {
+    private static String encodeAsJson(final Object obj) {
         try {
-            return MAPPER.writeValueAsBytes(obj)
+            return MAPPER.writeValueAsString(obj)
         } catch (final JsonProcessingException e) {
             throw new IllegalArgumentException('can not encode Object as JSON', e)
         }
@@ -114,10 +115,6 @@ final class MockMcBackEnd implements Startable {
         mockServer.stop()
     }
 
-    private static HttpRequest acceptJson(HttpRequest request) {
-        request.withHeader('Accept', MediaType.APPLICATION_JSON.toString())
-    }
-
     void mockCreateGameForScenario(@Nonnull final Game.Identifier gameId) {
         mockServerClient.when(createGameForScenarioRequest(gameId.scenario))
                 .respond(createGameForScenarioResponse(gameId))
@@ -134,11 +131,9 @@ final class MockMcBackEnd implements Startable {
     }
 
     private static HttpRequest createGameForScenarioRequest(@Nonnull UUID scenario) {
-        def request = HttpRequest.request()
+        HttpRequest.request()
                 .withMethod('POST')
                 .withPath(gamesListPath(scenario))
-        acceptJson(request)
-        request
     }
 
     private static HttpResponse createGameForScenarioResponse(@Nonnull final Game.Identifier gameId) {
@@ -172,9 +167,8 @@ final class MockMcBackEnd implements Startable {
     }
 
     private static HttpRequest getGameCreationTimesRequest(@Nonnull UUID scenario) {
-        def request = HttpRequest.request(gamesListPath(scenario))
-        acceptJson(request)
-        request
+        HttpRequest.request(gamesListPath(scenario))
+                .withMethod('GET')
     }
 
     private static HttpResponse getGameCreationTimesResponse(@Nonnull Set<Instant> times) {
@@ -205,9 +199,8 @@ final class MockMcBackEnd implements Startable {
     }
 
     private static HttpRequest getGameRequest(@Nonnull final Game.Identifier game) {
-        def request = HttpRequest.request(gamePath(game))
-        acceptJson(request)
-        request
+        HttpRequest.request(gamePath(game))
+                .withMethod('GET')
     }
 
     private static HttpResponse getGameResponse(@Nonnull final Game game) {
@@ -230,11 +223,9 @@ final class MockMcBackEnd implements Startable {
     }
 
     private static HttpRequest startGameRequest(@Nonnull final Game.Identifier game) {
-        final HttpRequest request = HttpRequest.request(gamePath(game))
+        HttpRequest.request(gamePath(game))
                 .withPathParameter('start')
                 .withMethod('POST')
-        acceptJson(request)
-        request
     }
 
     private static HttpResponse startGameResponse(@Nonnull final Game.Identifier game) {
@@ -303,9 +294,8 @@ final class MockMcBackEnd implements Startable {
     }
 
     private static HttpRequest currentGameRequest() {
-        def request = HttpRequest.request('/api/self/current-game')
+        HttpRequest.request('/api/self/current-game')
                 .withMethod('GET')
-        request
     }
 
     private static HttpResponse currentGameResponse(@Nonnull final Game.Identifier game) {
@@ -328,9 +318,8 @@ final class MockMcBackEnd implements Startable {
     }
 
     private static HttpRequest getGamePlayersRequest(@Nonnull final Game.Identifier game) {
-        def request = HttpRequest.request(gamePlayersPath(game))
-        acceptJson(request)
-        request
+        HttpRequest.request(gamePlayersPath(game))
+                .withMethod('GET')
     }
 
     private static HttpResponse getGamePlayersResponse(@Nonnull GamePlayers players) {
@@ -353,11 +342,9 @@ final class MockMcBackEnd implements Startable {
     }
 
     private static HttpRequest joinGameRequest(@Nonnull final Game.Identifier game) {
-        def request = HttpRequest.request(gamePlayersPath(game))
+        HttpRequest.request(gamePlayersPath(game))
                 .withPathParameter('join', null)
                 .withMethod('POST')
-        acceptJson(request)
-        request
     }
 
     private static HttpResponse joinGameResponse(@Nonnull final Game.Identifier game) {
@@ -375,11 +362,9 @@ final class MockMcBackEnd implements Startable {
     }
 
     private static HttpRequest mayJoinGameRequest(@Nonnull final Game.Identifier game) {
-        def request = HttpRequest.request(gamePlayersPath(game))
+        HttpRequest.request(gamePlayersPath(game))
                 .withPathParameter('mayJoin')
                 .withMethod('GET')
-        acceptJson(request)
-        request
     }
 
     private static HttpResponse mayJoinGameResponse(final boolean mayJoin) {
@@ -392,10 +377,8 @@ final class MockMcBackEnd implements Startable {
     }
 
     private static HttpRequest getAllScenariosRequest() {
-        def request = HttpRequest.request('/api/scenario')
+        HttpRequest.request('/api/scenario')
                 .withMethod('GET')
-        acceptJson(request)
-        request
     }
 
     private static HttpResponse getAllScenariosResponse(@Nonnull final Set<NamedUUID> scenarios) {
@@ -413,10 +396,8 @@ final class MockMcBackEnd implements Startable {
     }
 
     private static HttpRequest getScenarioRequest(@Nonnull UUID scenario) {
-        def request = HttpRequest.request(scenarioPath(scenario))
+        HttpRequest.request(scenarioPath(scenario))
                 .withMethod('GET')
-        acceptJson(request)
-        request
     }
 
     private static HttpResponse getScenarioResponse(@Nonnull final Scenario scenario) {
@@ -465,10 +446,8 @@ final class MockMcBackEnd implements Startable {
     }
 
     private static HttpRequest getAllUsersRequest() {
-        def request = HttpRequest.request('/api/user')
+        HttpRequest.request('/api/user')
                 .withMethod('GET')
-        acceptJson(request)
-        request
     }
 
     private static HttpResponse getAllUsersResponse(@Nonnull final Set<User> users) {
@@ -486,10 +465,8 @@ final class MockMcBackEnd implements Startable {
     }
 
     private static HttpRequest getSelfRequest() {
-        def request = HttpRequest.request('/api/self')
+        HttpRequest.request('/api/self')
                 .withMethod('GET')
-        acceptJson(request)
-        request
     }
 
     private static HttpResponse getSelfResponse(@Nonnull final User user) {
@@ -507,10 +484,8 @@ final class MockMcBackEnd implements Startable {
     }
 
     private static HttpRequest getUserRequest(@Nonnull final UUID id) {
-        def request = HttpRequest.request(userPath(id))
+        HttpRequest.request(userPath(id))
                 .withMethod('GET')
-        acceptJson(request)
-        request
     }
 
     private static HttpResponse getUserResponse(@Nonnull final User user) {
