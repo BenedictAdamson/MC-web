@@ -71,8 +71,7 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
     private final McFrontEndContainer fe = new McFrontEndContainer()
     private final MockMcBackEnd ms = new MockMcBackEnd()
     private final McReverseProxyContainer ingress = McReverseProxyContainer.createWithMockBe()
-    private BrowserWebDriverContainer<BrowserWebDriverContainer> browser
-
+    private final BrowserWebDriverContainer browser = new BrowserWebDriverContainer<>(BROWSER_IMAGE_NAME)
     private RemoteWebDriver webDriver
 
     private int nUsers
@@ -92,6 +91,18 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
         ms.withNetwork(network).withNetworkAliases(MS_HOST)
         ingress.withNetwork(network).withNetworkAliases(INGRESS_HOST)
         this.failureRecordingDirectory = failureRecordingDirectory
+        browser.withCapabilities(new FirefoxOptions().addPreference(
+                "security.insecure_field_warning.contextual.enabled", false))
+                .withNetwork(network)
+        if (failureRecordingDirectory != null) {
+            try {
+                Files.createDirectories(failureRecordingDirectory)
+            } catch (final IOException e) {
+                throw new IllegalArgumentException(e)
+            }
+            browser.withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.RECORD_ALL,
+                    failureRecordingDirectory.toFile())
+        }
     }
 
     MockMcBackEnd getBackEnd() {
@@ -130,30 +141,6 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
                             + ")",
                     e)
         }
-    }
-
-    private void createAndStartBrowser() {
-        if (browser != null) {
-            throw new IllegalStateException('has a browser')
-        }
-        if (webDriver != null) {
-            throw new IllegalStateException('has a webDriver')
-        }
-        browser = new BrowserWebDriverContainer<>(BROWSER_IMAGE_NAME)
-        browser.withCapabilities(new FirefoxOptions().addPreference(
-                "security.insecure_field_warning.contextual.enabled", false))
-                .withNetwork(network)
-        if (failureRecordingDirectory != null) {
-            try {
-                Files.createDirectories(failureRecordingDirectory)
-            } catch (final IOException e) {
-                throw new IllegalArgumentException(e)
-            }
-            browser.withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.RECORD_ALL,
-                    failureRecordingDirectory.toFile())
-        }
-        browser.start()
-        webDriver = browser.getWebDriver()
     }
 
     @Override
@@ -201,22 +188,16 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
         ms.start()
         fe.start()
         ingress.start()
+        browser.start()
+        webDriver = browser.getWebDriver()
     }
 
     private void cleanup() {
-        expectedPage = null// expectedPage holds reference to webDriver
-        if (webDriver != null) {
-            webDriver.close()
-            webDriver = null
-        }
-        if (browser != null) {
-            browser.close()
-            browser = null
-        }
+        expectedPage = null
     }
 
     void retainScreenshot(@Nonnull final String baseFileName) {
-        if (failureRecordingDirectory != null && webDriver != null) {
+        if (failureRecordingDirectory != null) {
             final var leafName = "${baseFileName}.png"
             final var path = failureRecordingDirectory.resolve(leafName)
             try {
@@ -248,6 +229,7 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
     @Override
     void stop() {
         cleanup()
+        browser.stop()
         ingress.stop()
         fe.stop()
         ms.stop()
@@ -256,7 +238,7 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
 
     @Override
     void beforeTest(final TestDescription description) {
-        createAndStartBrowser()
+        webDriver.manage().deleteAllCookies()
         browser.beforeTest(description)
     }
 
@@ -394,7 +376,6 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
      * </p>
      *
      * @throws IllegalStateException*            <ul>
-     *            <li>If the browser has not been {@linkplain #createAndStartBrowser() created and started}.</li>
      *            <li>If the scenario has beean {@linkplain #cleanup() cleaned-up}.</li>
      *            <li>If the this has been {@linkplain #close() closed}.</li>
      *            <li>If no URL was previously {@linkplain #setUrlPath(String)
