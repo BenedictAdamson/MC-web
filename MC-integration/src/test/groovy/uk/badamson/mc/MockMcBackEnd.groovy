@@ -7,10 +7,7 @@ import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpResponse
 import org.mockserver.model.HttpStatusCode
 import org.mockserver.model.MediaType
-import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.MockServerContainer
-import org.testcontainers.containers.Network
-import org.testcontainers.lifecycle.Startable
 import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException
 import org.testcontainers.utility.DockerImageName
 
@@ -43,9 +40,7 @@ import static org.mockserver.model.HttpResponse.response
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-final class MockMcBackEnd implements Startable {
-    static final String MS_HOST = 'ms'
-
+final class MockMcBackEnd extends MockServerContainer {
     private static final DockerImageName MOCKSERVER_IMAGE =
             DockerImageName.parse('mockserver/mockserver:5.13.2')
 
@@ -88,22 +83,17 @@ final class MockMcBackEnd implements Startable {
         }
     }
 
-    private final MockServerContainer mockServer
     private MockServerClient mockServerClient
 
-    MockMcBackEnd(Network network) {
-        mockServer = new MockServerContainer(MOCKSERVER_IMAGE)
-                .withNetwork(network).withNetworkAliases(MS_HOST)
-    }
-
-    GenericContainer<?> getContainer() {
-        mockServer
+    @SuppressWarnings('deprecation')
+    MockMcBackEnd() {
+        super(MOCKSERVER_IMAGE)
     }
 
     @Override
     void start() {
-        mockServer.start()
-        mockServerClient = new MockServerClient(mockServer.getHost(), mockServer.getServerPort())
+        super.start()
+        mockServerClient = new MockServerClient(getHost(), getServerPort())
     }
 
     @Override
@@ -112,7 +102,12 @@ final class MockMcBackEnd implements Startable {
             mockServerClient.stop()
             mockServerClient = null
         }
-        mockServer.stop()
+        super.stop()
+    }
+
+    @Override
+    void close() {
+        super.close()
     }
 
     void mockCreateGameForScenario(@Nonnull final Game.Identifier gameId) {

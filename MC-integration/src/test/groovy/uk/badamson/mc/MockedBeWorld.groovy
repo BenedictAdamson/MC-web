@@ -47,8 +47,8 @@ import java.util.concurrent.atomic.AtomicReference
  */
 
 final class MockedBeWorld implements Startable, TestLifecycleAware {
-    private static final String FE_HOST = "fe"
-    private static final String BE_HOST = MockMcBackEnd.MS_HOST
+    private static final String FE_HOST = 'fe'
+    private static final String MS_HOST = 'ms'
     private static final String INGRESS_HOST = "in"
 
     private static final URI BASE_INGRESS_URI = new URI('http', INGRESS_HOST, null, null)
@@ -69,10 +69,8 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
     private final Path failureRecordingDirectory
     private final Network network = Network.newNetwork()
     private final McFrontEndContainer fe = new McFrontEndContainer()
-            .withNetwork(network).withNetworkAliases(FE_HOST)
-    private final MockMcBackEnd ms = new MockMcBackEnd(network)
+    private final MockMcBackEnd ms = new MockMcBackEnd()
     private final McReverseProxyContainer ingress = McReverseProxyContainer.createWithMockBe()
-            .withNetwork(network).withNetworkAliases(INGRESS_HOST)
     private BrowserWebDriverContainer<BrowserWebDriverContainer> browser
 
     private RemoteWebDriver webDriver
@@ -90,6 +88,9 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
     private boolean loggedIn
 
     MockedBeWorld(@Nullable final Path failureRecordingDirectory = DEFAULT_FAILURE_RECORDING_DIRECTORY) {
+        fe.withNetwork(network).withNetworkAliases(FE_HOST)
+        ms.withNetwork(network).withNetworkAliases(MS_HOST)
+        ingress.withNetwork(network).withNetworkAliases(INGRESS_HOST)
         this.failureRecordingDirectory = failureRecordingDirectory
     }
 
@@ -228,13 +229,13 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
     }
 
     private void retainLogFiles(@Nonnull final String baseFileName) {
-        retainLogFile(failureRecordingDirectory, baseFileName, BE_HOST, ms.container)
+        retainLogFile(failureRecordingDirectory, baseFileName, MS_HOST, ms)
         retainLogFile(failureRecordingDirectory, baseFileName, FE_HOST, fe)
         retainLogFile(failureRecordingDirectory, baseFileName, INGRESS_HOST, ingress)
     }
 
     private static void retainLogFile(final Path directory, final String baseFileName, final String host,
-                                      final GenericContainer<?> container) {
+                                      final GenericContainer container) {
         final var leafName = baseFileName + '-' + host + '.log'
         final var path = directory.resolve(leafName)
         try {
