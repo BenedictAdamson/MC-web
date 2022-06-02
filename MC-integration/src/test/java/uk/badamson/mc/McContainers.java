@@ -120,7 +120,7 @@ public class McContainers
    private final McFrontEndContainer fe = new McFrontEndContainer()
             .withNetwork(network).withNetworkAliases(FE_HOST);
 
-   private final McReverseProxyContainer in = new McReverseProxyContainer()
+   private final McReverseProxyContainer in = McReverseProxyContainer.createWithRealBe()
             .withNetwork(network).withNetworkAliases(REVERSE_PROXY_HOST);
 
    private BrowserWebDriverContainer<?> browser;

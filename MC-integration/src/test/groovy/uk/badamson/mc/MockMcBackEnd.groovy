@@ -43,7 +43,7 @@ import static org.mockserver.model.HttpResponse.response
  */
 
 final class MockMcBackEnd implements Startable {
-    static final String BE_HOST = 'be'
+    static final String MS_HOST = 'ms'
 
     private static final DockerImageName MOCKSERVER_IMAGE =
             DockerImageName.parse('mockserver/mockserver:5.13.2')
@@ -92,7 +92,7 @@ final class MockMcBackEnd implements Startable {
 
     MockMcBackEnd(Network network) {
         mockServer = new MockServerContainer(MOCKSERVER_IMAGE)
-                .withNetwork(network).withNetworkAliases(BE_HOST)
+                .withNetwork(network).withNetworkAliases(MS_HOST)
     }
 
     GenericContainer<?> getContainer() {

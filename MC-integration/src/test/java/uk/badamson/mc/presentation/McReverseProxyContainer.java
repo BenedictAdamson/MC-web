@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-20,22.
  *
  * This file is part of MC.
  *
@@ -22,8 +22,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
-import uk.badamson.mc.Version;
-
 /**
  * <p>
  * A Testcontainers Docker providing an HTTP reverse proxy (ingress) for the MC
@@ -33,18 +31,37 @@ import uk.badamson.mc.Version;
 public final class McReverseProxyContainer
          extends GenericContainer<McReverseProxyContainer> {
 
-   public static final String VERSION = Version.VERSION;
-
    public static final int PORT = 80;
 
-   private static final ImageFromDockerfile IMAGE = new ImageFromDockerfile()
-            .withFileFromClasspath("Dockerfile", "reverse-proxy.Dockerfile")
-            .withFileFromClasspath("rp.conf", "reverse-proxy.rp.conf");
+   private static final ImageFromDockerfile REAL_BE_IMAGE = createImageWithConfiguration(
+           "reverse-proxy.rp.conf"
+   );
 
-   public McReverseProxyContainer() {
-      super(IMAGE);
+   private static final ImageFromDockerfile MOCK_BE_IMAGE = createImageWithConfiguration(
+           "mock-be.rp.conf"
+   );
+
+
+   private static ImageFromDockerfile createImageWithConfiguration(final String nginxConfigurationResourcePath) {
+      return new ImageFromDockerfile()
+              .withFileFromClasspath("Dockerfile", "reverse-proxy.Dockerfile")
+              .withFileFromClasspath("rp.conf", nginxConfigurationResourcePath);
+   }
+
+   public static McReverseProxyContainer createWithRealBe() {
+      return new McReverseProxyContainer(REAL_BE_IMAGE);
+   }
+
+   public static McReverseProxyContainer createWithMockBe() {
+      return new McReverseProxyContainer(MOCK_BE_IMAGE);
+   }
+
+   private McReverseProxyContainer(final ImageFromDockerfile image) {
+      super(image);
       addExposedPort(PORT);
       waitingFor(Wait.forListeningPort());
    }
+
+
 
 }

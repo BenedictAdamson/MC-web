@@ -48,7 +48,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 final class MockedBeWorld implements Startable, TestLifecycleAware {
     private static final String FE_HOST = "fe"
-    private static final String BE_HOST = MockMcBackEnd.BE_HOST
+    private static final String BE_HOST = MockMcBackEnd.MS_HOST
     private static final String INGRESS_HOST = "in"
 
     private static final URI BASE_INGRESS_URI = new URI('http', INGRESS_HOST, null, null)
@@ -70,8 +70,8 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
     private final Network network = Network.newNetwork()
     private final McFrontEndContainer fe = new McFrontEndContainer()
             .withNetwork(network).withNetworkAliases(FE_HOST)
-    private final MockMcBackEnd be = new MockMcBackEnd(network)
-    private final McReverseProxyContainer ingress = new McReverseProxyContainer()
+    private final MockMcBackEnd ms = new MockMcBackEnd(network)
+    private final McReverseProxyContainer ingress = McReverseProxyContainer.createWithMockBe()
             .withNetwork(network).withNetworkAliases(INGRESS_HOST)
     private BrowserWebDriverContainer<BrowserWebDriverContainer> browser
 
@@ -94,7 +94,7 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
     }
 
     MockMcBackEnd getBackEnd() {
-        be
+        ms
     }
 
     /**
@@ -197,7 +197,7 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
 
     @Override
     void start() {
-        be.start()
+        ms.start()
         fe.start()
         ingress.start()
     }
@@ -228,7 +228,7 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
     }
 
     private void retainLogFiles(@Nonnull final String baseFileName) {
-        retainLogFile(failureRecordingDirectory, baseFileName, BE_HOST, be.container)
+        retainLogFile(failureRecordingDirectory, baseFileName, BE_HOST, ms.container)
         retainLogFile(failureRecordingDirectory, baseFileName, FE_HOST, fe)
         retainLogFile(failureRecordingDirectory, baseFileName, INGRESS_HOST, ingress)
     }
@@ -249,7 +249,7 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
         cleanup()
         ingress.stop()
         fe.stop()
-        be.stop()
+        ms.stop()
     }
 
 
