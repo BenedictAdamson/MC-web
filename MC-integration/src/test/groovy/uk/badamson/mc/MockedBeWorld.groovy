@@ -236,6 +236,7 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
     void beforeTest(final TestDescription description) {
         webDriver.manage().deleteAllCookies()
         browser.beforeTest(description)
+        ms.reset()
     }
 
     @Override

@@ -110,6 +110,12 @@ final class MockMcBackEnd extends MockServerContainer {
         super.close()
     }
 
+    void reset() {
+        if (mockServerClient != null) {
+            mockServerClient.reset()
+        }
+    }
+
     void mockCreateGameForScenario(@Nonnull final Game.Identifier gameId) {
         mockServerClient.when(createGameForScenarioRequest(gameId.scenario))
                 .respond(createGameForScenarioResponse(gameId))
