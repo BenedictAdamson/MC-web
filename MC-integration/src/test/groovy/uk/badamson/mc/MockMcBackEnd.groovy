@@ -419,32 +419,33 @@ final class MockMcBackEnd extends MockServerContainer {
     }
 
     void mockAddBadUser(@Nonnull final BasicUserDetails userDetails) {
-        mockServerClient.when(addUserResponse(userDetails))
+        mockServerClient.when(addUserRequest(userDetails))
                 .respond(response().withStatusCode(HttpStatusCode.BAD_REQUEST_400.code()))
+    }
+
+    private static final class MinimalUserDetails {
+        public final String username
+        public final String password
+        public final Set<Authority> authorities = Set.of()
+
+        MinimalUserDetails(@Nonnull final BasicUserDetails userDetails) {
+            this.username = userDetails.username
+            this.password = userDetails.password
+        }
     }
 
     private static HttpRequest addUserRequest(@Nonnull final BasicUserDetails userDetails) {
         HttpRequest.request('/api/user')
                 .withMethod('POST')
-                .withContentType(MediaType.APPLICATION_JSON)
-                .withBody(encodeAsJson(userDetails))
-    }
-
-    private static HttpRequest addUserResponse(@Nonnull final BasicUserDetails userDetails) {
-        HttpRequest.request('/api/user')
-                .withMethod('POST')
-                .withContentType(MediaType.APPLICATION_JSON)
-                .withBody(encodeAsJson(userDetails))
+                .withBody(encodeAsJson(new MinimalUserDetails(userDetails)))
     }
 
     private static HttpResponse addUserResponse(@Nonnull final UUID id) {
-        response()
-                .withStatusCode(HttpStatusCode.CREATED_201.code())
-                .withHeader(header('Location', userPath(id)))
+        foundResponse(userPath(id))
     }
 
-    void mockGetAllUsers(@Nonnull final Set<User> users) {
-        mockServerClient.when(getAllUsersRequest())
+    void mockGetAllUsers(@Nonnull final Set<User> users, @Nonnull Times times = Times.unlimited()) {
+        mockServerClient.when(getAllUsersRequest(), times)
                 .respond(getAllUsersResponse(users))
     }
 
@@ -496,9 +497,9 @@ final class MockMcBackEnd extends MockServerContainer {
         jsonResponse(user)
     }
 
-    void mockLogin(@Nonnull final String sessionCookie, @Nonnull String xsrfToken) {
+    void mockLogin(@Nonnull User user, @Nonnull final String sessionCookie, @Nonnull String xsrfToken) {
         mockServerClient.when(loginRequest())
-                .respond(loginResponse(sessionCookie, xsrfToken))
+                .respond(loginResponse(user, sessionCookie, xsrfToken))
     }
 
     private static HttpRequest loginRequest() {
@@ -507,9 +508,11 @@ final class MockMcBackEnd extends MockServerContainer {
                 .withHeader(header('Authorization', 'Basic .*'))
     }
 
-    private static HttpResponse loginResponse(@Nonnull final String sessionCookie, @Nonnull String xsrfToken) {
+    private static HttpResponse loginResponse(@Nonnull User user, @Nonnull final String sessionCookie, @Nonnull String xsrfToken) {
         response()
                 .withCookie('JSESSIONID', sessionCookie)
                 .withCookie('XSRF-TOKEN', xsrfToken)
+                .withContentType(MediaType.APPLICATION_JSON)
+                .withBody(encodeAsJson(user))
     }
 }

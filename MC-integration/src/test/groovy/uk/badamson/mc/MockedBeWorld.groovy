@@ -463,7 +463,7 @@ final class MockedBeWorld implements Startable, TestLifecycleAware {
 
     HomePage logInAsUser(final User user) {
         currentLoggedInUser = user
-        backEnd.mockLogin(UUID.randomUUID().toString(), UUID.randomUUID().toString())
+        backEnd.mockLogin(user, UUID.randomUUID().toString(), UUID.randomUUID().toString())
         backEnd.mockGetSelf(currentLoggedInUser)
         getHomePage()
     }
