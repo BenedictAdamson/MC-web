@@ -34,7 +34,7 @@ import static spock.util.matcher.HamcrestSupport.expect
  * The Mission Command game provides multiple scenarios that can be played.
  */
 @Testcontainers
-class ScenarioSpec extends MockedBeSpecification {
+class ScenarioFESpec extends MockedBeSpecification {
 
     private static final def SCENARIO_ID = UUID.randomUUID()
     private static final List<NamedUUID> CHARACTERS = List.of(new NamedUUID(UUID.randomUUID(), 'Squad leader'))
@@ -46,7 +46,7 @@ class ScenarioSpec extends MockedBeSpecification {
 
     @Override
     protected final String getSpecificationName() {
-        'ScenarioSpec'
+        'ScenarioFESpec'
     }
 
     def "List scenarios"() {

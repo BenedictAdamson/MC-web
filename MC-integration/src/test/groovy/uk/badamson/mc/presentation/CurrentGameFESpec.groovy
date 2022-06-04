@@ -30,7 +30,7 @@ import java.time.Instant
 /**
  * The system provides information about the game that a player is currently playing
  */
-class CurrentGameSpec extends MockedBeSpecification {
+class CurrentGameFESpec extends MockedBeSpecification {
 
   private static final def SCENARIO_ID = UUID.randomUUID()
   private static final def CHARACTER_ID = UUID.randomUUID()
@@ -43,7 +43,7 @@ class CurrentGameSpec extends MockedBeSpecification {
 
   @Override
   protected String getSpecificationName() {
-    'CurrentGameSpec'
+    'CurrentGameFESpec'
   }
 
   def "May examine current-game only if playing"() {

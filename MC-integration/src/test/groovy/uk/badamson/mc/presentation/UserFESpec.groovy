@@ -27,11 +27,11 @@ import uk.badamson.mc.User
 /**
  * Mission Command is a multi-player game. To conserve resources, play on a server is restricted to only known (and presumably trusted) users.
  */
-class UserSpec extends MockedBeSpecification {
+class UserFESpec extends MockedBeSpecification {
 
   @Override
   protected final String getSpecificationName() {
-    'UserSpec'
+    'UserFESpec'
   }
 
   def "List users"() {

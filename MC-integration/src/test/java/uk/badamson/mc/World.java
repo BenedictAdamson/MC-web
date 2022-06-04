@@ -51,6 +51,7 @@ import org.testcontainers.lifecycle.TestDescription;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.Scenario;
+import org.testcontainers.lifecycle.TestLifecycleAware;
 import uk.badamson.mc.McContainers.HttpServer;
 import uk.badamson.mc.presentation.HomePage;
 import uk.badamson.mc.presentation.Page;
@@ -80,7 +81,7 @@ import uk.badamson.mc.presentation.Page;
  *
  * @see WorldScenarioHook
  */
-public final class World implements AutoCloseable {
+public final class World implements AutoCloseable, TestLifecycleAware {
 
    private static Optional<Throwable> createOutcomeException(
             final Scenario scenario) {
@@ -189,6 +190,16 @@ public final class World implements AutoCloseable {
       }
    }
 
+   @Override
+   public void beforeTest(TestDescription description) {
+      containers.beforeTest(description);
+   }
+
+   @Override
+   public void afterTest(TestDescription description, Optional<Throwable> throwable) {
+      containers.afterTest(description, throwable);
+   }
+
    /**
     * <p>
     * Prepare the SUT and this interface for execution of a Cucumber scenario.
@@ -207,7 +218,7 @@ public final class World implements AutoCloseable {
        * Recreates the web driver, so tests do not share cookies, JavaScript
        * state, etc.
        */
-      containers.beforeTest(createTestDescription(scenario));
+      beforeTest(createTestDescription(scenario));
       webDriver = containers.getWebDriver();
       currentUser = null;
       setLoggedIn(false);
@@ -297,7 +308,7 @@ public final class World implements AutoCloseable {
    public void endScenario(final Scenario scenario) {
       final var testDescription = createTestDescription(scenario);
       final var exception = createOutcomeException(scenario);
-      containers.afterTest(testDescription, exception);// invalidates webDriver
+      afterTest(testDescription, exception);// invalidates webDriver
       expectedPage = null;// expectedPage holds reference to webDriver
       webDriver = null;
    }

@@ -31,7 +31,7 @@ import java.time.Instant
 /**
  * The Mission Command game can have multiple games (plays) for each scenario
  */
-class GameSpec extends MockedBeSpecification {
+class GameFESpec extends MockedBeSpecification {
 
   private static final def SCENARIO_ID = UUID.randomUUID()
   private static final def CHARACTER_ID = UUID.randomUUID()
@@ -45,7 +45,7 @@ class GameSpec extends MockedBeSpecification {
 
   @Override
   protected final String getSpecificationName() {
-    'GameSpec'
+    'GameFESpec'
   }
 
   def "Examine game as player"() {

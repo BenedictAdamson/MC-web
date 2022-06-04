@@ -33,6 +33,8 @@ abstract class UnmockedSpecification extends Specification {
 
     private static int testIndex = 0
 
+    protected static @Nonnull Path failureRecordingDirectory = DEFAULT_FAILURE_RECORDING_DIRECTORY
+
     private String specificationName
 
     private TestDescription description = new TestDescription() {
@@ -48,16 +50,12 @@ abstract class UnmockedSpecification extends Specification {
     }
 
     @Shared
-    protected final World world
-
-    UnmockedSpecification(@Nonnull String specificationName, @Nonnull Path failureRecordingDirectory = DEFAULT_FAILURE_RECORDING_DIRECTORY) {
-        this.specificationName = specificationName
-        this.world = new World(failureRecordingDirectory)
-    }
+    protected World world
 
     void setupSpec() {
         testIndex = 0
-        world.start()
+        world.open()
+        world = new World(failureRecordingDirectory)
     }
 
     void setup() {

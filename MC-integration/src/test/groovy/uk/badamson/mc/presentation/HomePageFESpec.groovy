@@ -24,11 +24,11 @@ import uk.badamson.mc.NamedUUID
 /**
  * It should be easy for users to access the home-page of an MC server, and know they have got the right page.
  */
-class HomePageSpec extends MockedBeSpecification {
+class HomePageFESpec extends MockedBeSpecification {
 
     @Override
     protected final String getSpecificationName() {
-        'HomePageSpec'
+        'HomePageFESpec'
     }
 
     def "Potential user accesses an MC server using a simple URL with the root path"() {
