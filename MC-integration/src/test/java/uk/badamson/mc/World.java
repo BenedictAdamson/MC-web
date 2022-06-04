@@ -18,43 +18,29 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.Scenario;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.opentest4j.AssertionFailedError;
+import org.testcontainers.lifecycle.TestDescription;
+import org.testcontainers.lifecycle.TestLifecycleAware;
+import uk.badamson.mc.McContainers.HttpServer;
+import uk.badamson.mc.presentation.HomePage;
+import uk.badamson.mc.presentation.Page;
+
+import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URI;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.time.Instant;
-import java.util.EnumSet;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.*;
 import java.util.stream.Stream;
-
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverException;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import org.opentest4j.AssertionFailedError;
-import org.testcontainers.lifecycle.TestDescription;
-
-import io.cucumber.java.After;
-import io.cucumber.java.Before;
-import io.cucumber.java.Scenario;
-import org.testcontainers.lifecycle.TestLifecycleAware;
-import uk.badamson.mc.McContainers.HttpServer;
-import uk.badamson.mc.presentation.HomePage;
-import uk.badamson.mc.presentation.Page;
 
 /**
  * <p>
@@ -122,7 +108,7 @@ public final class World implements AutoCloseable, TestLifecycleAware {
    private static <TYPE> boolean intersects(final Set<TYPE> set1,
             final Set<TYPE> set2) {
       /* The sets intersect if we can find any element in both. */
-      return set1.stream().filter(x -> set2.contains(x)).findAny().isPresent();
+      return set1.stream().anyMatch(set2::contains);
    }
 
    private final McContainers containers;
@@ -132,8 +118,6 @@ public final class World implements AutoCloseable, TestLifecycleAware {
    private User administratorUser;
 
    private RemoteWebDriver webDriver;
-
-   private URI privateNetworkUrl;
 
    private URI localUrl;
 
@@ -151,43 +135,6 @@ public final class World implements AutoCloseable, TestLifecycleAware {
     */
    public World(final Path failureRecordingDirectory) {
       containers = new McContainers(failureRecordingDirectory);
-   }
-
-   /**
-    * Require that the current page has an element with a given tag.
-    *
-    * @param tag
-    *           The HTML tag of the required element
-    * @throws NullPointerException
-    *            if {@code tag} is null
-    * @throws AssertionFailedError
-    *            if no such element is present.
-    */
-   public WebElement assertHasElementWithTag(final String tag) {
-      Objects.requireNonNull(tag, "tag");
-      try {
-         return getWebDriver().findElement(By.tagName(tag));
-      } catch (final NoSuchElementException e) {
-         throw new AssertionFailedError("Has element with tag " + tag, e);
-      }
-   }
-
-   public void awaitSuccessOrErrorMessage(final String expectedSuccessUrlPath)
-            throws IllegalStateException {
-      final var webDriver = getWebDriver();
-      final var currentPath = new AtomicReference<String>();
-      try {
-         new WebDriverWait(webDriver, Duration.ofSeconds(17)).until(driver -> {
-            currentPath.set(getPathOfUrl(driver.getCurrentUrl()));
-            return expectedSuccessUrlPath.equals(currentPath.get())
-                     || !driver.findElements(By.className("error")).isEmpty();
-         });
-      } catch (final Exception e) {// give better diagnostics
-         throw new IllegalStateException(
-                  "No indication of success or failure (at " + currentPath.get()
-                           + ")",
-                  e);
-      }
    }
 
    @Override
@@ -242,7 +189,6 @@ public final class World implements AutoCloseable, TestLifecycleAware {
    @PreDestroy
    public void close() {
       webDriver = null;
-      privateNetworkUrl = null;
       containers.stop();
       containers.close();
    }
@@ -259,8 +205,8 @@ public final class World implements AutoCloseable, TestLifecycleAware {
       containers.startGame(game);
    }
 
-   private User createUser(final Set<Authority> authoritites) {
-      final var userDetails = generateBasicUserDetails(authoritites);
+   private User createUser(final Set<Authority> authorities) {
+      final var userDetails = generateBasicUserDetails(authorities);
       final var id = containers.addUser(userDetails);
       return new User(id, userDetails);
    }
@@ -478,53 +424,6 @@ public final class World implements AutoCloseable, TestLifecycleAware {
       return containers.getScenarios();
    }
 
-   /**
-    * <p>
-    * Perform an HTTP GET of the front-end of the SUT, using the previously
-    * {@linkplain #setUrlPath(String) set URL}, using {@link WebDriver} to give
-    * a similar experience to manually using a web browser.
-    * </p>
-    *
-    * @throws IllegalStateException
-    *            <ul>
-    *            <li>If the scenario has not
-    *            {@linkplain #beginScenario(Scenario) begun}.</li>
-    *            <li>If the scenario has {@linkplain #endScenario(Scenario)
-    *            ended}.</li>
-    *            <li>If the this has been {@linkplain #close() closed}.</li>
-    *            <li>If no URL was previously {@linkplain #setUrlPath(String)
-    *            set}.</li>
-    *            </ul>
-    * @throws WebDriverException
-    *            If the resource given by the URL does not exist.
-    */
-   public void getUrlUsingBrowser() throws WebDriverException {
-      try {
-         Objects.requireNonNull(webDriver, "webDriver");
-         Objects.requireNonNull(privateNetworkUrl, "url");
-      } catch (final NullPointerException e) {
-         throw new IllegalStateException(e);
-      }
-      webDriver.get(privateNetworkUrl.toASCIIString());
-   }
-
-   /**
-    * <p>
-    * GET the URL that has a given path component.
-    * </p>
-    *
-    * @param path
-    *           The path component
-    * @throws NullPointerException
-    *            If {@code path} is null.
-    * @throws IllegalArgumentException
-    *            If {@code path} violates RFC 2396
-    */
-   public void getUrlUsingBrowser(final String path) {
-      setUrlPath(path);
-      getUrlUsingBrowser();
-   }
-
    public WebDriver getWebDriver() {
       Objects.requireNonNull(webDriver, "webDriver");
       return webDriver;
@@ -539,7 +438,7 @@ public final class World implements AutoCloseable, TestLifecycleAware {
       try {
          /*
           * @PreDestroy method will not be called if we throw an exception, so
-          * must roll-back ourself in that case. Important because this
+          * must roll back yourself in that case. Important because this
           * allocates expensive resources.
           */
          administratorUser = User
@@ -591,39 +490,7 @@ public final class World implements AutoCloseable, TestLifecycleAware {
     *            If {@code path} violates RFC 2396
     */
    public void setUrlPath(final String path) {
-      privateNetworkUrl = McContainers
-               .createIngressPrivateNetworkUriFromPath(path);
       localUrl = containers.createUriFromPath(HttpServer.INGRESS, path);
    }
 
-   /**
-    * <p>
-    * Wait until the {@linkplain #getCurrentUrlPath() path component of the
-    * current URL of the browser} becomes equal to a given path, of a timeout
-    * expires.
-    * </p>
-    *
-    * @param timeout
-    *           The maximum time, in seconds, to wait for the path of the
-    *           browser to become equal to the given {@code path}.
-    * @param path
-    *           The wanted path
-    * @throws TimeoutException
-    *            If the browser path does not become equal to the given
-    *            {@code path} within the given {@code timeout}.
-    */
-   public void waitUntilCurrentUrlPath(final long timeout, final String path)
-            throws TimeoutException {
-      final var current = new AtomicReference<String>();
-      try {
-         new WebDriverWait(getWebDriver(), Duration.ofSeconds(timeout)).until(driver -> {
-            final var p = getPathOfUrl(driver.getCurrentUrl());
-            current.set(p);
-            return p.equals(path);
-         });
-      } catch (final org.openqa.selenium.TimeoutException e) {
-         throw new TimeoutException("Timeout while waiting URL path (currently "
-                  + current.get() + ") to become " + path);
-      }
-   }
-}// class
+}
