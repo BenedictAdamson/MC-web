@@ -1,6 +1,5 @@
 package uk.badamson.mc.presentation
 
-
 import org.testcontainers.spock.Testcontainers
 import spock.lang.Unroll
 import uk.badamson.mc.Authority
@@ -8,10 +7,10 @@ import uk.badamson.mc.Game
 import uk.badamson.mc.NamedUUID
 import uk.badamson.mc.Scenario
 
-import static org.hamcrest.Matchers.*
-import static spock.util.matcher.HamcrestSupport.*
-
 import java.time.Instant
+
+import static org.hamcrest.Matchers.contains
+import static spock.util.matcher.HamcrestSupport.expect
 
 /** © Copyright Benedict Adamson 2019,20,22.
  *
@@ -59,11 +58,9 @@ class ScenarioSpec extends MockedBeSpecification {
         world.notLoggedIn()
 
         when: "examine scenarios"
-        world.getHomePage()
-        world.navigateToScenariosPage()
+        def scenariosPage = world.getHomePage().navigateToScenariosPage()
 
         then: "the response is the list of scenarios"
-        def scenariosPage = world.getAndAssertExpectedPage(ScenariosPage.class)
         scenariosPage.assertInvariants()
         scenariosPage.assertHasListOfScenarios()
         expect(scenariosPage.getScenarioTitles(), contains(SCENARIO_TITLE))
@@ -81,13 +78,11 @@ class ScenarioSpec extends MockedBeSpecification {
         world.notLoggedIn()
 
         when: "examine the scenario"
-        world.navigateToScenariosPage()
-        final def scenariosPage = world.getExpectedPage(ScenariosPage.class)
-        final int index = 0
-        world.setExpectedPage(scenariosPage.navigateToScenario(index))
+        final def scenarioPage = world.getHomePage()
+                .navigateToScenariosPage()
+                .navigateToScenario(0)
 
         then: "the scenario includes the scenario description"
-        def scenarioPage = world.getExpectedPage(ScenarioPage.class)
         scenarioPage.assertInvariants()
         //TODO test presence of description
 
@@ -111,16 +106,14 @@ class ScenarioSpec extends MockedBeSpecification {
         world.backEnd.mockMayJoinGame(GAME_ID, false)
 
         and: "logged in as a user with the $role role"
-        world.logInAsUserWithTheRole(role)
+        def homePage = world.logInAsUserWithTheRole(role)
 
         when: "examine the scenario"
-        world.navigateToScenariosPage()
-        final def scenariosPage = world.getExpectedPage(ScenariosPage.class)
-        final int index = 0
-        world.setExpectedPage(scenariosPage.navigateToScenario(index))
+        final def scenarioPage = homePage
+                .navigateToScenariosPage()
+                .navigateToScenario(0)
 
         then: "the scenario includes the scenario description"
-        def scenarioPage = world.getExpectedPage(ScenarioPage.class)
         scenarioPage.assertInvariants()
         //TODO test presence of description
 

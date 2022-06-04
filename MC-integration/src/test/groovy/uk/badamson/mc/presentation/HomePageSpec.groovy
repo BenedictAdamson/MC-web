@@ -40,9 +40,8 @@ class HomePageSpec extends MockedBeSpecification {
         // do nothing
         when: "the potential user gives the obvious URL http://example.com/ to a web browser"
         world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(UUID.randomUUID(), 'Squad assault')))
-        world.getHomePage()
+        def homePage = world.getHomePage()
         then: "MC serves the home page"
-        HomePage homePage = world.getAndAssertExpectedPage(HomePage.class)
         homePage.assertInvariants()
         and: "the home page title includes the name of the game"
         homePage.assertTitleIncludesNameOfGame()

@@ -405,9 +405,10 @@ class GameSpec extends MockedBeSpecification {
   private GamePage examineGame(final HomePage homePage) {
     def scenarioPage = homePage.navigateToScenariosPage()
             .navigateToScenario(0)
+    scenarioPage.awaitIsReadyOrErrorMessage()
     scenarioPage.requireIsReady()
     def gamePage = scenarioPage.navigateToGamePage(0)
-    world.setExpectedPage(gamePage)
+    gamePage.awaitIsReadyOrErrorMessage()
     gamePage
   }
 }

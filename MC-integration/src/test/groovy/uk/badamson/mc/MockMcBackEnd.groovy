@@ -122,16 +122,6 @@ final class MockMcBackEnd extends MockServerContainer {
                 .respond(createGameForScenarioResponse(gameId))
     }
 
-    void mockCreateGameForNoSuchScenario(@Nonnull final UUID scenario) {
-        mockServerClient.when(createGameForScenarioRequest(scenario))
-                .respond(notFoundResponse())
-    }
-
-    void mockUnauthorisedToCreateGameForScenario(@Nonnull final UUID scenario) {
-        mockServerClient.when(createGameForScenarioRequest(scenario))
-                .respond(unauthorisedResponse())
-    }
-
     private static HttpRequest createGameForScenarioRequest(@Nonnull UUID scenario) {
         HttpRequest.request()
                 .withMethod('POST')
@@ -158,16 +148,6 @@ final class MockMcBackEnd extends MockServerContainer {
                 .respond(getGameCreationTimesResponse(gameCreationTimes))
     }
 
-    void mockGetGameCreationTimesForNoSuchGame(@Nonnull UUID scenario) {
-        mockServerClient.when(getGameCreationTimesRequest(scenario))
-                .respond(notFoundResponse())
-    }
-
-    void mockUnauthorisedGetGameCreationTimes(@Nonnull UUID scenario) {
-        mockServerClient.when(getGameCreationTimesRequest(scenario))
-                .respond(unauthorisedResponse())
-    }
-
     private static HttpRequest getGameCreationTimesRequest(@Nonnull UUID scenario) {
         HttpRequest.request(gamesListPath(scenario))
                 .withMethod('GET')
@@ -190,16 +170,6 @@ final class MockMcBackEnd extends MockServerContainer {
                 .respond(getGameResponse(game))
     }
 
-    void mockGetNoSuchGame(@Nonnull final Game game) {
-        mockServerClient.when(getGameRequest(game.identifier))
-                .respond(notFoundResponse())
-    }
-
-    void mockUnauthorisedGetGame(@Nonnull final Game game) {
-        mockServerClient.when(getGameRequest(game.identifier))
-                .respond(unauthorisedResponse())
-    }
-
     private static HttpRequest getGameRequest(@Nonnull final Game.Identifier game) {
         HttpRequest.request(gamePath(game))
                 .withMethod('GET')
@@ -212,16 +182,6 @@ final class MockMcBackEnd extends MockServerContainer {
     void mockStartGame(@Nonnull final Game.Identifier game) {
         mockServerClient.when(startGameRequest(game))
                 .respond(startGameResponse(game))
-    }
-
-    void mockStartNoSuchGame(@Nonnull final Game.Identifier game) {
-        mockServerClient.when(startGameRequest(game))
-                .respond(notFoundResponse())
-    }
-
-    void mockUnauthorisedToStartGame(@Nonnull final Game.Identifier game) {
-        mockServerClient.when(startGameRequest(game))
-                .respond(unauthorisedResponse())
     }
 
     private static HttpRequest startGameRequest(@Nonnull final Game.Identifier game) {
@@ -239,16 +199,6 @@ final class MockMcBackEnd extends MockServerContainer {
                 .respond(stopGameResponse(game))
     }
 
-    void mockStopNoSuchGame(@Nonnull final Game.Identifier game) {
-        mockServerClient.when(stopGameRequest(game))
-                .respond(notFoundResponse())
-    }
-
-    void mockUnauthorisedToStopGame(@Nonnull final Game.Identifier game) {
-        mockServerClient.when(stopGameRequest(game))
-                .respond(unauthorisedResponse())
-    }
-
     private static HttpRequest stopGameRequest(@Nonnull final Game.Identifier game) {
         HttpRequest.request(gamePath(game))
                 .withQueryStringParameter('stop', '')
@@ -262,16 +212,6 @@ final class MockMcBackEnd extends MockServerContainer {
     void mockEndRecruitment(@Nonnull final Game.Identifier game) {
         mockServerClient.when(endRecruitmentRequest(game))
                 .respond(endRecruitmentResponse(game))
-    }
-
-    void mockEndRecruitmentForNoSuchGame(@Nonnull final Game.Identifier game) {
-        mockServerClient.when(endRecruitmentRequest(game))
-                .respond(notFoundResponse())
-    }
-
-    void mockUnauthorisedToEndRecruitment(@Nonnull final Game.Identifier game) {
-        mockServerClient.when(endRecruitmentRequest(game))
-                .respond(unauthorisedResponse())
     }
 
     private static HttpRequest endRecruitmentRequest(@Nonnull final Game.Identifier game) {
@@ -309,16 +249,6 @@ final class MockMcBackEnd extends MockServerContainer {
                 .respond(getGamePlayersResponse(players))
     }
 
-    void mockGetNoSuchGamePlayers(@Nonnull final Game.Identifier game) {
-        mockServerClient.when(getGamePlayersRequest(game))
-                .respond(notFoundResponse())
-    }
-
-    void mockUnauthorisedToGetGamePlayers(@Nonnull Game.Identifier game) {
-        mockServerClient.when(getGamePlayersRequest(game))
-                .respond(unauthorisedResponse())
-    }
-
     private static HttpRequest getGamePlayersRequest(@Nonnull final Game.Identifier game) {
         HttpRequest.request(gamePlayersPath(game))
                 .withMethod('GET')
@@ -334,16 +264,6 @@ final class MockMcBackEnd extends MockServerContainer {
                 .respond(joinGameResponse(game))
     }
 
-    void mockJoinNoSuchGame(@Nonnull final Game.Identifier game) {
-        mockServerClient.when(joinGameRequest(game))
-                .respond(notFoundResponse())
-    }
-
-    void mockUnauthorisedToJoinGame(@Nonnull final Game.Identifier game) {
-        mockServerClient.when(joinGameRequest(game))
-                .respond(unauthorisedResponse())
-    }
-
     private static HttpRequest joinGameRequest(@Nonnull final Game.Identifier game) {
         HttpRequest.request(gamePlayersPath(game))
                 .withQueryStringParameter('join', '')
@@ -357,11 +277,6 @@ final class MockMcBackEnd extends MockServerContainer {
     void mockMayJoinGame(@Nonnull final Game.Identifier game, final boolean mayJoin) {
         mockServerClient.when(mayJoinGameRequest(game))
                 .respond(mayJoinGameResponse(mayJoin))
-    }
-
-    void mockMayJoinNoSuchGame(@Nonnull final Game.Identifier game) {
-        mockServerClient.when(mayJoinGameRequest(game))
-                .respond(notFoundResponse())
     }
 
     private static HttpRequest mayJoinGameRequest(@Nonnull final Game.Identifier game) {
@@ -393,11 +308,6 @@ final class MockMcBackEnd extends MockServerContainer {
                 .respond(getScenarioResponse(scenario))
     }
 
-    void mockGetNoSuchScenario(@Nonnull final UUID scenario) {
-        mockServerClient.when(getScenarioRequest(scenario))
-                .respond(notFoundResponse())
-    }
-
     private static HttpRequest getScenarioRequest(@Nonnull UUID scenario) {
         HttpRequest.request(scenarioPath(scenario))
                 .withMethod('GET')
@@ -411,16 +321,6 @@ final class MockMcBackEnd extends MockServerContainer {
     void mockAddUser(@Nonnull final BasicUserDetails userDetails, @Nonnull final UUID id) {
         mockServerClient.when(addUserRequest(userDetails))
                 .respond(addUserResponse(id))
-    }
-
-    void mockAddExistingUser(@Nonnull final BasicUserDetails userDetails) {
-        mockServerClient.when(addUserRequest(userDetails))
-                .respond(response().withStatusCode(HttpStatusCode.CONFLICT_409.code()))
-    }
-
-    void mockAddBadUser(@Nonnull final BasicUserDetails userDetails) {
-        mockServerClient.when(addUserRequest(userDetails))
-                .respond(response().withStatusCode(HttpStatusCode.BAD_REQUEST_400.code()))
     }
 
     private static final class MinimalUserDetails {
@@ -480,11 +380,6 @@ final class MockMcBackEnd extends MockServerContainer {
     void mockGetUser(@Nonnull final User user) {
         mockServerClient.when(getUserRequest(user.id))
                 .respond(getUserResponse(user))
-    }
-
-    void mockGeUnknownUser(@Nonnull final UUID id) {
-        mockServerClient.when(getUserRequest(id))
-                .respond(notFoundResponse())
     }
 
     private static HttpRequest getUserRequest(@Nonnull final UUID id) {
