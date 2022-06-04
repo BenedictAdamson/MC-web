@@ -218,7 +218,7 @@ public final class World implements AutoCloseable, TestLifecycleAware {
       currentUser = createUser(authorities);
    }
 
-   public void currentUserHasRoles(final Set<Authority> included,
+   public User currentUserHasRoles(final Set<Authority> included,
             final Set<Authority> excluded) {
       Objects.requireNonNull(included, "included");
       Objects.requireNonNull(excluded, "excluded");
@@ -227,6 +227,7 @@ public final class World implements AutoCloseable, TestLifecycleAware {
       }
 
       currentUser = createUser(included);
+      return currentUser;
    }
 
    public void currentUserIsAdministrator() {
@@ -234,9 +235,10 @@ public final class World implements AutoCloseable, TestLifecycleAware {
       currentUser = administratorUser;
    }
 
-   public void currentUserIsUnknownUser() {
+   public User currentUserIsUnknownUser() {
       currentUser = new User(UUID.randomUUID(),
                generateBasicUserDetails(Authority.ALL));
+      return currentUser;
    }
 
    /**
