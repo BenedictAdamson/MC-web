@@ -193,11 +193,16 @@ public final class World implements AutoCloseable, TestLifecycleAware {
    @Override
    public void beforeTest(TestDescription description) {
       containers.beforeTest(description);
+      webDriver = containers.getWebDriver();
+      currentUser = null;
+      setLoggedIn(false);
    }
 
    @Override
    public void afterTest(TestDescription description, Optional<Throwable> throwable) {
       containers.afterTest(description, throwable);
+      expectedPage = null;// expectedPage holds reference to webDriver
+      webDriver = null;
    }
 
    /**
@@ -219,9 +224,6 @@ public final class World implements AutoCloseable, TestLifecycleAware {
        * state, etc.
        */
       beforeTest(createTestDescription(scenario));
-      webDriver = containers.getWebDriver();
-      currentUser = null;
-      setLoggedIn(false);
       /*
        * The previous test might have left us deep in the page hierarchy, so
        * reset to the top location, and must not use the old webDriver.
@@ -309,8 +311,6 @@ public final class World implements AutoCloseable, TestLifecycleAware {
       final var testDescription = createTestDescription(scenario);
       final var exception = createOutcomeException(scenario);
       afterTest(testDescription, exception);// invalidates webDriver
-      expectedPage = null;// expectedPage holds reference to webDriver
-      webDriver = null;
    }
 
    private BasicUserDetails generateBasicUserDetails(

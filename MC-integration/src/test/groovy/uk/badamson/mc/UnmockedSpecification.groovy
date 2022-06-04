@@ -5,7 +5,6 @@ import org.testcontainers.spock.Testcontainers
 import spock.lang.Shared
 import spock.lang.Specification
 
-import javax.annotation.Nonnull
 import java.nio.file.Path
 /**
  * © Copyright Benedict Adamson 2019-22.
@@ -29,13 +28,11 @@ import java.nio.file.Path
 @Testcontainers
 abstract class UnmockedSpecification extends Specification {
 
-    private static final Path DEFAULT_FAILURE_RECORDING_DIRECTORY = Path.of(".", "target", "test-logs")
+    private static final Path FAILURE_RECORDING_DIRECTORY = Path.of(".", "target", "test-logs")
 
     private static int testIndex = 0
 
-    protected static @Nonnull Path failureRecordingDirectory = DEFAULT_FAILURE_RECORDING_DIRECTORY
-
-    private String specificationName
+    protected static String specificationName = getClass().simpleName
 
     private TestDescription description = new TestDescription() {
         @Override
@@ -54,8 +51,8 @@ abstract class UnmockedSpecification extends Specification {
 
     void setupSpec() {
         testIndex = 0
+        world = new World(FAILURE_RECORDING_DIRECTORY)
         world.open()
-        world = new World(failureRecordingDirectory)
     }
 
     void setup() {
@@ -68,11 +65,7 @@ abstract class UnmockedSpecification extends Specification {
     }
 
     void cleanupSpec() {
-        world.stop()
         world.close()
-    }
-
-    protected final String getSpecificationName() {
-        specificationName
+        world = null
     }
 }
