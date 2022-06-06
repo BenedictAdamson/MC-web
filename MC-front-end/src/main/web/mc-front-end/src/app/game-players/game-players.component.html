@@ -2,30 +2,25 @@
    <h4>Players</h4>
 
    <section>
-      <p id="recruiting" *ngIf="recruiting$ | async; else notRecruiting">This game is recruiting players.</p>
-      <ng-template #notRecruiting>
-         <p id="recruiting">This game is not recruiting players.</p>
-      </ng-template>
+      <p id="recruiting"><span *ngIf="recruiting$ | async; else notRecruiting">This game is recruiting players.</span>
+      <ng-template #notRecruiting><span>This game is not recruiting players.</span></ng-template>
+      </p>
 
       <button id="end-recruitment" [disabled]="isEndRecruitmentDisabled$ | async" (click)="endRecruitment()">End
          recruitment</button>
 
-      <div *ngIf="mayJoinGame$ | async; else notJoinable">
-         <p id="joinable">You may join this game.</p>
-         <button id="join" (click)="joinGame()">Join</button>
+      <div>
+        <p id="joinable">
+          <span  *ngIf="mayJoinGame$ | async; else notJoinable">You may join this game.</span>
+          <ng-template #notJoinable><span>You may not join this game.</span></ng-template>
+          <button id="join" [disabled]="!(mayJoinGame$ | async)" (click)="joinGame()">Join</button>
+        </p>
       </div>
-      <ng-template #notJoinable>
-         <div>
-            <p id="joinable">You may not join this game.</p>
-            <button id="join" disabled>Join</button>
-         </div>
-      </ng-template>
 
-      <p id="playing" *ngIf="playing$ | async; else notPlaying">You are playing this game as
-         {{characterNameForUser$ | async}}</p>
-      <ng-template #notPlaying>
-         <p id="playing">You are not playing this game.</p>
-      </ng-template>
+      <p id="playing">
+        <span *ngIf="playing$ | async; else notPlaying">You are playing this game as {{characterNameForUser$ | async}}</span>
+        <ng-template #notPlaying><span>You are not playing this game.</span></ng-template>
+      </p>
 
       <section id="played-characters" *ngIf="mayManageGames$ | async">
          <ol>

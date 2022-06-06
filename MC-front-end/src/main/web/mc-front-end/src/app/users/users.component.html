@@ -8,7 +8,7 @@
   <span id="add-user">You may not add users.</span>
   </ng-template>
 </nav>
-	
+
 <ul id="users">
     <li *ngFor="let user of users">
         <a [routerLink]="['/user',user.id]" *ngIf="mayManageUsers$ | async; else noLink">{{user.username}}</a>
@@ -17,4 +17,4 @@
         </ng-template>
     </li>
 </ul>
-<section>
+</section>
