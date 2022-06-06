@@ -40,8 +40,8 @@ describe('UsersComponent', () => {
 	};
 
 	const mayManageUsers = function(): boolean | null {
-		var may: boolean | null = null;
-		component.mayManageUsers$.subscribe({
+    let may: boolean | null = null;
+    component.mayManageUsers$.subscribe({
 			next: (m) => may = m,
 			error: (err) => fail(err),
 			complete: () => { }

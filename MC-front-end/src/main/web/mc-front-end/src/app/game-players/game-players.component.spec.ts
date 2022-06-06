@@ -1,28 +1,28 @@
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
-import { of } from 'rxjs';
-import { v4 as uuid } from 'uuid';
+import {of} from 'rxjs';
+import {v4 as uuid} from 'uuid';
 
-import { ActivatedRoute, convertToParamMap } from '@angular/router';
+import {ActivatedRoute, convertToParamMap} from '@angular/router';
 
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 
-import { AbstractSelfService } from '../service/abstract.self.service';
-import { AbstractGamePlayersBackEndService } from '../service/abstract.game-players.back-end.service';
-import { AbstractMayJoinGameBackEndService } from '../service/abstract.may-join-game.back-end.service';
-import { AbstractScenarioBackEndService } from '../service/abstract.scenario.back-end.service';
-import { GameIdentifier } from '../game-identifier';
-import { GamePlayers } from '../game-players';
-import { GamePlayersComponent } from './game-players.component';
-import { GamePlayersService } from '../service/game-players.service';
-import { MockGamePlayersBackEndService } from '../service/mock/mock.game-players.back-end.service';
-import { MockMayJoinGameBackEndService } from '../service/mock/mock.may-join-game.back-end.service';
-import { MayJoinGameService } from '../service/may-join-game.service';
-import { MockScenarioBackEndService } from '../service/mock/mock.scenario.back-end.service';
-import { MockSelfService } from '../service/mock/mock.self.service';
-import { NamedUUID } from '../named-uuid';
-import { Scenario } from '../scenario';
-import { ScenarioService } from '../service/scenario.service';
-import { User } from '../user';
+import {AbstractSelfService} from '../service/abstract.self.service';
+import {AbstractGamePlayersBackEndService} from '../service/abstract.game-players.back-end.service';
+import {AbstractMayJoinGameBackEndService} from '../service/abstract.may-join-game.back-end.service';
+import {AbstractScenarioBackEndService} from '../service/abstract.scenario.back-end.service';
+import {GameIdentifier} from '../game-identifier';
+import {GamePlayers} from '../game-players';
+import {GamePlayersComponent} from './game-players.component';
+import {GamePlayersService} from '../service/game-players.service';
+import {MockGamePlayersBackEndService} from '../service/mock/mock.game-players.back-end.service';
+import {MockMayJoinGameBackEndService} from '../service/mock/mock.may-join-game.back-end.service';
+import {MayJoinGameService} from '../service/may-join-game.service';
+import {MockScenarioBackEndService} from '../service/mock/mock.scenario.back-end.service';
+import {MockSelfService} from '../service/mock/mock.self.service';
+import {NamedUUID} from '../named-uuid';
+import {Scenario} from '../scenario';
+import {ScenarioService} from '../service/scenario.service';
+import {User} from '../user';
 
 
 describe('GamePlayersComponent', () => {
@@ -208,17 +208,21 @@ describe('GamePlayersComponent', () => {
       expect(recruitingElement).withContext('recruiting element').not.toBeNull();
       expect(joinableElement).withContext('joinable element').not.toBeNull();
       expect(playingElement).withContext('playing element').not.toBeNull();
-      expect(endRecruitmentButton).withContext('end-recuitment button').not.toBeNull();
+      expect(endRecruitmentButton).withContext('end-recruitment button').not.toBeNull();
       expect(joinButton).withContext('join button').not.toBeNull();
 
       expect(joinableText.includes('You may not join this game') || joinableText.includes('You may join this game'))
          .withContext('joinable element text reports a recognized message').toBeTrue();
 
       if (recruitingElement) {
-         expect(recruitingElement.innerText).withContext('recruiting element text mentions recruiting').toMatch('[Rr]ecruiting');
+         expect(recruitingElement.innerText)
+           .withContext('recruiting element text mentions recruiting')
+           .toMatch('[Rr]ecruiting');
       }
       if (joinableElement) {
-         expect(joinableElement.innerText).withContext('joinable element text mentions joining').toMatch('[Jj]oin');
+         expect(joinableElement.innerText)
+           .withContext('joinable element text mentions joining')
+           .toMatch('[Jj]oin');
       }
       if (joinButton && joinableElement) {
          expect(joinButton.disabled === joinableText.includes('You may not join this game'))
@@ -249,7 +253,7 @@ describe('GamePlayersComponent', () => {
 
       component.isEndRecruitmentDisabled$.subscribe(may => {
          expect(may).withContext(
-            'end recuitment disabled if game is not recuiting or user is not authorised'
+            'end recruitment disabled if game is not recruiting or user is not authorised'
          ).toEqual(!mayEndRecruitment);
       });
 
@@ -382,9 +386,7 @@ describe('GamePlayersComponent', () => {
 
 
    const testEndRecruitment = function(gamePlayers0: GamePlayers, scenario: Scenario) {
-      const self: User = USER_ADMIN;
-
-      setUp(gamePlayers0, self, true, scenario);
+     setUp(gamePlayers0, USER_ADMIN, true, scenario);
       component.endRecruitment();
       tick();
       tick();
@@ -399,15 +401,15 @@ describe('GamePlayersComponent', () => {
       expect(recruitingText.includes('This game is not recruiting players'))
          .withContext('recruiting element text indicates that not recruiting').toBeTrue();
       if (endRecruitmentButton) {
-         expect(endRecruitmentButton.disabled).withContext('end-recuitment button is disabled').toBeTrue();
+         expect(endRecruitmentButton.disabled).withContext('end-recruitment button is disabled').toBeTrue();
       }
    };
 
-   it('can end recuitment [A]', fakeAsync((() => {
+   it('can end recruitment [A]', fakeAsync((() => {
       testEndRecruitment(GAME_PLAYERS_A, SCENARIO_A);
    })));
 
-   it('can end recuitment [B]', fakeAsync((() => {
+   it('can end recruitment [B]', fakeAsync((() => {
       testEndRecruitment(GAME_PLAYERS_B, SCENARIO_B);
    })));
 

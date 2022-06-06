@@ -1,12 +1,12 @@
-import { v4 as uuid } from 'uuid';
+import {v4 as uuid} from 'uuid';
 
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {RouterTestingModule} from '@angular/router/testing';
 
-import { AbstractSelfService } from '../service/abstract.self.service';
-import { MockSelfService } from '../service/mock/mock.self.service';
-import { SelfComponent } from './self.component';
-import { User } from '../user';
+import {AbstractSelfService} from '../service/abstract.self.service';
+import {MockSelfService} from '../service/mock/mock.self.service';
+import {SelfComponent} from './self.component';
+import {User} from '../user';
 
 describe('SelfComponent', () => {
 	let fixture: ComponentFixture<SelfComponent>;
@@ -14,8 +14,8 @@ describe('SelfComponent', () => {
 	let component: SelfComponent;
 
 	let getAuthenticated = function(component: SelfComponent): boolean | null {
-		var loggedIn: boolean | null = null;
-		component.authenticated$.subscribe({
+    let loggedIn: boolean | null = null;
+    component.authenticated$.subscribe({
 			next: (l) => loggedIn = l,
 			error: (err) => fail(err),
 			complete: () => { }
@@ -23,7 +23,7 @@ describe('SelfComponent', () => {
 		return loggedIn;
 	};
 
-	const USER_A: User = { id: uuid(), username: 'Allan', password: 'letmein', authorities: ['ROLE_MANAGE_GAMES'] };
+	const USER_A: User = { id: uuid(), username: 'Allan', password: 'secret', authorities: ['ROLE_MANAGE_GAMES'] };
 	const USER_B: User = { id: uuid(), username: 'Benedict', password: 'password123', authorities: [] };
 
 	const setup = function(self: User | null) {
@@ -44,8 +44,8 @@ describe('SelfComponent', () => {
 	};
 
 	const getUsername = function(component: SelfComponent): string | null {
-		var username: string | null = null;
-		component.username$.subscribe({
+    let username: string | null = null;
+    component.username$.subscribe({
 			next: (u) => username = u,
 			error: (err) => fail(err),
 			complete: () => { }
@@ -109,8 +109,7 @@ describe('SelfComponent', () => {
 	});
 
 	it('handles logout', fakeAsync(() => {
-		const self: User = USER_A;
-		setup(self);
+    setup(USER_A);
 
 		component.logout();
 		tick();
