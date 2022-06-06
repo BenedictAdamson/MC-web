@@ -50,7 +50,7 @@ class Delegate extends HttpKeyValueService<GameIdentifier, GamePlayers, EncodedG
 	}
 
 	endRecruitment(game: GameIdentifier): Observable<GamePlayers> {
-		return this.http.post<GamePlayers>(HttpGamePlayersBackEndService.getApiGameEndRecuitmentPath(game), '').pipe(
+		return this.http.post<GamePlayers>(HttpGamePlayersBackEndService.getApiGameEndRecruitmentPath(game), '').pipe(
 			map(v => this.decode(v))
 		);
 	}
@@ -104,7 +104,7 @@ export class HttpGamePlayersBackEndService extends AbstractGamePlayersBackEndSer
 		return HttpGamePlayersBackEndService.getApiGamePlayersPath(game) + '?join';
 	}
 
-	static getApiGameEndRecuitmentPath(game: GameIdentifier): string {
+	static getApiGameEndRecruitmentPath(game: GameIdentifier): string {
 		return HttpGamePlayersBackEndService.getApiGamePlayersPath(game) + '?endRecruitment';
 	}
 

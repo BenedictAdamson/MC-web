@@ -28,7 +28,7 @@ export class GameComponent implements OnInit {
          case 'WAITING_TO_START': return 'waiting to start';
          case 'RUNNING': return 'running';
          case 'STOPPED': return 'stopped';
-      };
+      }
       return '?';// never happens
    }
 

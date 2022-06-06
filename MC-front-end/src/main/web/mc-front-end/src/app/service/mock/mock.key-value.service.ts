@@ -1,6 +1,6 @@
-import { Observable, of } from 'rxjs';
+import {Observable, of} from 'rxjs';
 
-import { AbstractKeyValueService } from '../abstract.key-value.service'
+import {AbstractKeyValueService} from '../abstract.key-value.service'
 
 
 export class Id {
@@ -79,8 +79,8 @@ export class MockKeyValueService extends AbstractKeyValueService<Id, Value, Data
 	add(specification: Data): Observable<Value> | undefined {
 		++this.nCalls_add;
 		if (this.hasAdd) {
-			var result: Value | null = this.getImmediateForData(specification);
-			if (!result) {
+      let result: Value | null = this.getImmediateForData(specification);
+      if (!result) {
 				result = this.addDatum(specification);
 			}
 			return of(result);
@@ -91,7 +91,6 @@ export class MockKeyValueService extends AbstractKeyValueService<Id, Value, Data
 
 	alter(i: number, data: Data) {
 		const oldValue: Value = this.values[i];
-		const newValue: Value = { id: oldValue.id, data: data };
-		this.values[i] = newValue;
+    this.values[i] = {id: oldValue.id, data: data};
 	}
 }

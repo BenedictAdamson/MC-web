@@ -1,7 +1,5 @@
 import { Observable } from 'rxjs';
 
-import { fakeAsync, tick } from '@angular/core/testing';
-
 import { AbstractKeyValueService } from './abstract.key-value.service'
 import { CachingKeyValueService } from './caching.key-value.service';
 import { Data, Id, MockKeyValueService, Value } from './mock/mock.key-value.service';
@@ -32,11 +30,11 @@ describe('CachingKeyValueService', () => {
 	const DATA_A: Data = { field: 'fieldA' };
 	const DATA_B: Data = { field: 'fieldB' };
 
-	var backEnd: MockKeyValueService;
-	var service: TestCachingKeyValueService;
+  let backEnd: MockKeyValueService;
+  let service: TestCachingKeyValueService;
 
 
-	const setUp = function(
+  const setUp = function(
 		hasGetAll: boolean,
 		hasAdd: boolean,
 		data: Data[]
@@ -175,9 +173,9 @@ describe('CachingKeyValueService', () => {
 	) {
 		setUp(true, true, [specification1]);
 		const id: Id = backEnd.values[0].id;
-		var n: number = 0;
+    let n: number = 0;
 
-		service.get(id).subscribe(
+    service.get(id).subscribe(
 			value => {
 				expect(value).withContext('value').not.toBeNull();
 				if (value) {
@@ -206,9 +204,9 @@ describe('CachingKeyValueService', () => {
 	const testGetForUnchangedUpdate = function(specification: Data) {
 		setUp(true, true, [specification]);
 		const id: Id = backEnd.values[0].id;
-		var n: number = 0;
+    let n: number = 0;
 
-		service.get(id).subscribe(
+    service.get(id).subscribe(
 			value => {
 				expect(value).withContext('value').not.toBeNull();
 				if (value) {

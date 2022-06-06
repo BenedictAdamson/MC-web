@@ -11,7 +11,7 @@ export abstract class CachingKeyValueService<KEY, VALUE, SPECIFICATION>
 	private values: Map<string, ReplaySubject<VALUE | null>> = new Map();
 
 
-	constructor(
+	protected constructor(
 		private backEnd: AbstractKeyValueService<KEY, VALUE, SPECIFICATION>
 	) {
 		super();
@@ -138,15 +138,15 @@ export abstract class CachingKeyValueService<KEY, VALUE, SPECIFICATION>
 		return this.validKeys$.pipe(
 			distinctUntilChanged(),// do not spam changes
 			map((keys: KEY[]) => {// get the ReplySubjects for the valid keys
-				const rses: Observable<VALUE | null>[] = [];
+				const result: Observable<VALUE | null>[] = [];
 				for (const key of keys) {
 					const id: string = this.createKeyString(key);
 					const rs: ReplaySubject<VALUE | null> | undefined = this.values.get(id);
 					if (rs) {
-						rses.push(rs.asObservable());
-					};
+						result.push(rs.asObservable());
+					}
 				}
-				return rses;
+				return result;
 			}),
 			mergeMap((rses: Observable<VALUE | null>[]) =>
 				combineLatest(rses).pipe(

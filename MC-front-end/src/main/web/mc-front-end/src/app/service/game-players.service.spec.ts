@@ -1,21 +1,21 @@
-import { v4 as uuid } from 'uuid';
+import {v4 as uuid} from 'uuid';
 
-import { HttpClient } from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 
-import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
+import {TestBed} from '@angular/core/testing';
+import {HttpClientTestingModule, HttpTestingController, TestRequest} from '@angular/common/http/testing';
 
-import { AbstractGamePlayersBackEndService } from './abstract.game-players.back-end.service';
-import { AbstractSelfService } from './abstract.self.service';
-import { CURRENTGAMEPATH, EncodedGamePlayers, HttpGamePlayersBackEndService } from './http.game-players.back-end.service';
-import { Game } from '../game';
-import { GamePlayers } from '../game-players';
-import { GameIdentifier } from '../game-identifier';
-import { GamePlayersService } from './game-players.service';
-import { User } from '../user';
-import { UserDetails } from '../user-details';
+import {AbstractGamePlayersBackEndService} from './abstract.game-players.back-end.service';
+import {AbstractSelfService} from './abstract.self.service';
+import {CURRENTGAMEPATH, EncodedGamePlayers, HttpGamePlayersBackEndService} from './http.game-players.back-end.service';
+import {Game} from '../game';
+import {GamePlayers} from '../game-players';
+import {GameIdentifier} from '../game-identifier';
+import {GamePlayersService} from './game-players.service';
+import {User} from '../user';
+import {UserDetails} from '../user-details';
 
-import { MockSelfService } from './mock/mock.self.service';
+import {MockSelfService} from './mock/mock.self.service';
 
 
 describe('GamePlayersService', () => {
@@ -68,8 +68,7 @@ describe('GamePlayersService', () => {
    const encode = (gamePlayers: GamePlayers): EncodedGamePlayers => {
       const users = {};
       gamePlayers.users.forEach((value, key) => users[key] = value);
-      const encoded: EncodedGamePlayers = { game: gamePlayers.game, recruiting: gamePlayers.recruiting, users };
-      return encoded;
+     return {game: gamePlayers.game, recruiting: gamePlayers.recruiting, users};
    };
 
    const testGet = (gamePlayers: GamePlayers) => {
@@ -131,9 +130,9 @@ describe('GamePlayersService', () => {
    });
 
 
-   const testEndRecuitment = (done: any, gamePlayers0: GamePlayers) => {
+   const testEndRecruitment = (done: any, gamePlayers0: GamePlayers) => {
       const game: GameIdentifier = gamePlayers0.game;
-      const path: string = HttpGamePlayersBackEndService.getApiGameEndRecuitmentPath(game);
+      const path: string = HttpGamePlayersBackEndService.getApiGameEndRecruitmentPath(game);
       const service: GamePlayersService = setUp(USER_B);
       // Tough test: the reply identifier is not the same object
       const gamePlayersReply: GamePlayers = new GamePlayers(
@@ -159,11 +158,11 @@ describe('GamePlayersService', () => {
    };
 
    it('can end recuitment [A]', (done) => {
-      testEndRecuitment(done, GAME_PLAYERS_A);
+      testEndRecruitment(done, GAME_PLAYERS_A);
    });
 
    it('can end recuitment [B]', (done) => {
-      testEndRecuitment(done, GAME_PLAYERS_B);
+      testEndRecruitment(done, GAME_PLAYERS_B);
    });
 
 

@@ -18,7 +18,7 @@ export class MockScenarioBackEndService extends AbstractScenarioBackEndService {
 		for (const scenario of this.scenarios) {
 			if (scenario.identifier === id) {
 				return of(scenario);
-			};
+			}
 		}
 		return of(null);
 	}

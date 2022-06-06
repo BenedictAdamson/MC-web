@@ -12,8 +12,8 @@ export class MockGamesOfScenarioBackEndService extends AbstractGamesOfScenarioBa
 	};
 
 	private copy(): Observable<string[]> {
-		var result: string[] = [];
-		this.games.forEach(game => result.push(game));
+    const result: string[] = [];
+    this.games.forEach(game => result.push(game));
 		return of(result);
 	}
 

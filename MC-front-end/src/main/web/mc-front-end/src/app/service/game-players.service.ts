@@ -38,7 +38,7 @@ export class GamePlayersService extends CachingKeyValueService<GameIdentifier, G
       return GamePlayersService.getApiGamePlayersPath(game) + '?join';
    }
 
-   static getApiGameEndRecuitmentPath(game: GameIdentifier): string {
+   static getApiGameEndRecruitmentPath(game: GameIdentifier): string {
       return GamePlayersService.getApiGamePlayersPath(game) + '?endRecruitment';
    }
 
@@ -60,7 +60,7 @@ export class GamePlayersService extends CachingKeyValueService<GameIdentifier, G
             this.setValue(gps);
             if (!this.currentGameId) {
                this.currentGameId = new ReplaySubject(1);
-            };
+            }
             this.currentGameId.next(game);
          }
       );
@@ -70,7 +70,7 @@ export class GamePlayersService extends CachingKeyValueService<GameIdentifier, G
       if (!this.currentGameId) {
          this.currentGameId = new ReplaySubject(1);
          this.updateCurrentGameIdRS(this.currentGameId);
-      };
+      }
       // else use currently cached value
       return this.currentGameId.asObservable();
    }
@@ -78,7 +78,7 @@ export class GamePlayersService extends CachingKeyValueService<GameIdentifier, G
    updateCurrentGameId(): void {
       if (!this.currentGameId) {
          this.currentGameId = new ReplaySubject(1);
-      };
+      }
       this.updateCurrentGameIdRS(this.currentGameId);
    }
 

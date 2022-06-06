@@ -162,9 +162,9 @@ describe('UserService', () => {
 		const user2: User = { id: id, username: username2, password: password2, authorities: authorities2 };
 		const expectedPath: string = getApiUserPath(id);
 		const service: UserService = setUp();
-		var n: number = 0;
+    let n: number = 0;
 
-		service.get(id).subscribe(
+    service.get(id).subscribe(
 			user => {
 				expect(0 != n || user1 == user).withContext('provides the first value').toBeTrue();
 				expect(1 != n || user2 == user).withContext('provides the second value').toBeTrue();
@@ -201,9 +201,9 @@ describe('UserService', () => {
 		const id: string = user.id;
 		const expectedPath: string = getApiUserPath(id);
 		const service: UserService = setUp();
-		var n: number = 0;
+    let n: number = 0;
 
-		service.get(id).subscribe(
+    service.get(id).subscribe(
 			u => {
 				expect(user == u).withContext('provides the expected value').toBeTrue();
 				n++;

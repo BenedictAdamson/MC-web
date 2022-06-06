@@ -9,7 +9,7 @@ export abstract class HttpKeyValueService<KEY, VALUE, ENCODEDVALUE, SPECIFICATIO
 	extends AbstractKeyValueService<KEY, VALUE, SPECIFICATION> {
 
 
-	constructor(
+	protected constructor(
 		protected http: HttpClient,
 		public allUrl: string | undefined
 	) {

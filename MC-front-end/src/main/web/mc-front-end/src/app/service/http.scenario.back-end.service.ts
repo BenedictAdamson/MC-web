@@ -18,7 +18,7 @@ class EncodedScenario {
    public title: string;
    public description: string;
    public characters: NamedUUID[];
-};
+}
 
 
 class Delegate extends HttpSimpleKeyValueService<string, EncodedScenario, string, null> {

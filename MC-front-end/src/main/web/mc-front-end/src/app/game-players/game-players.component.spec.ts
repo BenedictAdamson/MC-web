@@ -200,7 +200,7 @@ describe('GamePlayersComponent', () => {
       const recruitingElement: HTMLElement | null = html.querySelector('#recruiting');
       const joinableElement: HTMLElement | null = html.querySelector('#joinable');
       const playingElement: HTMLElement | null = html.querySelector('#playing');
-      const endRecuitmentButton: HTMLButtonElement | null = html.querySelector('button#end-recruitment');
+      const endRecruitmentButton: HTMLButtonElement | null = html.querySelector('button#end-recruitment');
       const joinButton: HTMLButtonElement | null = html.querySelector('button#join');
 
       const joinableText: string = joinableElement ? joinableElement.innerText : '';
@@ -208,7 +208,7 @@ describe('GamePlayersComponent', () => {
       expect(recruitingElement).withContext('recruiting element').not.toBeNull();
       expect(joinableElement).withContext('joinable element').not.toBeNull();
       expect(playingElement).withContext('playing element').not.toBeNull();
-      expect(endRecuitmentButton).withContext('end-recuitment button').not.toBeNull();
+      expect(endRecruitmentButton).withContext('end-recuitment button').not.toBeNull();
       expect(joinButton).withContext('join button').not.toBeNull();
 
       expect(joinableText.includes('You may not join this game') || joinableText.includes('You may join this game'))
@@ -232,7 +232,7 @@ describe('GamePlayersComponent', () => {
    ) {
       const recruiting: boolean = gamePlayers.recruiting;
       const manager: boolean = self.authorities.includes('ROLE_MANAGE_GAMES');
-      const mayEndRecuitment: boolean = recruiting && manager;
+      const mayEndRecruitment: boolean = recruiting && manager;
       const playing: boolean = gamePlayers.isPlaying(self.id);
 
       setUp(gamePlayers, self, mayJoinGame, scenario);
@@ -250,7 +250,7 @@ describe('GamePlayersComponent', () => {
       component.isEndRecruitmentDisabled$.subscribe(may => {
          expect(may).withContext(
             'end recuitment disabled if game is not recuiting or user is not authorised'
-         ).toEqual(!mayEndRecuitment);
+         ).toEqual(!mayEndRecruitment);
       });
 
       component.mayJoinGame$.subscribe(may => {
@@ -261,7 +261,7 @@ describe('GamePlayersComponent', () => {
       const recruitingElement: HTMLElement | null = html.querySelector('#recruiting');
       const joinableElement: HTMLElement | null = html.querySelector('#joinable');
       const playingElement: HTMLElement | null = html.querySelector('#playing');
-      const endRecuitmentButton: HTMLButtonElement | null = html.querySelector('button#end-recruitment');
+      const endRecruitmentButton: HTMLButtonElement | null = html.querySelector('button#end-recruitment');
       const joinButton: HTMLButtonElement | null = html.querySelector('button#join');
       const playedCharactersElement: HTMLElement | null = html.querySelector('#played-characters');
 
@@ -284,8 +284,8 @@ describe('GamePlayersComponent', () => {
       expect(
          !playing || playingText.includes('You are playing this game')
       ).withContext('playing element text can indicate that playing').toBeTrue();
-      if (endRecuitmentButton) {
-         expect(endRecuitmentButton.disabled).withContext('end-recuitment button is disabled').toEqual(!mayEndRecuitment);
+      if (endRecruitmentButton) {
+         expect(endRecruitmentButton.disabled).withContext('end-recuitment button is disabled').toEqual(!mayEndRecruitment);
       }
       if (joinButton) {
          expect(joinButton.disabled).withContext('join button is disabled').toEqual(!mayJoinGame);
@@ -393,13 +393,13 @@ describe('GamePlayersComponent', () => {
       assertInvariants();
       const html: HTMLElement = fixture.nativeElement;
       const recruitingElement: HTMLElement | null = html.querySelector('#recruiting');
-      const endRecuitmentButton: HTMLButtonElement | null = html.querySelector('button#end-recruitment');
+      const endRecruitmentButton: HTMLButtonElement | null = html.querySelector('button#end-recruitment');
 
       const recruitingText: string = recruitingElement ? recruitingElement.innerText : '';
       expect(recruitingText.includes('This game is not recruiting players'))
          .withContext('recruiting element text indicates that not recruiting').toBeTrue();
-      if (endRecuitmentButton) {
-         expect(endRecuitmentButton.disabled).withContext('end-recuitment button is disabled').toBeTrue();
+      if (endRecruitmentButton) {
+         expect(endRecruitmentButton.disabled).withContext('end-recuitment button is disabled').toBeTrue();
       }
    };
 

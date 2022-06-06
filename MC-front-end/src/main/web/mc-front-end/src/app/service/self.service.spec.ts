@@ -205,12 +205,12 @@ describe('SelfService', () => {
    };
 
    it('handles authentication failure [A]', (done) => {
-      if (!USER_A.password) { throw new Error('invalid test fixture'); };
+      if (!USER_A.password) { throw new Error('invalid test fixture'); }
       testAuthenticationFailure(done, USER_A.username, USER_A.password);
    });
 
    it('handles authentication failure [B]', (done) => {
-      if (!USER_B.password) { throw new Error('invalid test fixture'); };
+      if (!USER_B.password) { throw new Error('invalid test fixture'); }
       testAuthenticationFailure(done, USER_B.username, USER_B.password);
    });
 

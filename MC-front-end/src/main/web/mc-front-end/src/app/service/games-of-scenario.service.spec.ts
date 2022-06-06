@@ -20,8 +20,8 @@ describe('GamesOfScenarioService', () => {
 	const CREATEDS_0: string[] = [];
 	const CREATEDS_1: string[] = [CREATED_A];
 	const CREATEDS_2: string[] = [CREATED_A, CREATED_B];
-	
-	
+
+
 	const setUp = function(): GamesOfScenarioService {
 		TestBed.configureTestingModule({
 			imports: [HttpClientTestingModule]
@@ -32,7 +32,7 @@ describe('GamesOfScenarioService', () => {
 		const backEnd: AbstractGamesOfScenarioBackEndService = new HttpGamesOfScenarioBackEndService(httpClient);
 		return new GamesOfScenarioService(backEnd);
 	};
-	
+
 
 	it('should be created', () => {
 		const service: GamesOfScenarioService = setUp();
@@ -116,9 +116,9 @@ describe('GamesOfScenarioService', () => {
 	const testGetGamesOfScenarioForChangingValue = function(done: any, scenario: string, identifiers1: string[], identifiers2: string[]) {
 		const service: GamesOfScenarioService = setUp();
 		const expectedPath: string = getApiGamesPath(scenario);
-		var n: number = 0;
+    let n: number = 0;
 
-		service.get(scenario).subscribe(
+    service.get(scenario).subscribe(
 			ids => {
 				expect(0 != n || identifiers1 == ids).withContext('provides the first identifiers').toBeTrue();
 				expect(1 != n || identifiers2 == ids).withContext('provides the second identifiers').toBeTrue();
@@ -152,9 +152,9 @@ describe('GamesOfScenarioService', () => {
 	const testGetGamesOfScenarioForUnchangedUpdate = function(scenario: string, identifiers: string[]) {
 		const service: GamesOfScenarioService = setUp();
 		const expectedPath: string = getApiGamesPath(scenario);
-		var n: number = 0;
+    let n: number = 0;
 
-		service.get(scenario).subscribe(
+    service.get(scenario).subscribe(
 			ids => {
 				expect(identifiers == ids).withContext('provides the expected identifiers').toBeTrue();
 				n++;

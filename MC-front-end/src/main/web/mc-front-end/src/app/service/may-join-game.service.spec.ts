@@ -123,7 +123,7 @@ describe('MayJoinGameService', () => {
 		testUpdateAfterGet(GAME_IDENTIFIER_A, true);
 	})
 
-	it('can update whether may join game afte rquery whether may join game [C]', () => {
+	it('can update whether may join game after query whether may join game [C]', () => {
 		testUpdateAfterGet(GAME_IDENTIFIER_B, false);
 	})
 
@@ -141,9 +141,9 @@ describe('MayJoinGameService', () => {
 		const may2: boolean = !may1;
 		const expectedPath: string = MayJoinGameService.getApiMayJoinGamePath(game);
 		const service: MayJoinGameService = setUp();
-		var n: number = 0;
+    let n: number = 0;
 
-		service.get(game).subscribe(
+    service.get(game).subscribe(
 			() => {
 				n++;
 				if (n == 2) done();
@@ -173,9 +173,9 @@ describe('MayJoinGameService', () => {
 	const testGetForUnchangedUpdate = function(game: GameIdentifier, may: boolean) {
 		const expectedPath: string = MayJoinGameService.getApiMayJoinGamePath(game);
 		const service: MayJoinGameService = setUp();
-		var n: number = 0;
+    let n: number = 0;
 
-		service.get(game).subscribe(
+    service.get(game).subscribe(
 			() => {
 				n++;
 				expect(n).withContext('number emitted').toEqual(1);

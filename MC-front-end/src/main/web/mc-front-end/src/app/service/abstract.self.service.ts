@@ -26,7 +26,7 @@ export abstract class AbstractSelfService {
     *
     * Instancing this class does not trigger a login request or any network traffic.
     */
-   constructor() {
+   protected constructor() {
       this.userRS$.next(null);
       this.authenticatedRS$.next(false);
    }

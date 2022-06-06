@@ -22,8 +22,8 @@ describe('UserComponent', () => {
 	const EXPECTED_ROLE_NAMES_B: string[] = [];
 
 	const getUser = function(component: UserComponent): User | null {
-		var user: User | null = null;
-		component.user$.subscribe({
+    let user: User | null = null;
+    component.user$.subscribe({
 			next: (u) => user = u,
 			error: (err) => fail(err),
 			complete: () => { }

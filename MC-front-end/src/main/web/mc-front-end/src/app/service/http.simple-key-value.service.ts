@@ -6,7 +6,7 @@ export abstract class HttpSimpleKeyValueService<KEY, VALUE, SPECIFICATION, ADDPA
 	extends HttpKeyValueService<KEY, VALUE, VALUE, SPECIFICATION, ADDPAYLOAD> {
 
 
-	constructor(
+	protected constructor(
 		protected http: HttpClient,
 		public allUrl: string | undefined
 	) {

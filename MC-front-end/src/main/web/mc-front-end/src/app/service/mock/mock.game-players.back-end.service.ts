@@ -7,7 +7,7 @@ import { GamePlayers } from '../../game-players';
 export class MockGamePlayersBackEndService extends AbstractGamePlayersBackEndService {
 
 	private gamePlayers: GamePlayers | null;
-	private game: GameIdentifier | null;
+	private readonly game: GameIdentifier | null;
 
 	constructor(
 		gamePlayers: GamePlayers | null,
@@ -35,7 +35,7 @@ export class MockGamePlayersBackEndService extends AbstractGamePlayersBackEndSer
 	}
 
 	endRecruitment(game: GameIdentifier): Observable<GamePlayers> {
-		this.expectGameIdentifier(game, 'endRecuitment');
+		this.expectGameIdentifier(game, 'endRecruitment');
 		if (this.gamePlayers) {
 			this.gamePlayers.recruiting = false;
 		}

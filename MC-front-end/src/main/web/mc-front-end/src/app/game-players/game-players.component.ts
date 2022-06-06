@@ -22,10 +22,10 @@ export class GamePlayersComponent implements OnInit {
    private get scenarioId$(): Observable<string> {
       if (!this.route.parent) {
          throw new Error('missing this.route.parent');
-      };
+      }
       if (!this.route.parent.parent) {
          throw new Error('missing this.route.parent.parent');
-      };
+      }
       return this.route.parent.parent.paramMap.pipe(
          map(params => params.get('scenario')),
          filter(id => !!id),
@@ -37,7 +37,7 @@ export class GamePlayersComponent implements OnInit {
    private get created$(): Observable<string> {
       if (!this.route.parent) {
          throw new Error('missing this.route.parent');
-      };
+      }
       return this.route.parent.paramMap.pipe(
          map(params => params.get('created')),
          filter(created => !!created),
@@ -143,14 +143,7 @@ export class GamePlayersComponent implements OnInit {
       );
    }
 
-   get players$(): Observable<Map<string, string>> {
-      return this.gamePlayers$.pipe(
-         map(gp => gp.users)
-         // TODO provide names
-      );
-   }
-
-   get playedCharacters$(): Observable<string[]> {
+  get playedCharacters$(): Observable<string[]> {
       return combineLatest([this.scenario$, this.gamePlayers$]).pipe(
          map(([scenario, gamePlayers]) => GamePlayersComponent.playedCharacters(scenario, gamePlayers))
       );
