@@ -45,6 +45,39 @@ describe('ScenarioComponent', () => {
 	};
 
 
+  const getTitle = (sc: ScenarioComponent): string | null => {
+    let title: string | null = null;
+    sc.title$.subscribe({
+      next: (t) => title = t,
+      error: (err) => fail(err),
+      complete: () => { }
+    });
+    return title;
+  };
+
+
+  const getDescription = (sc: ScenarioComponent): string | null => {
+    let description: string | null = null;
+    sc.description$.subscribe({
+      next: (d) => description = d,
+      error: (err) => fail(err),
+      complete: () => { }
+    });
+    return description;
+  };
+
+
+  const getCharacters = (sc: ScenarioComponent): NamedUUID[] | null => {
+    let characters: NamedUUID[] | null = null;
+    sc.characters$.subscribe({
+      next: (c) => characters = c,
+      error: (err) => fail(err),
+      complete: () => { }
+    });
+    return characters;
+  };
+
+
 	const setUpForNgInit = (testScenario: Scenario,) => {
 		const scenarioBackEndService: AbstractScenarioBackEndService = new MockScenarioBackEndService([testScenario]);
 
@@ -71,6 +104,9 @@ describe('ScenarioComponent', () => {
 
 		expect(component).toBeTruthy();
 		expect(getScenario(component)).toBe(testScenario);
+    expect(getTitle(component)).toBe(testScenario.title);
+    expect(getDescription(component)).toBe(testScenario.description);
+    expect(getCharacters(component)).toEqual(testScenario.characters);
 
 		const html: HTMLElement = fixture.nativeElement;
 		const selfLink: HTMLAnchorElement | null = html.querySelector('a#scenario');

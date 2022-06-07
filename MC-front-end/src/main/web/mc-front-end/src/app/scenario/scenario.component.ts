@@ -6,6 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 
 import { Scenario } from '../scenario';
 import { ScenarioService } from '../service/scenario.service';
+import {NamedUUID} from "../named-uuid";
 
 @Component({
 	selector: 'app-scenario',
@@ -36,6 +37,24 @@ export class ScenarioComponent implements OnInit {
 			map((scenario: Scenario | null) => scenario as Scenario)
 		);
 	}
+
+  get title$(): Observable<string> {
+    return this.scenario$.pipe(
+      map(s => s.title)
+    )
+  }
+
+  get description$(): Observable<string> {
+    return this.scenario$.pipe(
+      map(s => s.description)
+    )
+  }
+
+  get characters$(): Observable<NamedUUID[]> {
+    return this.scenario$.pipe(
+      map(s => s.characters)
+    )
+  }
 
 	ngOnInit() {
 		// Do nothing
