@@ -353,6 +353,17 @@ public abstract class Page {
       }
    }
 
+   public final void awaitIsReadyAndErrorMessage() throws IllegalStateException {
+      try {
+         new WebDriverWait(webDriver, Duration.ofSeconds(17))
+                 .until(driver -> isReady(driver, isA(WebElement.class))
+                         && HAS_ERROR_ELEMENT
+                         .matches(driver.findElement(BODY_LOCATOR)));
+      } catch (final Exception e) {// give better diagnostics
+         throw new NotReadyException(e);
+      }
+   }
+
    private final <T> Matcher<T> createMatcher(final String decription,
             final Predicate<T> predicate) {
       return new CustomTypeSafeMatcher<>(decription) {

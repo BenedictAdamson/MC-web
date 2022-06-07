@@ -131,6 +131,7 @@ class UserFESpec extends MockedBeSpecification {
     when: "try to login"
     final var loginPage = world.getHomePage().navigateToLoginPage()
     loginPage.submitLoginForm(user.getUsername(), user.getPassword())
+    loginPage.awaitIsReadyAndErrorMessage()
 
     then: "rejects the login"
     loginPage.assertRejectedLogin()

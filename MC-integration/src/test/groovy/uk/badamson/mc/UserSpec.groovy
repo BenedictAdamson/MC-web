@@ -78,7 +78,7 @@ class UserSpec extends UnmockedSpecification {
     when: "try to login"
     final var loginPage = world.getHomePage().navigateToLoginPage()
     loginPage.submitLoginForm(user.getUsername(), user.getPassword())
-    loginPage.awaitIsReadyOrErrorMessage()
+    loginPage.awaitIsReadyAndErrorMessage()
 
     then: "rejects the login"
     loginPage.assertRejectedLogin()
