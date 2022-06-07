@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-20,22.
  *
  * This file is part of MC.
  *
@@ -18,11 +18,11 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.util.Objects;
-
-import javax.annotation.concurrent.Immutable;
-
 import org.openqa.selenium.By;
+
+import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
+import java.util.Objects;
 
 /**
  * <p>
@@ -32,42 +32,40 @@ import org.openqa.selenium.By;
 @Immutable
 public final class LoginPage extends Page {
 
-   private static final String PATH = "/login";
+    private static final String PATH = "/login";
 
-   /**
-    * <p>
-    * Construct a login page object associated with an existing page.
-    * </p>
-    *
-    * @param page
-    *           The existing page.
-    * @throws NullPointerException
-    *            If {@code page} is null.
-    */
-   public LoginPage(final Page page) {
-      super(page);
-   }
+    /**
+     * <p>
+     * Construct a login page object associated with an existing page.
+     * </p>
+     *
+     * @param page The existing page.
+     * @throws NullPointerException If {@code page} is null.
+     */
+    public LoginPage(final Page page) {
+        super(page);
+    }
 
-   public void assertRejectedLogin() {
-      assertInvariants();// guard
-      assertHasErrorMessage();
-   }
+    public void assertRejectedLogin() {
+        assertInvariants();// guard
+        assertHasErrorMessage();
+    }
 
-   @Override
-   protected boolean isValidPath(final String path) {
-      Objects.requireNonNull(path, "path");
-      return PATH.equals(path);
-   }
+    @Override
+    protected boolean isValidPath(@Nonnull final String path) {
+        Objects.requireNonNull(path, "path");
+        return PATH.equals(path);
+    }
 
-   public void submitLoginForm(final String user, final String password) {
-      Objects.requireNonNull(user, "user");
-      Objects.requireNonNull(password, "password");
-      requireIsReady();
+    public void submitLoginForm(final String user, final String password) {
+        Objects.requireNonNull(user, "user");
+        Objects.requireNonNull(password, "password");
+        requireIsReady();
 
-      final var body = getBody();
-      body.findElement(By.name("username")).sendKeys(user);
-      body.findElement(By.xpath("//input[@type='password']"))
-               .sendKeys(password);
-      body.findElement(By.xpath("//button[@type='submit']")).submit();
-   }
+        final var body = getBody();
+        body.findElement(By.name("username")).sendKeys(user);
+        body.findElement(By.xpath("//input[@type='password']"))
+                .sendKeys(password);
+        body.findElement(By.xpath("//button[@type='submit']")).submit();
+    }
 }

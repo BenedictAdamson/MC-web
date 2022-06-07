@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-20,22.
  *
  * This file is part of MC.
  *
@@ -18,18 +18,17 @@ package uk.badamson.mc.presentation;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
-import java.util.Objects;
-
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
-
 import org.hamcrest.Matcher;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+
+import javax.annotation.Nonnull;
+import javax.annotation.concurrent.Immutable;
+import java.util.Objects;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 /**
  * <p>
@@ -39,64 +38,61 @@ import org.openqa.selenium.WebElement;
 @Immutable
 public final class UserPage extends Page {
 
-   private static final String BASE = "/user/";
-   private static final By USERNAME_LOCATOR = By.id("username");
-   private static final By ROLES_LIST_LOCATOR = By.id("roles");
+    private static final String BASE = "/user/";
+    private static final By USERNAME_LOCATOR = By.id("username");
+    private static final By ROLES_LIST_LOCATOR = By.id("roles");
 
-   private final Matcher<String> containsDisplayName;
+    private final Matcher<String> containsDisplayName;
 
-   /**
-    * <p>
-    * Construct a user page associated with a given users page and having a
-    * given (expected) display name..
-    * </p>
-    *
-    * @param usersPage
-    *           The users page.
-    * @param displayName
-    *           The expected display name.
-    * @throws NullPointerException
-    *            <ul>
-    *            <li>If {@code usersPage} is null.</li>
-    *            <li>If {@code displayName} is null.</li>
-    *            </ul>
-    */
-   public UserPage(final UsersPage usersPage, final String displayName) {
-      super(usersPage);
-      Objects.requireNonNull(displayName, "displayName");
-      containsDisplayName = containsString(displayName);
-   }
+    /**
+     * <p>
+     * Construct a user page associated with a given users page and having a
+     * given (expected) display name..
+     * </p>
+     *
+     * @param usersPage   The users page.
+     * @param displayName The expected display name.
+     * @throws NullPointerException <ul>
+     *                                         <li>If {@code usersPage} is null.</li>
+     *                                         <li>If {@code displayName} is null.</li>
+     *                                         </ul>
+     */
+    public UserPage(final UsersPage usersPage, final String displayName) {
+        super(usersPage);
+        Objects.requireNonNull(displayName, "displayName");
+        containsDisplayName = containsString(displayName);
+    }
 
-   public void assertIncludesUserName() {
-      assertIncludesUserName(getBody());
-   }
+    public void assertIncludesUserName() {
+        assertIncludesUserName(getBody());
+    }
 
-   private void assertIncludesUserName(final WebElement body) {
-      final var element = assertHasElement("Has a username element", body,
-               USERNAME_LOCATOR);
-      assertThat("Username element text includes the user name",
-               element.getText(), containsDisplayName);
-   }
+    private void assertIncludesUserName(final WebElement body) {
+        final var element = assertHasElement("Has a username element", body,
+                USERNAME_LOCATOR);
+        assertThat("Username element text includes the user name",
+                element.getText(), containsDisplayName);
+    }
 
-   public void assertListsRolesOfUser() {
-      assertListsRolesOfUser(getBody());
-   }
+    public void assertListsRolesOfUser() {
+        assertListsRolesOfUser(getBody());
+    }
 
-   private void assertListsRolesOfUser(final WebElement body) {
-      assertHasElement(body, ROLES_LIST_LOCATOR);
-   }
+    private void assertListsRolesOfUser(final WebElement body) {
+        assertHasElement(body, ROLES_LIST_LOCATOR);
+    }
 
-   @Override
-   protected void assertValidBody(@Nonnull final WebElement body) {
-      assertAll(() -> super.assertValidBody(body),
-               () -> assertIncludesUserName(body),
-               () -> assertListsRolesOfUser(body));
-   }
+    @Override
+    protected void assertValidBody(@Nonnull final WebElement body) {
+        assertAll(() -> super.assertValidBody(body),
+                () -> assertIncludesUserName(body),
+                () -> assertListsRolesOfUser(body));
+    }
 
-   @Override
-   protected boolean isValidPath(final String path) {
-      Objects.requireNonNull(path, "path");
-      return path.startsWith(BASE);
-   }
+    @Override
+    protected boolean isValidPath(@Nonnull final String path) {
+        Objects.requireNonNull(path, "path");
+        return path.startsWith(BASE);
+    }
 
 }

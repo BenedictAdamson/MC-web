@@ -21,7 +21,6 @@ package uk.badamson.mc.presentation;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
-
 import uk.badamson.mc.Version;
 
 /**
@@ -30,19 +29,19 @@ import uk.badamson.mc.Version;
  * </p>
  */
 public final class McFrontEndContainer
-         extends GenericContainer<McFrontEndContainer> {
+        extends GenericContainer<McFrontEndContainer> {
 
-   public static final String VERSION = Version.VERSION;
+    public static final String VERSION = Version.VERSION;
 
-   public static final int PORT = 80;
+    public static final int PORT = 80;
 
-   public static final DockerImageName IMAGE = DockerImageName.parse(
+    public static final DockerImageName IMAGE = DockerImageName.parse(
             "index.docker.io/benedictadamson/mc-front-end-srv:" + VERSION);
 
-   public McFrontEndContainer() {
-      super(IMAGE);
-      addExposedPort(PORT);
-      waitingFor(Wait.forListeningPort());
-   }
+    public McFrontEndContainer() {
+        super(IMAGE);
+        addExposedPort(PORT);
+        waitingFor(Wait.forListeningPort());
+    }
 
 }

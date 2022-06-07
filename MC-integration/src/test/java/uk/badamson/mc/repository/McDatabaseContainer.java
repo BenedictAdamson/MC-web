@@ -18,22 +18,15 @@ package uk.badamson.mc.repository;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.time.Duration;
-import java.util.Arrays;
-
+import com.mongodb.MongoCredential;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
 import org.testcontainers.utility.DockerImageName;
-
-import com.mongodb.MongoClientSettings;
-import com.mongodb.MongoCredential;
-import com.mongodb.ServerAddress;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-
 import uk.badamson.mc.Version;
+
+import java.time.Duration;
 
 /**
  * <p>
@@ -41,59 +34,45 @@ import uk.badamson.mc.Version;
  * </p>
  */
 public final class McDatabaseContainer
-         extends GenericContainer<McDatabaseContainer> {
+        extends GenericContainer<McDatabaseContainer> {
 
-   public static final String VERSION = Version.VERSION;
+    public static final String VERSION = Version.VERSION;
 
-   public static final DockerImageName IMAGE = DockerImageName
+    public static final DockerImageName IMAGE = DockerImageName
             .parse("index.docker.io/benedictadamson/mc-database:" + VERSION);
 
-   public static final int PORT = 27017;
+    public static final int PORT = 27017;
 
-   public static final String AUTHENTICATION_DB = "admin";
+    public static final String AUTHENTICATION_DB = "admin";
 
-   public static final String DB = "mc";
+    private static final String NORMAL_USER = "mc";
 
-   private static final String NORMAL_USER = "mc";
+    private static final String ROOT_USER = "admin";
 
-   private static final String ROOT_USER = "admin";
+    private static final Duration STARTUP_TIME = Duration.ofSeconds(45);
 
-   public static final MongoCredential BAD_CREDENTIALS = MongoCredential
-            .createCredential("BAD", AUTHENTICATION_DB, "BAD".toCharArray());
-
-   private static final Duration STARTUP_TIME = Duration.ofSeconds(45);
-
-   private static final WaitStrategy WAIT_STRATEGY = new WaitAllStrategy()
+    private static final WaitStrategy WAIT_STRATEGY = new WaitAllStrategy()
             .withStrategy(Wait.forListeningPort())
             .withStartupTimeout(STARTUP_TIME);
 
-   public final MongoCredential userCredentials;
+    public final MongoCredential userCredentials;
 
-   public final MongoCredential rootCredentials;
+    public final MongoCredential rootCredentials;
 
-   public McDatabaseContainer(final String rootPassword,
-            final String userPassword) {
-      super(IMAGE);
-      userCredentials = MongoCredential.createCredential(NORMAL_USER,
-               AUTHENTICATION_DB, userPassword.toCharArray());
-      rootCredentials = MongoCredential.createCredential(ROOT_USER,
-               AUTHENTICATION_DB, rootPassword.toCharArray());
-      addExposedPort(PORT);
-      withEnv("MONGO_INITDB_ROOT_PASSWORD", rootPassword);
-      withEnv("MC_INIT_PASSWORD", userPassword);
-      withCommand("--bind_ip", "0.0.0.0");
-      waitingFor(WAIT_STRATEGY);
-      addExposedPort(PORT);
-   }
+    @SuppressWarnings("resource")
+    public McDatabaseContainer(final String rootPassword,
+                               final String userPassword) {
+        super(IMAGE);
+        userCredentials = MongoCredential.createCredential(NORMAL_USER,
+                AUTHENTICATION_DB, userPassword.toCharArray());
+        rootCredentials = MongoCredential.createCredential(ROOT_USER,
+                AUTHENTICATION_DB, rootPassword.toCharArray());
+        addExposedPort(PORT);
+        withEnv("MONGO_INITDB_ROOT_PASSWORD", rootPassword);
+        withEnv("MC_INIT_PASSWORD", userPassword);
+        withCommand("--bind_ip", "0.0.0.0");
+        waitingFor(WAIT_STRATEGY);
+        addExposedPort(PORT);
+    }
 
-   public MongoClient createClient(final MongoCredential credentials) {
-      return MongoClients.create(MongoClientSettings.builder()
-               .applyToClusterSettings(builder -> builder
-                        .hosts(Arrays.asList(getServerAddress())))
-               .credential(credentials).build());
-   }
-
-   private ServerAddress getServerAddress() {
-      return new ServerAddress(getHost(), getMappedPort(PORT));
-   }
 }

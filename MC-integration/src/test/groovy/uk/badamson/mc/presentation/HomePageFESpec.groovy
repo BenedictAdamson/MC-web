@@ -38,7 +38,7 @@ class HomePageFESpec extends MockedBeSpecification {
         world.notLoggedIn()
         and: "not resuming a session"
         // do nothing
-        when: "the potential user gives the obvious URL http://example.com/ to a web browser"
+        when: "the potential user gives the obvious URL https://example.com/ to a web browser"
         world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(UUID.randomUUID(), 'Squad assault')))
         def homePage = world.getHomePage()
         then: "MC serves the home page"

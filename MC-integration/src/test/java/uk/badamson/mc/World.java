@@ -49,116 +49,115 @@ import java.util.stream.Stream;
  */
 public final class World implements AutoCloseable, TestLifecycleAware {
 
-   private static <TYPE> boolean intersects(final Set<TYPE> set1,
-            final Set<TYPE> set2) {
-      /* The sets intersect if we can find any element in both. */
-      return set1.stream().anyMatch(set2::contains);
-   }
+    private static <TYPE> boolean intersects(final Set<TYPE> set1,
+                                             final Set<TYPE> set2) {
+        /* The sets intersect if we can find any element in both. */
+        return set1.stream().anyMatch(set2::contains);
+    }
 
-   private final McContainers containers;
+    private final McContainers containers;
 
-   private int nUsers;
+    private int nUsers;
 
-   private RemoteWebDriver webDriver;
+    private RemoteWebDriver webDriver;
 
-   private User currentUser;
+    private User currentUser;
 
-   /**
-    * @param failureRecordingDirectory
-    *           The location of a directory in which to store files holding
-    *           verbose information about failed test cases. Or {@code null} if
-    *           no such records are to be made.
-    */
-   public World(final Path failureRecordingDirectory) {
-      containers = new McContainers(failureRecordingDirectory);
-   }
+    /**
+     * @param failureRecordingDirectory The location of a directory in which to store files holding
+     *                                  verbose information about failed test cases. Or {@code null} if
+     *                                  no such records are to be made.
+     */
+    public World(final Path failureRecordingDirectory) {
+        containers = new McContainers(failureRecordingDirectory);
+    }
 
-   @Override
-   public void beforeTest(TestDescription description) {
-      containers.beforeTest(description);
-      webDriver = containers.getWebDriver();
-      currentUser = null;
-   }
+    @Override
+    public void beforeTest(TestDescription description) {
+        containers.beforeTest(description);
+        webDriver = containers.getWebDriver();
+        currentUser = null;
+    }
 
-   @Override
-   public void afterTest(TestDescription description, Optional<Throwable> throwable) {
-      containers.afterTest(description, throwable);
-      webDriver = null;
-   }
+    @Override
+    public void afterTest(TestDescription description, Optional<Throwable> throwable) {
+        containers.afterTest(description, throwable);
+        webDriver = null;
+    }
 
-   /**
-    * <p>
-    * Stop and then dispose of the Docker containers used for the SUT.
-    * </p>
-    *
-    * @see #open()
-    */
-   @Override
-   @PreDestroy
-   public void close() {
-      webDriver = null;
-      containers.stop();
-      containers.close();
-   }
+    /**
+     * <p>
+     * Stop and then dispose of the Docker containers used for the SUT.
+     * </p>
+     *
+     * @see #open()
+     */
+    @Override
+    @PreDestroy
+    public void close() {
+        webDriver = null;
+        containers.stop();
+        containers.close();
+    }
 
-   public Game.Identifier createGame(final UUID scenario) {
-      return containers.createGame(scenario);
-   }
+    public Game.Identifier createGame(final UUID scenario) {
+        return containers.createGame(scenario);
+    }
 
-   private User createUser(final Set<Authority> authorities) {
-      final var userDetails = generateBasicUserDetails(authorities);
-      final var id = containers.addUser(userDetails);
-      return new User(id, userDetails);
-   }
+    private User createUser(final Set<Authority> authorities) {
+        final var userDetails = generateBasicUserDetails(authorities);
+        final var id = containers.addUser(userDetails);
+        return new User(id, userDetails);
+    }
 
-   public User currentUserHasRoles(final Set<Authority> included,
-            final Set<Authority> excluded) {
-      Objects.requireNonNull(included, "included");
-      Objects.requireNonNull(excluded, "excluded");
-      if (intersects(included, excluded)) {
-         throw new IllegalArgumentException("Contradictory role constraints");
-      }
+    public User currentUserHasRoles(final Set<Authority> included,
+                                    final Set<Authority> excluded) {
+        Objects.requireNonNull(included, "included");
+        Objects.requireNonNull(excluded, "excluded");
+        if (intersects(included, excluded)) {
+            throw new IllegalArgumentException("Contradictory role constraints");
+        }
 
-      currentUser = createUser(included);
-      return currentUser;
-   }
+        currentUser = createUser(included);
+        return currentUser;
+    }
 
-   public User currentUserIsUnknownUser() {
-      currentUser = new User(UUID.randomUUID(),
-               generateBasicUserDetails(Authority.ALL));
-      return currentUser;
-   }
+    public User currentUserIsUnknownUser() {
+        currentUser = new User(UUID.randomUUID(),
+                generateBasicUserDetails(Authority.ALL));
+        return currentUser;
+    }
 
-   private BasicUserDetails generateBasicUserDetails(
+    private BasicUserDetails generateBasicUserDetails(
             final Set<Authority> authorities) {
-      final var sequenceId = ++nUsers;
-      final var username = "User " + sequenceId;
-      final var password = "password" + sequenceId;
-      return new BasicUserDetails(username, password, authorities, true, true,
-               true, true);
-   }
+        final var sequenceId = ++nUsers;
+        final var username = "User " + sequenceId;
+        final var password = "password" + sequenceId;
+        return new BasicUserDetails(username, password, authorities, true, true,
+                true, true);
+    }
 
-   public HomePage getHomePage() {
-      final var homePage = new HomePage(getWebDriver());
-      homePage.get();
-      return homePage;
-   }
+    public HomePage getHomePage() {
+        final var homePage = new HomePage(getWebDriver());
+        homePage.get();
+        return homePage;
+    }
 
-   public Stream<NamedUUID> getScenarios() {
-      return containers.getScenarios();
-   }
+    public Stream<NamedUUID> getScenarios() {
+        return containers.getScenarios();
+    }
 
-   public WebDriver getWebDriver() {
-      Objects.requireNonNull(webDriver, "webDriver");
-      return webDriver;
-   }
+    public WebDriver getWebDriver() {
+        Objects.requireNonNull(webDriver, "webDriver");
+        return webDriver;
+    }
 
-   /**
-    * @see #close()
-    */
-   @PostConstruct
-   public void open() {
-      containers.start();
-   }
+    /**
+     * @see #close()
+     */
+    @PostConstruct
+    public void open() {
+        containers.start();
+    }
 
 }

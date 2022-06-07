@@ -34,7 +34,7 @@ class HomePageSpec extends UnmockedSpecification {
         world.currentUserIsUnknownUser()
         and: "not resuming a session"
         // do nothing
-        when: "the potential user gives the obvious URL http://example.com/ to a web browser"
+        when: "the potential user gives the obvious URL https://example.com/ to a web browser"
         def homePage = world.getHomePage()
         then: "MC serves the home page"
         homePage.assertInvariants()
