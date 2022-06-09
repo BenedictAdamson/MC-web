@@ -92,7 +92,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
                                 gameId.getCreated(), in(creationTimes)));
             }
 
-        }// class
+        }
 
         private ResponseSpec exchange(final UUID scenario, final User user) {
             Objects.requireNonNull(scenario, "scenario");
@@ -107,7 +107,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
 
             return response;
         }
-    }// class
+    }
 
     @Nested
     public class GetSelf {
@@ -210,7 +210,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
             response.expectStatus().is4xxClientError();
         }
 
-    }// class
+    }
 
     @Nested
     public class Logout {
@@ -283,7 +283,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
             response.expectStatus().is4xxClientError();
         }
 
-    }// class
+    }
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 

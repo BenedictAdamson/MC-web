@@ -63,7 +63,7 @@ public abstract class Page {
             super(createNotReadyMessage(), cause);
         }
 
-    }// class
+    }
 
     protected static abstract class WebElementMatcher
             extends TypeSafeDiagnosingMatcher<WebElement> {
@@ -72,7 +72,7 @@ public abstract class Page {
         public void describeTo(final Description description) {
             description.appendText("Element matches");
         }
-    }// class
+    }
 
     /**
      * <p>
