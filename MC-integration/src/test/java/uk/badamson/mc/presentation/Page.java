@@ -34,7 +34,6 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
-import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -224,8 +223,7 @@ public abstract class Page {
     public final void assertNoErrorMessages() {
         final var elements = getBody().findElements(ERROR_LOCATOR);
         // Report the error messages, to provide better diagnostics
-        final var errorMessages = elements.stream().map(WebElement::getText)
-                .collect(toUnmodifiableList());
+        final var errorMessages = elements.stream().map(WebElement::getText).toList();
         assertThat("No error messages", errorMessages, is(empty()));
     }
 

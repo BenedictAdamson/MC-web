@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public final class MockMcBackEndContainer extends MockServerContainer {
     private static String gamePath(final Game.Identifier game) {
@@ -117,7 +116,7 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpResponse getGameCreationTimesResponse(@Nonnull Set<Instant> times) {
-        List<String> formattedTimes = times.stream().map(URI_DATETIME_FORMATTER::format).collect(Collectors.toUnmodifiableList());
+        List<String> formattedTimes = times.stream().map(URI_DATETIME_FORMATTER::format).toList();
         return jsonResponse(formattedTimes);
     }
 
