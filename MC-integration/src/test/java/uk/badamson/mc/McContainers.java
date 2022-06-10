@@ -40,6 +40,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -207,6 +208,8 @@ public class McContainers
 
     private void createAndStartBrowser() {
         browser = new BrowserWebDriverContainer<>(BROWSER_IMAGE_NAME);
+        browser.withCreateContainerCmdModifier(cmd -> Objects.requireNonNull(cmd.getHostConfig())
+                .withCpuCount(2L));
         browser.withCapabilities(new FirefoxOptions().addPreference(
                         "security.insecure_field_warning.contextual.enabled", false))
                 .withNetwork(network);

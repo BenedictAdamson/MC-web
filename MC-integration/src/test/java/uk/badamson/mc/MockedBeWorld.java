@@ -30,6 +30,8 @@ public final class MockedBeWorld implements Startable, TestLifecycleAware {
         ms.withNetwork(network).withNetworkAliases(MS_HOST);
         ingress.withNetwork(network).withNetworkAliases(INGRESS_HOST);
         this.failureRecordingDirectory = failureRecordingDirectory;
+        browser.withCreateContainerCmdModifier(cmd -> Objects.requireNonNull(cmd.getHostConfig())
+                .withCpuCount(2L));
         browser.withCapabilities(new FirefoxOptions().addPreference("security.insecure_field_warning.contextual.enabled", false)).withNetwork(network);
         if (failureRecordingDirectory != null) {
             try {
