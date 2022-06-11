@@ -25,9 +25,7 @@ import org.testcontainers.containers.BrowserWebDriverContainer;
 import org.testcontainers.containers.BrowserWebDriverContainer.VncRecordingMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
-import org.testcontainers.lifecycle.Startable;
 import org.testcontainers.lifecycle.TestDescription;
-import org.testcontainers.lifecycle.TestLifecycleAware;
 import org.testcontainers.utility.DockerImageName;
 import uk.badamson.mc.presentation.McFrontEndContainer;
 import uk.badamson.mc.presentation.McReverseProxyContainer;
@@ -55,8 +53,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
  * MC software.
  * </p>
  */
-public class McContainers
-        implements Startable, AutoCloseable, TestLifecycleAware {
+public class McContainers extends BaseContainers {
 
     public enum HttpServer {
         BACK_END, FRONT_END, INGRESS

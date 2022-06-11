@@ -6,9 +6,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.containers.BrowserWebDriverContainer;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
-import org.testcontainers.lifecycle.Startable;
 import org.testcontainers.lifecycle.TestDescription;
-import org.testcontainers.lifecycle.TestLifecycleAware;
 import org.testcontainers.utility.DockerImageName;
 import uk.badamson.mc.presentation.McFrontEndContainer;
 import uk.badamson.mc.presentation.McReverseProxyContainer;
@@ -22,7 +20,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class MockedBeContainers implements Startable, TestLifecycleAware {
+public final class MockedBeContainers extends BaseContainers {
 
     private static final String FE_HOST = "fe";
     private static final String MS_HOST = "ms";
