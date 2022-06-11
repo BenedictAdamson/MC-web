@@ -11,6 +11,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -59,6 +60,8 @@ abstract class BaseContainers implements Startable, TestLifecycleAware {
     @Nullable
     private final Path failureRecordingDirectory;
 
+    private final Network network = Network.newNetwork();
+
     public BaseContainers(@Nullable Path failureRecordingDirectory) {
         this.failureRecordingDirectory = failureRecordingDirectory;
         if (failureRecordingDirectory != null) {
@@ -70,6 +73,12 @@ abstract class BaseContainers implements Startable, TestLifecycleAware {
         }
     }
 
+    @OverridingMethodsMustInvokeSuper
+    @Override
+    public void close() {
+        network.close();
+    }
+
     @Nullable
     protected final Path getFailureRecordingDirectory() {
         return failureRecordingDirectory;
@@ -79,5 +88,7 @@ abstract class BaseContainers implements Startable, TestLifecycleAware {
     public abstract RemoteWebDriver getWebDriver();
 
     @Nonnull
-    protected abstract Network getNetwork();
+    protected final Network getNetwork() {
+        return network;
+    }
 }

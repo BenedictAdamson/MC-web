@@ -22,7 +22,6 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.containers.BrowserWebDriverContainer;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.Network;
 import org.testcontainers.lifecycle.TestDescription;
 import uk.badamson.mc.presentation.McFrontEndContainer;
 import uk.badamson.mc.presentation.McReverseProxyContainer;
@@ -80,21 +79,13 @@ public class McContainers extends BaseContainers {
         return BASE_PRIVATE_NETWORK_URI.resolve(path);
     }
 
-    private final Network network = Network.newNetwork();
+    private final McDatabaseContainer db;
 
-    private final McDatabaseContainer db = new McDatabaseContainer(
-            DB_ROOT_PASSWORD, DB_USER_PASSWORD).withNetwork(network)
-            .withNetworkAliases(DB_HOST);
+    private final McBackEndContainer be;
 
-    private final McBackEndContainer be = new McBackEndContainer(DB_HOST,
-            DB_USER_PASSWORD, ADMINISTRATOR_PASSWORD).withNetwork(network)
-            .withNetworkAliases(BE_HOST);
+    private final McFrontEndContainer fe;
 
-    private final McFrontEndContainer fe = new McFrontEndContainer()
-            .withNetwork(network).withNetworkAliases(FE_HOST);
-
-    private final McReverseProxyContainer in = McReverseProxyContainer.createWithRealBe()
-            .withNetwork(network).withNetworkAliases(REVERSE_PROXY_HOST);
+    private final McReverseProxyContainer in;
 
     private BrowserWebDriverContainer<?> browser;
 
@@ -105,6 +96,16 @@ public class McContainers extends BaseContainers {
      */
     public McContainers(final Path failureRecordingDirectory) {
         super(failureRecordingDirectory);
+        db = new McDatabaseContainer(
+                DB_ROOT_PASSWORD, DB_USER_PASSWORD).withNetwork(getNetwork())
+                .withNetworkAliases(DB_HOST);
+        be = new McBackEndContainer(DB_HOST,
+                DB_USER_PASSWORD, ADMINISTRATOR_PASSWORD).withNetwork(getNetwork())
+                .withNetworkAliases(BE_HOST);
+        fe = new McFrontEndContainer()
+                .withNetwork(getNetwork()).withNetworkAliases(FE_HOST);
+        in = McReverseProxyContainer.createWithRealBe()
+                .withNetwork(getNetwork()).withNetworkAliases(REVERSE_PROXY_HOST);
     }
 
     /**
@@ -177,11 +178,11 @@ public class McContainers extends BaseContainers {
         fe.close();
         be.close();
         db.close();
-        network.close();
+        super.close();
     }
 
     private void createAndStartBrowser() {
-        browser = createBrowserContainer(network, getFailureRecordingDirectory());
+        browser = createBrowserContainer(getNetwork(), getFailureRecordingDirectory());
         browser.start();
     }
 
@@ -216,12 +217,6 @@ public class McContainers extends BaseContainers {
     public RemoteWebDriver getWebDriver() {
         requireBroswer();
         return browser.getWebDriver();
-    }
-
-    @Override
-    @Nonnull
-    protected Network getNetwork()  {
-        return network;
     }
 
     private void requireBroswer() {

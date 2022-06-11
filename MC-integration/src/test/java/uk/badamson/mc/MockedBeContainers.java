@@ -3,7 +3,6 @@ package uk.badamson.mc;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.containers.BrowserWebDriverContainer;
-import org.testcontainers.containers.Network;
 import org.testcontainers.lifecycle.TestDescription;
 import uk.badamson.mc.presentation.McFrontEndContainer;
 import uk.badamson.mc.presentation.McReverseProxyContainer;
@@ -19,7 +18,6 @@ public final class MockedBeContainers extends BaseContainers {
     private static final String FE_HOST = "fe";
     private static final String MS_HOST = "ms";
     private static final String INGRESS_HOST = "in";
-    private final Network network = Network.newNetwork();
     private final McFrontEndContainer fe = new McFrontEndContainer();
     private final MockMcBackEndContainer ms = new MockMcBackEndContainer();
     private final McReverseProxyContainer ingress = McReverseProxyContainer.createWithMockBe();
@@ -28,9 +26,9 @@ public final class MockedBeContainers extends BaseContainers {
 
     public MockedBeContainers(@Nullable final Path failureRecordingDirectory) {
         super(failureRecordingDirectory);
-        fe.withNetwork(network).withNetworkAliases(FE_HOST);
-        ms.withNetwork(network).withNetworkAliases(MS_HOST);
-        ingress.withNetwork(network).withNetworkAliases(INGRESS_HOST);
+        fe.withNetwork(getNetwork()).withNetworkAliases(FE_HOST);
+        ms.withNetwork(getNetwork()).withNetworkAliases(MS_HOST);
+        ingress.withNetwork(getNetwork()).withNetworkAliases(INGRESS_HOST);
         browser = createBrowserContainer(getNetwork(), failureRecordingDirectory);
     }
 
@@ -38,7 +36,7 @@ public final class MockedBeContainers extends BaseContainers {
     public void close() {
         cleanup();
         stop();
-        network.close();
+        super.close();
     }
 
     @Override
@@ -117,11 +115,5 @@ public final class MockedBeContainers extends BaseContainers {
 
     public BrowserWebDriverContainer<?> getBrowser() {
         return browser;
-    }
-
-    @Override
-    @Nonnull
-    protected Network getNetwork()  {
-        return network;
     }
 }
