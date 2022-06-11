@@ -18,19 +18,12 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.lifecycle.TestDescription;
 import uk.badamson.mc.presentation.McReverseProxyContainer;
 import uk.badamson.mc.repository.McDatabaseContainer;
 
 import java.net.URI;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -49,10 +42,6 @@ public class McContainers extends BaseContainers {
     public enum HttpServer {
         BACK_END, FRONT_END, INGRESS
     }// enum
-
-    private static final SimpleDateFormat FILENAME_TIMESTAMP_FORMAT = new SimpleDateFormat(
-            "yyyyMMdd-HHmmss");
-    private static final String SCREENSHOT_FILENAME_FORMAT = "FAILED-%s-%s.png";
 
     private static final String BE_HOST = "be";
     private static final String DB_HOST = "db";
@@ -117,38 +106,12 @@ public class McContainers extends BaseContainers {
         return be.addUser(userDetails);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>
-     * Calling this method invalidates the {@linkplain RemoteWebDriver web
-     * drivers} returned by previous calls to {@link #getWebDriver()}.
-     * </p>
-     */
-    @Override
-    public void afterTest(final TestDescription description,
-                          final Optional<Throwable> throwable) {
-        getBrowser().afterTest(description, throwable);
-        if (getFailureRecordingDirectory() != null && throwable.isPresent()) {
-            final var timestamp = FILENAME_TIMESTAMP_FORMAT.format(new Date());
-            final var filenamePrefix = description.getFilesystemFriendlyName();
-            retainLogFiles(filenamePrefix);
-            retainScreenshot(filenamePrefix, timestamp);
-        }
-    }
-
     public void assertThatNoErrorMessagesLogged() {
         assertThatNoErrorMessagesLogged("db", db.getLogs());
         assertThatNoErrorMessagesLogged("be", be.getLogs());
         assertThatNoErrorMessagesLogged("fe", getFrontEnd().getLogs());
         assertThatNoErrorMessagesLogged("in", in.getLogs());
         assertThatNoErrorMessagesLogged("browser", getBrowser().getLogs());
-    }
-
-    @Override
-    public void beforeTest(final TestDescription description) {
-        getWebDriver().manage().deleteAllCookies();
-        getBrowser().beforeTest(description);
     }
 
     @Override
@@ -182,25 +145,13 @@ public class McContainers extends BaseContainers {
         return be.getScenarios();
     }
 
-    private void retainLogFiles(final String prefix) {
+    @Override
+    protected void retainLogFiles(final String prefix) {
         assert getFailureRecordingDirectory() != null;
+        super.retainLogFiles(prefix);
         retainLogFile(getFailureRecordingDirectory(), prefix, DB_HOST, db);
         retainLogFile(getFailureRecordingDirectory(), prefix, BE_HOST, be);
-        retainLogFile(getFailureRecordingDirectory(), prefix, FE_HOST, getFrontEnd());
         retainLogFile(getFailureRecordingDirectory(), prefix, REVERSE_PROXY_HOST, in);
-    }
-
-    private void retainScreenshot(final String prefix, final String timestamp) {
-        final var leafName = String.format(SCREENSHOT_FILENAME_FORMAT, prefix,
-                timestamp);
-        assert getFailureRecordingDirectory() != null;
-        final var path = getFailureRecordingDirectory().resolve(leafName);
-        try {
-            final var bytes = getWebDriver().getScreenshotAs(OutputType.BYTES);
-            Files.write(path, bytes);
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
