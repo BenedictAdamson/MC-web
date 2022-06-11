@@ -4,7 +4,6 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.containers.BrowserWebDriverContainer;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.lifecycle.TestDescription;
 import org.testcontainers.utility.DockerImageName;
@@ -14,7 +13,6 @@ import uk.badamson.mc.presentation.McReverseProxyContainer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -26,7 +24,6 @@ public final class MockedBeContainers extends BaseContainers {
     private static final String MS_HOST = "ms";
     private static final String INGRESS_HOST = "in";
     private static final DockerImageName BROWSER_IMAGE_NAME = DockerImageName.parse("selenium/standalone-firefox:4.1.4");
-    private final Path failureRecordingDirectory;
     private final Network network = Network.newNetwork();
     private final McFrontEndContainer fe = new McFrontEndContainer();
     private final MockMcBackEndContainer ms = new MockMcBackEndContainer();
@@ -35,10 +32,10 @@ public final class MockedBeContainers extends BaseContainers {
     private RemoteWebDriver webDriver;
 
     public MockedBeContainers(@Nullable final Path failureRecordingDirectory) {
+        super(failureRecordingDirectory);
         fe.withNetwork(network).withNetworkAliases(FE_HOST);
         ms.withNetwork(network).withNetworkAliases(MS_HOST);
         ingress.withNetwork(network).withNetworkAliases(INGRESS_HOST);
-        this.failureRecordingDirectory = failureRecordingDirectory;
         browser.withCreateContainerCmdModifier(cmd -> Objects.requireNonNull(cmd.getHostConfig())
                 .withCpuCount(2L));
         browser.withCapabilities(new FirefoxOptions().addPreference("security.insecure_field_warning.contextual.enabled", false)).withNetwork(network);
@@ -49,17 +46,6 @@ public final class MockedBeContainers extends BaseContainers {
                 throw new IllegalArgumentException(e);
             }
             browser.withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.RECORD_ALL, failureRecordingDirectory.toFile());
-        }
-
-    }
-
-    private static void retainLogFile(final Path directory, final String baseFileName, final String host, final GenericContainer<?> container) {
-        final String leafName = baseFileName + "-" + host + ".log";
-        final Path path = directory.resolve(leafName);
-        try {
-            Files.writeString(path, container.getLogs(), StandardCharsets.UTF_8);
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
         }
 
     }
@@ -84,9 +70,9 @@ public final class MockedBeContainers extends BaseContainers {
     }
 
     public void retainScreenshot(@Nonnull final String baseFileName) {
-        if (failureRecordingDirectory != null) {
+        if (getFailureRecordingDirectory() != null) {
             final String leafName = baseFileName + ".png";
-            final Path path = failureRecordingDirectory.resolve(leafName);
+            final Path path = getFailureRecordingDirectory().resolve(leafName);
             try {
                 final var bytes = webDriver.getScreenshotAs(OutputType.BYTES);
                 Files.write(path, bytes);
@@ -99,9 +85,10 @@ public final class MockedBeContainers extends BaseContainers {
     }
 
     private void retainLogFiles(@Nonnull final String baseFileName) {
-        retainLogFile(failureRecordingDirectory, baseFileName, MS_HOST, ms);
-        retainLogFile(failureRecordingDirectory, baseFileName, FE_HOST, fe);
-        retainLogFile(failureRecordingDirectory, baseFileName, INGRESS_HOST, ingress);
+        assert getFailureRecordingDirectory() != null;
+        retainLogFile(getFailureRecordingDirectory(), baseFileName, MS_HOST, ms);
+        retainLogFile(getFailureRecordingDirectory(), baseFileName, FE_HOST, fe);
+        retainLogFile(getFailureRecordingDirectory(), baseFileName, INGRESS_HOST, ingress);
     }
 
     @Override
@@ -123,13 +110,19 @@ public final class MockedBeContainers extends BaseContainers {
     @Override
     public void afterTest(final TestDescription description, final Optional<Throwable> throwable) {
         browser.afterTest(description, throwable);
-        if (failureRecordingDirectory != null) {
+        if (getFailureRecordingDirectory() != null) {
             String baseFileName = description.getFilesystemFriendlyName();
             retainLogFiles(baseFileName);
             retainScreenshot(baseFileName);
         }
 
         cleanup();
+    }
+
+    @Nonnull
+    @Override
+    public RemoteWebDriver getWebDriver() {
+        return webDriver;
     }
 
     public MockMcBackEndContainer getBackEnd() {

@@ -31,9 +31,9 @@ import uk.badamson.mc.presentation.McFrontEndContainer;
 import uk.badamson.mc.presentation.McReverseProxyContainer;
 import uk.badamson.mc.repository.McDatabaseContainer;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
@@ -61,7 +61,6 @@ public class McContainers extends BaseContainers {
 
     private static final SimpleDateFormat FILENAME_TIMESTAMP_FORMAT = new SimpleDateFormat(
             "yyyyMMdd-HHmmss");
-    private static final String LOGFILE_FILENAME_FORMAT = "FAILED-%s-%s-%s.log";
     private static final String SCREENSHOT_FILENAME_FORMAT = "FAILED-%s-%s.png";
 
     private static final String BE_HOST = "be";
@@ -88,21 +87,6 @@ public class McContainers extends BaseContainers {
         return BASE_PRIVATE_NETWORK_URI.resolve(path);
     }
 
-    private static void retainLogFile(final Path directory, final String prefix,
-                                      final String timestamp, final String host,
-                                      final GenericContainer<?> container) {
-        final var leafName = String.format(LOGFILE_FILENAME_FORMAT, prefix,
-                timestamp, host);
-        final var path = directory.resolve(leafName);
-        try {
-            Files.writeString(path, container.getLogs(), StandardCharsets.UTF_8);
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private final Path failureRecordingDirectory;
-
     private final Network network = Network.newNetwork();
 
     private final McDatabaseContainer db = new McDatabaseContainer(
@@ -127,7 +111,7 @@ public class McContainers extends BaseContainers {
      *                                  no such records are to be made.
      */
     public McContainers(final Path failureRecordingDirectory) {
-        this.failureRecordingDirectory = failureRecordingDirectory;
+        super(failureRecordingDirectory);
     }
 
     /**
@@ -162,10 +146,10 @@ public class McContainers extends BaseContainers {
                           final Optional<Throwable> throwable) {
         requireBroswer();
         browser.afterTest(description, throwable);
-        if (failureRecordingDirectory != null && throwable.isPresent()) {
+        if (getFailureRecordingDirectory() != null && throwable.isPresent()) {
             final var timestamp = FILENAME_TIMESTAMP_FORMAT.format(new Date());
             final var filenamePrefix = description.getFilesystemFriendlyName();
-            retainLogFiles(filenamePrefix, timestamp);
+            retainLogFiles(filenamePrefix);
             retainScreenshot(filenamePrefix, timestamp);
         }
         stopBrowser();
@@ -210,14 +194,14 @@ public class McContainers extends BaseContainers {
         browser.withCapabilities(new FirefoxOptions().addPreference(
                         "security.insecure_field_warning.contextual.enabled", false))
                 .withNetwork(network);
-        if (failureRecordingDirectory != null) {
+        if (getFailureRecordingDirectory() != null) {
             try {
-                Files.createDirectories(failureRecordingDirectory);
+                Files.createDirectories(getFailureRecordingDirectory());
             } catch (final IOException e) {
                 throw new IllegalArgumentException(e);
             }
             browser.withRecordingMode(VncRecordingMode.RECORD_FAILING,
-                    failureRecordingDirectory.toFile());
+                    getFailureRecordingDirectory().toFile());
         }
         browser.start();
     }
@@ -248,6 +232,8 @@ public class McContainers extends BaseContainers {
         return be.getScenarios();
     }
 
+    @Nonnull
+    @Override
     public RemoteWebDriver getWebDriver() {
         requireBroswer();
         return browser.getWebDriver();
@@ -259,18 +245,17 @@ public class McContainers extends BaseContainers {
         }
     }
 
-    private void retainLogFiles(final String prefix, final String timestamp) {
-        retainLogFile(failureRecordingDirectory, prefix, timestamp, DB_HOST, db);
-        retainLogFile(failureRecordingDirectory, prefix, timestamp, BE_HOST, be);
-        retainLogFile(failureRecordingDirectory, prefix, timestamp, FE_HOST, fe);
-        retainLogFile(failureRecordingDirectory, prefix, timestamp,
-                REVERSE_PROXY_HOST, in);
+    private void retainLogFiles(final String prefix) {
+        retainLogFile(getFailureRecordingDirectory(), prefix, DB_HOST, db);
+        retainLogFile(getFailureRecordingDirectory(), prefix, BE_HOST, be);
+        retainLogFile(getFailureRecordingDirectory(), prefix, FE_HOST, fe);
+        retainLogFile(getFailureRecordingDirectory(), prefix, REVERSE_PROXY_HOST, in);
     }
 
     private void retainScreenshot(final String prefix, final String timestamp) {
         final var leafName = String.format(SCREENSHOT_FILENAME_FORMAT, prefix,
                 timestamp);
-        final var path = failureRecordingDirectory.resolve(leafName);
+        final var path = getFailureRecordingDirectory().resolve(leafName);
         try {
             final var bytes = getWebDriver().getScreenshotAs(OutputType.BYTES);
             Files.write(path, bytes);
