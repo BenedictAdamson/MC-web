@@ -186,18 +186,11 @@ public class McContainers extends BaseContainers {
     }
 
     public URI createUriFromPath(final HttpServer server, final String path) {
-        GenericContainer<?> container = null;
-        switch (server) {
-            case BACK_END:
-                container = be;
-                break;
-            case FRONT_END:
-                container = fe;
-                break;
-            case INGRESS:
-                container = in;
-                break;
-        }
+        GenericContainer<?> container = switch (server) {
+            case BACK_END -> be;
+            case FRONT_END -> fe;
+            case INGRESS -> in;
+        };
         final var base = URI.create("http://" + container.getHost() + ":"
                 + container.getFirstMappedPort());
         return base.resolve(path);
