@@ -25,7 +25,6 @@ public final class MockedBeContainers extends BaseContainers {
     private static final String FE_HOST = "fe";
     private static final String MS_HOST = "ms";
     private static final String INGRESS_HOST = "in";
-    private static final Path DEFAULT_FAILURE_RECORDING_DIRECTORY = Path.of(".", "target", "test-logs");
     private static final DockerImageName BROWSER_IMAGE_NAME = DockerImageName.parse("selenium/standalone-firefox:4.1.4");
     private final Path failureRecordingDirectory;
     private final Network network = Network.newNetwork();
@@ -52,9 +51,6 @@ public final class MockedBeContainers extends BaseContainers {
             browser.withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.RECORD_ALL, failureRecordingDirectory.toFile());
         }
 
-    }
-    public MockedBeContainers() {
-        this(DEFAULT_FAILURE_RECORDING_DIRECTORY);
     }
 
     private static void retainLogFile(final Path directory, final String baseFileName, final String host, final GenericContainer<?> container) {
@@ -134,5 +130,13 @@ public final class MockedBeContainers extends BaseContainers {
         }
 
         cleanup();
+    }
+
+    public MockMcBackEndContainer getBackEnd() {
+        return ms;
+    }
+
+    public BrowserWebDriverContainer<?> getBrowser() {
+        return browser;
     }
 }
