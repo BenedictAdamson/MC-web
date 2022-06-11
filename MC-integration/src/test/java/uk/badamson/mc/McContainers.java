@@ -246,6 +246,7 @@ public class McContainers extends BaseContainers {
     }
 
     private void retainLogFiles(final String prefix) {
+        assert getFailureRecordingDirectory() != null;
         retainLogFile(getFailureRecordingDirectory(), prefix, DB_HOST, db);
         retainLogFile(getFailureRecordingDirectory(), prefix, BE_HOST, be);
         retainLogFile(getFailureRecordingDirectory(), prefix, FE_HOST, fe);
@@ -255,6 +256,7 @@ public class McContainers extends BaseContainers {
     private void retainScreenshot(final String prefix, final String timestamp) {
         final var leafName = String.format(SCREENSHOT_FILENAME_FORMAT, prefix,
                 timestamp);
+        assert getFailureRecordingDirectory() != null;
         final var path = getFailureRecordingDirectory().resolve(leafName);
         try {
             final var bytes = getWebDriver().getScreenshotAs(OutputType.BYTES);
@@ -270,9 +272,8 @@ public class McContainers extends BaseContainers {
          * Start the containers bottom-up, and wait until each is ready, to reduce
          * the number of transient connection errors.
          */
-        db.start();
+        startInParallel(db, fe);
         be.start();
-        fe.start();
         in.start();
     }
 

@@ -59,10 +59,12 @@ public final class MockedBeContainers extends BaseContainers {
 
     @Override
     public void start() {
-        ms.start();
-        fe.start();
+        /*
+         * Start the containers bottom-up, and wait until each is ready, to reduce
+         * the number of transient connection errors.
+         */
+        startInParallel(ms, fe, browser);
         ingress.start();
-        browser.start();
         webDriver = browser.getWebDriver();
     }
 

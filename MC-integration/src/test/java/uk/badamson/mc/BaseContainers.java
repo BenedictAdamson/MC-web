@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 
 abstract class BaseContainers implements Startable, TestLifecycleAware {
 
@@ -26,6 +27,10 @@ abstract class BaseContainers implements Startable, TestLifecycleAware {
         } catch (final IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected static void startInParallel(@Nonnull GenericContainer<?>... containers) {
+        Stream.of(containers).parallel().forEach(GenericContainer::start);
     }
 
     @Nullable
