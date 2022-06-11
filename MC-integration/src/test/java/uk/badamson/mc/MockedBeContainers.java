@@ -21,7 +21,8 @@ public final class MockedBeContainers extends BaseContainers {
 
     @Override
     public void close() {
-        stop();
+        ingress.close();
+        ms.close();
         super.close();
     }
 

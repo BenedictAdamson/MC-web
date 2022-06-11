@@ -39,10 +39,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 public class McContainers extends BaseContainers {
 
-    public enum HttpServer {
-        BACK_END, FRONT_END, INGRESS
-    }// enum
-
+    public static final String ADMINISTRATOR_PASSWORD = "secret4";
     private static final String BE_HOST = "be";
     private static final String DB_HOST = "db";
     private static final String REVERSE_PROXY_HOST = "in";
@@ -52,22 +49,8 @@ public class McContainers extends BaseContainers {
 
     private static final String DB_ROOT_PASSWORD = "secret2";
     private static final String DB_USER_PASSWORD = "secret3";
-    public static final String ADMINISTRATOR_PASSWORD = "secret4";
-
-    private static void assertThatNoErrorMessagesLogged(final String container,
-                                                        final String logs) {
-        assertThat(container + " logs no errors", logs,
-                not(containsString("ERROR:")));
-    }
-
-    public static URI createIngressPrivateNetworkUriFromPath(final String path) {
-        return BASE_PRIVATE_NETWORK_URI.resolve(path);
-    }
-
     private final McDatabaseContainer db;
-
     private final McBackEndContainer be;
-
     private final McReverseProxyContainer in;
 
     /**
@@ -85,6 +68,16 @@ public class McContainers extends BaseContainers {
                 .withNetworkAliases(BE_HOST);
         in = McReverseProxyContainer.createWithRealBe()
                 .withNetwork(getNetwork()).withNetworkAliases(REVERSE_PROXY_HOST);
+    }
+
+    private static void assertThatNoErrorMessagesLogged(final String container,
+                                                        final String logs) {
+        assertThat(container + " logs no errors", logs,
+                not(containsString("ERROR:")));
+    }
+
+    public static URI createIngressPrivateNetworkUriFromPath(final String path) {
+        return BASE_PRIVATE_NETWORK_URI.resolve(path);
     }
 
     /**
@@ -178,4 +171,8 @@ public class McContainers extends BaseContainers {
         db.stop();
         close();
     }
+
+    public enum HttpServer {
+        BACK_END, FRONT_END, INGRESS
+    }// enum
 }

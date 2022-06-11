@@ -26,7 +26,25 @@ import java.util.stream.Stream;
 abstract class BaseContainers implements Startable, TestLifecycleAware {
     private static final String FE_HOST = "fe";
     private static final DockerImageName BROWSER_IMAGE_NAME = DockerImageName.parse("selenium/standalone-firefox:4.1.4");
+    @Nullable
+    private final Path failureRecordingDirectory;
+    private final Network network = Network.newNetwork();
+    private final McFrontEndContainer frontEnd;
+    private final BrowserWebDriverContainer<?> browser;
 
+    public BaseContainers(@Nullable Path failureRecordingDirectory) {
+        this.failureRecordingDirectory = failureRecordingDirectory;
+        if (failureRecordingDirectory != null) {
+            try {
+                Files.createDirectories(failureRecordingDirectory);
+            } catch (final IOException e) {
+                throw new IllegalArgumentException(e);
+            }
+        }
+        frontEnd = new McFrontEndContainer()
+                .withNetwork(getNetwork()).withNetworkAliases(FE_HOST);
+        browser = createBrowserContainer(network, failureRecordingDirectory);
+    }
 
     private static BrowserWebDriverContainer<?> createBrowserContainer(
             @Nonnull Network network,
@@ -36,7 +54,7 @@ abstract class BaseContainers implements Startable, TestLifecycleAware {
                 .withCpuCount(2L));
         browser.withCapabilities(
                 new FirefoxOptions().addPreference("security.insecure_field_warning.contextual.enabled", false)
-                );
+        );
         browser.withNetwork(network);
         if (failureRecordingDirectory != null) {
             browser.withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.RECORD_ALL, failureRecordingDirectory.toFile());
@@ -60,29 +78,6 @@ abstract class BaseContainers implements Startable, TestLifecycleAware {
 
     protected static void startInParallel(@Nonnull GenericContainer<?>... containers) {
         Stream.of(containers).parallel().forEach(GenericContainer::start);
-    }
-
-    @Nullable
-    private final Path failureRecordingDirectory;
-
-    private final Network network = Network.newNetwork();
-
-    private final McFrontEndContainer frontEnd;
-
-    private final BrowserWebDriverContainer<?> browser;
-
-    public BaseContainers(@Nullable Path failureRecordingDirectory) {
-        this.failureRecordingDirectory = failureRecordingDirectory;
-        if (failureRecordingDirectory != null) {
-            try {
-                Files.createDirectories(failureRecordingDirectory);
-            } catch (final IOException e) {
-                throw new IllegalArgumentException(e);
-            }
-        }
-        frontEnd = new McFrontEndContainer()
-                .withNetwork(getNetwork()).withNetworkAliases(FE_HOST);
-        browser = createBrowserContainer(network, failureRecordingDirectory);
     }
 
     @OverridingMethodsMustInvokeSuper
@@ -145,7 +140,8 @@ abstract class BaseContainers implements Startable, TestLifecycleAware {
         return browser;
     }
 
-    public McFrontEndContainer getFrontEnd() {
+    @Nonnull
+    protected final McFrontEndContainer getFrontEnd() {
         return frontEnd;
     }
 

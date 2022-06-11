@@ -18,8 +18,6 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.lifecycle.TestDescription;
 import org.testcontainers.lifecycle.TestLifecycleAware;
 import uk.badamson.mc.presentation.HomePage;
@@ -49,18 +47,8 @@ import java.util.stream.Stream;
  */
 public final class World implements AutoCloseable, TestLifecycleAware {
 
-    private static <TYPE> boolean intersects(final Set<TYPE> set1,
-                                             final Set<TYPE> set2) {
-        /* The sets intersect if we can find any element in both. */
-        return set1.stream().anyMatch(set2::contains);
-    }
-
     private final McContainers containers;
-
     private int nUsers;
-
-    private RemoteWebDriver webDriver;
-
     private User currentUser;
 
     /**
@@ -72,17 +60,21 @@ public final class World implements AutoCloseable, TestLifecycleAware {
         containers = new McContainers(failureRecordingDirectory);
     }
 
+    private static <TYPE> boolean intersects(final Set<TYPE> set1,
+                                             final Set<TYPE> set2) {
+        /* The sets intersect if we can find any element in both. */
+        return set1.stream().anyMatch(set2::contains);
+    }
+
     @Override
     public void beforeTest(TestDescription description) {
         containers.beforeTest(description);
-        webDriver = containers.getWebDriver();
         currentUser = null;
     }
 
     @Override
     public void afterTest(TestDescription description, Optional<Throwable> throwable) {
         containers.afterTest(description, throwable);
-        webDriver = null;
     }
 
     /**
@@ -95,7 +87,6 @@ public final class World implements AutoCloseable, TestLifecycleAware {
     @Override
     @PreDestroy
     public void close() {
-        webDriver = null;
         containers.stop();
         containers.close();
     }
@@ -138,18 +129,13 @@ public final class World implements AutoCloseable, TestLifecycleAware {
     }
 
     public HomePage getHomePage() {
-        final var homePage = new HomePage(getWebDriver());
+        final var homePage = new HomePage(containers.getWebDriver());
         homePage.get();
         return homePage;
     }
 
     public Stream<NamedUUID> getScenarios() {
         return containers.getScenarios();
-    }
-
-    public WebDriver getWebDriver() {
-        Objects.requireNonNull(webDriver, "webDriver");
-        return webDriver;
     }
 
     /**
