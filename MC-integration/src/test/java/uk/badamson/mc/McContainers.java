@@ -87,7 +87,7 @@ public class McContainers extends BaseContainers {
 
     private final McReverseProxyContainer in;
 
-    private BrowserWebDriverContainer<?> browser;
+    private final BrowserWebDriverContainer<?> browser;
 
     /**
      * @param failureRecordingDirectory The location of a directory in which to store files holding
@@ -106,6 +106,7 @@ public class McContainers extends BaseContainers {
                 .withNetwork(getNetwork()).withNetworkAliases(FE_HOST);
         in = McReverseProxyContainer.createWithRealBe()
                 .withNetwork(getNetwork()).withNetworkAliases(REVERSE_PROXY_HOST);
+        browser = createBrowserContainer(getNetwork(), getFailureRecordingDirectory());
     }
 
     /**
@@ -146,7 +147,6 @@ public class McContainers extends BaseContainers {
             retainLogFiles(filenamePrefix);
             retainScreenshot(filenamePrefix, timestamp);
         }
-        stopBrowser();
     }
 
     public void assertThatNoErrorMessagesLogged() {
@@ -161,7 +161,7 @@ public class McContainers extends BaseContainers {
 
     @Override
     public void beforeTest(final TestDescription description) {
-        createAndStartBrowser();
+        getWebDriver().manage().deleteAllCookies();
         browser.beforeTest(description);
     }
 
@@ -179,11 +179,6 @@ public class McContainers extends BaseContainers {
         be.close();
         db.close();
         super.close();
-    }
-
-    private void createAndStartBrowser() {
-        browser = createBrowserContainer(getNetwork(), getFailureRecordingDirectory());
-        browser.start();
     }
 
     public Game.Identifier createGame(final UUID scenario) {
@@ -252,7 +247,7 @@ public class McContainers extends BaseContainers {
          * Start the containers bottom-up, and wait until each is ready, to reduce
          * the number of transient connection errors.
          */
-        startInParallel(db, fe);
+        startInParallel(db, fe, browser);
         be.start();
         in.start();
     }
@@ -263,20 +258,11 @@ public class McContainers extends BaseContainers {
          * Stop the resources top-down, to reduce the number of transient
          * connection errors.
          */
-        stopBrowser();
+        browser.stop();
         in.stop();
         fe.stop();
         be.stop();
         db.stop();
         close();
-    }
-
-    private void stopBrowser() {
-        if (browser != null) {
-            browser.getWebDriver().quit();
-            browser.stop();
-            browser.close();
-            browser = null;
-        }
     }
 }
