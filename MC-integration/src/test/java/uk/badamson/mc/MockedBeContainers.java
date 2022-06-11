@@ -1,21 +1,17 @@
 package uk.badamson.mc;
 
 import org.openqa.selenium.OutputType;
-import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.containers.BrowserWebDriverContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.lifecycle.TestDescription;
-import org.testcontainers.utility.DockerImageName;
 import uk.badamson.mc.presentation.McFrontEndContainer;
 import uk.badamson.mc.presentation.McReverseProxyContainer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Objects;
 import java.util.Optional;
 
 public final class MockedBeContainers extends BaseContainers {
@@ -23,12 +19,11 @@ public final class MockedBeContainers extends BaseContainers {
     private static final String FE_HOST = "fe";
     private static final String MS_HOST = "ms";
     private static final String INGRESS_HOST = "in";
-    private static final DockerImageName BROWSER_IMAGE_NAME = DockerImageName.parse("selenium/standalone-firefox:4.1.4");
     private final Network network = Network.newNetwork();
     private final McFrontEndContainer fe = new McFrontEndContainer();
     private final MockMcBackEndContainer ms = new MockMcBackEndContainer();
     private final McReverseProxyContainer ingress = McReverseProxyContainer.createWithMockBe();
-    private final BrowserWebDriverContainer<?> browser = new BrowserWebDriverContainer<>(BROWSER_IMAGE_NAME);
+    private final BrowserWebDriverContainer<?> browser;
     private RemoteWebDriver webDriver;
 
     public MockedBeContainers(@Nullable final Path failureRecordingDirectory) {
@@ -36,18 +31,7 @@ public final class MockedBeContainers extends BaseContainers {
         fe.withNetwork(network).withNetworkAliases(FE_HOST);
         ms.withNetwork(network).withNetworkAliases(MS_HOST);
         ingress.withNetwork(network).withNetworkAliases(INGRESS_HOST);
-        browser.withCreateContainerCmdModifier(cmd -> Objects.requireNonNull(cmd.getHostConfig())
-                .withCpuCount(2L));
-        browser.withCapabilities(new FirefoxOptions().addPreference("security.insecure_field_warning.contextual.enabled", false)).withNetwork(network);
-        if (failureRecordingDirectory != null) {
-            try {
-                Files.createDirectories(failureRecordingDirectory);
-            } catch (final IOException e) {
-                throw new IllegalArgumentException(e);
-            }
-            browser.withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.RECORD_ALL, failureRecordingDirectory.toFile());
-        }
-
+        browser = createBrowserContainer(getNetwork(), failureRecordingDirectory);
     }
 
     @Override
@@ -133,5 +117,11 @@ public final class MockedBeContainers extends BaseContainers {
 
     public BrowserWebDriverContainer<?> getBrowser() {
         return browser;
+    }
+
+    @Override
+    @Nonnull
+    protected Network getNetwork()  {
+        return network;
     }
 }

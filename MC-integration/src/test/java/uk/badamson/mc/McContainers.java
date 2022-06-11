@@ -19,26 +19,21 @@ package uk.badamson.mc;
  */
 
 import org.openqa.selenium.OutputType;
-import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.containers.BrowserWebDriverContainer;
-import org.testcontainers.containers.BrowserWebDriverContainer.VncRecordingMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.lifecycle.TestDescription;
-import org.testcontainers.utility.DockerImageName;
 import uk.badamson.mc.presentation.McFrontEndContainer;
 import uk.badamson.mc.presentation.McReverseProxyContainer;
 import uk.badamson.mc.repository.McDatabaseContainer;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -74,8 +69,6 @@ public class McContainers extends BaseContainers {
     private static final String DB_ROOT_PASSWORD = "secret2";
     private static final String DB_USER_PASSWORD = "secret3";
     public static final String ADMINISTRATOR_PASSWORD = "secret4";
-
-    private static final DockerImageName BROWSER_IMAGE_NAME = DockerImageName.parse("selenium/standalone-firefox:4.1.4");
 
     private static void assertThatNoErrorMessagesLogged(final String container,
                                                         final String logs) {
@@ -188,21 +181,7 @@ public class McContainers extends BaseContainers {
     }
 
     private void createAndStartBrowser() {
-        browser = new BrowserWebDriverContainer<>(BROWSER_IMAGE_NAME);
-        browser.withCreateContainerCmdModifier(cmd -> Objects.requireNonNull(cmd.getHostConfig())
-                .withCpuCount(2L));
-        browser.withCapabilities(new FirefoxOptions().addPreference(
-                        "security.insecure_field_warning.contextual.enabled", false))
-                .withNetwork(network);
-        if (getFailureRecordingDirectory() != null) {
-            try {
-                Files.createDirectories(getFailureRecordingDirectory());
-            } catch (final IOException e) {
-                throw new IllegalArgumentException(e);
-            }
-            browser.withRecordingMode(VncRecordingMode.RECORD_FAILING,
-                    getFailureRecordingDirectory().toFile());
-        }
+        browser = createBrowserContainer(network, getFailureRecordingDirectory());
         browser.start();
     }
 
@@ -237,6 +216,12 @@ public class McContainers extends BaseContainers {
     public RemoteWebDriver getWebDriver() {
         requireBroswer();
         return browser.getWebDriver();
+    }
+
+    @Override
+    @Nonnull
+    protected Network getNetwork()  {
+        return network;
     }
 
     private void requireBroswer() {
