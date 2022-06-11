@@ -20,14 +20,11 @@ package uk.badamson.mc;
 
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.testcontainers.containers.BrowserWebDriverContainer;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.lifecycle.TestDescription;
-import uk.badamson.mc.presentation.McFrontEndContainer;
 import uk.badamson.mc.presentation.McReverseProxyContainer;
 import uk.badamson.mc.repository.McDatabaseContainer;
 
-import javax.annotation.Nonnull;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -59,7 +56,6 @@ public class McContainers extends BaseContainers {
 
     private static final String BE_HOST = "be";
     private static final String DB_HOST = "db";
-    private static final String FE_HOST = "fe";
     private static final String REVERSE_PROXY_HOST = "in";
 
     private static final URI BASE_PRIVATE_NETWORK_URI = URI
@@ -83,11 +79,7 @@ public class McContainers extends BaseContainers {
 
     private final McBackEndContainer be;
 
-    private final McFrontEndContainer fe;
-
     private final McReverseProxyContainer in;
-
-    private final BrowserWebDriverContainer<?> browser;
 
     /**
      * @param failureRecordingDirectory The location of a directory in which to store files holding
@@ -102,11 +94,8 @@ public class McContainers extends BaseContainers {
         be = new McBackEndContainer(DB_HOST,
                 DB_USER_PASSWORD, ADMINISTRATOR_PASSWORD).withNetwork(getNetwork())
                 .withNetworkAliases(BE_HOST);
-        fe = new McFrontEndContainer()
-                .withNetwork(getNetwork()).withNetworkAliases(FE_HOST);
         in = McReverseProxyContainer.createWithRealBe()
                 .withNetwork(getNetwork()).withNetworkAliases(REVERSE_PROXY_HOST);
-        browser = createBrowserContainer(getNetwork(), getFailureRecordingDirectory());
     }
 
     /**
@@ -139,8 +128,7 @@ public class McContainers extends BaseContainers {
     @Override
     public void afterTest(final TestDescription description,
                           final Optional<Throwable> throwable) {
-        requireBroswer();
-        browser.afterTest(description, throwable);
+        getBrowser().afterTest(description, throwable);
         if (getFailureRecordingDirectory() != null && throwable.isPresent()) {
             final var timestamp = FILENAME_TIMESTAMP_FORMAT.format(new Date());
             final var filenamePrefix = description.getFilesystemFriendlyName();
@@ -152,17 +140,15 @@ public class McContainers extends BaseContainers {
     public void assertThatNoErrorMessagesLogged() {
         assertThatNoErrorMessagesLogged("db", db.getLogs());
         assertThatNoErrorMessagesLogged("be", be.getLogs());
-        assertThatNoErrorMessagesLogged("fe", fe.getLogs());
+        assertThatNoErrorMessagesLogged("fe", getFrontEnd().getLogs());
         assertThatNoErrorMessagesLogged("in", in.getLogs());
-        if (browser != null) {
-            assertThatNoErrorMessagesLogged("browser", browser.getLogs());
-        }
+        assertThatNoErrorMessagesLogged("browser", getBrowser().getLogs());
     }
 
     @Override
     public void beforeTest(final TestDescription description) {
         getWebDriver().manage().deleteAllCookies();
-        browser.beforeTest(description);
+        getBrowser().beforeTest(description);
     }
 
     @Override
@@ -171,11 +157,7 @@ public class McContainers extends BaseContainers {
          * Close the resources top-down, to reduce the number of transient
          * connection errors.
          */
-        if (browser != null) {
-            browser.close();
-        }
         in.close();
-        fe.close();
         be.close();
         db.close();
         super.close();
@@ -188,7 +170,7 @@ public class McContainers extends BaseContainers {
     public URI createUriFromPath(final HttpServer server, final String path) {
         GenericContainer<?> container = switch (server) {
             case BACK_END -> be;
-            case FRONT_END -> fe;
+            case FRONT_END -> getFrontEnd();
             case INGRESS -> in;
         };
         final var base = URI.create("http://" + container.getHost() + ":"
@@ -200,24 +182,11 @@ public class McContainers extends BaseContainers {
         return be.getScenarios();
     }
 
-    @Nonnull
-    @Override
-    public RemoteWebDriver getWebDriver() {
-        requireBroswer();
-        return browser.getWebDriver();
-    }
-
-    private void requireBroswer() {
-        if (browser == null) {
-            throw new IllegalStateException("no browser");
-        }
-    }
-
     private void retainLogFiles(final String prefix) {
         assert getFailureRecordingDirectory() != null;
         retainLogFile(getFailureRecordingDirectory(), prefix, DB_HOST, db);
         retainLogFile(getFailureRecordingDirectory(), prefix, BE_HOST, be);
-        retainLogFile(getFailureRecordingDirectory(), prefix, FE_HOST, fe);
+        retainLogFile(getFailureRecordingDirectory(), prefix, FE_HOST, getFrontEnd());
         retainLogFile(getFailureRecordingDirectory(), prefix, REVERSE_PROXY_HOST, in);
     }
 
@@ -240,7 +209,7 @@ public class McContainers extends BaseContainers {
          * Start the containers bottom-up, and wait until each is ready, to reduce
          * the number of transient connection errors.
          */
-        startInParallel(db, fe, browser);
+        startInParallel(db, getFrontEnd(), getBrowser());
         be.start();
         in.start();
     }
@@ -251,9 +220,9 @@ public class McContainers extends BaseContainers {
          * Stop the resources top-down, to reduce the number of transient
          * connection errors.
          */
-        browser.stop();
+        getBrowser().stop();
         in.stop();
-        fe.stop();
+        getFrontEnd().stop();
         be.stop();
         db.stop();
         close();

@@ -8,6 +8,7 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.lifecycle.Startable;
 import org.testcontainers.lifecycle.TestLifecycleAware;
 import org.testcontainers.utility.DockerImageName;
+import uk.badamson.mc.presentation.McFrontEndContainer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -20,10 +21,11 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 abstract class BaseContainers implements Startable, TestLifecycleAware {
+    protected static final String FE_HOST = "fe";
     private static final DockerImageName BROWSER_IMAGE_NAME = DockerImageName.parse("selenium/standalone-firefox:4.1.4");
 
 
-    protected static BrowserWebDriverContainer<?> createBrowserContainer(
+    private static BrowserWebDriverContainer<?> createBrowserContainer(
             @Nonnull Network network,
             @Nullable final Path failureRecordingDirectory) {
         final var browser = new BrowserWebDriverContainer<>(BROWSER_IMAGE_NAME);
@@ -62,6 +64,10 @@ abstract class BaseContainers implements Startable, TestLifecycleAware {
 
     private final Network network = Network.newNetwork();
 
+    private final McFrontEndContainer frontEnd;
+
+    private final BrowserWebDriverContainer<?> browser;
+
     public BaseContainers(@Nullable Path failureRecordingDirectory) {
         this.failureRecordingDirectory = failureRecordingDirectory;
         if (failureRecordingDirectory != null) {
@@ -71,11 +77,16 @@ abstract class BaseContainers implements Startable, TestLifecycleAware {
                 throw new IllegalArgumentException(e);
             }
         }
+        frontEnd = new McFrontEndContainer()
+                .withNetwork(getNetwork()).withNetworkAliases(FE_HOST);
+        browser = createBrowserContainer(network, failureRecordingDirectory);
     }
 
     @OverridingMethodsMustInvokeSuper
     @Override
     public void close() {
+        browser.close();
+        frontEnd.close();
         network.close();
     }
 
@@ -85,7 +96,18 @@ abstract class BaseContainers implements Startable, TestLifecycleAware {
     }
 
     @Nonnull
-    public abstract RemoteWebDriver getWebDriver();
+    public final RemoteWebDriver getWebDriver() {
+        return getBrowser().getWebDriver();
+    }
+
+    @Nonnull
+    protected final BrowserWebDriverContainer<?> getBrowser() {
+        return browser;
+    }
+
+    public McFrontEndContainer getFrontEnd() {
+        return frontEnd;
+    }
 
     @Nonnull
     protected final Network getNetwork() {
