@@ -25,6 +25,21 @@ import java.util.*;
 
 public final class MockedBeWorld implements Startable, TestLifecycleAware {
 
+    private static final String FE_HOST = "fe";
+    private static final String MS_HOST = "ms";
+    private static final String INGRESS_HOST = "in";
+    private static final Path DEFAULT_FAILURE_RECORDING_DIRECTORY = Path.of(".", "target", "test-logs");
+    private static final DockerImageName BROWSER_IMAGE_NAME = DockerImageName.parse("selenium/standalone-firefox:4.1.4");
+    private final Path failureRecordingDirectory;
+    private final Network network = Network.newNetwork();
+    private final McFrontEndContainer fe = new McFrontEndContainer();
+    private final MockMcBackEndContainer ms = new MockMcBackEndContainer();
+    private final McReverseProxyContainer ingress = McReverseProxyContainer.createWithMockBe();
+    private final BrowserWebDriverContainer<?> browser = new BrowserWebDriverContainer<>(BROWSER_IMAGE_NAME);
+    private RemoteWebDriver webDriver;
+    private int nUsers;
+    private User currentLoggedInUser;
+
     public MockedBeWorld(@Nullable final Path failureRecordingDirectory) {
         fe.withNetwork(network).withNetworkAliases(FE_HOST);
         ms.withNetwork(network).withNetworkAliases(MS_HOST);
@@ -46,6 +61,17 @@ public final class MockedBeWorld implements Startable, TestLifecycleAware {
 
     public MockedBeWorld() {
         this(DEFAULT_FAILURE_RECORDING_DIRECTORY);
+    }
+
+    private static void retainLogFile(final Path directory, final String baseFileName, final String host, final GenericContainer<?> container) {
+        final String leafName = baseFileName + "-" + host + ".log";
+        final Path path = directory.resolve(leafName);
+        try {
+            Files.writeString(path, container.getLogs(), StandardCharsets.UTF_8);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public MockMcBackEndContainer getBackEnd() {
@@ -100,17 +126,6 @@ public final class MockedBeWorld implements Startable, TestLifecycleAware {
         retainLogFile(failureRecordingDirectory, baseFileName, MS_HOST, ms);
         retainLogFile(failureRecordingDirectory, baseFileName, FE_HOST, fe);
         retainLogFile(failureRecordingDirectory, baseFileName, INGRESS_HOST, ingress);
-    }
-
-    private static void retainLogFile(final Path directory, final String baseFileName, final String host, final GenericContainer<?> container) {
-        final String leafName = baseFileName + "-" + host + ".log";
-        final Path path = directory.resolve(leafName);
-        try {
-            Files.writeString(path, container.getLogs(), StandardCharsets.UTF_8);
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-
     }
 
     @Override
@@ -181,19 +196,4 @@ public final class MockedBeWorld implements Startable, TestLifecycleAware {
         homePage.awaitIsReady();
         return homePage;
     }
-
-    private static final String FE_HOST = "fe";
-    private static final String MS_HOST = "ms";
-    private static final String INGRESS_HOST = "in";
-    private static final Path DEFAULT_FAILURE_RECORDING_DIRECTORY = Path.of(".", "target", "test-logs");
-    private static final DockerImageName BROWSER_IMAGE_NAME = DockerImageName.parse("selenium/standalone-firefox:4.1.4");
-    private final Path failureRecordingDirectory;
-    private final Network network = Network.newNetwork();
-    private final McFrontEndContainer fe = new McFrontEndContainer();
-    private final MockMcBackEndContainer ms = new MockMcBackEndContainer();
-    private final McReverseProxyContainer ingress = McReverseProxyContainer.createWithMockBe();
-    private final BrowserWebDriverContainer<?> browser = new BrowserWebDriverContainer<>(BROWSER_IMAGE_NAME);
-    private RemoteWebDriver webDriver;
-    private int nUsers;
-    private User currentLoggedInUser;
 }
