@@ -48,6 +48,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
  */
 public abstract class Page {
 
+    private static final Duration WAIT_UNTIL_READY_TIMEOUT = Duration.ofSeconds(17);
+    private static final Duration WAIT_UNTIL_READY_POLL_INTERVAL = Duration.ofMillis(111);
+
     public final class NotReadyException extends IllegalStateException {
 
         public NotReadyException(final String message) {
@@ -288,7 +291,7 @@ public abstract class Page {
             @Nonnull final Matcher<WebElement> additionalBodyConstraints)
             throws IllegalStateException {
         try {
-            new WebDriverWait(webDriver, Duration.ofSeconds(17))
+            new WebDriverWait(webDriver, WAIT_UNTIL_READY_TIMEOUT, WAIT_UNTIL_READY_POLL_INTERVAL)
                     .until(driver -> isReady(driver, additionalBodyConstraints));
         } catch (final TimeoutException e) {
             requireIsReady(); // throws NotReadyException, with good diagnostics,
@@ -301,7 +304,7 @@ public abstract class Page {
 
     public final void awaitIsReadyOrErrorMessage() throws IllegalStateException {
         try {
-            new WebDriverWait(webDriver, Duration.ofSeconds(17))
+            new WebDriverWait(webDriver, WAIT_UNTIL_READY_TIMEOUT, WAIT_UNTIL_READY_POLL_INTERVAL)
                     .until(driver -> isReady(driver, isA(WebElement.class))
                             || HAS_ERROR_ELEMENT
                             .matches(driver.findElement(BODY_LOCATOR)));
@@ -320,7 +323,7 @@ public abstract class Page {
 
     public final void awaitIsReadyAndErrorMessage() throws IllegalStateException {
         try {
-            new WebDriverWait(webDriver, Duration.ofSeconds(17))
+            new WebDriverWait(webDriver, WAIT_UNTIL_READY_TIMEOUT, WAIT_UNTIL_READY_POLL_INTERVAL)
                     .until(driver -> isReady(driver, isA(WebElement.class))
                             && HAS_ERROR_ELEMENT
                             .matches(driver.findElement(BODY_LOCATOR)));
