@@ -292,6 +292,26 @@ public abstract class Page {
         awaitIsReady(isA(WebElement.class));
     }
 
+    protected final void awaitElementIsEnabled(@Nonnull By elementLocator) {
+        awaitIsReady(new TypeSafeDiagnosingMatcher<>() {
+            @Override
+            protected boolean matchesSafely(WebElement body, Description mismatchDescription) {
+                final var element = body.findElement(elementLocator);
+                if (isEnabled(element)) {
+                    return true;
+                } else {
+                    mismatchDescription.appendText("Element [" + element + "] is not enabled");
+                    return false;
+                }
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("Require element to be ready");
+            }
+        });
+    }
+
     protected final void awaitIsReady(
             @Nonnull final Matcher<WebElement> additionalBodyConstraints)
             throws IllegalStateException {

@@ -382,12 +382,8 @@ public final class GamePage extends Page {
     }
 
     public void joinGame() {
-        requireIsReady();
+        awaitElementIsEnabled(JOIN_BUTTON_LOCATOR);
         final var button = getBody().findElement(JOIN_BUTTON_LOCATOR);
-        if (!isEnabled(button)) {
-            throw new IllegalStateException(
-                    "Button [" + button + "] is not enabled");
-        }
         button.click();
         awaitIsReady(IS_PLAYING_GAME);
     }
