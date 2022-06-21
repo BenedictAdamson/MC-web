@@ -27,12 +27,10 @@ import org.openqa.selenium.WebElement;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
-import java.util.Objects;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 
 /**
  * <p>
@@ -151,9 +149,8 @@ public final class HomePage extends Page {
     }
 
     @Override
-    protected boolean isValidPath(@Nonnull final String path) {
-        Objects.requireNonNull(path, "path");
-        return PATH.equals(path);
+    protected void assertValidPath(@Nonnull final String path) {
+        assertThat("path", path, is(PATH));
     }
 
     public void logout() {

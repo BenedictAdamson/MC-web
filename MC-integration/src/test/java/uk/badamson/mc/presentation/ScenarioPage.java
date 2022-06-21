@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.*;
 
 /**
  * <p>
@@ -127,9 +127,8 @@ public final class ScenarioPage extends Page {
     }
 
     @Override
-    protected boolean isValidPath(@Nonnull final String path) {
-        Objects.requireNonNull(path, "path");
-        return path.startsWith(BASE);
+    protected void assertValidPath(@Nonnull final String path) {
+        assertThat("path", path, startsWith(BASE));
     }
 
     public GamePage navigateToGamePage(final int gameIndex) {

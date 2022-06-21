@@ -57,10 +57,6 @@ public abstract class Page {
             super(message);
         }
 
-        public NotReadyException(final String message, final Throwable cause) {
-            super(message, cause);
-        }
-
         public NotReadyException(final Throwable cause) {
             super(createNotReadyMessage(), cause);
         }
@@ -104,7 +100,7 @@ public abstract class Page {
      * Require that a parent element contains an element.
      * </p>
      *
-     * @param message An assertion message to use if reporting that this assertino
+     * @param message An assertion message to use if reporting that this assertion
      *                failed
      * @param parent  The element to search
      * @param by      A matcher for the required element
@@ -266,6 +262,15 @@ public abstract class Page {
         assertThat(path, IS_VALID_PATH);
     }
 
+    protected final boolean isValidPath(@Nonnull final String path) {
+        try {
+            assertValidPath(path);
+        } catch (AssertionError e) {
+            return false;
+        }
+        return true;
+    }
+
     /**
      * <p>
      * Assert that a given page (window) title is a valid title for this type of
@@ -308,14 +313,6 @@ public abstract class Page {
                     .until(driver -> isReady(driver, isA(WebElement.class))
                             || HAS_ERROR_ELEMENT
                             .matches(driver.findElement(BODY_LOCATOR)));
-        } catch (final TimeoutException e) {
-            try {
-                /* Use requireIsReady to get a good diagnostic exception */
-                requireIsReady();
-            } catch (final NotReadyException e2) {
-                throw new NotReadyException("Not ready and no error message", e2);
-            }
-            // OK, the final check was OK, so *just* became ready in time
         } catch (final Exception e) {// give better diagnostics
             throw new NotReadyException(e);
         }
@@ -393,82 +390,51 @@ public abstract class Page {
     }
 
     public final boolean isCurrentPath() {
-        return isValidPath(getCurrentPath());
+        try {
+            assertValidPath(getCurrentPath());
+        } catch (AssertionError e) {
+            return false;
+        }
+        return true;
     }
 
     private boolean isReady(final WebDriver driver,
                             final Matcher<WebElement> additionalRequirements) {
-        final var body = driver.findElement(BODY_LOCATOR);
         try {
-            requireIsReady(getPathOfUrl(driver.getCurrentUrl()), driver.getTitle(),
-                    body);
-            requireForReady("Additional body constraints", body,
-                    additionalRequirements);
+            requireIsReady(driver);
+            requireAdditionalBodyConstraintsForReady(driver.findElement(BODY_LOCATOR), additionalRequirements);
         } catch (final NotReadyException e) {
             return false;
         }
         return true;
     }
 
-    /**
-     * <p>
-     * Whether a given URI {@linkplain URI#getPath() path component} of a URI is
-     * a valid value for this type of page.
-     * </p>
-     *
-     * @param path the path component to examine
-     * @return whether {@code path} is valid
-     * @throws NullPointerException If {@code path} is null.
-     * @see #assertValidPath(String)
-     */
-    protected abstract boolean isValidPath(@Nonnull String path);
+    private void requireIsReady(@Nonnull WebDriver webDriver) throws NotReadyException {
+        try {
+            assertValidPath(getPathOfUrl(webDriver.getCurrentUrl()));
+            assertValidTitle(webDriver.getTitle());
+            assertValidBody(webDriver.findElement(BODY_LOCATOR));
+        } catch (AssertionError e) {
+            throw new NotReadyException(e);
+        }
+    }
 
-    protected <T> void requireForReady(final String requirementDescription,
-                                       final T value, final Matcher<T> requirement)
+    public final void requireIsReady() throws NotReadyException {
+        requireIsReady(webDriver);
+    }
+
+    private void requireAdditionalBodyConstraintsForReady(final WebElement value, final Matcher<WebElement> requirement)
             throws NotReadyException {
         if (!requirement.matches(value)) {
             final Description description = new StringDescription();
             description.appendText("Not ready because requires ")
                     .appendText(System.lineSeparator())
-                    .appendText(requirementDescription)
+                    .appendText("Additional body constraints")
                     .appendText(System.lineSeparator())
                     .appendDescriptionOf(requirement)
                     .appendText(System.lineSeparator()).appendText("     but: ");
             requirement.describeMismatch(value, description);
             throw new NotReadyException(description.toString());
-        }
-    }
-
-    public final void requireIsReady() throws NotReadyException {
-        requireIsReady(getCurrentPath(), getTitle(), getBody());
-    }
-
-    /**
-     * <p>
-     * Throw an exception if a given page is not a page of this type in its ready
-     * (loaded) state.
-     * </p>
-     * <p>
-     * The provided implementation checks only that the given {@code path}
-     * {@linkplain #isValidPath(String) is a valid path for this type of page}.
-     * </p>
-     *
-     * @param path  The {@linkplain URI#getPath() path component} of the
-     *              {@linkplain URI URI} of the page.
-     * @param title The page (window) title of the page.
-     * @param body  the body of the page
-     * @throws NullPointerException <ul>
-     *                                         <li>If {@code path} is null.</li>
-     *                                         <li>If {@code title} is null.</li>
-     *                                         <li>If {@code body} is null.</li>
-     *                                         </ul>
-     * @throws NotReadyException    If, and only if, the page is not ready
-     */
-    protected void requireIsReady(@Nonnull final String path,
-                                  @Nonnull final String title, final @Nonnull WebElement body)
-            throws NotReadyException {
-        if (!isValidPath(path)) {
-            throw new NotReadyException("Invalid path " + path);
         }
     }
 }

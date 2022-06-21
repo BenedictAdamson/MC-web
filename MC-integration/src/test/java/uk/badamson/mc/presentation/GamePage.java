@@ -27,7 +27,6 @@ import org.springframework.web.util.UriTemplate;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
-import java.util.Objects;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -378,9 +377,8 @@ public final class GamePage extends Page {
     }
 
     @Override
-    protected boolean isValidPath(@Nonnull final String path) {
-        Objects.requireNonNull(path, "path");
-        return URI_TEMPLATE.matches(path);
+    protected void assertValidPath(@Nonnull final String path) {
+        assertThat("path", URI_TEMPLATE.matches(path));
     }
 
     public void joinGame() {
@@ -403,15 +401,6 @@ public final class GamePage extends Page {
         link.click();
         scenarioPage.awaitIsReady();
         return scenarioPage;
-    }
-
-    @Override
-    protected void requireIsReady(@Nonnull final String path,
-                                  @Nonnull final String title, final @Nonnull WebElement body)
-            throws NotReadyException {
-        super.requireIsReady(path, title, body);
-        requireForReady("Indicates is a game", body.getText(),
-                INDICATES_IS_A_GAME);
     }
 
     public void startGame() {
