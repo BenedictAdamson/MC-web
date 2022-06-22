@@ -50,6 +50,7 @@ public abstract class Page {
 
     private static final Duration WAIT_UNTIL_READY_TIMEOUT = Duration.ofSeconds(17);
     private static final Duration WAIT_UNTIL_READY_POLL_INTERVAL = Duration.ofMillis(111);
+    private static final Duration READY_QUERY_PAUSE = Duration.ofMillis(10);
 
     public final class NotReadyException extends IllegalStateException {
 
@@ -432,9 +433,12 @@ public abstract class Page {
     private void requireIsReady(@Nonnull WebDriver webDriver) throws NotReadyException {
         try {
             assertValidPath(getPathOfUrl(webDriver.getCurrentUrl()));
+            Thread.sleep(READY_QUERY_PAUSE.toMillis());
             assertValidTitle(webDriver.getTitle());
+            Thread.sleep(READY_QUERY_PAUSE.toMillis());
             assertValidBody(webDriver.findElement(BODY_LOCATOR));
-        } catch (AssertionError e) {
+            Thread.sleep(READY_QUERY_PAUSE.toMillis());
+        } catch (AssertionError | InterruptedException e) {
             throw new NotReadyException(e);
         }
     }
