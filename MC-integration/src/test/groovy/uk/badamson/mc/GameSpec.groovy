@@ -71,6 +71,7 @@ class GameSpec extends UnmockedSpecification {
 
     and: "a game is initially recruiting players"
     def gamePage = createGame(homePage)
+    gamePage.assertIndicatesIsRecruitingPlayers()
 
     when: "user ends recruitment for the game"
     gamePage.endRecruitement()
@@ -146,10 +147,9 @@ class GameSpec extends UnmockedSpecification {
   private GamePage createGame(@Nonnull HomePage homePage) {
     final var scenario = world.getScenarios().findFirst().get().getId()
     final var scenarioIndex = 0
-    world.createGame(scenario)
+    final var gameId = world.createGame(scenario)
     final def scenarioPage = homePage.navigateToScenariosPage()
             .navigateToScenario(scenarioIndex)
-    final int nGames0 = scenarioPage.getNumberOfGamesListed()
-    scenarioPage.navigateToGamePage(nGames0 - 1)
+    scenarioPage.navigateToGamePage(gameId.created.toString())
   }
 }
