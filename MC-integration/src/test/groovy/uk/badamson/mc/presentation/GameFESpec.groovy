@@ -407,7 +407,7 @@ class GameFESpec extends MockedBeSpecification {
             .navigateToScenario(0)
     scenarioPage.awaitIsReadyOrErrorMessage()
     scenarioPage.requireIsReady()
-    def gamePage = scenarioPage.navigateToGamePage(0)
+    def gamePage = scenarioPage.navigateToGamePage(GAME_CREATION_TIME.toString())
     gamePage.awaitIsReadyOrErrorMessage()
     gamePage
   }

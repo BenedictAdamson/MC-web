@@ -382,6 +382,7 @@ public final class GamePage extends Page {
     }
 
     public void joinGame() {
+        awaitIsReady();
         awaitElementIsEnabled(JOIN_BUTTON_LOCATOR);
         final var button = getBody().findElement(JOIN_BUTTON_LOCATOR);
         button.click();

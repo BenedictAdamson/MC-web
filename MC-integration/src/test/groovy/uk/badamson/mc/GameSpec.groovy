@@ -106,13 +106,12 @@ class GameSpec extends UnmockedSpecification {
   }
 
   def "Start game"() {
-    given: "a game is waiting to start"
-
-    and: "logged in as a user with the manage games role"
+    given: "logged in as a user with the manage games role"
     def homePage = loginAsUserWithRole(Authority.ROLE_MANAGE_GAMES)
 
-    and: "examining the game"
-    def gamePage = examineGame(homePage)
+    and: "examining a game is waiting to start"
+    def gamePage = createGame(homePage)
+    gamePage.assertIndicatesNotRunning()
 
     when: "user starts the game"
     gamePage.startGame()
@@ -123,16 +122,6 @@ class GameSpec extends UnmockedSpecification {
 
     and: "the game indicates that it is running"
     gamePage.assertIndicatesRunning()
-  }
-
-  private GamePage examineGame(final HomePage homePage) {
-    def scenarioPage = homePage.navigateToScenariosPage()
-            .navigateToScenario(0)
-    scenarioPage.awaitIsReadyOrErrorMessage()
-    scenarioPage.requireIsReady()
-    def gamePage = scenarioPage.navigateToGamePage(0)
-    gamePage.awaitIsReadyOrErrorMessage()
-    gamePage
   }
 
   private HomePage loginAsUserWithRole(@Nonnull final Authority role) {

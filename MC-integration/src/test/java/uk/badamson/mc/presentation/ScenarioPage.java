@@ -22,6 +22,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.util.List;
 import java.util.Objects;
@@ -108,6 +109,18 @@ public final class ScenarioPage extends Page {
                 .findElements(By.tagName("li"));
     }
 
+    @Nullable
+    private WebElement findGameElement(@Nonnull String created) {
+        requireIsReady();
+        final var elements = findGameElements();
+        for (var element: elements) {
+            if (element.getText().contains(created)) {
+                return element;
+            }
+        }
+        return null;
+    }
+
     public int getNumberOfGamesListed() {
         return findGameElements().size();
     }
@@ -131,22 +144,14 @@ public final class ScenarioPage extends Page {
         assertThat("path", path, startsWith(BASE));
     }
 
-    public GamePage navigateToGamePage(final int gameIndex) {
-        if (gameIndex < 0) {
-            throw new IndexOutOfBoundsException("Negative gameIndex");
-        }
+    public GamePage navigateToGamePage(final String created) {
         requireIsReady();
-        final var gameElements = findGameElements();
-        final WebElement listEntry;
-        try {
-            listEntry = gameElements.get(gameIndex);
-        } catch (final IndexOutOfBoundsException e) {
-            throw new IllegalStateException(
-                    "Games list too short [" + gameIndex + "] for length "
-                            + gameElements.size() + "\n" + getBody().getText());
+        final var gameElement = findGameElement(created);
+        if (gameElement == null) {
+            throw new IllegalStateException("No entry for game " + created);
         }
-        final var title = listEntry.getText();
-        final var link = listEntry.findElement(By.tagName("a"));
+        final var title = gameElement.getText();
+        final var link = gameElement.findElement(By.tagName("a"));
         link.click();
         final var gamePage = new GamePage(this, title);
         gamePage.awaitIsReady();
