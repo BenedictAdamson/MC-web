@@ -28,7 +28,6 @@ import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.testcontainers.containers.Network;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import uk.badamson.mc.repository.McDatabaseContainer;
 
 import java.io.IOException;
@@ -57,9 +56,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * </p>
  */
 @TestMethodOrder(OrderAnnotation.class)
-@Testcontainers
 @Tag("IT")
-public class BeWithDbSubSystemIT implements AutoCloseable {
+public class BeWithDbSubSystemIT {
 
     @Nested
     public class CreateGame {
@@ -126,7 +124,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
         @Test
         @Order(4)
         public void twiceWithoutSessionCookie() {
-            final var user = USER_DETAILS_A;
+            final var user = createBasicUserDetails();
             final var username = user.getUsername();
             final var password = user.getPassword();
             be.addUser(user);
@@ -153,7 +151,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
         @Test
         @Order(4)
         public void twiceWithSessionCookie() {
-            final var user = USER_DETAILS_A;
+            final var user = createBasicUserDetails();
             final var username = user.getUsername();
             final var password = user.getPassword();
             be.addUser(user);
@@ -175,7 +173,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
         @Test
         @Order(1)
         public void unknownUser() {
-            final var user = USER_DETAILS_A;
+            final var user = createBasicUserDetails();
             final var request = be.createGetSelfRequest(user.getUsername(),
                     user.getPassword());
 
@@ -187,7 +185,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
         @Test
         @Order(3)
         public void valid() {
-            final var user = USER_DETAILS_A;
+            final var user = createBasicUserDetails();
             be.addUser(user);
             final var request = be.createGetSelfRequest(user.getUsername(),
                     user.getPassword());
@@ -200,7 +198,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
         @Test
         @Order(1)
         public void wrongPassword() {
-            final var user = USER_DETAILS_A;
+            final var user = createBasicUserDetails();
             be.addUser(user);
             final var request = be.createGetSelfRequest(user.getUsername(),
                     "*" + user.getPassword());
@@ -244,7 +242,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
         @Test
         @Order(1)
         public void noSession() {
-            final var user = USER_DETAILS_A;
+            final var user = createBasicUserDetails();
             be.addUser(user);
             final var request = be.connectWebTestClient("/logout").post()
                     .headers(headers -> headers.setBasicAuth(user.getUsername(),
@@ -258,7 +256,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
         @Test
         @Order(3)
         public void withSession() {
-            final var user = USER_DETAILS_A;
+            final var user = createBasicUserDetails();
             be.addUser(user);
             final var cookies = be.login(user);
             final var request = be.connectWebTestClient("/logout").post();
@@ -272,7 +270,7 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
         @Test
         @Order(1)
         public void wrongPassword() {
-            final var user = USER_DETAILS_A;
+            final var user = createBasicUserDetails();
             be.addUser(user);
             final var request = be.connectWebTestClient("/logout").post()
                     .headers(headers -> headers.setBasicAuth(user.getUsername(),
@@ -296,9 +294,6 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
     private static final String DB_USER_PASSWORD = "secret3";
 
     private static final String ADMINISTARTOR_PASSWORD = "secret4";
-
-    private static final BasicUserDetails USER_DETAILS_A = new BasicUserDetails("jeff",
-            "password", Authority.ALL, true, true, true, true);
 
     private static void assertSelfResponseEquivalent(final BasicUserDetails expectedUser,
                                                      final boolean expectSetSessionCookie, final ResponseSpec response) {
@@ -325,20 +320,28 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
                         hasKey("XSRF-TOKEN")));
     }
 
-    private final Network network = Network.newNetwork();
+    private static final Network network = Network.newNetwork();
 
-    private final McDatabaseContainer db = new McDatabaseContainer(
+    private static final McDatabaseContainer db = new McDatabaseContainer(
             DB_ROOT_PASSWORD, DB_USER_PASSWORD).withNetwork(network)
             .withNetworkAliases(DB_HOST);
 
-    private final McBackEndContainer be = new McBackEndContainer(DB_HOST,
+    private static final McBackEndContainer be = new McBackEndContainer(DB_HOST,
             DB_USER_PASSWORD, ADMINISTARTOR_PASSWORD).withNetwork(network)
             .withNetworkAliases(BE_HOST);
+
+    private static int nUsers;
+
+    private static BasicUserDetails createBasicUserDetails() {
+        return new BasicUserDetails("jeff-" + (++nUsers),
+                "password", Authority.ALL, true, true, true, true);
+    }
 
     @Test
     @Order(2)
     public void addUser() {
-        be.addUser(USER_DETAILS_A);
+        final var userDetails = createBasicUserDetails();
+        be.addUser(userDetails);
 
         final List<User> users;
         try {
@@ -347,15 +350,14 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
             throw new AssertionFailedError("Unable to get list of users", e);
         }
         assertThat("Added user", users.stream()
-                .anyMatch(u -> USER_DETAILS_A.getUsername().equals(u.getUsername())));
+                .anyMatch(u -> userDetails.getUsername().equals(u.getUsername())));
     }
 
     private void assertThatNoErrorMessagesLogged(final String logs) {
         assertThat(logs, not(containsString("ERROR")));
     }
 
-    @Override
-    public void close() {
+    public static void close() {
         be.close();
         db.close();
         network.close();
@@ -393,8 +395,8 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
         return mapper.readValue(usersAsJson, typeId);
     }
 
-    @BeforeEach
-    public void start() {
+    @BeforeAll
+    public static void start() {
         /*
          * Start the containers bottom-up, and wait until each is ready, to reduce
          * the number of transient connection errors.
@@ -424,8 +426,8 @@ public class BeWithDbSubSystemIT implements AutoCloseable {
         }
     }
 
-    @AfterEach
-    public void stop() {
+    @AfterAll
+    public static void stop() {
         /*
          * Stop the resources top-down, to reduce the number of transient
          * connection errors.
