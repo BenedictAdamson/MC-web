@@ -29,7 +29,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.testcontainers.containers.Network;
 import uk.badamson.mc.repository.McDatabaseContainer;
+import uk.badamson.mc.spring.SpringAuthority;
+import uk.badamson.mc.spring.SpringUser;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -86,7 +89,7 @@ public class BeWithDbSubSystemIT {
                         () -> assertEquals(scenario, gameId.getScenario(),
                                 "scenario of created game is the given scenario"),
                         () -> assertThat(
-                                "added the creation time of the created game to the list of creatino times",
+                                "added the creation time of the created game to the list of creation times",
                                 gameId.getCreated(), in(creationTimes)));
             }
 
@@ -293,16 +296,18 @@ public class BeWithDbSubSystemIT {
     private static final String DB_ROOT_PASSWORD = "secret2";
     private static final String DB_USER_PASSWORD = "secret3";
 
-    private static final String ADMINISTARTOR_PASSWORD = "secret4";
+    private static final String ADMINISTRATOR_PASSWORD = "secret4";
 
-    private static void assertSelfResponseEquivalent(final BasicUserDetails expectedUser,
-                                                     final boolean expectSetSessionCookie, final ResponseSpec response) {
+    private static void assertSelfResponseEquivalent(
+            @Nonnull final BasicUserDetails expectedUser,
+            final boolean expectSetSessionCookie,
+            @Nonnull final ResponseSpec response) {
         final var result = response.returnResult(String.class);
         final var responseJson = result.getResponseBody()
                 .blockFirst(Duration.ofSeconds(9));
-        final User responseUser;
+        final SpringUser responseUser;
         try {
-            responseUser = OBJECT_MAPPER.readValue(responseJson, User.class);
+            responseUser = OBJECT_MAPPER.readValue(responseJson, SpringUser.class);
         } catch (final JsonProcessingException e) {
             throw new AssertionFailedError("Response has valid JSON", e);
         }
@@ -312,7 +317,7 @@ public class BeWithDbSubSystemIT {
                         is(expectedUser.getUsername())),
                 () -> assertThat("response authorities",
                         responseUser.getAuthorities(),
-                        is(expectedUser.getAuthorities())),
+                        is(SpringAuthority.convertToSpring(expectedUser.getAuthorities()))),
                 () -> assertThat("Sets session cookie", cookies,
                         expectSetSessionCookie ? hasKey("JSESSIONID")
                                 : not(hasKey("JSESSIONID"))),
@@ -327,11 +332,12 @@ public class BeWithDbSubSystemIT {
             .withNetworkAliases(DB_HOST);
 
     private static final McBackEndContainer be = new McBackEndContainer(DB_HOST,
-            DB_USER_PASSWORD, ADMINISTARTOR_PASSWORD).withNetwork(network)
+            DB_USER_PASSWORD, ADMINISTRATOR_PASSWORD).withNetwork(network)
             .withNetworkAliases(BE_HOST);
 
     private static int nUsers;
 
+    @Nonnull
     private static BasicUserDetails createBasicUserDetails() {
         return new BasicUserDetails("jeff-" + (++nUsers),
                 "password", Authority.ALL, true, true, true, true);
@@ -343,7 +349,7 @@ public class BeWithDbSubSystemIT {
         final var userDetails = createBasicUserDetails();
         be.addUser(userDetails);
 
-        final List<User> users;
+        final List<SpringUser> users;
         try {
             users = getUsers1();
         } catch (final IOException e) {
@@ -376,7 +382,7 @@ public class BeWithDbSubSystemIT {
     @Test
     @Order(2)
     public void getUsers() {
-        final List<User> users;
+        final List<SpringUser> users;
         try {
             users = getUsers1();
         } catch (final IOException e) {
@@ -385,14 +391,13 @@ public class BeWithDbSubSystemIT {
         assertThat("List of users", users, not(empty()));
     }
 
-    private List<User> getUsers1() throws IOException {
+    private List<SpringUser> getUsers1() throws IOException {
         final var usersAsJson = be.getJsonAsAdministrator("/api/user")
                 .returnResult(String.class).getResponseBody()
                 .blockFirst(Duration.ofSeconds(9));
-        final var mapper = OBJECT_MAPPER;
-        final var typeId = mapper.getTypeFactory()
-                .constructCollectionType(List.class, User.class);
-        return mapper.readValue(usersAsJson, typeId);
+        final var typeId = OBJECT_MAPPER.getTypeFactory()
+                .constructCollectionType(List.class, SpringUser.class);
+        return OBJECT_MAPPER.readValue(usersAsJson, typeId);
     }
 
     @BeforeAll
