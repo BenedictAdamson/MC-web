@@ -29,8 +29,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.testcontainers.containers.Network;
 import uk.badamson.mc.repository.McDatabaseContainer;
-import uk.badamson.mc.spring.SpringAuthority;
-import uk.badamson.mc.spring.SpringUser;
+import uk.badamson.mc.rest.AuthorityValue;
+import uk.badamson.mc.rest.UserResponse;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -305,19 +305,19 @@ public class BeWithDbSubSystemIT {
         final var result = response.returnResult(String.class);
         final var responseJson = result.getResponseBody()
                 .blockFirst(Duration.ofSeconds(9));
-        final SpringUser responseUser;
+        final UserResponse responseUser;
         try {
-            responseUser = OBJECT_MAPPER.readValue(responseJson, SpringUser.class);
+            responseUser = OBJECT_MAPPER.readValue(responseJson, UserResponse.class);
         } catch (final JsonProcessingException e) {
             throw new AssertionFailedError("Response has valid JSON", e);
         }
         final var cookies = result.getResponseCookies();
         assertAll(() -> response.expectStatus().isOk(),
-                () -> assertThat("response username", responseUser.getUsername(),
+                () -> assertThat("response username", responseUser.username(),
                         is(expectedUser.getUsername())),
                 () -> assertThat("response authorities",
-                        responseUser.getAuthorities(),
-                        is(SpringAuthority.convertToSpring(expectedUser.getAuthorities()))),
+                        responseUser.authorities(),
+                        is(AuthorityValue.convertToValue(expectedUser.getAuthorities()))),
                 () -> assertThat("Sets session cookie", cookies,
                         expectSetSessionCookie ? hasKey("JSESSIONID")
                                 : not(hasKey("JSESSIONID"))),
@@ -349,14 +349,14 @@ public class BeWithDbSubSystemIT {
         final var userDetails = createBasicUserDetails();
         be.addUser(userDetails);
 
-        final List<SpringUser> users;
+        final List<UserResponse> users;
         try {
             users = getUsers1();
         } catch (final IOException e) {
             throw new AssertionFailedError("Unable to get list of users", e);
         }
         assertThat("Added user", users.stream()
-                .anyMatch(u -> userDetails.getUsername().equals(u.getUsername())));
+                .anyMatch(u -> userDetails.getUsername().equals(u.username())));
     }
 
     private void assertThatNoErrorMessagesLogged(final String logs) {
@@ -382,7 +382,7 @@ public class BeWithDbSubSystemIT {
     @Test
     @Order(2)
     public void getUsers() {
-        final List<SpringUser> users;
+        final List<UserResponse> users;
         try {
             users = getUsers1();
         } catch (final IOException e) {
@@ -391,12 +391,12 @@ public class BeWithDbSubSystemIT {
         assertThat("List of users", users, not(empty()));
     }
 
-    private List<SpringUser> getUsers1() throws IOException {
+    private List<UserResponse> getUsers1() throws IOException {
         final var usersAsJson = be.getJsonAsAdministrator("/api/user")
                 .returnResult(String.class).getResponseBody()
                 .blockFirst(Duration.ofSeconds(9));
         final var typeId = OBJECT_MAPPER.getTypeFactory()
-                .constructCollectionType(List.class, SpringUser.class);
+                .constructCollectionType(List.class, UserResponse.class);
         return OBJECT_MAPPER.readValue(usersAsJson, typeId);
     }
 
