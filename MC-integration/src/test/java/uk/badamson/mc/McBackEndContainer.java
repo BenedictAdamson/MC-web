@@ -298,8 +298,8 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
     }
 
     public Stream<NamedUUID> getScenarios() {
-        return getJson("/api/scenario").returnResult(NamedUUID.class)
-                .getResponseBody().toStream();
+        return getJson("/api/scenario").returnResult(uk.badamson.mc.rest.NamedUUID.class)
+                .getResponseBody().toStream().map(ni -> new NamedUUID(ni.getId(), ni.getTitle()));
     }
 
     public void joinGame(final Game.Identifier game, final User user) {

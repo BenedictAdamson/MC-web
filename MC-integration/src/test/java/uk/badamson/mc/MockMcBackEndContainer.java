@@ -8,6 +8,7 @@ import org.mockserver.matchers.Times;
 import org.mockserver.model.*;
 import org.testcontainers.containers.MockServerContainer;
 import org.testcontainers.utility.DockerImageName;
+import uk.badamson.mc.rest.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public final class MockMcBackEndContainer extends MockServerContainer {
     private static String gamePath(final Game.Identifier game) {
@@ -124,20 +126,20 @@ public final class MockMcBackEndContainer extends MockServerContainer {
         return HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(encodeAsJson(body));
     }
 
-    public void mockGetGame(@Nonnull final Game game, Times times) {
-        mockServerClient.when(getGameRequest(game.getIdentifier()), times).respond(getGameResponse(game));
+    public void mockGetGame(@Nonnull final Game.Identifier id, @Nonnull final Game game, Times times) {
+        mockServerClient.when(getGameRequest(game.getIdentifier()), times).respond(getGameResponse(id, game));
     }
 
-    public void mockGetGame(@Nonnull final Game game) {
-        mockGetGame(game, Times.unlimited());
+    public void mockGetGame(@Nonnull final Game.Identifier id, @Nonnull final Game game) {
+        mockGetGame(id, game, Times.unlimited());
     }
 
     private static HttpRequest getGameRequest(@Nonnull final Game.Identifier game) {
         return HttpRequest.request(gamePath(game)).withMethod("GET");
     }
 
-    private static HttpResponse getGameResponse(@Nonnull final Game game) {
-        return jsonResponse(game);
+    private static HttpResponse getGameResponse(@Nonnull Game.Identifier id, @Nonnull final Game game) {
+        return jsonResponse(GameResponse.convertToResponse(id, game));
     }
 
     public void mockStartGame(@Nonnull final Game.Identifier game) {
@@ -193,20 +195,20 @@ public final class MockMcBackEndContainer extends MockServerContainer {
         return foundResponse(gamePath(game));
     }
 
-    public void mockGetGamePlayers(@Nonnull GamePlayers players, Times times) {
-        mockServerClient.when(getGamePlayersRequest(players.getGame()), times).respond(getGamePlayersResponse(players));
+    public void mockGetGamePlayers(@Nonnull Game.Identifier id, @Nonnull GamePlayers players, Times times) {
+        mockServerClient.when(getGamePlayersRequest(players.getGame()), times).respond(getGamePlayersResponse(id, players));
     }
 
-    public void mockGetGamePlayers(@Nonnull GamePlayers players) {
-        mockGetGamePlayers(players, Times.unlimited());
+    public void mockGetGamePlayers(@Nonnull Game.Identifier id, @Nonnull GamePlayers players) {
+        mockGetGamePlayers(id, players, Times.unlimited());
     }
 
     private static HttpRequest getGamePlayersRequest(@Nonnull final Game.Identifier game) {
         return HttpRequest.request(gamePlayersPath(game)).withMethod("GET").withQueryStringParameter("!mayJoin");
     }
 
-    private static HttpResponse getGamePlayersResponse(@Nonnull GamePlayers players) {
-        return jsonResponse(players);
+    private static HttpResponse getGamePlayersResponse(@Nonnull Game.Identifier id, @Nonnull GamePlayers players) {
+        return jsonResponse(GamePlayersResponse.convertToResponse(id, players));
     }
 
     public void mockJoinGame(@Nonnull final Game.Identifier game) {
@@ -242,7 +244,8 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpResponse getAllScenariosResponse(@Nonnull final Set<NamedUUID> scenarios) {
-        return jsonResponse(scenarios);
+        final var dto = scenarios.stream().map(ni -> new uk.badamson.mc.rest.NamedUUID(ni.getId(), ni.getTitle())).collect(Collectors.toUnmodifiableSet());
+        return jsonResponse(dto);
     }
 
     public void mockGetScenario(@Nonnull final Scenario scenario) {
@@ -255,7 +258,7 @@ public final class MockMcBackEndContainer extends MockServerContainer {
 
     private static HttpResponse getScenarioResponse(@Nonnull final Scenario scenario) {
         Objects.requireNonNull(scenario, "scenario");
-        return jsonResponse(scenario);
+        return jsonResponse(ScenarioResponse.convertToResponse(scenario));
     }
 
     public void mockAddUser(@Nonnull final BasicUserDetails userDetails, @Nonnull final UUID id) {
@@ -263,7 +266,8 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpRequest addUserRequest(@Nonnull final BasicUserDetails userDetails) {
-        return HttpRequest.request("/api/user").withMethod("POST").withBody(encodeAsJson(new MinimalUserDetails(userDetails)));
+        return HttpRequest.request("/api/user").withMethod("POST")
+                .withBody(encodeAsJson(new MinimalUserDetails(userDetails)));
     }
 
     private static HttpResponse addUserResponse(@Nonnull final UUID id) {
@@ -282,8 +286,11 @@ public final class MockMcBackEndContainer extends MockServerContainer {
         return HttpRequest.request("/api/user").withMethod("GET");
     }
 
-    private static HttpResponse getAllUsersResponse(@Nonnull final Set<User> users) {
-        return jsonResponse(users);
+    private static HttpResponse  getAllUsersResponse(@Nonnull final Set<User> users) {
+        final var dto = users.stream()
+                .map(UserResponse::convertToResponse)
+                .collect(Collectors.toUnmodifiableSet());
+        return jsonResponse(dto);
     }
 
     public void mockGetSelf(@Nonnull final User user, Times times) {
@@ -307,7 +314,7 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpResponse getSelfResponse(@Nonnull final User user) {
-        return jsonResponse(user);
+        return jsonResponse(UserResponse.convertToResponse(user));
     }
 
     public void mockGetUser(@Nonnull final User user) {
@@ -320,7 +327,7 @@ public final class MockMcBackEndContainer extends MockServerContainer {
 
     private static HttpResponse getUserResponse(@Nonnull final User user) {
         Objects.requireNonNull(user, "user");
-        return jsonResponse(user);
+        return jsonResponse(UserResponse.convertToResponse(user));
     }
 
     public void mockLogin(@Nonnull User user, @Nonnull final String sessionCookie, @Nonnull String xsrfToken) {
@@ -331,8 +338,16 @@ public final class MockMcBackEndContainer extends MockServerContainer {
         return HttpRequest.request("/api/self").withMethod("GET").withHeader(Header.header("Authorization", "Basic .*"));
     }
 
-    private static HttpResponse loginResponse(@Nonnull User user, @Nonnull final String sessionCookie, @Nonnull String xsrfToken) {
-        return HttpResponse.response().withCookie("JSESSIONID", sessionCookie).withCookie("XSRF-TOKEN", xsrfToken).withContentType(MediaType.APPLICATION_JSON).withBody(encodeAsJson(user));
+    private static HttpResponse loginResponse(
+            @Nonnull User user,
+            @Nonnull final String sessionCookie,
+            @Nonnull String xsrfToken
+    ) {
+        return HttpResponse.response()
+                .withCookie("JSESSIONID", sessionCookie)
+                .withCookie("XSRF-TOKEN", xsrfToken)
+                .withContentType(MediaType.APPLICATION_JSON)
+                .withBody(encodeAsJson(UserResponse.convertToResponse(user)));
     }
 
     private static final DockerImageName MOCKSERVER_IMAGE = DockerImageName.parse("mockserver/mockserver:5.13.2");

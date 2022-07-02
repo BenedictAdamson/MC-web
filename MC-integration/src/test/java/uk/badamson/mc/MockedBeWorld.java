@@ -96,7 +96,8 @@ public final class MockedBeWorld implements Startable, TestLifecycleAware {
         final var sequenceId = ++nUsers;
         final var username = "User " + sequenceId;
         final var password = "password" + sequenceId;
-        return new BasicUserDetails(username, password, authorities, true, true, true, true);
+        return new BasicUserDetails(username, password, authorities,
+                true, true, true, true);
     }
 
     public HomePage getHomePage() {

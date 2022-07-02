@@ -67,7 +67,7 @@ class CurrentGameFESpec extends MockedBeSpecification {
     and: "user is playing the game"
     def user = world.createUserWithRole(Authority.ROLE_PLAYER)
     world.backEnd.mockCurrentGame(GAME_ID)
-    world.backEnd.mockGetGamePlayers(new GamePlayers(GAME_ID, true, Map.of(CHARACTER_ID, user.id)))
+    world.backEnd.mockGetGamePlayers(GAME_ID, new GamePlayers(GAME_ID, true, Map.of(CHARACTER_ID, user.id)))
 
     when: "logged in as a user with the player role"
     def homePage = world.logInAsUser(user)
@@ -87,7 +87,7 @@ class CurrentGameFESpec extends MockedBeSpecification {
     world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, SCENARIO_TITLE)))
     world.backEnd.mockGetScenario(SCENARIO)
     world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME))
-    world.backEnd.mockGetGame(GAME_WAITING_TO_START)
+    world.backEnd.mockGetGame(GAME_ID, GAME_WAITING_TO_START)
   }
 
 
