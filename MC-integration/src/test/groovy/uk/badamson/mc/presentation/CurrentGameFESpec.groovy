@@ -2,12 +2,10 @@ package uk.badamson.mc.presentation
 
 import uk.badamson.mc.Authority
 import uk.badamson.mc.Game
-import uk.badamson.mc.GamePlayers
 import uk.badamson.mc.NamedUUID
 import uk.badamson.mc.Scenario
 
 import java.time.Instant
-
 /**
  * © Copyright Benedict Adamson 2021-22.
  *
@@ -39,7 +37,8 @@ class CurrentGameFESpec extends MockedBeSpecification {
   private static final def SCENARIO = new Scenario(SCENARIO_ID, SCENARIO_TITLE, 'Basic fire and movement tactics', CHARACTERS)
   private static final def GAME_CREATION_TIME = Instant.parse('2022-05-31T20:00:00Z')
   private static final def GAME_ID = new Game.Identifier(SCENARIO_ID, GAME_CREATION_TIME)
-  private static final def GAME_WAITING_TO_START = new Game(GAME_ID, Game.RunState.WAITING_TO_START)
+  private static final def GAME_WAITING_TO_START =
+          new Game(GAME_ID, Game.RunState.WAITING_TO_START, true, Map.of())
 
   @Override
   protected String getSpecificationName() {
@@ -67,7 +66,9 @@ class CurrentGameFESpec extends MockedBeSpecification {
     and: "user is playing the game"
     def user = world.createUserWithRole(Authority.ROLE_PLAYER)
     world.backEnd.mockCurrentGame(GAME_ID)
-    world.backEnd.mockGetGamePlayers(GAME_ID, new GamePlayers(GAME_ID, true, Map.of(CHARACTER_ID, user.id)))
+    world.backEnd.mockGetGamePlayers(
+            GAME_ID, new Game(GAME_ID, Game.RunState.WAITING_TO_START, true, Map.of(CHARACTER_ID, user.id))
+    )
 
     when: "logged in as a user with the player role"
     def homePage = world.logInAsUser(user)

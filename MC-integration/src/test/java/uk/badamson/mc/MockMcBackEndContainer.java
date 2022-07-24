@@ -195,20 +195,20 @@ public final class MockMcBackEndContainer extends MockServerContainer {
         return foundResponse(gamePath(game));
     }
 
-    public void mockGetGamePlayers(@Nonnull Game.Identifier id, @Nonnull GamePlayers players, Times times) {
-        mockServerClient.when(getGamePlayersRequest(players.getGame()), times).respond(getGamePlayersResponse(id, players));
+    public void mockGetGamePlayers(@Nonnull Game.Identifier id, @Nonnull Game game, Times times) {
+        mockServerClient.when(getGamePlayersRequest(game.getIdentifier()), times).respond(getGamePlayersResponse(id, game));
     }
 
-    public void mockGetGamePlayers(@Nonnull Game.Identifier id, @Nonnull GamePlayers players) {
-        mockGetGamePlayers(id, players, Times.unlimited());
+    public void mockGetGamePlayers(@Nonnull Game.Identifier id, @Nonnull Game game) {
+        mockGetGamePlayers(id, game, Times.unlimited());
     }
 
     private static HttpRequest getGamePlayersRequest(@Nonnull final Game.Identifier game) {
         return HttpRequest.request(gamePlayersPath(game)).withMethod("GET").withQueryStringParameter("!mayJoin");
     }
 
-    private static HttpResponse getGamePlayersResponse(@Nonnull Game.Identifier id, @Nonnull GamePlayers players) {
-        return jsonResponse(GamePlayersResponse.convertToResponse(id, players));
+    private static HttpResponse getGamePlayersResponse(@Nonnull Game.Identifier id, @Nonnull Game game) {
+        return jsonResponse(GamePlayersResponse.convertToResponse(id, game));
     }
 
     public void mockJoinGame(@Nonnull final Game.Identifier game) {
