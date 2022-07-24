@@ -4,6 +4,7 @@ import uk.badamson.mc.presentation.GamePage
 import uk.badamson.mc.presentation.HomePage
 
 import javax.annotation.Nonnull
+
 /**
  * © Copyright Benedict Adamson 2020-22.
  *
@@ -28,117 +29,117 @@ import javax.annotation.Nonnull
  */
 class GameSpec extends UnmockedSpecification {
 
-  void setupSpec() {
-    specificationName = 'GameSpec'
-  }
+    void setupSpec() {
+        specificationName = 'GameSpec'
+    }
 
-  def "Add game"() {
-    given: "logged in as a user with the manage games role"
-    def homePage = loginAsUserWithRole(Authority.ROLE_MANAGE_GAMES)
+    def "Add game"() {
+        given: "logged in as a user with the manage games role"
+        def homePage = loginAsUserWithRole(Authority.ROLE_MANAGE_GAMES)
 
-    and: "selected the scenario"
-    def scenarioPage0 = homePage.navigateToScenariosPage()
-            .navigateToScenario(0)
-    final int nGames0 = scenarioPage0.numberOfGamesListed
+        and: "selected the scenario"
+        def scenarioPage0 = homePage.navigateToScenariosPage()
+                .navigateToScenario(0)
+        final int nGames0 = scenarioPage0.numberOfGamesListed
 
-    when: "creating a game for the scenario"
-    def gamePage = scenarioPage0.createGame()
+        when: "creating a game for the scenario"
+        def gamePage = scenarioPage0.createGame()
 
-    then: "accepts the creation of the game"
-    gamePage.assertInvariants()
-    gamePage.assertNoErrorMessages()
+        then: "accepts the creation of the game"
+        gamePage.assertInvariants()
+        gamePage.assertNoErrorMessages()
 
-    and: "the game indicates that it is recruiting players"
-    gamePage.assertIndicatesIsRecruitingPlayers()
+        and: "the game indicates that it is recruiting players"
+        gamePage.assertIndicatesIsRecruitingPlayers()
 
-    and: "the game indicates that it has no players"
-    gamePage.assertIndicatesGameHasNoPlayedCharacters()
+        and: "the game indicates that it has no players"
+        gamePage.assertIndicatesGameHasNoPlayedCharacters()
 
-    and: "the game indicates that it is not running"
-    gamePage.assertIndicatesNotRunning()
+        and: "the game indicates that it is not running"
+        gamePage.assertIndicatesNotRunning()
 
-    and: "can get the list of games"
-    def scenarioPage1 = gamePage.navigateToScenarioPage()
-    scenarioPage1.assertHasListOfGames()
+        and: "can get the list of games"
+        def scenarioPage1 = gamePage.navigateToScenarioPage()
+        scenarioPage1.assertHasListOfGames()
 
-    and: "the list of games includes a new game"
-    scenarioPage1.getNumberOfGamesListed() == nGames0 + 1
-  }
+        and: "the list of games includes a new game"
+        scenarioPage1.getNumberOfGamesListed() == nGames0 + 1
+    }
 
-  def "End game recruitment"() {
-    given: "logged in as a user with the manage games role"
-    def homePage = loginAsUserWithRole(Authority.ROLE_MANAGE_GAMES)
+    def "End game recruitment"() {
+        given: "logged in as a user with the manage games role"
+        def homePage = loginAsUserWithRole(Authority.ROLE_MANAGE_GAMES)
 
-    and: "a game is initially recruiting players"
-    def gamePage = createGame(homePage)
-    gamePage.assertIndicatesIsRecruitingPlayers()
+        and: "a game is initially recruiting players"
+        def gamePage = createGame(homePage)
+        gamePage.assertIndicatesIsRecruitingPlayers()
 
-    when: "user ends recruitment for the game"
-    gamePage.endRecruitement()
+        when: "user ends recruitment for the game"
+        gamePage.endRecruitement()
 
-    then: "the game accepts ending recruitment"
-    gamePage.assertInvariants()
-    gamePage.assertNoErrorMessages()
+        then: "the game accepts ending recruitment"
+        gamePage.assertInvariants()
+        gamePage.assertNoErrorMessages()
 
-    and: "the game indicates that it is not recruiting players"
-    gamePage.assertIndicatesIsNotRecruitingPlayers()
-  }
+        and: "the game indicates that it is not recruiting players"
+        gamePage.assertIndicatesIsNotRecruitingPlayers()
+    }
 
-  def "Join a game"() {
-    given: "logged in as a user with the player role not playing any games"
-    def homePage = loginAsUserWithRole(Authority.ROLE_PLAYER)
+    def "Join a game"() {
+        given: "logged in as a user with the player role not playing any games"
+        def homePage = loginAsUserWithRole(Authority.ROLE_PLAYER)
 
-    and: "a game is recruiting players"
-    def gamePage = createGame(homePage)
+        and: "a game is recruiting players"
+        def gamePage = createGame(homePage)
 
-    when: "the user joins the game"
-    gamePage.joinGame()
+        when: "the user joins the game"
+        gamePage.joinGame()
 
-    then: "the game accepts joining"
-    gamePage.assertInvariants()
-    gamePage.assertNoErrorMessages()
+        then: "the game accepts joining"
+        gamePage.assertInvariants()
+        gamePage.assertNoErrorMessages()
 
-    and: "the game indicates that the user is playing the game"
-    gamePage.assertIndicatesUserIsPlayingGame()
+        and: "the game indicates that the user is playing the game"
+        gamePage.assertIndicatesUserIsPlayingGame()
 
-    and: "the game indicates which character the user is playing"
-    gamePage.assertIndicatesWhichCharacterUserIsPlaying()
-  }
+        and: "the game indicates which character the user is playing"
+        gamePage.assertIndicatesWhichCharacterUserIsPlaying()
+    }
 
-  def "Start game"() {
-    given: "logged in as a user with the manage games role"
-    def homePage = loginAsUserWithRole(Authority.ROLE_MANAGE_GAMES)
+    def "Start game"() {
+        given: "logged in as a user with the manage games role"
+        def homePage = loginAsUserWithRole(Authority.ROLE_MANAGE_GAMES)
 
-    and: "examining a game is waiting to start"
-    def gamePage = createGame(homePage)
-    gamePage.assertIndicatesNotRunning()
+        and: "examining a game is waiting to start"
+        def gamePage = createGame(homePage)
+        gamePage.assertIndicatesNotRunning()
 
-    when: "user starts the game"
-    gamePage.startGame()
+        when: "user starts the game"
+        gamePage.startGame()
 
-    then: "the game accepts starting"
-    gamePage.assertInvariants()
-    gamePage.assertNoErrorMessages()
+        then: "the game accepts starting"
+        gamePage.assertInvariants()
+        gamePage.assertNoErrorMessages()
 
-    and: "the game indicates that it is running"
-    gamePage.assertIndicatesRunning()
-  }
+        and: "the game indicates that it is running"
+        gamePage.assertIndicatesRunning()
+    }
 
-  private HomePage loginAsUserWithRole(@Nonnull final Authority role) {
-    def user = world.currentUserHasRoles(Set.of(role), Set.of())
-    def homePage = world.getHomePage()
-    final var loginPage = homePage.navigateToLoginPage()
-    loginPage.submitLoginForm(user.getUsername(), user.getPassword())
-    homePage.awaitIsReadyOrErrorMessage()
-    homePage
-  }
+    private HomePage loginAsUserWithRole(@Nonnull final Authority role) {
+        def user = world.currentUserHasRoles(Set.of(role), Set.of())
+        def homePage = world.getHomePage()
+        final var loginPage = homePage.navigateToLoginPage()
+        loginPage.submitLoginForm(user.getUsername(), user.getPassword())
+        homePage.awaitIsReadyOrErrorMessage()
+        homePage
+    }
 
-  private GamePage createGame(@Nonnull HomePage homePage) {
-    final var scenario = world.getScenarios().findFirst().get().getId()
-    final var scenarioIndex = 0
-    final var gameId = world.createGame(scenario)
-    final def scenarioPage = homePage.navigateToScenariosPage()
-            .navigateToScenario(scenarioIndex)
-    scenarioPage.navigateToGamePage(gameId.created.toString())
-  }
+    private GamePage createGame(@Nonnull HomePage homePage) {
+        final var scenario = world.getScenarios().findFirst().get().getId()
+        final var scenarioIndex = 0
+        final var gameId = world.createGame(scenario)
+        final def scenarioPage = homePage.navigateToScenariosPage()
+                .navigateToScenario(scenarioIndex)
+        scenarioPage.navigateToGamePage(gameId.created.toString())
+    }
 }
