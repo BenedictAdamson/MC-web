@@ -1,8 +1,9 @@
-import { Observable, of, throwError } from 'rxjs';
+import {Observable, of, throwError} from 'rxjs';
 
-import { AbstractGameBackEndService } from '../abstract.game.back-end.service';
-import { Game } from '../../game';
-import { GameIdentifier } from '../../game-identifier';
+import {AbstractGameBackEndService} from '../abstract.game.back-end.service';
+import {Game} from '../../game';
+import {GameIdentifier} from '../../game-identifier';
+import {v4 as uuid} from "uuid";
 
 
 export class MockGameBackEndService extends AbstractGameBackEndService {
@@ -23,12 +24,20 @@ export class MockGameBackEndService extends AbstractGameBackEndService {
       return of(null);
    }
 
-   add(scenario: string): Observable<Game> {
-      const id: GameIdentifier = { scenario, created: '2021-01-01T00:00:00.' + ++this.created };
-      const game: Game = { identifier: id, runState: 'WAITIBG_TO_START' };
-      this.games.push(game);
-      return of(game);
-   }
+  add(scenario: string): Observable<Game> {
+    const identifier: GameIdentifier = {scenario, created: '2021-01-01T00:00:00.' + ++this.created};
+    const characterIdA: string = uuid();
+    const characterIdB: string = uuid();
+    const userIdA: string = uuid();
+    const userIdB: string = uuid();
+    const users: Map<string, string> = new Map([
+      [characterIdA, userIdA],
+      [characterIdB, userIdB]
+    ]);
+    const game: Game = new Game(identifier, 'WAITING_TO_START', true, users);
+    this.games.push(game);
+    return of(game);
+  }
 
    startGame(id: GameIdentifier): Observable<Game> {
       for (const game of this.games) {

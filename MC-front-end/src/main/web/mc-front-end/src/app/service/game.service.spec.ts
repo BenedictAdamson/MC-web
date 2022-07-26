@@ -20,10 +20,19 @@ describe('GameService', () => {
 	const SCENARIO_B: string = uuid();
 	const CREATED_A = '1970-01-01T00:00:00.000Z';
 	const CREATED_B = '2020-12-31T23:59:59.999Z';
+  const USER_ID_A: string = uuid();
+  const USER_ID_B: string = uuid();
+  const CHARACTER_ID_A: string = uuid();
+  const CHARACTER_ID_B: string = uuid();
 	const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_A, created: CREATED_A };
 	const GAME_IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_B, created: CREATED_B };
-	const GAME_A: Game = { identifier: GAME_IDENTIFIER_A, runState: 'WAITING_TO_START' };
-	const GAME_B: Game = { identifier: GAME_IDENTIFIER_B, runState: 'RUNNING' };
+  const USERS_A: Map<string, string> = new Map([
+    [CHARACTER_ID_A, USER_ID_A],
+    [CHARACTER_ID_B, USER_ID_B]
+  ]);
+  const USERS_B: Map<string, string> = new Map([]);
+	const GAME_A: Game = new Game(GAME_IDENTIFIER_A, 'WAITING_TO_START', true, USERS_A);
+	const GAME_B: Game = new Game(GAME_IDENTIFIER_B, 'RUNNING', false, USERS_B);
 
 	const setUp = (): GameService => {
 		TestBed.configureTestingModule({
@@ -89,7 +98,7 @@ describe('GameService', () => {
 
 
    const testStartGame = (done: any, identifier: GameIdentifier) => {
-      const game: Game = {identifier, runState: 'RUNNING'};
+      const game: Game = new Game(identifier, 'RUNNING', false, USERS_A);
       const service: GameService = setUp();
 
       service.startGame(identifier);
@@ -119,7 +128,7 @@ describe('GameService', () => {
 
 
    const testStopGame = (done: any, identifier: GameIdentifier) => {
-      const game: Game = {identifier, runState: 'STOPPED'};
+      const game: Game = new Game(identifier, 'STOPPED', false, USERS_A);
       const service: GameService = setUp();
 
       service.stopGame(identifier);
