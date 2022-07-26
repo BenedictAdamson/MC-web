@@ -14,7 +14,7 @@ import { HttpGameBackEndService } from './http.game.back-end.service';
 
 
 export class EncodedGamePlayers {
-	game: GameIdentifier;
+	identifier: GameIdentifier;
 	recruiting: boolean;
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	users: object;
@@ -43,14 +43,14 @@ class Delegate extends HttpKeyValueService<GameIdentifier, GamePlayers, EncodedG
 		return undefined;
 	}
 
-	joinGame(game: GameIdentifier): Observable<GamePlayers> {
-		return this.http.post<GamePlayers>(HttpGamePlayersBackEndService.getApiJoinGamePath(game), '').pipe(
+	joinGame(identifier: GameIdentifier): Observable<GamePlayers> {
+		return this.http.post<GamePlayers>(HttpGamePlayersBackEndService.getApiJoinGamePath(identifier), '').pipe(
 			map(v => this.decode(v))
 		);
 	}
 
-	endRecruitment(game: GameIdentifier): Observable<GamePlayers> {
-		return this.http.post<GamePlayers>(HttpGamePlayersBackEndService.getApiGameEndRecruitmentPath(game), '').pipe(
+	endRecruitment(identifier: GameIdentifier): Observable<GamePlayers> {
+		return this.http.post<GamePlayers>(HttpGamePlayersBackEndService.getApiGameEndRecruitmentPath(identifier), '').pipe(
 			map(v => this.decode(v))
 		);
 	}
@@ -73,7 +73,7 @@ class Delegate extends HttpKeyValueService<GameIdentifier, GamePlayers, EncodedG
 
 	protected decode(encodedValue: EncodedGamePlayers): GamePlayers {
 		const users: Map<string, string> = new Map(Object.entries(encodedValue.users).map(([k, v]) => ([k, v])));
-		return new GamePlayers(encodedValue.game, encodedValue.recruiting, users);
+		return new GamePlayers(encodedValue.identifier, encodedValue.recruiting, users);
 	}
 
 
@@ -109,16 +109,16 @@ export class HttpGamePlayersBackEndService extends AbstractGamePlayersBackEndSer
 	}
 
 
-	get(id: GameIdentifier): Observable<GamePlayers | null> {
-		return this.delegate.get(id);
+	get(identifier: GameIdentifier): Observable<GamePlayers | null> {
+		return this.delegate.get(identifier);
 	}
 
-	joinGame(game: GameIdentifier): Observable<GamePlayers> {
-		return this.delegate.joinGame(game);
+	joinGame(identifier: GameIdentifier): Observable<GamePlayers> {
+		return this.delegate.joinGame(identifier);
 	}
 
-	endRecruitment(game: GameIdentifier): Observable<GamePlayers> {
-		return this.delegate.endRecruitment(game);
+	endRecruitment(identifier: GameIdentifier): Observable<GamePlayers> {
+		return this.delegate.endRecruitment(identifier);
 	}
 
 	getCurrentGameId(): Observable<GameIdentifier | null> {

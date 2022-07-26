@@ -17,9 +17,9 @@ export abstract class AbstractGamePlayersBackEndService extends AbstractKeyValue
 
 	abstract get(id: GameIdentifier): Observable<GamePlayers | null>;
 
-	abstract joinGame(game: GameIdentifier): Observable<GamePlayers>;
+	abstract joinGame(identifier: GameIdentifier): Observable<GamePlayers>;
 
-	abstract endRecruitment(game: GameIdentifier): Observable<GamePlayers>;
+	abstract endRecruitment(identifier: GameIdentifier): Observable<GamePlayers>;
 
 	abstract getCurrentGameId(): Observable<GameIdentifier|null>;
 }

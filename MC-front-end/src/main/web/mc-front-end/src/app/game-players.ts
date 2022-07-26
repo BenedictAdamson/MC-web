@@ -12,7 +12,7 @@ import { GameIdentifier } from './game-identifier';
  */
 export class GamePlayers {
    constructor(
-      public game: GameIdentifier,
+      public identifier: GameIdentifier,
       public recruiting: boolean,
       /**
        * <p>

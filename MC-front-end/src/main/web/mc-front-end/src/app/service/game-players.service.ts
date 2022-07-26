@@ -15,7 +15,7 @@ import { GameService } from './game.service';
 })
 export class GamePlayersService extends CachingKeyValueService<GameIdentifier, GamePlayers, void> {
 
-   private currentGameId: ReplaySubject<GameIdentifier | null> | null = null;
+   private currentId: ReplaySubject<GameIdentifier | null> | null = null;
 
    constructor(
       private readonly selfService: AbstractSelfService,
@@ -24,7 +24,7 @@ export class GamePlayersService extends CachingKeyValueService<GameIdentifier, G
       super(gamePlayersBackEnd);
       /* When the user ID changes, the current game changes. */
       this.selfService.id$.subscribe(() => {
-         if (this.currentGameId) {
+         if (this.currentId) {
             this.updateCurrentGameId();
          }
       });
@@ -58,28 +58,28 @@ export class GamePlayersService extends CachingKeyValueService<GameIdentifier, G
       this.gamePlayersBackEnd.joinGame(game).subscribe(
          gps => {
             this.setValue(gps);
-            if (!this.currentGameId) {
-               this.currentGameId = new ReplaySubject(1);
+            if (!this.currentId) {
+               this.currentId = new ReplaySubject(1);
             }
-            this.currentGameId.next(game);
+            this.currentId.next(game);
          }
       );
    }
 
    getCurrentGameId(): Observable<GameIdentifier | null> {
-      if (!this.currentGameId) {
-         this.currentGameId = new ReplaySubject(1);
-         this.updateCurrentGameIdRS(this.currentGameId);
+      if (!this.currentId) {
+         this.currentId = new ReplaySubject(1);
+         this.updateCurrentGameIdRS(this.currentId);
       }
       // else use currently cached value
-      return this.currentGameId.asObservable();
+      return this.currentId.asObservable();
    }
 
    updateCurrentGameId(): void {
-      if (!this.currentGameId) {
-         this.currentGameId = new ReplaySubject(1);
+      if (!this.currentId) {
+         this.currentId = new ReplaySubject(1);
       }
-      this.updateCurrentGameIdRS(this.currentGameId);
+      this.updateCurrentGameIdRS(this.currentId);
    }
 
 
@@ -111,7 +111,7 @@ export class GamePlayersService extends CachingKeyValueService<GameIdentifier, G
    }
 
    protected getKey(value: GamePlayers): GameIdentifier {
-      return value.game;
+      return value.identifier;
    }
 
 

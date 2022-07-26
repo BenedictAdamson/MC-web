@@ -57,15 +57,15 @@ describe('GamePlayersComponent', () => {
    );
    const USER_ADMIN: User = { id: USER_ID_A, username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
    const USER_NORMAL: User = { id: USER_ID_B, username: 'Benedict', password: null, authorities: [] };
-   const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_ID_A, created: CREATED_A };
-   const GAME_IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_ID_B, created: CREATED_B };
+   const IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_ID_A, created: CREATED_A };
+   const IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_ID_B, created: CREATED_B };
    const USERS_A: Map<string, string> = new Map([
       [CHARACTER_ID_A, USER_ID_A],
       [CHARACTER_ID_B, USER_ID_B]
    ]);
    const USERS_B: Map<string, string> = new Map([]);
-   const GAME_PLAYERS_A: GamePlayers = new GamePlayers(GAME_IDENTIFIER_A, true, USERS_A);
-   const GAME_PLAYERS_B: GamePlayers = new GamePlayers(GAME_IDENTIFIER_B, false, USERS_B);
+   const GAME_PLAYERS_A: GamePlayers = new GamePlayers(IDENTIFIER_A, true, USERS_A);
+   const GAME_PLAYERS_B: GamePlayers = new GamePlayers(IDENTIFIER_B, false, USERS_B);
 
    const getIdentifier = function(gp: GamePlayersComponent): GameIdentifier | null {
       let identifier: GameIdentifier | null = null;
@@ -127,11 +127,11 @@ describe('GamePlayersComponent', () => {
    const testPlayedCharacters1 = function(character: NamedUUID, userId: string) {
       const scenario: Scenario = new Scenario(
           SCENARIO_A.identifier,
-         SCENARIO_A.title,
+          SCENARIO_A.title,
           SCENARIO_A.description,
          [character]
       );
-      const game: GameIdentifier = { scenario: scenario.identifier, created: GAME_IDENTIFIER_A.created };
+      const game: GameIdentifier = { scenario: scenario.identifier, created: IDENTIFIER_A.created };
       const users: Map<string, string> = new Map([[character.id, userId]]);
       const gamePlayers: GamePlayers = new GamePlayers(game, true, users);
 
@@ -150,7 +150,7 @@ describe('GamePlayersComponent', () => {
 
    const setUp = function(gamePlayers: GamePlayers, self: User, mayJoinGame: boolean, scenario: Scenario) {
       selfService = new MockSelfService(self);
-      const game: GameIdentifier = gamePlayers.game;
+      const game: GameIdentifier = gamePlayers.identifier;
       const gamePlayersBackEndService: AbstractGamePlayersBackEndService = new MockGamePlayersBackEndService(gamePlayers, self.id);
       gamePlayersService = new GamePlayersService(selfService, gamePlayersBackEndService);
       const mayJoinGameBackEnd: AbstractMayJoinGameBackEndService = new MockMayJoinGameBackEndService(mayJoinGame);
@@ -245,7 +245,7 @@ describe('GamePlayersComponent', () => {
 
       assertInvariants();
 
-      expect(getIdentifier(component)).withContext('identifier$').toEqual(gamePlayers.game);
+      expect(getIdentifier(component)).withContext('identifier$').toEqual(gamePlayers.identifier);
       expect(getGamePlayers(component)).withContext('gamePlayers$').toEqual(gamePlayers);
       expect(isPlaying(component)).withContext('playing').toEqual(playing);
       expect(getScenario(component)).withContext('scenario').toEqual(scenario);
@@ -317,9 +317,9 @@ describe('GamePlayersComponent', () => {
           SCENARIO_A.description,
           [character]
       );
-      const game: GameIdentifier = { scenario: scenario.identifier, created: GAME_IDENTIFIER_A.created };
+      const identifier: GameIdentifier = { scenario: scenario.identifier, created: IDENTIFIER_A.created };
       const users: Map<string, string> = new Map([[character.id, user.id]]);
-      const gamePlayers: GamePlayers = new GamePlayers(game, true, users);
+      const gamePlayers: GamePlayers = new GamePlayers(identifier, true, users);
       const expectedPlayedCharacters: string[] = [character.title];
 
       canCreate(gamePlayers, self, true, scenario, expectedPlayedCharacters);
@@ -376,11 +376,11 @@ describe('GamePlayersComponent', () => {
    };
 
    it('displays the played character [A]', fakeAsync(() => {
-      canCreatePlaying(GAME_IDENTIFIER_A, USER_ID_A, CHARACTER_A);
+      canCreatePlaying(IDENTIFIER_A, USER_ID_A, CHARACTER_A);
    }));
 
    it('displays the played character [B]', fakeAsync(() => {
-      canCreatePlaying(GAME_IDENTIFIER_B, USER_ID_B, CHARACTER_B);
+      canCreatePlaying(IDENTIFIER_B, USER_ID_B, CHARACTER_B);
    }));
 
 

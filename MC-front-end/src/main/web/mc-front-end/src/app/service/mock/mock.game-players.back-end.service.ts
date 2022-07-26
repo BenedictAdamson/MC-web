@@ -14,7 +14,7 @@ export class MockGamePlayersBackEndService extends AbstractGamePlayersBackEndSer
 		private self: string
 	) {
 		super();
-		this.game = gamePlayers ? gamePlayers.game : null;
+		this.game = gamePlayers ? gamePlayers.identifier : null;
 		this.gamePlayers = gamePlayers;
 	};
 
@@ -52,7 +52,7 @@ export class MockGamePlayersBackEndService extends AbstractGamePlayersBackEndSer
 
 	private copy(): Observable<GamePlayers> {
 		if (this.gamePlayers) {
-			return of(new GamePlayers(this.gamePlayers.game, this.gamePlayers.recruiting, this.gamePlayers.users));
+			return of(new GamePlayers(this.gamePlayers.identifier, this.gamePlayers.recruiting, this.gamePlayers.users));
 		} else {
 			return throwError('No current game');
 		}

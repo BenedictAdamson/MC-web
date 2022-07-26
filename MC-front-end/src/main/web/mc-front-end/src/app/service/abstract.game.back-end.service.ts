@@ -13,8 +13,8 @@ export abstract class AbstractGameBackEndService extends AbstractKeyValueService
 
 	abstract add(scenario: string): Observable<Game>;
 
-   abstract startGame(game: GameIdentifier): Observable<Game>;
+   abstract startGame(identifier: GameIdentifier): Observable<Game>;
 
-   abstract stopGame(game: GameIdentifier): Observable<Game>;
+   abstract stopGame(identifier: GameIdentifier): Observable<Game>;
 
 }
