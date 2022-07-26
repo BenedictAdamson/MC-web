@@ -7,7 +7,7 @@ import { ActivatedRoute } from '@angular/router';
 import { GamePlayersService } from '../service/game-players.service';
 import { AbstractSelfService } from '../service/abstract.self.service';
 import { GameIdentifier } from '../game-identifier';
-import { GamePlayers } from '../game-players';
+import { Game } from '../game';
 import { MayJoinGameService } from '../service/may-join-game.service';
 import { Scenario } from '../scenario';
 import { ScenarioService } from '../service/scenario.service';
@@ -55,16 +55,16 @@ export class GamePlayersComponent implements OnInit {
    ) {
    }
 
-   static playedCharacters(scenario: Scenario, gamePlayers: GamePlayers): string[] {
-      return scenario.characters.filter(c => gamePlayers.users.has(c.id)).map(c => c.title);
+   static playedCharacters(scenario: Scenario, game: Game): string[] {
+      return scenario.characters.filter(c => game.users.has(c.id)).map(c => c.title);
    }
 
    private static createIdentifier(scenario: string, created: string) {
       return { scenario, created };
    }
 
-   private static isEndRecruitmentDisabled(mayManageGames: boolean, gamePlayers: GamePlayers): boolean {
-      return !gamePlayers || !gamePlayers.recruiting || !mayManageGames;
+   private static isEndRecruitmentDisabled(mayManageGames: boolean, game: Game): boolean {
+      return !game || !game.recruiting || !mayManageGames;
    }
 
 
@@ -75,11 +75,11 @@ export class GamePlayersComponent implements OnInit {
       );
    };
 
-   get gamePlayers$(): Observable<GamePlayers> {
+   get gamePlayers$(): Observable<Game> {
       return this.identifier$.pipe(
          mergeMap(identifier => this.gamePlayersService.get(identifier)),
          filter(gps => !!gps),
-         map((gps: GamePlayers | null) => gps as GamePlayers)
+         map((gps: Game | null) => gps as Game)
       );
    }
 

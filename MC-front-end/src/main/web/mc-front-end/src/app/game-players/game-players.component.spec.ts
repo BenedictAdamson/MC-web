@@ -11,7 +11,7 @@ import {AbstractGamePlayersBackEndService} from '../service/abstract.game-player
 import {AbstractMayJoinGameBackEndService} from '../service/abstract.may-join-game.back-end.service';
 import {AbstractScenarioBackEndService} from '../service/abstract.scenario.back-end.service';
 import {GameIdentifier} from '../game-identifier';
-import {GamePlayers} from '../game-players';
+import {Game} from '../game';
 import {GamePlayersComponent} from './game-players.component';
 import {GamePlayersService} from '../service/game-players.service';
 import {MockGamePlayersBackEndService} from '../service/mock/mock.game-players.back-end.service';
@@ -64,8 +64,8 @@ describe('GamePlayersComponent', () => {
       [CHARACTER_ID_B, USER_ID_B]
    ]);
    const USERS_B: Map<string, string> = new Map([]);
-   const GAME_PLAYERS_A: GamePlayers = new GamePlayers(IDENTIFIER_A, true, USERS_A);
-   const GAME_PLAYERS_B: GamePlayers = new GamePlayers(IDENTIFIER_B, false, USERS_B);
+   const GAME_A: Game = new Game(IDENTIFIER_A, 'WAITING_TO_START', true, USERS_A);
+   const GAME_B: Game = new Game(IDENTIFIER_B, 'WAITING_TO_START', false, USERS_B);
 
    const getIdentifier = function(gp: GamePlayersComponent): GameIdentifier | null {
       let identifier: GameIdentifier | null = null;
@@ -77,8 +77,8 @@ describe('GamePlayersComponent', () => {
       return identifier;
    };
 
-   const getGamePlayers = function(gp: GamePlayersComponent): GamePlayers | null {
-      let gamePlayers: GamePlayers | null = null;
+   const getGamePlayers = function(gp: GamePlayersComponent): Game | null {
+      let gamePlayers: Game | null = null;
       gp.gamePlayers$.subscribe({
          next: (gps) => gamePlayers = gps,
          error: (err) => fail(err),
@@ -119,8 +119,8 @@ describe('GamePlayersComponent', () => {
 
 
 
-   const testPlayedCharacters = function(scenario: Scenario, gamePlayers: GamePlayers, expected: string[]) {
-      const actual: string[] = GamePlayersComponent.playedCharacters(scenario, gamePlayers);
+   const testPlayedCharacters = function(scenario: Scenario, game: Game, expected: string[]) {
+      const actual: string[] = GamePlayersComponent.playedCharacters(scenario, game);
       expect(actual).toEqual(expected);
    };
 
@@ -131,11 +131,11 @@ describe('GamePlayersComponent', () => {
           SCENARIO_A.description,
          [character]
       );
-      const game: GameIdentifier = { scenario: scenario.identifier, created: IDENTIFIER_A.created };
+      const identifier: GameIdentifier = { scenario: scenario.identifier, created: IDENTIFIER_A.created };
       const users: Map<string, string> = new Map([[character.id, userId]]);
-      const gamePlayers: GamePlayers = new GamePlayers(game, true, users);
+      const game: Game = new Game(identifier, 'WAITING_TO_START', true, users);
 
-      testPlayedCharacters(scenario, gamePlayers, [character.title]);
+      testPlayedCharacters(scenario, game, [character.title]);
    };
 
    it('can join scenario and game players information [A]', () => {
@@ -148,10 +148,10 @@ describe('GamePlayersComponent', () => {
 
 
 
-   const setUp = function(gamePlayers: GamePlayers, self: User, mayJoinGame: boolean, scenario: Scenario) {
+   const setUp = function(game: Game, self: User, mayJoinGame: boolean, scenario: Scenario) {
       selfService = new MockSelfService(self);
-      const game: GameIdentifier = gamePlayers.identifier;
-      const gamePlayersBackEndService: AbstractGamePlayersBackEndService = new MockGamePlayersBackEndService(gamePlayers, self.id);
+      const identifier: GameIdentifier = game.identifier;
+      const gamePlayersBackEndService: AbstractGamePlayersBackEndService = new MockGamePlayersBackEndService(game, self.id);
       gamePlayersService = new GamePlayersService(selfService, gamePlayersBackEndService);
       const mayJoinGameBackEnd: AbstractMayJoinGameBackEndService = new MockMayJoinGameBackEndService(mayJoinGame);
       mayJoinGameService = new MayJoinGameService(mayJoinGameBackEnd);
@@ -165,16 +165,16 @@ describe('GamePlayersComponent', () => {
             useValue: {
                parent: {
                   parent: {
-                     paramMap: of(convertToParamMap({ scenario: game.scenario }))
+                     paramMap: of(convertToParamMap({ scenario: identifier.scenario }))
                   },
-                  paramMap: of(convertToParamMap({ created: game.created }))
+                  paramMap: of(convertToParamMap({ created: identifier.created }))
                },
                snapshot: {
                   parent: {
                      parent: {
-                        paramMap: convertToParamMap({ scenario: game.scenario })
+                        paramMap: convertToParamMap({ scenario: identifier.scenario })
                      },
-                     paramMap: convertToParamMap({ created: game.created })
+                     paramMap: convertToParamMap({ created: identifier.created })
                   }
                }
             }
@@ -232,21 +232,21 @@ describe('GamePlayersComponent', () => {
 
 
    const canCreate = function(
-      gamePlayers: GamePlayers, self: User, mayJoinGame: boolean, scenario: Scenario, expectedPlayedCharacters: string[] | null
+      game: Game, self: User, mayJoinGame: boolean, scenario: Scenario, expectedPlayedCharacters: string[] | null
    ) {
-      const recruiting: boolean = gamePlayers.recruiting;
+      const recruiting: boolean = game.recruiting;
       const manager: boolean = self.authorities.includes('ROLE_MANAGE_GAMES');
       const mayEndRecruitment: boolean = recruiting && manager;
-      const playing: boolean = gamePlayers.isPlaying(self.id);
+      const playing: boolean = game.isPlaying(self.id);
 
-      setUp(gamePlayers, self, mayJoinGame, scenario);
+      setUp(game, self, mayJoinGame, scenario);
       tick();
       fixture.detectChanges();
 
       assertInvariants();
 
-      expect(getIdentifier(component)).withContext('identifier$').toEqual(gamePlayers.identifier);
-      expect(getGamePlayers(component)).withContext('gamePlayers$').toEqual(gamePlayers);
+      expect(getIdentifier(component)).withContext('identifier$').toEqual(game.identifier);
+      expect(getGamePlayers(component)).withContext('gamePlayers$').toEqual(game);
       expect(isPlaying(component)).withContext('playing').toEqual(playing);
       expect(getScenario(component)).withContext('scenario').toEqual(scenario);
       expect(getPlayedCharacters(component)).withContext('playedCharacters').toEqual(expectedPlayedCharacters);
@@ -298,15 +298,15 @@ describe('GamePlayersComponent', () => {
    };
 
    it('can create [A]', fakeAsync(() => {
-      canCreate(GAME_PLAYERS_A, USER_NORMAL, true, SCENARIO_A, []);
+      canCreate(GAME_A, USER_NORMAL, true, SCENARIO_A, []);
    }));
 
    it('can create [B]', fakeAsync(() => {
-      canCreate(GAME_PLAYERS_B, USER_ADMIN, false, SCENARIO_B, []);
+      canCreate(GAME_B, USER_ADMIN, false, SCENARIO_B, []);
    }));
 
    it('can create [C]', fakeAsync(() => {
-      canCreate(GAME_PLAYERS_B, USER_NORMAL, false, SCENARIO_B, []);
+      canCreate(GAME_B, USER_NORMAL, false, SCENARIO_B, []);
    }));
 
    const canCreateWithPlayer = function(character: NamedUUID, user: User) {
@@ -319,10 +319,10 @@ describe('GamePlayersComponent', () => {
       );
       const identifier: GameIdentifier = { scenario: scenario.identifier, created: IDENTIFIER_A.created };
       const users: Map<string, string> = new Map([[character.id, user.id]]);
-      const gamePlayers: GamePlayers = new GamePlayers(identifier, true, users);
+      const game: Game = new Game(identifier, 'WAITING_TO_START', true, users);
       const expectedPlayedCharacters: string[] = [character.title];
 
-      canCreate(gamePlayers, self, true, scenario, expectedPlayedCharacters);
+      canCreate(game, self, true, scenario, expectedPlayedCharacters);
 
       const html: HTMLElement = fixture.nativeElement;
       const playedCharactersElement: HTMLElement | null = html.querySelector('#played-characters');
@@ -345,28 +345,30 @@ describe('GamePlayersComponent', () => {
 
 
    const canCreatePlaying = function(
-      game: GameIdentifier, selfId: string, character: NamedUUID
+      identifier: GameIdentifier, selfId: string, character: NamedUUID
    ) {
       const expectedPlayingText: string = 'You are playing this game as ' + character.title;
       const recruiting = false;
+      const runState = 'WAITING_TO_START';
       const self: User = {
          id: selfId, username: USER_NORMAL.username,
          password: USER_NORMAL.password,
          authorities: ['ROLE_PLAYER']
       };
       const scenario: Scenario = new Scenario(
-          game.scenario,
+          identifier.scenario,
           SCENARIO_A.title,
           SCENARIO_A.description,
          [character]
       );
-      const gamePlayers: GamePlayers = new GamePlayers(
-         game,
+      const game: Game = new Game(
+         identifier,
+         runState,
          recruiting,
          new Map([[character.id, selfId]])
       );
 
-      canCreate(gamePlayers, self, false, scenario, [character.title]);
+      canCreate(game, self, false, scenario, [character.title]);
 
       const html: HTMLElement = fixture.nativeElement;
       const playingElement: HTMLElement | null = html.querySelector('#playing');
@@ -385,8 +387,8 @@ describe('GamePlayersComponent', () => {
 
 
 
-   const testEndRecruitment = function(gamePlayers0: GamePlayers, scenario: Scenario) {
-     setUp(gamePlayers0, USER_ADMIN, true, scenario);
+   const testEndRecruitment = function(game0: Game, scenario: Scenario) {
+      setUp(game0, USER_ADMIN, true, scenario);
       component.endRecruitment();
       tick();
       tick();
@@ -406,21 +408,21 @@ describe('GamePlayersComponent', () => {
    };
 
    it('can end recruitment [A]', fakeAsync((() => {
-      testEndRecruitment(GAME_PLAYERS_A, SCENARIO_A);
+      testEndRecruitment(GAME_A, SCENARIO_A);
    })));
 
    it('can end recruitment [B]', fakeAsync((() => {
-      testEndRecruitment(GAME_PLAYERS_B, SCENARIO_B);
+      testEndRecruitment(GAME_B, SCENARIO_B);
    })));
 
-   const testJoinGame = function(gamePlayers0: GamePlayers, self: User, scenario: Scenario) {
-      setUp(gamePlayers0, self, true, scenario);
+   const testJoinGame = function(game0: Game, self: User, scenario: Scenario) {
+      setUp(game0, self, true, scenario);
       component.joinGame();
       tick();
       fixture.detectChanges();
 
       assertInvariants();
-      const gamePlayers1: GamePlayers | null = getGamePlayers(component);
+      const gamePlayers1: Game | null = getGamePlayers(component);
       expect(gamePlayers1).withContext('gamePlayers').not.toBeNull();
       if (gamePlayers1) {
          expect(gamePlayers1.isPlaying(self.id)).withContext('gamePlayers.users includes self').toBeTrue();
@@ -436,10 +438,10 @@ describe('GamePlayersComponent', () => {
    };
 
    it('can join game [A]', fakeAsync((() => {
-      testJoinGame(GAME_PLAYERS_A, USER_ADMIN, SCENARIO_A);
+      testJoinGame(GAME_A, USER_ADMIN, SCENARIO_A);
    })));
 
    it('can join game [B]', fakeAsync((() => {
-      testJoinGame(GAME_PLAYERS_B, USER_NORMAL, SCENARIO_B);
+      testJoinGame(GAME_B, USER_NORMAL, SCENARIO_B);
    })));
 });

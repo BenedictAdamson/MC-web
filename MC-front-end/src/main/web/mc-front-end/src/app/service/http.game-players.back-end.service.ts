@@ -7,7 +7,6 @@ import { Injectable } from '@angular/core';
 import { AbstractGamePlayersBackEndService } from './abstract.game-players.back-end.service';
 import { Game } from '../game';
 import { GameIdentifier } from '../game-identifier';
-import { GamePlayers } from '../game-players';
 import { HttpKeyValueService } from './http.key-value.service';
 import { HttpGameBackEndService } from './http.game.back-end.service';
 
@@ -15,6 +14,7 @@ import { HttpGameBackEndService } from './http.game.back-end.service';
 
 export class EncodedGamePlayers {
 	identifier: GameIdentifier;
+  runState: string;
 	recruiting: boolean;
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	users: object;
@@ -22,7 +22,7 @@ export class EncodedGamePlayers {
 
 export const CURRENTGAMEPATH = '/api/self/current-game';
 
-class Delegate extends HttpKeyValueService<GameIdentifier, GamePlayers, EncodedGamePlayers, void, void> {
+class Delegate extends HttpKeyValueService<GameIdentifier, Game, EncodedGamePlayers, void, void> {
 
 	constructor(
 		http: HttpClient
@@ -43,14 +43,14 @@ class Delegate extends HttpKeyValueService<GameIdentifier, GamePlayers, EncodedG
 		return undefined;
 	}
 
-	joinGame(identifier: GameIdentifier): Observable<GamePlayers> {
-		return this.http.post<GamePlayers>(HttpGamePlayersBackEndService.getApiJoinGamePath(identifier), '').pipe(
+	joinGame(identifier: GameIdentifier): Observable<Game> {
+		return this.http.post<Game>(HttpGamePlayersBackEndService.getApiJoinGamePath(identifier), '').pipe(
 			map(v => this.decode(v))
 		);
 	}
 
-	endRecruitment(identifier: GameIdentifier): Observable<GamePlayers> {
-		return this.http.post<GamePlayers>(HttpGamePlayersBackEndService.getApiGameEndRecruitmentPath(identifier), '').pipe(
+	endRecruitment(identifier: GameIdentifier): Observable<Game> {
+		return this.http.post<Game>(HttpGamePlayersBackEndService.getApiGameEndRecruitmentPath(identifier), '').pipe(
 			map(v => this.decode(v))
 		);
 	}
@@ -71,9 +71,9 @@ class Delegate extends HttpKeyValueService<GameIdentifier, GamePlayers, EncodedG
 		return undefined;
 	}
 
-	protected decode(encodedValue: EncodedGamePlayers): GamePlayers {
+	protected decode(encodedValue: EncodedGamePlayers): Game {
 		const users: Map<string, string> = new Map(Object.entries(encodedValue.users).map(([k, v]) => ([k, v])));
-		return new GamePlayers(encodedValue.identifier, encodedValue.recruiting, users);
+		return new Game(encodedValue.identifier, encodedValue.runState, encodedValue.recruiting, users);
 	}
 
 
@@ -109,15 +109,15 @@ export class HttpGamePlayersBackEndService extends AbstractGamePlayersBackEndSer
 	}
 
 
-	get(identifier: GameIdentifier): Observable<GamePlayers | null> {
+	get(identifier: GameIdentifier): Observable<Game | null> {
 		return this.delegate.get(identifier);
 	}
 
-	joinGame(identifier: GameIdentifier): Observable<GamePlayers> {
+	joinGame(identifier: GameIdentifier): Observable<Game> {
 		return this.delegate.joinGame(identifier);
 	}
 
-	endRecruitment(identifier: GameIdentifier): Observable<GamePlayers> {
+	endRecruitment(identifier: GameIdentifier): Observable<Game> {
 		return this.delegate.endRecruitment(identifier);
 	}
 

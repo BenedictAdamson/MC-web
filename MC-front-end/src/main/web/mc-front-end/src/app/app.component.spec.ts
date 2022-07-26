@@ -7,7 +7,7 @@ import { AbstractGamePlayersBackEndService } from './service/abstract.game-playe
 import { AbstractSelfService } from './service/abstract.self.service';
 import { AppComponent } from './app.component';
 import { GameIdentifier } from './game-identifier';
-import { GamePlayers } from './game-players';
+import { Game } from './game';
 import { GamePlayersService } from './service/game-players.service';
 import { HomeComponent } from './home/home.component';
 import { MockSelfService } from './service/mock/mock.self.service';
@@ -29,9 +29,9 @@ describe('AppComponent', () => {
 
    const setUp = (authorities: string[], currentGame: GameIdentifier | null) => {
       const self: User = { id: uuid(), username: 'Benedict', password: null, authorities };
-      const gamePlayers: GamePlayers | null = currentGame ? new GamePlayers(currentGame, true, new Map([[uuid(), self.id]])) : null;
+      const game: Game | null = currentGame ? new Game(currentGame, 'WAITING_TO_START', true, new Map([[uuid(), self.id]])) : null;
       selfService = new MockSelfService(self);
-      const gamePlayersBackEndService: AbstractGamePlayersBackEndService = new MockGamePlayersBackEndService(gamePlayers, self.id);
+      const gamePlayersBackEndService: AbstractGamePlayersBackEndService = new MockGamePlayersBackEndService(game, self.id);
       const gamePlayersService: GamePlayersService = new GamePlayersService(selfService, gamePlayersBackEndService);
       TestBed.configureTestingModule({
          declarations: [

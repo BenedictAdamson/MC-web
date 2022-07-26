@@ -2,10 +2,10 @@ import { Observable } from 'rxjs';
 
 import { AbstractKeyValueService } from './abstract.key-value.service';
 import { GameIdentifier } from '../game-identifier';
-import { GamePlayers } from '../game-players';
+import { Game } from '../game';
 
 
-export abstract class AbstractGamePlayersBackEndService extends AbstractKeyValueService<GameIdentifier, GamePlayers, void> {
+export abstract class AbstractGamePlayersBackEndService extends AbstractKeyValueService<GameIdentifier, Game, void> {
 
 	getAll(): undefined {
 		return undefined;
@@ -15,11 +15,11 @@ export abstract class AbstractGamePlayersBackEndService extends AbstractKeyValue
 		return undefined;
 	}
 
-	abstract get(id: GameIdentifier): Observable<GamePlayers | null>;
+	abstract get(id: GameIdentifier): Observable<Game | null>;
 
-	abstract joinGame(identifier: GameIdentifier): Observable<GamePlayers>;
+	abstract joinGame(identifier: GameIdentifier): Observable<Game>;
 
-	abstract endRecruitment(identifier: GameIdentifier): Observable<GamePlayers>;
+	abstract endRecruitment(identifier: GameIdentifier): Observable<Game>;
 
 	abstract getCurrentGameId(): Observable<GameIdentifier|null>;
 }

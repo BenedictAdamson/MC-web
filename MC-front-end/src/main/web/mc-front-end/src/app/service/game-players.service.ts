@@ -6,14 +6,14 @@ import { AbstractGamePlayersBackEndService } from './abstract.game-players.back-
 import { AbstractSelfService } from './abstract.self.service';
 import { CachingKeyValueService } from './caching.key-value.service';
 import { GameIdentifier } from '../game-identifier';
-import { GamePlayers } from '../game-players';
+import { Game } from '../game';
 import { GameService } from './game.service';
 
 
 @Injectable({
    providedIn: 'root'
 })
-export class GamePlayersService extends CachingKeyValueService<GameIdentifier, GamePlayers, void> {
+export class GamePlayersService extends CachingKeyValueService<GameIdentifier, Game, void> {
 
    private currentId: ReplaySubject<GameIdentifier | null> | null = null;
 
@@ -110,7 +110,7 @@ export class GamePlayersService extends CachingKeyValueService<GameIdentifier, G
       return id.scenario + '/' + id.created;
    }
 
-   protected getKey(value: GamePlayers): GameIdentifier {
+   protected getKey(value: Game): GameIdentifier {
       return value.identifier;
    }
 
