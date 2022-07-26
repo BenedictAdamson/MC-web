@@ -208,7 +208,7 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpResponse getGamePlayersResponse(@Nonnull Game.Identifier id, @Nonnull Game game) {
-        return jsonResponse(GamePlayersResponse.convertToResponse(id, game));
+        return jsonResponse(GameResponse.convertToResponse(id, game));
     }
 
     public void mockJoinGame(@Nonnull final Game.Identifier game) {
