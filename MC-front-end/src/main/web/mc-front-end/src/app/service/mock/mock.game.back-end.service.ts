@@ -8,21 +8,25 @@ import {v4 as uuid} from "uuid";
 
 export class MockGameBackEndService extends AbstractGameBackEndService {
 
-   private created = 0;
 
-   constructor(
-      public games: Game[]
-   ) {
-      super();
-   }
+  private created = 0;
+
+  constructor(
+    public games: Game[],
+    private selfId: string
+  ) {
+    super();
+  }
 
 
-   get(id: GameIdentifier): Observable<Game | null> {
-      for (const game of this.games) {
-         if (game.identifier.scenario === id.scenario && game.identifier.created === id.created) { return of(game); }
+  get(id: GameIdentifier): Observable<Game | null> {
+    for (const game of this.games) {
+      if (game.identifier.scenario === id.scenario && game.identifier.created === id.created) {
+        return of(game);
       }
-      return of(null);
-   }
+    }
+    return of(null);
+  }
 
   add(scenario: string): Observable<Game> {
     const identifier: GameIdentifier = {scenario, created: '2021-01-01T00:00:00.' + ++this.created};
@@ -39,39 +43,69 @@ export class MockGameBackEndService extends AbstractGameBackEndService {
     return of(game);
   }
 
-   startGame(id: GameIdentifier): Observable<Game> {
-      for (const game of this.games) {
-         if (game.identifier.scenario === id.scenario && game.identifier.created === id.created) {
-            switch (game.runState) {
-               case 'WAITING_TO_START':
-                  game.runState = 'RUNNING';
-                  return of(game);
-               case 'RUNNING':
-                  return of(game);
-               case 'STOPPED':
-                  return throwError('Conflict');
-            }
+  startGame(id: GameIdentifier): Observable<Game> {
+    for (const game of this.games) {
+      if (game.identifier.scenario === id.scenario && game.identifier.created === id.created) {
+        switch (game.runState) {
+          case 'WAITING_TO_START':
+            game.runState = 'RUNNING';
             return of(game);
-         }
+          case 'RUNNING':
+            return of(game);
+          case 'STOPPED':
+            return throwError('Conflict');
+        }
+        return of(game);
       }
-      return throwError('Not Found');
-   }
+    }
+    return throwError('Not Found');
+  }
 
-   stopGame(id: GameIdentifier): Observable<Game> {
-      for (const game of this.games) {
-         if (game.identifier.scenario === id.scenario && game.identifier.created === id.created) {
-            switch (game.runState) {
-               case 'WAITING_TO_START':
-               case 'RUNNING':
-                  game.runState = 'STOPPED';
-                  return of(game);
-               case 'STOPPED':
-                  return of(game);
-            }
+  stopGame(id: GameIdentifier): Observable<Game> {
+    for (const game of this.games) {
+      if (game.identifier.scenario === id.scenario && game.identifier.created === id.created) {
+        switch (game.runState) {
+          case 'WAITING_TO_START':
+          case 'RUNNING':
+            game.runState = 'STOPPED';
             return of(game);
-         }
+          case 'STOPPED':
+            return of(game);
+        }
+        return of(game);
       }
-      return throwError('Not Found');
-   }
+    }
+    return throwError('Not Found');
+  }
+
+  joinGame(id: GameIdentifier): Observable<Game> {
+    for (const game of this.games) {
+      if (game.identifier.scenario === id.scenario && game.identifier.created === id.created) {
+        if (!game.isPlaying(this.selfId)) {
+          game.users.set('FIXME', this.selfId);
+        }
+        return of(game);
+      }
+    }
+    return throwError('Not Found');
+  }
+
+  endRecruitment(id: GameIdentifier): Observable<Game> {
+    for (const game of this.games) {
+      if (game.identifier.scenario === id.scenario && game.identifier.created === id.created) {
+        game.recruiting = false;
+        return of(game);
+      }
+    }
+    return throwError('Not Found');
+  }
+
+  getCurrentGameId(): Observable<GameIdentifier | null> {
+    if (this.games.length == 0) {
+      return of(null)
+    } else {
+      return of(this.games[0].identifier);
+    }
+  }
 }
 

@@ -80,7 +80,7 @@ describe('GameComponent', () => {
 
 
   const setUp = (self: User, game: Game) => {
-    const gameServiceStub: AbstractGameBackEndService = new MockGameBackEndService([game]);
+    const gameServiceStub: AbstractGameBackEndService = new MockGameBackEndService([game], self.id);
     selfService = new MockSelfService(self);
 
     const identifier: GameIdentifier = game.identifier;
