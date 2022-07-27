@@ -7,14 +7,14 @@ import {ActivatedRoute, convertToParamMap} from '@angular/router';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 
 import {AbstractSelfService} from '../service/abstract.self.service';
-import {AbstractGamePlayersBackEndService} from '../service/abstract.game-players.back-end.service';
+import {AbstractGameBackEndService} from '../service/abstract.game.back-end.service';
 import {AbstractMayJoinGameBackEndService} from '../service/abstract.may-join-game.back-end.service';
 import {AbstractScenarioBackEndService} from '../service/abstract.scenario.back-end.service';
 import {GameIdentifier} from '../game-identifier';
 import {Game} from '../game';
 import {GamePlayersComponent} from './game-players.component';
-import {GamePlayersService} from '../service/game-players.service';
-import {MockGamePlayersBackEndService} from '../service/mock/mock.game-players.back-end.service';
+import {GameService} from '../service/game.service';
+import {MockGameBackEndService} from '../service/mock/mock.game.back-end.service';
 import {MockMayJoinGameBackEndService} from '../service/mock/mock.may-join-game.back-end.service';
 import {MayJoinGameService} from '../service/may-join-game.service';
 import {MockScenarioBackEndService} from '../service/mock/mock.scenario.back-end.service';
@@ -29,7 +29,7 @@ describe('GamePlayersComponent', () => {
    let component: GamePlayersComponent;
    let fixture: ComponentFixture<GamePlayersComponent>;
    let selfService: AbstractSelfService;
-   let gamePlayersService: GamePlayersService;
+   let gameService: GameService;
    let mayJoinGameService: MayJoinGameService;
    let scenarioService: ScenarioService;
 
@@ -151,8 +151,8 @@ describe('GamePlayersComponent', () => {
    const setUp = function(game: Game, self: User, mayJoinGame: boolean, scenario: Scenario) {
       selfService = new MockSelfService(self);
       const identifier: GameIdentifier = game.identifier;
-      const gamePlayersBackEndService: AbstractGamePlayersBackEndService = new MockGamePlayersBackEndService(game, self.id);
-      gamePlayersService = new GamePlayersService(selfService, gamePlayersBackEndService);
+      const gameBackEndService: AbstractGameBackEndService = new MockGameBackEndService([game], self.id);
+      gameService = new GameService(selfService, gameBackEndService);
       const mayJoinGameBackEnd: AbstractMayJoinGameBackEndService = new MockMayJoinGameBackEndService(mayJoinGame);
       mayJoinGameService = new MayJoinGameService(mayJoinGameBackEnd);
       const scenarioBackEndService: AbstractScenarioBackEndService = new MockScenarioBackEndService([scenario]);
@@ -179,7 +179,7 @@ describe('GamePlayersComponent', () => {
                }
             }
          },
-         { provide: GamePlayersService, useValue: gamePlayersService },
+         { provide: GameService, useValue: gameService },
          { provide: MayJoinGameService, useValue: mayJoinGameService },
          { provide: AbstractSelfService, useValue: selfService },
          { provide: ScenarioService, useValue: scenarioService }]

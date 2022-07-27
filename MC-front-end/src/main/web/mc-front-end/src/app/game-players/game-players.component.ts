@@ -4,7 +4,7 @@ import { distinctUntilChanged, filter, first, map, mergeMap, tap } from 'rxjs/op
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { GamePlayersService } from '../service/game-players.service';
+import { GameService } from '../service/game.service';
 import { AbstractSelfService } from '../service/abstract.self.service';
 import { GameIdentifier } from '../game-identifier';
 import { Game } from '../game';
@@ -48,7 +48,7 @@ export class GamePlayersComponent implements OnInit {
 
    constructor(
       private route: ActivatedRoute,
-      private gamePlayersService: GamePlayersService,
+      private gameService: GameService,
       private mayJoinGameService: MayJoinGameService,
       private scenarioService: ScenarioService,
       private selfService: AbstractSelfService
@@ -77,7 +77,7 @@ export class GamePlayersComponent implements OnInit {
 
    get gamePlayers$(): Observable<Game> {
       return this.identifier$.pipe(
-         mergeMap(identifier => this.gamePlayersService.get(identifier)),
+         mergeMap(identifier => this.gameService.get(identifier)),
          filter(gps => !!gps),
          map((gps: Game | null) => gps as Game)
       );
@@ -152,14 +152,14 @@ export class GamePlayersComponent implements OnInit {
    endRecruitment() {
       this.identifier$.pipe(
          first(),// do the operation only once
-         tap(id => this.gamePlayersService.endRecruitment(id))
+         tap(id => this.gameService.endRecruitment(id))
       ).subscribe();
    }
 
    joinGame() {
       this.identifier$.pipe(
          first(),// do the operation only once
-         tap(id => this.gamePlayersService.joinGame(id))
+         tap(id => this.gameService.joinGame(id))
       ).subscribe();
    }
 

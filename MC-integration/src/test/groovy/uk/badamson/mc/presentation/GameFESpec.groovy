@@ -151,7 +151,6 @@ class GameFESpec extends MockedBeSpecification {
         world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME), Times.unlimited())
         world.backEnd.mockGetGame(GAME_ID, GAME_WAITING_TO_START)
         world.backEnd.mockMayJoinGame(GAME_ID, true)
-        world.backEnd.mockGetGamePlayers(GAME_ID, new Game(GAME_ID, Game.RunState.WAITING_TO_START, true, NO_USERS))
         def gamePage = scenarioPage0.createGame()
 
         then: "accepts the creation of the game"
@@ -193,9 +192,11 @@ class GameFESpec extends MockedBeSpecification {
 
     def "End game recruitment"() {
         given: "a game is initially recruiting players"
-        hasAGameWaitingToStart()
+        hasAScenario()
+        def game = new Game(GAME_ID, Game.RunState.WAITING_TO_START, true, NO_USERS)
+        world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_ID.created))
         world.backEnd.mockMayJoinGame(GAME_ID, false)
-        world.backEnd.mockGetGamePlayers(GAME_ID, new Game(GAME_ID, Game.RunState.WAITING_TO_START, true, NO_USERS), Times.once())
+        world.backEnd.mockGetGame(GAME_ID, game, Times.once())
 
         and: "logged in as a user with the manage games role"
         def homePage = world.logInAsUserWithTheRole(Authority.ROLE_MANAGE_GAMES)
@@ -203,7 +204,8 @@ class GameFESpec extends MockedBeSpecification {
         when: "user ends recruitment for the game"
         def gamePage = examineGame(homePage)
         world.backEnd.mockEndRecruitment(GAME_ID)
-        def game = new Game(GAME_ID, Game.RunState.WAITING_TO_START, false, NO_USERS)
+        game.endRecruitment()
+        world.backEnd.mockGetGame(GAME_ID, game, Times.unlimited())
         world.backEnd.mockGetGamePlayers(GAME_ID, game, Times.unlimited())
         gamePage.endRecruitement()
 
@@ -253,27 +255,26 @@ class GameFESpec extends MockedBeSpecification {
 
     def "Join a game"() {
         given: "a game is recruiting players"
-        hasAGameWaitingToStart()
-
+        hasAScenario()
         def game = new Game(GAME_ID, Game.RunState.WAITING_TO_START, true, NO_USERS)
-        world.backEnd.mockGetGamePlayers(GAME_ID, game, Times.once())
+        world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_ID.created))
+        world.backEnd.mockGetGame(GAME_ID, game, Times.once())
         world.backEnd.mockMayJoinGame(GAME_ID, true)
 
-        and: "logged in as a user with the player role"
-        def user = world.createUserWithRole(Authority.ROLE_PLAYER)
-        def homePage = world.logInAsUser(user)
-
-        and: "user is not playing any games"
+        and: "logged in as a user with the player role who is not playing any game"
         world.backEnd.mockNoCurrentGame()
         world.backEnd.mockMayJoinGame(GAME_ID, true)
+        def user = world.createUserWithRole(Authority.ROLE_PLAYER)
+        def homePage = world.logInAsUser(user)
 
         and: "examining the game"
         def gamePage = examineGame(homePage)
 
         when: "the user joins the game"
         world.backEnd.mockJoinGame(GAME_ID)
-        def game1 = new Game(GAME_ID, Game.RunState.WAITING_TO_START, true, Map.of(CHARACTER_ID, user.id))
-        world.backEnd.mockGetGamePlayers(GAME_ID, game1, Times.unlimited())
+        game.addUser(CHARACTER_ID, user.id)
+        world.backEnd.mockGetGame(GAME_ID, game, Times.unlimited())
+        world.backEnd.mockGetGamePlayers(GAME_ID, game, Times.unlimited())
         gamePage.joinGame()
 
         then: "the game accepts joining"
@@ -311,7 +312,6 @@ class GameFESpec extends MockedBeSpecification {
         world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME))
         def game = new Game(GAME_ID, Game.RunState.WAITING_TO_START, true, NO_USERS)
         world.backEnd.mockGetGame(GAME_ID, game, Times.once())
-        world.backEnd.mockGetGamePlayers(GAME_ID, game)
 
         and: "logged in as a user with the manage games role"
         def homePage = world.logInAsUserWithTheRole(Authority.ROLE_MANAGE_GAMES)
@@ -353,7 +353,6 @@ class GameFESpec extends MockedBeSpecification {
         world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME))
         def game = new Game(GAME_ID, Game.RunState.RUNNING, true, NO_USERS)
         world.backEnd.mockGetGame(GAME_ID, game, Times.once())
-        world.backEnd.mockGetGamePlayers(GAME_ID, game)
 
         and: "logged in as a user with the manage games role"
         def homePage = world.logInAsUserWithTheRole(Authority.ROLE_MANAGE_GAMES)
@@ -381,7 +380,6 @@ class GameFESpec extends MockedBeSpecification {
         world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME))
         def game = new Game(GAME_ID, Game.RunState.RUNNING, true, NO_USERS)
         world.backEnd.mockGetGame(GAME_ID, game)
-        world.backEnd.mockGetGamePlayers(GAME_ID, game)
 
         and: "user has the player role but not the manage games role"
         def homePage = world.logInAsUserWithTheRole(Authority.ROLE_PLAYER)
@@ -395,7 +393,6 @@ class GameFESpec extends MockedBeSpecification {
 
     private void hasAGameRecruitingPlayers() {
         hasAGameWaitingToStart()
-        world.backEnd.mockGetGamePlayers(GAME_ID, new Game(GAME_ID, Game.RunState.WAITING_TO_START, true, NO_USERS))
     }
 
     private void hasAGameWaitingToStart() {

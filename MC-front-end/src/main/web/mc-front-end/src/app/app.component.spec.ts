@@ -3,18 +3,17 @@ import { v4 as uuid } from 'uuid';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { AbstractGamePlayersBackEndService } from './service/abstract.game-players.back-end.service';
+import { AbstractGameBackEndService } from './service/abstract.game.back-end.service';
 import { AbstractSelfService } from './service/abstract.self.service';
 import { AppComponent } from './app.component';
 import { GameIdentifier } from './game-identifier';
 import { Game } from './game';
-import { GamePlayersService } from './service/game-players.service';
+import { GameService } from './service/game.service';
 import { HomeComponent } from './home/home.component';
 import { MockSelfService } from './service/mock/mock.self.service';
 import { SelfComponent } from './self/self.component';
 import { User } from './user';
-
-import { MockGamePlayersBackEndService } from './service/mock/mock.game-players.back-end.service';
+import { MockGameBackEndService } from './service/mock/mock.game.back-end.service';
 
 
 describe('AppComponent', () => {
@@ -31,8 +30,8 @@ describe('AppComponent', () => {
       const self: User = { id: uuid(), username: 'Benedict', password: null, authorities };
       const game: Game | null = currentGame ? new Game(currentGame, 'WAITING_TO_START', true, new Map([[uuid(), self.id]])) : null;
       selfService = new MockSelfService(self);
-      const gamePlayersBackEndService: AbstractGamePlayersBackEndService = new MockGamePlayersBackEndService(game, self.id);
-      const gamePlayersService: GamePlayersService = new GamePlayersService(selfService, gamePlayersBackEndService);
+      const gameBackEndService: AbstractGameBackEndService = new MockGameBackEndService(game?[game]:[], self.id);
+      const gameService: GameService = new GameService(selfService, gameBackEndService);
       TestBed.configureTestingModule({
          declarations: [
             AppComponent, SelfComponent
@@ -43,7 +42,7 @@ describe('AppComponent', () => {
             )
          ],
          providers: [
-            { provide: GamePlayersService, useValue: gamePlayersService },
+            { provide: GameService, useValue: gameService },
             { provide: AbstractSelfService, useValue: selfService }
          ]
       });

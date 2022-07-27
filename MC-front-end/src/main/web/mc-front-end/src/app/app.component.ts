@@ -5,7 +5,7 @@ import { Component } from '@angular/core';
 
 import { AbstractSelfService } from './service/abstract.self.service';
 import { GameIdentifier } from './game-identifier';
-import { GamePlayersService } from './service/game-players.service';
+import { GameService } from './service/game.service';
 
 @Component({
 	selector: 'app-root',
@@ -23,7 +23,7 @@ export class AppComponent {
 	 */
 	constructor(
 		private readonly selfService: AbstractSelfService,
-		private readonly gamePlayersService: GamePlayersService
+		private readonly gameService: GameService
 	) {
 		this.checkForCurrentAuthentication();
 	}
@@ -38,7 +38,7 @@ export class AppComponent {
 	}
 
 	get currentGameId$(): Observable<GameIdentifier|null> {
-		return this.gamePlayersService.getCurrentGameId();
+		return this.gameService.getCurrentGameId();
 	}
 
 	get currentGameScenario$(): Observable<string> {
