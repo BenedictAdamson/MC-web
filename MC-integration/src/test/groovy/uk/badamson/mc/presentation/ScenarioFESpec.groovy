@@ -39,7 +39,7 @@ class ScenarioFESpec extends MockedBeSpecification {
     private static final def SCENARIO_ID = UUID.randomUUID()
     private static final List<NamedUUID> CHARACTERS = List.of(new NamedUUID(UUID.randomUUID(), 'Squad leader'))
     private static final def SCENARIO_TITLE = 'Squad assault'
-    private static final def SCENARIO = new Scenario(SCENARIO_ID, SCENARIO_TITLE, 'Basic fire and movement tactics', CHARACTERS)
+    private static final def SCENARIO = new Scenario(SCENARIO_TITLE, 'Basic fire and movement tactics', CHARACTERS)
     private static final def GAME_CREATION_TIME = Instant.parse('2022-05-31T20:00:00Z')
     private static final def GAME_ID = new Game.Identifier(SCENARIO_ID, GAME_CREATION_TIME)
     private static final def GAME = new Game(GAME_ID, Game.RunState.RUNNING, true, Map.of())
