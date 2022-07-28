@@ -57,7 +57,7 @@ export class HttpMayJoinGameBackEndService extends AbstractMayJoinGameBackEndSer
    }
 
    static getApiMayJoinGamePath(game: GameIdentifier): string {
-      return HttpGameBackEndService.getApiGamePath(game) + '/players?mayJoin';
+      return HttpGameBackEndService.getApiGamePath(game) + '?mayJoin';
    }
 
    get(id: GameIdentifier): Observable<boolean | null> {

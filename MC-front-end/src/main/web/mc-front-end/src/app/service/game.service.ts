@@ -36,17 +36,12 @@ export class GameService extends CachingKeyValueService<GameIdentifier, Game, st
   static getApiGamePath(id: GameIdentifier): string {
     return GameService.getApiGamesPath(id.scenario) + id.created;
   }
-
-  static getApiGamePlayersPath(game: GameIdentifier): string {
-    return GameService.getApiGamePath(game) + '/players';
-  }
-
   static getApiJoinGamePath(game: GameIdentifier): string {
-    return GameService.getApiGamePlayersPath(game) + '?join';
+    return GameService.getApiGamePath(game) + '?join';
   }
 
   static getApiGameEndRecruitmentPath(game: GameIdentifier): string {
-    return GameService.getApiGamePlayersPath(game) + '?endRecruitment';
+    return GameService.getApiGamePath(game) + '?endRecruitment';
   }
 
   /**

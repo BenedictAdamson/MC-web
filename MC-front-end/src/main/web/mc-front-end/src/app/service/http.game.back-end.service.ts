@@ -114,17 +114,12 @@ export class HttpGameBackEndService extends AbstractGameBackEndService {
   static getApiStopGamePath(id: GameIdentifier): string {
     return HttpGameBackEndService.getApiGamePath(id) + '?stop';
   }
-
-  static getApiGamePlayersPath(game: GameIdentifier): string {
-    return HttpGameBackEndService.getApiGamePath(game) + '/players';
-  }
-
   static getApiJoinGamePath(game: GameIdentifier): string {
-    return HttpGameBackEndService.getApiGamePlayersPath(game) + '?join';
+    return HttpGameBackEndService.getApiGamePath(game) + '?join';
   }
 
   static getApiGameEndRecruitmentPath(game: GameIdentifier): string {
-    return HttpGameBackEndService.getApiGamePlayersPath(game) + '?endRecruitment';
+    return HttpGameBackEndService.getApiGamePath(game) + '?endRecruitment';
   }
 
 

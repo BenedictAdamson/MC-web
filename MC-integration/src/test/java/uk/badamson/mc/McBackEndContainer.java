@@ -90,10 +90,6 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
                 + URI_DATETIME_FORMATTER.format(game.getCreated());
     }
 
-    private static String createGamePlayersPath(final Game.Identifier game) {
-        return createGamePath(game) + "/players";
-    }
-
     private static String createGamesListPath(final UUID scenario) {
         Objects.requireNonNull(scenario, "scenario");
         return "/api/scenario/" + scenario + "/game";
@@ -248,7 +244,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
         Objects.requireNonNull(user, "user");
         Objects.requireNonNull(cookies, "cookies");
 
-        final var path = createGamePlayersPath(game);
+        final var path = createGamePath(game);
         final var query = "join";
         final var request = connectWebTestClient(path, query).post()
                 .accept(MediaType.APPLICATION_JSON);
@@ -274,14 +270,14 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
         return administrator;
     }
 
-    public Stream<Instant> getGameCreationTimes(final UUID scenario) {
-        final var response = getGameCreationTimesResponse(scenario);
+    public Stream<Instant> getGameCreationTimes(final UUID scenario, User user) {
+        final var response = getGameCreationTimesResponse(scenario, user);
         response.expectStatus().isOk();
         return response.returnResult(Instant.class).getResponseBody().toStream();
     }
 
-    ResponseSpec getGameCreationTimesResponse(final UUID scenario) {
-        return getJson(createGamesListPath(scenario));
+    ResponseSpec getGameCreationTimesResponse(final UUID scenario, User user) {
+        return getJsonAsAdministrator(createGamesListPath(scenario));
     }
 
     private WebTestClient.ResponseSpec getJson(final String path) {
@@ -290,10 +286,14 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
     }
 
     public WebTestClient.ResponseSpec getJsonAsAdministrator(final String path) {
+        return getJsonAsUser(path, administrator);
+    }
+
+    public WebTestClient.ResponseSpec getJsonAsUser(final String path, User user) {
         return connectWebTestClient(path).get().accept(MediaType.APPLICATION_JSON)
                 .headers(headers -> headers.setBasicAuth(
-                        administrator.getUsername(),
-                        administrator.getPassword()))
+                        user.getUsername(),
+                        user.getPassword()))
                 .exchange();
     }
 

@@ -206,7 +206,6 @@ class GameFESpec extends MockedBeSpecification {
         world.backEnd.mockEndRecruitment(GAME_ID)
         game.endRecruitment()
         world.backEnd.mockGetGame(GAME_ID, game, Times.unlimited())
-        world.backEnd.mockGetGamePlayers(GAME_ID, game, Times.unlimited())
         gamePage.endRecruitement()
 
         then: "the game accepts ending recruitment"
@@ -274,7 +273,6 @@ class GameFESpec extends MockedBeSpecification {
         world.backEnd.mockJoinGame(GAME_ID)
         game.addUser(CHARACTER_ID, user.id)
         world.backEnd.mockGetGame(GAME_ID, game, Times.unlimited())
-        world.backEnd.mockGetGamePlayers(GAME_ID, game, Times.unlimited())
         gamePage.joinGame()
 
         then: "the game accepts joining"
@@ -290,8 +288,8 @@ class GameFESpec extends MockedBeSpecification {
 
     def "Only a player may join a game"() {
         given: "a game is recruiting players"
-        hasAGameRecruitingPlayers()
         world.backEnd.mockMayJoinGame(GAME_ID, false)
+        hasAGameRecruitingPlayers()
 
         and: "user is not playing any games"
         world.backEnd.mockNoCurrentGame()

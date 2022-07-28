@@ -83,7 +83,7 @@ public class BeWithDbSubSystemIT {
                 response.expectStatus().isFound();
                 final var gameId = McBackEndContainer
                         .parseCreateGameResponse(response);
-                final var creationTimes = be.getGameCreationTimes(scenario)
+                final var creationTimes = be.getGameCreationTimes(scenario, user)
                         .collect(toList());
                 assertAll(
                         () -> assertEquals(scenario, gameId.getScenario(),
@@ -374,7 +374,8 @@ public class BeWithDbSubSystemIT {
         final var namedUUIDOptional = be.getScenarios().findAny();
         assertThat("namedUUID", namedUUIDOptional.isPresent());
         final var scenario = namedUUIDOptional.get().getId();
-        final var response = be.getGameCreationTimesResponse(scenario);
+        final var user = be.getAdministrator();
+        final var response = be.getGameCreationTimesResponse(scenario, user);
         response.expectStatus().isOk();
         response.expectBodyList(Instant.class).hasSize(0);
     }

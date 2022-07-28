@@ -26,10 +26,6 @@ public final class MockMcBackEndContainer extends MockServerContainer {
         return gamesListPath(game.getScenario()) + URI_DATETIME_FORMATTER.format(game.getCreated());
     }
 
-    private static String gamePlayersPath(final Game.Identifier game) {
-        return gamePath(game) + "/players";
-    }
-
     private static String gamesListPath(final UUID scenario) {
         return scenarioPath(scenario) + "/game/";
     }
@@ -171,11 +167,11 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpRequest endRecruitmentRequest(@Nonnull final Game.Identifier game) {
-        return HttpRequest.request(gamePlayersPath(game)).withQueryStringParameter("endRecruitment", "").withMethod("POST");
+        return HttpRequest.request(gamePath(game)).withQueryStringParameter("endRecruitment", "").withMethod("POST");
     }
 
     private static HttpResponse endRecruitmentResponse(@Nonnull final Game.Identifier game) {
-        return foundResponse(gamePlayersPath(game));
+        return foundResponse(gamePath(game));
     }
 
     public void mockCurrentGame(@Nonnull final Game.Identifier game) {
@@ -195,32 +191,16 @@ public final class MockMcBackEndContainer extends MockServerContainer {
         return foundResponse(gamePath(game));
     }
 
-    public void mockGetGamePlayers(@Nonnull Game.Identifier id, @Nonnull Game game, Times times) {
-        mockServerClient.when(getGamePlayersRequest(game.getIdentifier()), times).respond(getGamePlayersResponse(id, game));
-    }
-
-    public void mockGetGamePlayers(@Nonnull Game.Identifier id, @Nonnull Game game) {
-        mockGetGamePlayers(id, game, Times.unlimited());
-    }
-
-    private static HttpRequest getGamePlayersRequest(@Nonnull final Game.Identifier game) {
-        return HttpRequest.request(gamePlayersPath(game)).withMethod("GET").withQueryStringParameter("!mayJoin");
-    }
-
-    private static HttpResponse getGamePlayersResponse(@Nonnull Game.Identifier id, @Nonnull Game game) {
-        return jsonResponse(GameResponse.convertToResponse(id, game));
-    }
-
     public void mockJoinGame(@Nonnull final Game.Identifier game) {
         mockServerClient.when(joinGameRequest(game)).respond(joinGameResponse(game));
     }
 
     private static HttpRequest joinGameRequest(@Nonnull final Game.Identifier game) {
-        return HttpRequest.request(gamePlayersPath(game)).withQueryStringParameter("join", "").withMethod("POST");
+        return HttpRequest.request(gamePath(game)).withQueryStringParameter("join", "").withMethod("POST");
     }
 
     private static HttpResponse joinGameResponse(@Nonnull final Game.Identifier game) {
-        return foundResponse(gamePlayersPath(game));
+        return foundResponse(gamePath(game));
     }
 
     public void mockMayJoinGame(@Nonnull final Game.Identifier game, final boolean mayJoin) {
@@ -228,7 +208,7 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpRequest mayJoinGameRequest(@Nonnull final Game.Identifier game) {
-        return HttpRequest.request(gamePlayersPath(game)).withQueryStringParameter("mayJoin", "").withMethod("GET");
+        return HttpRequest.request(gamePath(game)).withQueryStringParameter("mayJoin", "").withMethod("GET");
     }
 
     private static HttpResponse mayJoinGameResponse(final boolean mayJoin) {
