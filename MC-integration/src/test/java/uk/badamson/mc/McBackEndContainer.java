@@ -84,7 +84,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
     private static final DateTimeFormatter URI_DATETIME_FORMATTER = DateTimeFormatter.ISO_INSTANT;
 
-    private static String createGamePath(final Game.Identifier game) {
+    private static String createGamePath(final GameIdentifier game) {
         Objects.requireNonNull(game, "game");
         return createGamesListPath(game.getScenario()) + "/"
                 + URI_DATETIME_FORMATTER.format(game.getCreated());
@@ -104,7 +104,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
         }
     }
 
-    static Game.Identifier parseCreateGameResponse(final ResponseSpec response) {
+    static GameIdentifier parseCreateGameResponse(final ResponseSpec response) {
         Objects.requireNonNull(response, "response");
 
         final UUID scenario;
@@ -120,7 +120,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
             throw new IllegalArgumentException("Invalid response", e);
         }
 
-        return new Game.Identifier(scenario, created);
+        return new GameIdentifier(scenario, created);
     }
 
     static void secure(final RequestBodySpec request,
@@ -218,7 +218,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
         return request;
     }
 
-    public Game.Identifier createGame(final UUID scenario) {
+    public GameIdentifier createGame(final UUID scenario) {
         Objects.requireNonNull(scenario, "scenario");
 
         final var cookies = login(administrator);
@@ -238,7 +238,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
                 .headers(headers -> headers.setBasicAuth(username, password));
     }
 
-    private RequestBodySpec createJoinGameRequest(final Game.Identifier game,
+    private RequestBodySpec createJoinGameRequest(final GameIdentifier game,
                                                   final User user, final MultiValueMap<String, HttpCookie> cookies) {
         Objects.requireNonNull(game, "game");
         Objects.requireNonNull(user, "user");
@@ -252,7 +252,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
         return request;
     }
 
-    private RequestBodySpec createStartGameRequest(final Game.Identifier game,
+    private RequestBodySpec createStartGameRequest(final GameIdentifier game,
                                                    final User user, final MultiValueMap<String, HttpCookie> cookies) {
         Objects.requireNonNull(game, "game");
         Objects.requireNonNull(user, "user");
@@ -302,7 +302,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
                 .getResponseBody().toStream().map(ni -> new NamedUUID(ni.getId(), ni.getTitle()));
     }
 
-    public void joinGame(final Game.Identifier game, final User user) {
+    public void joinGame(final GameIdentifier game, final User user) {
         Objects.requireNonNull(game, "game");
         Objects.requireNonNull(user, "user");
 
@@ -340,7 +340,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
         response.expectStatus().is2xxSuccessful();
     }
 
-    public void startGame(final Game.Identifier game) {
+    public void startGame(final GameIdentifier game) {
         Objects.requireNonNull(game, "game");
 
         final var cookies = login(administrator);

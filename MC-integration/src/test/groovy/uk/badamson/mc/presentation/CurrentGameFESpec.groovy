@@ -2,6 +2,7 @@ package uk.badamson.mc.presentation
 
 import uk.badamson.mc.Authority
 import uk.badamson.mc.Game
+import uk.badamson.mc.GameIdentifier
 import uk.badamson.mc.NamedUUID
 import uk.badamson.mc.Scenario
 
@@ -36,7 +37,7 @@ class CurrentGameFESpec extends MockedBeSpecification {
   private static final def SCENARIO_TITLE = 'Squad assault'
   private static final def SCENARIO = new Scenario(SCENARIO_TITLE, 'Basic fire and movement tactics', CHARACTERS)
   private static final def GAME_CREATION_TIME = Instant.parse('2022-05-31T20:00:00Z')
-  private static final def GAME_ID = new Game.Identifier(SCENARIO_ID, GAME_CREATION_TIME)
+  private static final def GAME_ID = new GameIdentifier(SCENARIO_ID, GAME_CREATION_TIME)
   private static final def GAME_WAITING_TO_START =
           new Game(GAME_ID, Game.RunState.WAITING_TO_START, true, Map.of())
 
