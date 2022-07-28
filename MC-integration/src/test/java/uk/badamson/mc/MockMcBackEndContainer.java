@@ -123,7 +123,7 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     public void mockGetGame(@Nonnull final GameIdentifier id, @Nonnull final Game game, Times times) {
-        mockServerClient.when(getGameRequest(game.getIdentifier()), times).respond(getGameResponse(id, game));
+        mockServerClient.when(getGameRequest(id), times).respond(getGameResponse(id, game));
     }
 
     public void mockGetGame(@Nonnull final GameIdentifier id, @Nonnull final Game game) {
