@@ -52,7 +52,7 @@ class ScenarioFESpec extends MockedBeSpecification {
     def "List scenarios"() {
         given: "back-end can provide a list of scenarios"
         world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, SCENARIO_TITLE)))
-        world.backEnd.mockGetScenario(SCENARIO)
+        world.backEnd.mockGetScenario(SCENARIO_ID, SCENARIO)
 
         and: "not logged in"
         world.notLoggedIn()
@@ -69,7 +69,7 @@ class ScenarioFESpec extends MockedBeSpecification {
     def "Examine scenario anonymously"() {
         given: "a scenario that has a game"
         world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, SCENARIO_TITLE)))
-        world.backEnd.mockGetScenario(SCENARIO)
+        world.backEnd.mockGetScenario(SCENARIO_ID, SCENARIO)
         world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME))
         world.backEnd.mockGetGame(GAME_ID, GAME)
         world.backEnd.mockMayJoinGame(GAME_ID, false)
@@ -100,7 +100,7 @@ class ScenarioFESpec extends MockedBeSpecification {
     def "Examine scenario with authorization"() {
         given: "a scenario that has a game"
         world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, SCENARIO_TITLE)))
-        world.backEnd.mockGetScenario(SCENARIO)
+        world.backEnd.mockGetScenario(SCENARIO_ID, SCENARIO)
         world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME))
         world.backEnd.mockGetGame(GAME_ID, GAME)
         world.backEnd.mockMayJoinGame(GAME_ID, false)

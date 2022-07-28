@@ -228,17 +228,17 @@ public final class MockMcBackEndContainer extends MockServerContainer {
         return jsonResponse(dto);
     }
 
-    public void mockGetScenario(@Nonnull final Scenario scenario) {
-        mockServerClient.when(getScenarioRequest(scenario.getIdentifier())).respond(getScenarioResponse(scenario));
+    public void mockGetScenario(@Nonnull UUID id, @Nonnull final Scenario scenario) {
+        mockServerClient.when(getScenarioRequest(id)).respond(getScenarioResponse(id, scenario));
     }
 
     private static HttpRequest getScenarioRequest(@Nonnull UUID scenario) {
         return HttpRequest.request(scenarioPath(scenario)).withMethod("GET");
     }
 
-    private static HttpResponse getScenarioResponse(@Nonnull final Scenario scenario) {
+    private static HttpResponse getScenarioResponse(@Nonnull UUID id, @Nonnull final Scenario scenario) {
         Objects.requireNonNull(scenario, "scenario");
-        return jsonResponse(ScenarioResponse.convertToResponse(scenario));
+        return jsonResponse(ScenarioResponse.convertToResponse(id, scenario));
     }
 
     public void mockAddUser(@Nonnull final BasicUserDetails userDetails, @Nonnull final UUID id) {

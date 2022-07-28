@@ -402,7 +402,7 @@ class GameFESpec extends MockedBeSpecification {
 
     private void hasAScenario() {
         world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, SCENARIO_TITLE)))
-        world.backEnd.mockGetScenario(SCENARIO)
+        world.backEnd.mockGetScenario(SCENARIO_ID, SCENARIO)
     }
 
     private GamePage examineGame(final HomePage homePage) {
