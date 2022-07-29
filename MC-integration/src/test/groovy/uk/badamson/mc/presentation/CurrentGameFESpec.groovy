@@ -39,7 +39,10 @@ class CurrentGameFESpec extends MockedBeSpecification {
   private static final def GAME_CREATION_TIME = Instant.parse('2022-05-31T20:00:00Z')
   private static final def GAME_ID = new GameIdentifier(SCENARIO_ID, GAME_CREATION_TIME)
   private static final def GAME_WAITING_TO_START =
-          new Game(SCENARIO_ID, GAME_CREATION_TIME, Game.RunState.WAITING_TO_START, true, Map.of())
+          new Game(GAME_CREATION_TIME, Game.RunState.WAITING_TO_START, true, Map.of())
+  static {
+    GAME_WAITING_TO_START.setScenario(SCENARIO)
+  }
 
   @Override
   protected String getSpecificationName() {
@@ -65,7 +68,8 @@ class CurrentGameFESpec extends MockedBeSpecification {
     world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, SCENARIO_TITLE)))
     world.backEnd.mockGetScenario(SCENARIO_ID, SCENARIO)
     def user = world.createUserWithRole(Authority.ROLE_PLAYER)
-    def game = new Game(SCENARIO_ID, GAME_CREATION_TIME, Game.RunState.WAITING_TO_START, true, Map.of(CHARACTER_ID, user.id))
+    def game = new Game(GAME_CREATION_TIME, Game.RunState.WAITING_TO_START, true, Map.of(CHARACTER_ID, user.id))
+    game.setScenario(SCENARIO)
     world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_ID.created))
     world.backEnd.mockGetGame(GAME_ID, game)
     world.backEnd.mockCurrentGame(GAME_ID)
