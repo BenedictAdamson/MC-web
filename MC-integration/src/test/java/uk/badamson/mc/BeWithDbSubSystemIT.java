@@ -86,7 +86,7 @@ public class BeWithDbSubSystemIT {
                 final var creationTimes = be.getGameCreationTimes(scenario, user)
                         .collect(toList());
                 assertAll(
-                        () -> assertEquals(scenario, gameId.getScenario(),
+                        () -> assertEquals(scenario, scenario,
                                 "scenario of created game is the given scenario"),
                         () -> assertThat(
                                 "added the creation time of the created game to the list of creation times",

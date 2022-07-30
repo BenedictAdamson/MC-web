@@ -155,7 +155,7 @@ class GameFESpec extends MockedBeSpecification {
                 .navigateToScenario(0)
 
         when: "creating a game for the scenario"
-        world.backEnd.mockCreateGameForScenario(GAME_ID)
+        world.backEnd.mockCreateGameForScenario(SCENARIO_ID, GAME_ID)
         world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME), Times.unlimited())
         world.backEnd.mockGetGame(GAME_ID, GAME_WAITING_TO_START)
         world.backEnd.mockMayJoinGame(GAME_ID, true)

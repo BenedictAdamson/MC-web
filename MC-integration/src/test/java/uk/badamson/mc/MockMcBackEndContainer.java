@@ -81,8 +81,8 @@ public final class MockMcBackEndContainer extends MockServerContainer {
 
     }
 
-    public void mockCreateGameForScenario(@Nonnull final GameIdentifier gameId) {
-        mockServerClient.when(createGameForScenarioRequest(gameId.getScenario())).respond(createGameForScenarioResponse(gameId));
+    public void mockCreateGameForScenario(@Nonnull UUID scenarioId, @Nonnull final GameIdentifier gameId) {
+        mockServerClient.when(createGameForScenarioRequest(scenarioId)).respond(createGameForScenarioResponse(gameId));
     }
 
     private static HttpRequest createGameForScenarioRequest(@Nonnull UUID scenario) {
