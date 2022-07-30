@@ -70,7 +70,7 @@ class CurrentGameFESpec extends MockedBeSpecification {
     def user = world.createUserWithRole(Authority.ROLE_PLAYER)
     def game = new Game(GAME_CREATION_TIME, Game.RunState.WAITING_TO_START, true, Map.of(CHARACTER_ID, user.id))
     game.setScenario(SCENARIO)
-    world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_ID.created))
+    world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME))
     world.backEnd.mockGetGame(GAME_ID, game)
     world.backEnd.mockCurrentGame(GAME_ID)
 

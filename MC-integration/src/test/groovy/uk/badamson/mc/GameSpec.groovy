@@ -140,6 +140,6 @@ class GameSpec extends UnmockedSpecification {
         final var gameId = world.createGame(scenario)
         final def scenarioPage = homePage.navigateToScenariosPage()
                 .navigateToScenario(scenarioIndex)
-        scenarioPage.navigateToGamePage(gameId.created.toString())
+        scenarioPage.navigateToGamePage(gameId)
     }
 }

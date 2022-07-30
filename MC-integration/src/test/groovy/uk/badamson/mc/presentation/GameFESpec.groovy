@@ -203,7 +203,7 @@ class GameFESpec extends MockedBeSpecification {
         hasAScenario()
         def game = new Game(GAME_CREATION_TIME, Game.RunState.WAITING_TO_START, true, NO_USERS)
         game.setScenario(SCENARIO)
-        world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_ID.created))
+        world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME))
         world.backEnd.mockMayJoinGame(GAME_ID, false)
         world.backEnd.mockGetGame(GAME_ID, game, Times.once())
 
@@ -266,7 +266,7 @@ class GameFESpec extends MockedBeSpecification {
         hasAScenario()
         def game = new Game(GAME_CREATION_TIME, Game.RunState.WAITING_TO_START, true, NO_USERS)
         game.setScenario(SCENARIO)
-        world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_ID.created))
+        world.backEnd.mockGetGameCreationTimes(SCENARIO_ID, Set.of(GAME_CREATION_TIME))
         world.backEnd.mockGetGame(GAME_ID, game, Times.once())
         world.backEnd.mockMayJoinGame(GAME_ID, true)
 
@@ -423,7 +423,7 @@ class GameFESpec extends MockedBeSpecification {
                 .navigateToScenario(0)
         scenarioPage.awaitIsReadyOrErrorMessage()
         scenarioPage.requireIsReady()
-        def gamePage = scenarioPage.navigateToGamePage(GAME_CREATION_TIME.toString())
+        def gamePage = scenarioPage.navigateToGamePage(GAME_ID)
         gamePage.awaitIsReadyOrErrorMessage()
         gamePage
     }

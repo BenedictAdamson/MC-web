@@ -20,6 +20,7 @@ package uk.badamson.mc.presentation;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import uk.badamson.mc.GameIdentifier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -144,9 +145,10 @@ public final class ScenarioPage extends Page {
         assertThat("path", path, startsWith(BASE));
     }
 
-    public GamePage navigateToGamePage(final String created) {
+    public GamePage navigateToGamePage(final GameIdentifier gameId) {
         requireIsReady();
-        final var gameElement = findGameElement(created);
+        final var created = gameId.getCreated();
+        final var gameElement = findGameElement(created.toString());
         if (gameElement == null) {
             throw new IllegalStateException("No entry for game " + created);
         }
