@@ -27,7 +27,8 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static String gamesListPath(final UUID scenario) {
-        return scenarioPath(scenario) + "/game/";
+        Objects.requireNonNull(scenario, "scenario");
+        return ("/api/game/" + scenario) + "/";
     }
 
     private static String scenarioPath(final UUID scenario) {

@@ -79,8 +79,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
     private static final UriTemplate USER_URI_TEMPLATE = new UriTemplate(
             "/api/user/{user}");
 
-    private static final UriTemplate GAME_URI_TEMPLATE = new UriTemplate(
-            "/api/scenario/{scenario}/game/{game}");
+    private static final UriTemplate GAME_URI_TEMPLATE = new UriTemplate("/api/game/{scenario}/{game}");
 
     private static final DateTimeFormatter URI_DATETIME_FORMATTER = DateTimeFormatter.ISO_INSTANT;
 
@@ -92,7 +91,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
     private static String createGamesListPath(final UUID scenario) {
         Objects.requireNonNull(scenario, "scenario");
-        return "/api/scenario/" + scenario + "/game";
+        return "/api/game/" + scenario;
     }
 
     private static String encodeAsJson(final Object obj) {

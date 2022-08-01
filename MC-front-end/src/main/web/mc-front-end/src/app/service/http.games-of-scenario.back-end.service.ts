@@ -9,7 +9,7 @@ import { HttpSimpleKeyValueService } from './http.simple-key-value.service';
 
 
 export function getApiGamesPath(scenario: string): string {
-	return '/api/scenario/' + scenario + '/game/';
+	return '/api/game/' + scenario + '/';
 }
 
 

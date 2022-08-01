@@ -7,7 +7,7 @@ import { GameIdentifier } from '../game-identifier';
 
 
 export function getApiGamesPath(scenario: string): string {
-	return '/api/scenario/' + scenario + '/game/';
+	return '/api/game/' + scenario + '/';
 }
 
 export function getApiGamePath(id: GameIdentifier): string {

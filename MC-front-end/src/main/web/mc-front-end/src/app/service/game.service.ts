@@ -30,7 +30,7 @@ export class GameService extends CachingKeyValueService<GameIdentifier, Game, st
   }
 
   static getApiGamesPath(scenario: string): string {
-    return '/api/scenario/' + scenario + '/game/';
+    return '/api/game/' + scenario + '/';
   }
 
   static getApiGamePath(id: GameIdentifier): string {

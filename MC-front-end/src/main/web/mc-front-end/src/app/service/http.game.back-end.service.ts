@@ -8,10 +8,6 @@ import {Game} from '../game';
 import {GameIdentifier} from '../game-identifier';
 import {catchError, map} from "rxjs/operators";
 import {HttpKeyValueService} from "./http.key-value.service";
-
-
-const apiScenariosPath = '/api/scenario/';
-
 export class EncodedGame {
   identifier: GameIdentifier;
   runState: string;
@@ -100,7 +96,7 @@ export class HttpGameBackEndService extends AbstractGameBackEndService {
   }
 
   static getApiGamesPath(scenario: string): string {
-    return apiScenariosPath + scenario + '/game/';
+    return '/api/game/' + scenario + '/';
   }
 
   static getApiGamePath(id: GameIdentifier): string {
