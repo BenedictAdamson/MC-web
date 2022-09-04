@@ -35,12 +35,11 @@ import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
 import org.testcontainers.utility.DockerImageName;
 import uk.badamson.mc.rest.GameIdentifierResponse;
+import uk.badamson.mc.rest.Paths;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -80,20 +79,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
     private static final UriTemplate USER_URI_TEMPLATE = new UriTemplate(
             "/api/user/{user}");
 
-    private static final UriTemplate GAME_URI_TEMPLATE = new UriTemplate("/api/game/{scenario}/{game}");
-
-    private static final DateTimeFormatter URI_DATETIME_FORMATTER = DateTimeFormatter.ISO_INSTANT;
-
-    private static String createGamePath(final GameIdentifier game) {
-        Objects.requireNonNull(game, "game");
-        return createGamesListPath(game.getScenario()) + "/"
-                + URI_DATETIME_FORMATTER.format(game.getCreated());
-    }
-
-    private static String createGamesListPath(final UUID scenario) {
-        Objects.requireNonNull(scenario, "scenario");
-        return "/api/game/" + scenario;
-    }
+    private static final UriTemplate GAME_URI_TEMPLATE = new UriTemplate(Paths.GAME_PATH_PATTERN);
 
     private static String encodeAsJson(final Object obj) {
         try {
@@ -107,20 +93,15 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
     static GameIdentifier parseCreateGameResponse(final ResponseSpec response) {
         Objects.requireNonNull(response, "response");
 
-        final UUID scenario;
-        final Instant created;
         try {
             final var location = response.returnResult(String.class)
                     .getResponseHeaders().getLocation();
             Objects.requireNonNull(location, "Has Location header");
             final var uriComponents = GAME_URI_TEMPLATE.match(location.getPath());
-            scenario = UUID.fromString(uriComponents.get("scenario"));
-            created = Instant.parse(uriComponents.get("game"));
+            return Paths.parseGameIdentifier(uriComponents.get("game"));
         } catch (final NullPointerException e) {
             throw new IllegalArgumentException("Invalid response", e);
         }
-
-        return new GameIdentifier(scenario, created);
     }
 
     static void secure(final RequestBodySpec request,
@@ -211,7 +192,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
                                             final MultiValueMap<String, HttpCookie> cookies) {
         Objects.requireNonNull(cookies, "cookies");
 
-        final var path = createGamesListPath(scenario);
+        final var path = Paths.createPathForGamesOfScenario(scenario);
         final var request = connectWebTestClient(path).post()
                 .accept(MediaType.APPLICATION_JSON);
         secure(request, user, cookies);
@@ -244,7 +225,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
         Objects.requireNonNull(user, "user");
         Objects.requireNonNull(cookies, "cookies");
 
-        final var path = createGamePath(game);
+        final var path = Paths.createPathForGame(game);
         final var query = "join";
         final var request = connectWebTestClient(path, query).post()
                 .accept(MediaType.APPLICATION_JSON);
@@ -258,7 +239,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
         Objects.requireNonNull(user, "user");
         Objects.requireNonNull(cookies, "cookies");
 
-        final var path = createGamePath(game);
+        final var path = Paths.createPathForGame(game);
         final var query = "start";
         final var request = connectWebTestClient(path, query).post()
                 .accept(MediaType.APPLICATION_JSON);
@@ -277,7 +258,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
     }
 
     ResponseSpec getGameCreationTimesResponse(final UUID scenario, User user) {
-        return getJsonAsAdministrator(createGamesListPath(scenario));
+        return getJsonAsAdministrator(Paths.createPathForGamesOfScenario(scenario));
     }
 
     private WebTestClient.ResponseSpec getJson(final String path) {

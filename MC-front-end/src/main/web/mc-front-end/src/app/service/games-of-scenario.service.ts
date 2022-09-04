@@ -6,8 +6,8 @@ import { GameIdentifier } from '../game-identifier';
 
 
 
-export function getApiGamesPath(scenario: string): string {
-	return '/api/game/' + scenario + '/';
+export function getApiGamesOfScenarioPath(scenario: string): string {
+	return '/api/scenario/' + scenario + '/games';
 }
 
 

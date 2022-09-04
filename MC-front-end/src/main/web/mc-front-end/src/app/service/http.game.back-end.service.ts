@@ -46,7 +46,7 @@ class Delegate extends HttpKeyValueService<GameIdentifier, Game, EncodedGame, st
 
 
   protected getAddUrl(scenario: string): string {
-    return HttpGameBackEndService.getApiGamesPath(scenario);
+    return HttpGameBackEndService.getApiGamesOfScenarioPath(scenario);
   }
 
   protected getAddPayload(_scenario: string): null {
@@ -95,12 +95,12 @@ export class HttpGameBackEndService extends AbstractGameBackEndService {
     this.delegate = new Delegate(http);
   }
 
-  static getApiGamesPath(scenario: string): string {
-    return '/api/game/' + scenario + '/';
+  static getApiGamesOfScenarioPath(scenario: string): string {
+    return '/api/scenario/' + scenario + '/games';
   }
 
   static getApiGamePath(id: GameIdentifier): string {
-    return HttpGameBackEndService.getApiGamesPath(id.scenario) + id.created;
+    return '/api/game/' + id.scenario + '@' + id.created;
   }
 
   static getApiStartGamePath(id: GameIdentifier): string {

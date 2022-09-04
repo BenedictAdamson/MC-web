@@ -97,7 +97,7 @@ describe('GameService', () => {
       expect(game.identifier.scenario).withContext('Game.identifier.scenario').toEqual(scenario);
     });
 
-    const request = httpTestingController.expectOne(GameService.getApiGamesPath(scenario));
+    const request = httpTestingController.expectOne(GameService.getApiGamesOfScenarioPath(scenario));
     expect(request.request.method).toEqual('POST');
     request.flush(createdGame);
     httpTestingController.verify();
