@@ -34,6 +34,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
 import org.testcontainers.utility.DockerImageName;
+import uk.badamson.mc.rest.GameIdentifierResponse;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -269,10 +270,10 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
         return administrator;
     }
 
-    public Stream<Instant> getGameCreationTimes(final UUID scenario, User user) {
+    public Stream<GameIdentifierResponse> getGameIds(final UUID scenario, User user) {
         final var response = getGameCreationTimesResponse(scenario, user);
         response.expectStatus().isOk();
-        return response.returnResult(Instant.class).getResponseBody().toStream();
+        return response.returnResult(GameIdentifierResponse.class).getResponseBody().toStream();
     }
 
     ResponseSpec getGameCreationTimesResponse(final UUID scenario, User user) {

@@ -8,13 +8,14 @@ import org.mockserver.matchers.Times;
 import org.mockserver.model.*;
 import org.testcontainers.containers.MockServerContainer;
 import org.testcontainers.utility.DockerImageName;
-import uk.badamson.mc.rest.*;
+import uk.badamson.mc.rest.GameIdentifierResponse;
+import uk.badamson.mc.rest.GameResponse;
+import uk.badamson.mc.rest.ScenarioResponse;
+import uk.badamson.mc.rest.UserResponse;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -102,21 +103,23 @@ public final class MockMcBackEndContainer extends MockServerContainer {
         return HttpResponse.response().withStatusCode(HttpStatusCode.UNAUTHORIZED_401.code());
     }
 
-    public void mockGetGameCreationTimes(@Nonnull UUID scenario, @Nonnull Set<Instant> gameCreationTimes, Times times) {
-        mockServerClient.when(getGameCreationTimesRequest(scenario), times).respond(getGameCreationTimesResponse(gameCreationTimes));
+    public void mockGetGameIDs(@Nonnull UUID scenario, @Nonnull Set<GameIdentifier> gameIds, Times times) {
+        mockServerClient.when(getGameIDsRequest(scenario), times).respond(getGameIDsResponse(gameIds));
     }
 
-    public void mockGetGameCreationTimes(@Nonnull UUID scenario, @Nonnull Set<Instant> gameCreationTimes) {
-        mockGetGameCreationTimes(scenario, gameCreationTimes, Times.unlimited());
+    public void mockGetGameIDs(@Nonnull UUID scenario, @Nonnull Set<GameIdentifier> gameIds) {
+        mockGetGameIDs(scenario, gameIds, Times.unlimited());
     }
 
-    private static HttpRequest getGameCreationTimesRequest(@Nonnull UUID scenario) {
+    private static HttpRequest getGameIDsRequest(@Nonnull UUID scenario) {
         return HttpRequest.request(gamesListPath(scenario)).withMethod("GET");
     }
 
-    private static HttpResponse getGameCreationTimesResponse(@Nonnull Set<Instant> times) {
-        List<String> formattedTimes = times.stream().map(URI_DATETIME_FORMATTER::format).toList();
-        return jsonResponse(formattedTimes);
+    private static HttpResponse getGameIDsResponse(@Nonnull Set<GameIdentifier> gameIds) {
+        final var response = gameIds.stream()
+                .map(GameIdentifierResponse::convertToResponse)
+                .collect(Collectors.toUnmodifiableSet());
+        return jsonResponse(response);
     }
 
     private static HttpResponse jsonResponse(@Nullable Object body) {

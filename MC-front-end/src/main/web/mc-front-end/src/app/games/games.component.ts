@@ -39,10 +39,10 @@ export class GamesComponent implements OnInit {
       );
    }
 
-   get games$(): Observable<string[]> {
+   get games$(): Observable<GameIdentifier[]> {
       return this.scenario$.pipe(
          mergeMap(scenario => this.gamesOfScenarioService.get(scenario)),
-         map((games: string[] | null) => {
+         map((games: GameIdentifier[] | null) => {
             if (games) {
                return games;
             } else {
@@ -76,7 +76,7 @@ export class GamesComponent implements OnInit {
 
    /**
     * Attempts to create a new game for the scenario of this games list.
-    * On completion, redirects to the the game page for that game.
+    * On completion, redirects to the game page for that game.
     */
    createGame(): void {
       this.scenario$.pipe(

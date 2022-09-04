@@ -43,12 +43,12 @@ describe('GamesComponent', () => {
     [CHARACTER_ID_B, USER_ID_B]
   ]);
   const USERS_B: Map<string, string> = new Map([]);
-  const GAMES_0: string[] = [];
-  const GAMES_2: string[] = [CREATED_A, CREATED_B];
-  const GAME_IDENTIFIER_A: GameIdentifier = {scenario: SCENARIO_A, created: CREATED_A};
-  const GAME_IDENTIFIER_B: GameIdentifier = {scenario: SCENARIO_B, created: CREATED_B};
-  const GAME_A: Game = new Game(GAME_IDENTIFIER_A, 'WAITING_TO_START', true, USERS_A);
-  const GAME_B: Game = new Game(GAME_IDENTIFIER_B, 'RUNNING', false, USERS_B);
+  const GAME_IDENTIFIER_A1: GameIdentifier = {scenario: SCENARIO_A, created: CREATED_A};
+  const GAME_IDENTIFIER_A2: GameIdentifier = {scenario: SCENARIO_A, created: CREATED_B};
+  const GAME_A: Game = new Game(GAME_IDENTIFIER_A1, 'WAITING_TO_START', true, USERS_A);
+  const GAME_B: Game = new Game(GAME_IDENTIFIER_A2, 'RUNNING', false, USERS_B);
+  const GAMES_0: GameIdentifier[] = [];
+  const GAMES_2: GameIdentifier[] = [GAME_IDENTIFIER_A1, GAME_IDENTIFIER_A2];
 
   const getScenario = (gc: GamesComponent): string | null => {
     let scenario: string | null = null;
@@ -61,8 +61,8 @@ describe('GamesComponent', () => {
     return scenario;
   };
 
-  const getGames = (gc: GamesComponent): string[] | null => {
-    let games: string[] | null = null;
+  const getGames = (gc: GamesComponent): GameIdentifier[] | null => {
+    let games: GameIdentifier[] | null = null;
     gc.games$.subscribe({
       next: (g) => games = g,
       error: (err) => fail(err),
@@ -72,7 +72,7 @@ describe('GamesComponent', () => {
     return games;
   };
 
-  const setUpForNgInit = (self: User, scenario: string, gamesOfScenario: string[]) => {
+  const setUpForNgInit = (self: User, scenario: string, gamesOfScenario: GameIdentifier[]) => {
     gameServiceSpy = null;
     gamesOfScenarioBackEndService = new MockGamesOfScenarioBackEndService(scenario, gamesOfScenario);
 
@@ -139,7 +139,7 @@ describe('GamesComponent', () => {
   };
 
 
-  const testNgInit = (self: User, scenario: string, gamesOfScenario: string[]) => {
+  const testNgInit = (self: User, scenario: string, gamesOfScenario: GameIdentifier[]) => {
     const expectHasGameLinks: boolean = self.authorities.includes('ROLE_MANAGE_GAMES') || self.authorities.includes('ROLE_PLAYER');
     setUpForNgInit(self, scenario, gamesOfScenario);
 
@@ -155,12 +155,13 @@ describe('GamesComponent', () => {
       const gameEntries: NodeListOf<HTMLLIElement> = gamesList.querySelectorAll('li');
       expect(gameEntries.length).withContext('number of game entries').toBe(gamesOfScenario.length);
       for (let i = 0; i < gameEntries.length; i++) {
-        const expectedGame: string = gamesOfScenario[i];
+        const expectedGame: GameIdentifier = gamesOfScenario[i];
+        const expectedGameCreationTime: string = expectedGame.created;
         const entry: HTMLLIElement = gameEntries.item(i);
         if (expectHasGameLinks) {
           const link: HTMLAnchorElement | null = entry.querySelector('a');
           const linkText: string | null = link ? link.textContent : null;
-          expect(linkText).withContext('entry link text contains game title').toContain(expectedGame);
+          expect(linkText).withContext('entry link text contains game creation time').toContain(expectedGameCreationTime);
         }
       }
     }

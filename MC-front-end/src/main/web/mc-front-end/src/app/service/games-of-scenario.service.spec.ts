@@ -8,6 +8,7 @@ import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@an
 import { AbstractGamesOfScenarioBackEndService } from './abstract.games-of-scenario.back-end.service';
 import { HttpGamesOfScenarioBackEndService } from './http.games-of-scenario.back-end.service';
 import { GamesOfScenarioService, getApiGamesPath } from './games-of-scenario.service';
+import {GameIdentifier} from "../game-identifier";
 
 
 describe('GamesOfScenarioService', () => {
@@ -17,9 +18,11 @@ describe('GamesOfScenarioService', () => {
 	const SCENARIO_B: string = uuid();
 	const CREATED_A: string = '1970-01-01T00:00:00.000Z';
 	const CREATED_B: string = '2020-12-31T23:59:59.999Z';
-	const CREATEDS_0: string[] = [];
-	const CREATEDS_1: string[] = [CREATED_A];
-	const CREATEDS_2: string[] = [CREATED_A, CREATED_B];
+  const ID_A1: GameIdentifier = {scenario: SCENARIO_A, created: CREATED_A};
+  const ID_A2: GameIdentifier = {scenario: SCENARIO_A, created: CREATED_B};
+	const ID_LIST_0: GameIdentifier[] = [];
+	const ID_LIST_1: GameIdentifier[] = [ID_A1];
+	const ID_LIST_2: GameIdentifier[] = [ID_A1, ID_A2];
 
 
 	const setUp = function(): GamesOfScenarioService {
@@ -39,7 +42,7 @@ describe('GamesOfScenarioService', () => {
 		expect(service).toBeTruthy();
 	});
 
-	const testGetGamesOfScenario = function(scenario: string, identifiers: string[]) {
+	const testGetGamesOfScenario = function(scenario: string, identifiers: GameIdentifier[]) {
 		const service: GamesOfScenarioService = setUp();
 
 		service.get(scenario).subscribe(ids => expect(ids).toEqual(identifiers));
@@ -51,20 +54,20 @@ describe('GamesOfScenarioService', () => {
 	};
 
 	it('can get game identifiers for scenario [0]', () => {
-		testGetGamesOfScenario(SCENARIO_A, CREATEDS_0);
+		testGetGamesOfScenario(SCENARIO_A, ID_LIST_0);
 	});
 
 	it('can get game identifiers for scenario  [1]', () => {
-		testGetGamesOfScenario(SCENARIO_B, CREATEDS_1);
+		testGetGamesOfScenario(SCENARIO_A, ID_LIST_1);
 	});
 
 	it('can get game identifiers for scenario  [2]', () => {
-		testGetGamesOfScenario(SCENARIO_A, CREATEDS_2);
+		testGetGamesOfScenario(SCENARIO_A, ID_LIST_2);
 	});
 
 
 
-	const testGetGamesOfScenarioAfterUpdateGamesOfScenario = function(scenario: string, identifiers: string[]) {
+	const testGetGamesOfScenarioAfterUpdateGamesOfScenario = function(scenario: string, identifiers: GameIdentifier[]) {
 		const service: GamesOfScenarioService = setUp();
 
 		service.update(scenario);
@@ -78,16 +81,16 @@ describe('GamesOfScenarioService', () => {
 	};
 
 	it('can update games of scenario before asking for the games of the scenario[0]', () => {
-		testGetGamesOfScenarioAfterUpdateGamesOfScenario(SCENARIO_A, CREATEDS_0);
+		testGetGamesOfScenarioAfterUpdateGamesOfScenario(SCENARIO_A, ID_LIST_0);
 	});
 
 	it('can update games of scenario before asking for the games of the scenario[1]', () => {
-		testGetGamesOfScenarioAfterUpdateGamesOfScenario(SCENARIO_B, CREATEDS_1);
+		testGetGamesOfScenarioAfterUpdateGamesOfScenario(SCENARIO_B, ID_LIST_1);
 	});
 
 
 
-	const testUpdateGamesOfScenarioAfterGetGamesOfScenario = function(scenario: string, identifiers: string[]) {
+	const testUpdateGamesOfScenarioAfterGetGamesOfScenario = function(scenario: string, identifiers: GameIdentifier[]) {
 		const service: GamesOfScenarioService = setUp();
 		const expectedPath: string = getApiGamesPath(scenario);
 
@@ -104,16 +107,16 @@ describe('GamesOfScenarioService', () => {
 	};
 
 	it('can update games of scenario after asking for the games of the scenario[0]', () => {
-		testUpdateGamesOfScenarioAfterGetGamesOfScenario(SCENARIO_A, CREATEDS_0);
+		testUpdateGamesOfScenarioAfterGetGamesOfScenario(SCENARIO_A, ID_LIST_0);
 	});
 
 	it('can update games of scenario after asking for the games of the scenario[1]', () => {
-		testUpdateGamesOfScenarioAfterGetGamesOfScenario(SCENARIO_B, CREATEDS_1);
+		testUpdateGamesOfScenarioAfterGetGamesOfScenario(SCENARIO_B, ID_LIST_1);
 	});
 
 
 
-	const testGetGamesOfScenarioForChangingValue = function(done: any, scenario: string, identifiers1: string[], identifiers2: string[]) {
+	const testGetGamesOfScenarioForChangingValue = function(done: any, scenario: string, identifiers1: GameIdentifier[], identifiers2: GameIdentifier[]) {
 		const service: GamesOfScenarioService = setUp();
 		const expectedPath: string = getApiGamesPath(scenario);
     let n: number = 0;
@@ -138,18 +141,18 @@ describe('GamesOfScenarioService', () => {
 	};
 
 	it('provides updated games of scenario [A]', (done) => {
-		testGetGamesOfScenarioForChangingValue(done, SCENARIO_A, CREATEDS_0, CREATEDS_1);
+		testGetGamesOfScenarioForChangingValue(done, SCENARIO_A, ID_LIST_0, ID_LIST_1);
 	});
 
 	it('provides updated games of scenario [B]', (done) => {
-		testGetGamesOfScenarioForChangingValue(done, SCENARIO_B, CREATEDS_2, CREATEDS_1);
+		testGetGamesOfScenarioForChangingValue(done, SCENARIO_A, ID_LIST_2, ID_LIST_1);
 	});
 
 
 
 
 
-	const testGetGamesOfScenarioForUnchangedUpdate = function(scenario: string, identifiers: string[]) {
+	const testGetGamesOfScenarioForUnchangedUpdate = function(scenario: string, identifiers: GameIdentifier[]) {
 		const service: GamesOfScenarioService = setUp();
 		const expectedPath: string = getApiGamesPath(scenario);
     let n: number = 0;
@@ -173,11 +176,11 @@ describe('GamesOfScenarioService', () => {
 	};
 
 	it('provides distinct games of scenario [A]', () => {
-		testGetGamesOfScenarioForUnchangedUpdate(SCENARIO_A, CREATEDS_0);
+		testGetGamesOfScenarioForUnchangedUpdate(SCENARIO_A, ID_LIST_0);
 	});
 
 	it('provides distinct games of scenario [B]', () => {
-		testGetGamesOfScenarioForUnchangedUpdate(SCENARIO_B, CREATEDS_2);
+		testGetGamesOfScenarioForUnchangedUpdate(SCENARIO_A, ID_LIST_2);
 	});
 
 });

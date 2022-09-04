@@ -150,7 +150,7 @@ public final class ScenarioPage extends Page {
         final var created = gameId.getCreated();
         final var gameElement = findGameElement(created.toString());
         if (gameElement == null) {
-            throw new IllegalStateException("No entry for game " + created);
+            throw new IllegalStateException("No entry for game created " + created);
         }
         final var title = gameElement.getText();
         final var link = gameElement.findElement(By.tagName("a"));

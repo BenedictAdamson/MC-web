@@ -30,12 +30,12 @@ import org.springframework.util.MultiValueMap;
 import org.testcontainers.containers.Network;
 import uk.badamson.mc.repository.McDatabaseContainer;
 import uk.badamson.mc.rest.AuthorityValue;
+import uk.badamson.mc.rest.GameIdentifierResponse;
 import uk.badamson.mc.rest.UserResponse;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -81,16 +81,9 @@ public class BeWithDbSubSystemIT {
                 final var response = exchange(scenario, user);
 
                 response.expectStatus().isFound();
-                final var gameId = McBackEndContainer
-                        .parseCreateGameResponse(response);
-                final var creationTimes = be.getGameCreationTimes(scenario, user)
-                        .collect(toList());
-                assertAll(
-                        () -> assertEquals(scenario, scenario,
-                                "scenario of created game is the given scenario"),
-                        () -> assertThat(
-                                "added the creation time of the created game to the list of creation times",
-                                gameId.getCreated(), in(creationTimes)));
+                final var gameId = McBackEndContainer.parseCreateGameResponse(response);
+                final var gameIds = be.getGameIds(scenario, user).collect(toList());
+                assertThat(GameIdentifierResponse.convertToResponse(gameId), in(gameIds));
             }
 
         }
@@ -370,14 +363,14 @@ public class BeWithDbSubSystemIT {
     }
 
     @Test
-    public void getGameCreationTimes_empty() {
+    public void getGameIds_empty() {
         final var namedUUIDOptional = be.getScenarios().findAny();
         assertThat("namedUUID", namedUUIDOptional.isPresent());
         final var scenario = namedUUIDOptional.get().getId();
         final var user = be.getAdministrator();
         final var response = be.getGameCreationTimesResponse(scenario, user);
         response.expectStatus().isOk();
-        response.expectBodyList(Instant.class).hasSize(0);
+        response.expectBodyList(GameIdentifierResponse.class).hasSize(0);
     }
 
     @Test

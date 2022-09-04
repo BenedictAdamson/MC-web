@@ -10,15 +10,11 @@ export function getApiGamesPath(scenario: string): string {
 	return '/api/game/' + scenario + '/';
 }
 
-export function getApiGamePath(id: GameIdentifier): string {
-	return getApiGamesPath(id.scenario) + id.created;
-}
-
 
 @Injectable({
 	providedIn: 'root'
 })
-export class GamesOfScenarioService extends CachingKeyValueService<string, string[], void> {
+export class GamesOfScenarioService extends CachingKeyValueService<string, GameIdentifier[], void> {
 
 	constructor(
 		backEnd: AbstractGamesOfScenarioBackEndService
@@ -31,7 +27,7 @@ export class GamesOfScenarioService extends CachingKeyValueService<string, strin
 		return id;
 	}
 
-	protected getKey(_value: string[]): undefined {
+	protected getKey(_value: GameIdentifier[]): undefined {
 		return undefined;
 	}
 
