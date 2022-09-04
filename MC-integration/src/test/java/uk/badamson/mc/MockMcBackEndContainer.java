@@ -8,39 +8,16 @@ import org.mockserver.matchers.Times;
 import org.mockserver.model.*;
 import org.testcontainers.containers.MockServerContainer;
 import org.testcontainers.utility.DockerImageName;
-import uk.badamson.mc.rest.GameIdentifierResponse;
-import uk.badamson.mc.rest.GameResponse;
-import uk.badamson.mc.rest.ScenarioResponse;
-import uk.badamson.mc.rest.UserResponse;
+import uk.badamson.mc.rest.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 public final class MockMcBackEndContainer extends MockServerContainer {
-    private static String gamePath(final GameIdentifier game) {
-        Objects.requireNonNull(game, "game");
-        return gamesListPath(game.getScenario()) + URI_DATETIME_FORMATTER.format(game.getCreated());
-    }
-
-    private static String gamesListPath(final UUID scenario) {
-        Objects.requireNonNull(scenario, "scenario");
-        return ("/api/game/" + scenario) + "/";
-    }
-
-    private static String scenarioPath(final UUID scenario) {
-        Objects.requireNonNull(scenario, "scenario");
-        return "/api/scenario/" + scenario;
-    }
-
-    private static String userPath(@Nonnull final UUID id) {
-        Objects.requireNonNull(id, "id");
-        return "/api/user/" + id;
-    }
 
     private static String encodeAsJson(final Object obj) {
         try {
@@ -88,15 +65,17 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpRequest createGameForScenarioRequest(@Nonnull UUID scenario) {
-        return HttpRequest.request().withMethod("POST").withPath(gamesListPath(scenario));
+        return HttpRequest.request().withMethod("POST").withPath(Paths.createPathForGamesOfScenario(scenario));
     }
 
     private static HttpResponse createGameForScenarioResponse(@Nonnull final GameIdentifier gameId) {
-        return foundResponse(gamePath(gameId));
+        return foundResponse(Paths.createPathForGame(gameId));
     }
 
     private static HttpResponse foundResponse(@Nonnull String path) {
-        return HttpResponse.response().withStatusCode(HttpStatusCode.FOUND_302.code()).withHeader(Header.header("Location", path));
+        return HttpResponse.response()
+                .withStatusCode(HttpStatusCode.FOUND_302.code())
+                .withHeader(Header.header("Location", path));
     }
 
     private static HttpResponse unauthorisedResponse() {
@@ -112,7 +91,7 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpRequest getGameIDsRequest(@Nonnull UUID scenario) {
-        return HttpRequest.request(gamesListPath(scenario)).withMethod("GET");
+        return HttpRequest.request(Paths.createPathForGamesOfScenario(scenario)).withMethod("GET");
     }
 
     private static HttpResponse getGameIDsResponse(@Nonnull Set<GameIdentifier> gameIds) {
@@ -135,7 +114,7 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpRequest getGameRequest(@Nonnull final GameIdentifier game) {
-        return HttpRequest.request(gamePath(game)).withMethod("GET");
+        return HttpRequest.request(Paths.createPathForGame(game)).withMethod("GET");
     }
 
     private static HttpResponse getGameResponse(@Nonnull GameIdentifier id, @Nonnull final Game game) {
@@ -147,11 +126,13 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpRequest startGameRequest(@Nonnull final GameIdentifier game) {
-        return HttpRequest.request(gamePath(game)).withQueryStringParameter("start", "").withMethod("POST");
+        return HttpRequest.request(Paths.createPathForGame(game))
+                .withQueryStringParameter("start", "")
+                .withMethod("POST");
     }
 
     private static HttpResponse startGameResponse(@Nonnull final GameIdentifier game) {
-        return foundResponse(gamePath(game));
+        return foundResponse(Paths.createPathForGame(game));
     }
 
     public void mockStopGame(@Nonnull final GameIdentifier game) {
@@ -159,11 +140,13 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpRequest stopGameRequest(@Nonnull final GameIdentifier game) {
-        return HttpRequest.request(gamePath(game)).withQueryStringParameter("stop", "").withMethod("POST");
+        return HttpRequest.request(Paths.createPathForGame(game))
+                .withQueryStringParameter("stop", "")
+                .withMethod("POST");
     }
 
     private static HttpResponse stopGameResponse(@Nonnull final GameIdentifier game) {
-        return foundResponse(gamePath(game));
+        return foundResponse(Paths.createPathForGame(game));
     }
 
     public void mockEndRecruitment(@Nonnull final GameIdentifier game) {
@@ -171,11 +154,13 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpRequest endRecruitmentRequest(@Nonnull final GameIdentifier game) {
-        return HttpRequest.request(gamePath(game)).withQueryStringParameter("endRecruitment", "").withMethod("POST");
+        return HttpRequest.request(Paths.createPathForGame(game))
+                .withQueryStringParameter("endRecruitment", "")
+                .withMethod("POST");
     }
 
     private static HttpResponse endRecruitmentResponse(@Nonnull final GameIdentifier game) {
-        return foundResponse(gamePath(game));
+        return foundResponse(Paths.createPathForGame(game));
     }
 
     public void mockCurrentGame(@Nonnull final GameIdentifier game) {
@@ -188,11 +173,11 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpRequest currentGameRequest() {
-        return HttpRequest.request("/api/self/current-game").withMethod("GET");
+        return HttpRequest.request(Paths.CURRENT_GAME_PATH).withMethod("GET");
     }
 
     private static HttpResponse currentGameResponse(@Nonnull final GameIdentifier game) {
-        return foundResponse(gamePath(game));
+        return foundResponse(Paths.createPathForGame(game));
     }
 
     public void mockJoinGame(@Nonnull final GameIdentifier game) {
@@ -200,11 +185,13 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpRequest joinGameRequest(@Nonnull final GameIdentifier game) {
-        return HttpRequest.request(gamePath(game)).withQueryStringParameter("join", "").withMethod("POST");
+        return HttpRequest.request(Paths.createPathForGame(game))
+                .withQueryStringParameter("join", "")
+                .withMethod("POST");
     }
 
     private static HttpResponse joinGameResponse(@Nonnull final GameIdentifier game) {
-        return foundResponse(gamePath(game));
+        return foundResponse(Paths.createPathForGame(game));
     }
 
     public void mockMayJoinGame(@Nonnull final GameIdentifier game, final boolean mayJoin) {
@@ -212,7 +199,9 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpRequest mayJoinGameRequest(@Nonnull final GameIdentifier game) {
-        return HttpRequest.request(gamePath(game)).withQueryStringParameter("mayJoin", "").withMethod("GET");
+        return HttpRequest.request(Paths.createPathForGame(game))
+                .withQueryStringParameter("mayJoin", "")
+                .withMethod("GET");
     }
 
     private static HttpResponse mayJoinGameResponse(final boolean mayJoin) {
@@ -224,7 +213,7 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpRequest getAllScenariosRequest() {
-        return HttpRequest.request("/api/scenario").withMethod("GET");
+        return HttpRequest.request(Paths.SCENARIOS_PATH).withMethod("GET");
     }
 
     private static HttpResponse getAllScenariosResponse(@Nonnull final Set<NamedUUID> scenarios) {
@@ -237,7 +226,7 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpRequest getScenarioRequest(@Nonnull UUID scenario) {
-        return HttpRequest.request(scenarioPath(scenario)).withMethod("GET");
+        return HttpRequest.request(Paths.createPathForScenario(scenario)).withMethod("GET");
     }
 
     private static HttpResponse getScenarioResponse(@Nonnull UUID id, @Nonnull final Scenario scenario) {
@@ -250,12 +239,12 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpRequest addUserRequest(@Nonnull final BasicUserDetails userDetails) {
-        return HttpRequest.request("/api/user").withMethod("POST")
+        return HttpRequest.request(Paths.USERS_PATH).withMethod("POST")
                 .withBody(encodeAsJson(new MinimalUserDetails(userDetails)));
     }
 
     private static HttpResponse addUserResponse(@Nonnull final UUID id) {
-        return foundResponse(userPath(id));
+        return foundResponse(Paths.createPathForUser(id));
     }
 
     public void mockGetAllUsers(@Nonnull final Set<User> users, @Nonnull Times times) {
@@ -267,7 +256,7 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpRequest getAllUsersRequest() {
-        return HttpRequest.request("/api/user").withMethod("GET");
+        return HttpRequest.request(Paths.USERS_PATH).withMethod("GET");
     }
 
     private static HttpResponse  getAllUsersResponse(@Nonnull final Set<User> users) {
@@ -294,7 +283,7 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpRequest getSelfRequest() {
-        return HttpRequest.request("/api/self").withMethod("GET");
+        return HttpRequest.request(Paths.SELF_PATH).withMethod("GET");
     }
 
     private static HttpResponse getSelfResponse(@Nonnull final User user) {
@@ -306,7 +295,7 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpRequest getUserRequest(@Nonnull final UUID id) {
-        return HttpRequest.request(userPath(id)).withMethod("GET");
+        return HttpRequest.request(Paths.createPathForUser(id)).withMethod("GET");
     }
 
     private static HttpResponse getUserResponse(@Nonnull final User user) {
@@ -319,7 +308,9 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpRequest loginRequest() {
-        return HttpRequest.request("/api/self").withMethod("GET").withHeader(Header.header("Authorization", "Basic .*"));
+        return HttpRequest.request(Paths.SELF_PATH)
+                .withMethod("GET")
+                .withHeader(Header.header("Authorization", "Basic .*"));
     }
 
     private static HttpResponse loginResponse(
@@ -335,7 +326,6 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static final DockerImageName MOCKSERVER_IMAGE = DockerImageName.parse("mockserver/mockserver:5.13.2");
-    private static final DateTimeFormatter URI_DATETIME_FORMATTER = DateTimeFormatter.ISO_INSTANT;
     private static final ObjectMapper MAPPER;
 
     static {
