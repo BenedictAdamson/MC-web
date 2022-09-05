@@ -2,15 +2,14 @@ import {Injectable} from '@angular/core';
 
 import {AbstractMayJoinGameBackEndService} from './abstract.may-join-game.back-end.service';
 import {CachingKeyValueService} from './caching.key-value.service';
-import {GameIdentifier} from '../game-identifier'
 import {GameService} from './game.service'
 
 
 @Injectable({
 	providedIn: 'root'
 })
-export class MayJoinGameService extends CachingKeyValueService<GameIdentifier, boolean, void> {
-  static getApiMayJoinGamePath(game: GameIdentifier): string {
+export class MayJoinGameService extends CachingKeyValueService<string, boolean, void> {
+  static getApiMayJoinGamePath(game: string): string {
 		return GameService.getApiGamePath(game) + '?mayJoin';
 	}
 
@@ -22,8 +21,8 @@ export class MayJoinGameService extends CachingKeyValueService<GameIdentifier, b
 	}
 
 
-	protected createKeyString(id: GameIdentifier): string {
-		return id.scenario + '/' + id.created;
+	protected createKeyString(id: string): string {
+		return id;
 	}
 
 	protected getKey(_value: boolean): undefined {

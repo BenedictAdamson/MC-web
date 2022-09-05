@@ -7,7 +7,6 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@angular/common/http/testing';
 
 import { AbstractMayJoinGameBackEndService } from './abstract.may-join-game.back-end.service';
-import { GameIdentifier } from '../game-identifier';
 import { HttpMayJoinGameBackEndService } from './http.may-join-game.back-end.service';
 import { MayJoinGameService } from './may-join-game.service';
 
@@ -15,12 +14,8 @@ import { MayJoinGameService } from './may-join-game.service';
 describe('MayJoinGameService', () => {
 	let httpTestingController: HttpTestingController;
 
-	const SCENARIO_A: string = uuid();
-	const SCENARIO_B: string = uuid();
-	const CREATED_A: string = '1970-01-01T00:00:00.000Z';
-	const CREATED_B: string = '2020-12-31T23:59:59.999Z';
-	const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_A, created: CREATED_A };
-	const GAME_IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_B, created: CREATED_B };
+	const GAME_IDENTIFIER_A: string = uuid();
+	const GAME_IDENTIFIER_B: string = uuid();
 
 
 	const setUp = function(): MayJoinGameService {
@@ -40,7 +35,7 @@ describe('MayJoinGameService', () => {
 	});
 
 
-	const testGet = function(game: GameIdentifier, mayJoin: boolean) {
+	const testGet = function(game: string, mayJoin: boolean) {
 		const service: MayJoinGameService = setUp();
 
 		const result: Observable<boolean | null> = service.get(game);
@@ -65,14 +60,13 @@ describe('MayJoinGameService', () => {
 
 
 
-	const testGetAfterUpdate = function(game: GameIdentifier, mayJoin: boolean) {
+	const testGetAfterUpdate = function(game: string, mayJoin: boolean) {
 		// Tough test: use two identifiers that are semantically equivalent, but not the same object.
-		const game2: GameIdentifier = { scenario: game.scenario, created: game.created };
 		const expectedPath: string = MayJoinGameService.getApiMayJoinGamePath(game);
 		const service: MayJoinGameService = setUp();
 
 		service.update(game);
-		service.get(game2).subscribe(may => expect(may).toEqual(mayJoin));
+		service.get(game).subscribe(may => expect(may).toEqual(mayJoin));
 
 		// Only one GET expected because should use the cached value.
 		const request = httpTestingController.expectOne(expectedPath);
@@ -99,7 +93,7 @@ describe('MayJoinGameService', () => {
 
 
 
-	const testUpdateAfterGet = function(game: GameIdentifier, mayJoin: boolean) {
+	const testUpdateAfterGet = function(game: string, mayJoin: boolean) {
 		const expectedPath: string = MayJoinGameService.getApiMayJoinGamePath(game);
 		const service: MayJoinGameService = setUp();
 
@@ -135,7 +129,7 @@ describe('MayJoinGameService', () => {
 
 	const testGetForChangingValue = function(
 		done: any,
-		game: GameIdentifier,
+		game: string,
 		may1: boolean
 	) {
 		const may2: boolean = !may1;
@@ -170,7 +164,7 @@ describe('MayJoinGameService', () => {
 
 
 
-	const testGetForUnchangedUpdate = function(game: GameIdentifier, may: boolean) {
+	const testGetForUnchangedUpdate = function(game: string, may: boolean) {
 		const expectedPath: string = MayJoinGameService.getApiMayJoinGamePath(game);
 		const service: MayJoinGameService = setUp();
     let n: number = 0;

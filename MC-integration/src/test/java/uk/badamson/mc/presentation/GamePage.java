@@ -24,6 +24,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.opentest4j.MultipleFailuresError;
 import org.springframework.web.util.UriTemplate;
+import uk.badamson.mc.rest.Paths;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
@@ -41,8 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Immutable
 public final class GamePage extends Page {
 
-    private static final UriTemplate URI_TEMPLATE = new UriTemplate(
-            "/scenario/{scenario}/game/{created}");
+    private static final UriTemplate URI_TEMPLATE = new UriTemplate("/game/{game}");
 
     private static final Matcher<String> INDICATES_IS_A_GAME = containsString(
             "Game");
@@ -129,17 +129,6 @@ public final class GamePage extends Page {
         includesScenarioTitile = isA(String.class);
     }
 
-    /**
-     * <p>
-     * Construct a game page associated with a given scenario page and having a
-     * given (expected) title.
-     * </p>
-     *
-     * @param scenarioPage The scenarios page.
-     * @param creationTime The expected creation time. Or {@code null} if the creation time
-     *                     is unknown.
-     * @throws NullPointerException If {@code scenariosPage} is null.
-     */
     public GamePage(final ScenarioPage scenarioPage, final String creationTime) {
         super(scenarioPage);
         this.scenarioPage = scenarioPage;

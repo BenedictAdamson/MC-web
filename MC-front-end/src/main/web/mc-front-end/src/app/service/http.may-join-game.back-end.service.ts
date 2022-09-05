@@ -9,7 +9,7 @@ import { HttpSimpleKeyValueService } from './http.simple-key-value.service';
 import { HttpGameBackEndService } from './http.game.back-end.service';
 
 
-class Delegate extends HttpSimpleKeyValueService<GameIdentifier, boolean, void, undefined> {
+class Delegate extends HttpSimpleKeyValueService<string, boolean, void, undefined> {
 
    constructor(
       http: HttpClient
@@ -17,7 +17,7 @@ class Delegate extends HttpSimpleKeyValueService<GameIdentifier, boolean, void, 
       super(http, undefined);
    }
 
-   getUrl(id: GameIdentifier): string {
+   getUrl(id: string): string {
       return HttpMayJoinGameBackEndService.getApiMayJoinGamePath(id);
    }
 
@@ -56,11 +56,11 @@ export class HttpMayJoinGameBackEndService extends AbstractMayJoinGameBackEndSer
       this.delegate = new Delegate(http);
    }
 
-   static getApiMayJoinGamePath(game: GameIdentifier): string {
+   static getApiMayJoinGamePath(game: string): string {
       return HttpGameBackEndService.getApiGamePath(game) + '?mayJoin';
    }
 
-   get(id: GameIdentifier): Observable<boolean | null> {
+   get(id: string): Observable<boolean | null> {
       return this.delegate.get(id);
    }
 

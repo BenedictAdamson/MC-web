@@ -4,7 +4,6 @@ import org.testcontainers.spock.Testcontainers
 import spock.lang.Unroll
 import uk.badamson.mc.Authority
 import uk.badamson.mc.Game
-import uk.badamson.mc.GameIdentifier
 import uk.badamson.mc.NamedUUID
 import uk.badamson.mc.Scenario
 
@@ -12,7 +11,6 @@ import java.time.Instant
 
 import static org.hamcrest.Matchers.contains
 import static spock.util.matcher.HamcrestSupport.expect
-
 /** © Copyright Benedict Adamson 2019,20,22.
  *
  * This file is part of MC.
@@ -44,7 +42,8 @@ class ScenarioFESpec extends MockedBeSpecification {
             SCENARIO_TITLE, 'Basic fire and movement tactics', CHARACTERS
     )
     private static final def GAME_CREATION_TIME = Instant.parse('2022-05-31T20:00:00Z')
-    private static final def GAME_ID = new GameIdentifier(SCENARIO_ID, GAME_CREATION_TIME)
+    private static final def GAME_ID = UUID.randomUUID()
+    private static final def NAMED_GAME_ID = new NamedUUID(GAME_ID, GAME_CREATION_TIME.toString())
     private static final def GAME = new Game(GAME_CREATION_TIME, Game.RunState.RUNNING, true, Map.of())
     static {
         GAME.setScenario(SCENARIO)
@@ -76,8 +75,8 @@ class ScenarioFESpec extends MockedBeSpecification {
         given: "a scenario that has a game"
         world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, SCENARIO_TITLE)))
         world.backEnd.mockGetScenario(SCENARIO_ID, SCENARIO)
-        world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(GAME_ID))
-        world.backEnd.mockGetGame(GAME_ID, GAME)
+        world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(NAMED_GAME_ID))
+        world.backEnd.mockGetGame(GAME_ID, SCENARIO_ID, GAME)
         world.backEnd.mockMayJoinGame(GAME_ID, false)
 
         and: "not logged in"
@@ -107,8 +106,8 @@ class ScenarioFESpec extends MockedBeSpecification {
         given: "a scenario that has a game"
         world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, SCENARIO_TITLE)))
         world.backEnd.mockGetScenario(SCENARIO_ID, SCENARIO)
-        world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(GAME_ID))
-        world.backEnd.mockGetGame(GAME_ID, GAME)
+        world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(NAMED_GAME_ID))
+        world.backEnd.mockGetGame(GAME_ID, SCENARIO_ID, GAME)
         world.backEnd.mockMayJoinGame(GAME_ID, false)
 
         and: "logged in as a user with the $role role"

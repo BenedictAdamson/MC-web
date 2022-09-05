@@ -60,7 +60,7 @@ public final class MockMcBackEndContainer extends MockServerContainer {
 
     }
 
-    public void mockCreateGameForScenario(@Nonnull UUID scenarioId, @Nonnull final GameIdentifier gameId) {
+    public void mockCreateGameForScenario(@Nonnull UUID scenarioId, @Nonnull final UUID gameId) {
         mockServerClient.when(createGameForScenarioRequest(scenarioId)).respond(createGameForScenarioResponse(gameId));
     }
 
@@ -68,7 +68,7 @@ public final class MockMcBackEndContainer extends MockServerContainer {
         return HttpRequest.request().withMethod("POST").withPath(Paths.createPathForGamesOfScenario(scenario));
     }
 
-    private static HttpResponse createGameForScenarioResponse(@Nonnull final GameIdentifier gameId) {
+    private static HttpResponse createGameForScenarioResponse(@Nonnull final UUID gameId) {
         return foundResponse(Paths.createPathForGame(gameId));
     }
 
@@ -82,11 +82,11 @@ public final class MockMcBackEndContainer extends MockServerContainer {
         return HttpResponse.response().withStatusCode(HttpStatusCode.UNAUTHORIZED_401.code());
     }
 
-    public void mockGetGameIDs(@Nonnull UUID scenario, @Nonnull Set<GameIdentifier> gameIds, Times times) {
+    public void mockGetGameIDs(@Nonnull UUID scenario, @Nonnull Set<NamedUUID> gameIds, Times times) {
         mockServerClient.when(getGameIDsRequest(scenario), times).respond(getGameIDsResponse(gameIds));
     }
 
-    public void mockGetGameIDs(@Nonnull UUID scenario, @Nonnull Set<GameIdentifier> gameIds) {
+    public void mockGetGameIDs(@Nonnull UUID scenario, @Nonnull Set<NamedUUID> gameIds) {
         mockGetGameIDs(scenario, gameIds, Times.unlimited());
     }
 
@@ -94,76 +94,75 @@ public final class MockMcBackEndContainer extends MockServerContainer {
         return HttpRequest.request(Paths.createPathForGamesOfScenario(scenario)).withMethod("GET");
     }
 
-    private static HttpResponse getGameIDsResponse(@Nonnull Set<GameIdentifier> gameIds) {
-        final var response = gameIds.stream()
-                .map(GameIdentifierResponse::convertToResponse)
-                .collect(Collectors.toUnmodifiableSet());
-        return jsonResponse(response);
+    private static HttpResponse getGameIDsResponse(@Nonnull Set<NamedUUID> gameIds) {
+        return jsonResponse(gameIds);
     }
 
     private static HttpResponse jsonResponse(@Nullable Object body) {
         return HttpResponse.response().withContentType(MediaType.APPLICATION_JSON).withBody(encodeAsJson(body));
     }
 
-    public void mockGetGame(@Nonnull final GameIdentifier id, @Nonnull final Game game, Times times) {
-        mockServerClient.when(getGameRequest(id), times).respond(getGameResponse(id, game));
+    public void mockGetGame(
+            @Nonnull final UUID gameId, @Nonnull final UUID scenarioId, @Nonnull final Game game, Times times) {
+        mockServerClient.when(getGameRequest(gameId), times).respond(getGameResponse(gameId, scenarioId, game));
     }
 
-    public void mockGetGame(@Nonnull final GameIdentifier id, @Nonnull final Game game) {
-        mockGetGame(id, game, Times.unlimited());
+    public void mockGetGame(@Nonnull final UUID gameId, @Nonnull final UUID scenarioId, @Nonnull final Game game) {
+        mockGetGame(gameId, scenarioId, game, Times.unlimited());
     }
 
-    private static HttpRequest getGameRequest(@Nonnull final GameIdentifier game) {
+    private static HttpRequest getGameRequest(@Nonnull final UUID game) {
         return HttpRequest.request(Paths.createPathForGame(game)).withMethod("GET");
     }
 
-    private static HttpResponse getGameResponse(@Nonnull GameIdentifier id, @Nonnull final Game game) {
-        return jsonResponse(GameResponse.convertToResponse(id, game));
+    private static HttpResponse getGameResponse(
+            @Nonnull UUID gameId, @Nonnull UUID scenarioId, @Nonnull final Game game) {
+        return jsonResponse(GameResponse.convertToResponse(gameId, scenarioId, game));
     }
 
-    public void mockStartGame(@Nonnull final GameIdentifier game) {
+    public void mockStartGame(@Nonnull final UUID game) {
         mockServerClient.when(startGameRequest(game)).respond(startGameResponse(game));
     }
 
-    private static HttpRequest startGameRequest(@Nonnull final GameIdentifier game) {
+    private static HttpRequest startGameRequest(@Nonnull final UUID game) {
         return HttpRequest.request(Paths.createPathForGame(game))
                 .withQueryStringParameter("start", "")
                 .withMethod("POST");
     }
 
-    private static HttpResponse startGameResponse(@Nonnull final GameIdentifier game) {
+    private static HttpResponse startGameResponse(@Nonnull final UUID game) {
         return foundResponse(Paths.createPathForGame(game));
     }
 
-    public void mockStopGame(@Nonnull final GameIdentifier game) {
+    public void mockStopGame(@Nonnull final UUID game) {
         mockServerClient.when(stopGameRequest(game)).respond(stopGameResponse(game));
     }
 
-    private static HttpRequest stopGameRequest(@Nonnull final GameIdentifier game) {
+    private static HttpRequest stopGameRequest(@Nonnull final UUID game) {
         return HttpRequest.request(Paths.createPathForGame(game))
                 .withQueryStringParameter("stop", "")
                 .withMethod("POST");
     }
 
-    private static HttpResponse stopGameResponse(@Nonnull final GameIdentifier game) {
+    private static HttpResponse stopGameResponse(@Nonnull final UUID game) {
         return foundResponse(Paths.createPathForGame(game));
     }
 
-    public void mockEndRecruitment(@Nonnull final GameIdentifier game) {
+    public void mockEndRecruitment(@Nonnull final UUID game) {
         mockServerClient.when(endRecruitmentRequest(game)).respond(endRecruitmentResponse(game));
     }
 
-    private static HttpRequest endRecruitmentRequest(@Nonnull final GameIdentifier game) {
+    private static HttpRequest endRecruitmentRequest(@Nonnull final UUID game) {
         return HttpRequest.request(Paths.createPathForGame(game))
                 .withQueryStringParameter("endRecruitment", "")
                 .withMethod("POST");
     }
 
-    private static HttpResponse endRecruitmentResponse(@Nonnull final GameIdentifier game) {
+    private static HttpResponse endRecruitmentResponse(@Nonnull final UUID game) {
         return foundResponse(Paths.createPathForGame(game));
     }
 
-    public void mockCurrentGame(@Nonnull final GameIdentifier game) {
+    public void mockCurrentGame(@Nonnull final UUID game) {
         Objects.requireNonNull(game, "game");
         mockServerClient.when(currentGameRequest()).respond(currentGameResponse(game));
     }
@@ -176,29 +175,29 @@ public final class MockMcBackEndContainer extends MockServerContainer {
         return HttpRequest.request(Paths.CURRENT_GAME_PATH).withMethod("GET");
     }
 
-    private static HttpResponse currentGameResponse(@Nonnull final GameIdentifier game) {
+    private static HttpResponse currentGameResponse(@Nonnull final UUID game) {
         return foundResponse(Paths.createPathForGame(game));
     }
 
-    public void mockJoinGame(@Nonnull final GameIdentifier game) {
+    public void mockJoinGame(@Nonnull final UUID game) {
         mockServerClient.when(joinGameRequest(game)).respond(joinGameResponse(game));
     }
 
-    private static HttpRequest joinGameRequest(@Nonnull final GameIdentifier game) {
+    private static HttpRequest joinGameRequest(@Nonnull final UUID game) {
         return HttpRequest.request(Paths.createPathForGame(game))
                 .withQueryStringParameter("join", "")
                 .withMethod("POST");
     }
 
-    private static HttpResponse joinGameResponse(@Nonnull final GameIdentifier game) {
+    private static HttpResponse joinGameResponse(@Nonnull final UUID game) {
         return foundResponse(Paths.createPathForGame(game));
     }
 
-    public void mockMayJoinGame(@Nonnull final GameIdentifier game, final boolean mayJoin) {
+    public void mockMayJoinGame(@Nonnull final UUID game, final boolean mayJoin) {
         mockServerClient.when(mayJoinGameRequest(game)).respond(mayJoinGameResponse(mayJoin));
     }
 
-    private static HttpRequest mayJoinGameRequest(@Nonnull final GameIdentifier game) {
+    private static HttpRequest mayJoinGameRequest(@Nonnull final UUID game) {
         return HttpRequest.request(Paths.createPathForGame(game))
                 .withQueryStringParameter("mayJoin", "")
                 .withMethod("GET");

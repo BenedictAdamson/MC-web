@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
 
 import { AbstractGamesOfScenarioBackEndService } from './abstract.games-of-scenario.back-end.service';
 import { HttpSimpleKeyValueService } from './http.simple-key-value.service';
-import {GameIdentifier} from "../game-identifier";
+import {NamedUUID} from "../named-uuid";
 
 
 
@@ -14,7 +14,7 @@ export function getApiGamesOfScenarioPath(scenario: string): string {
 }
 
 
-class Delegate extends HttpSimpleKeyValueService<string, GameIdentifier[], void, void> {
+class Delegate extends HttpSimpleKeyValueService<string, NamedUUID[], void, void> {
 
 	constructor(
 		http: HttpClient
@@ -45,7 +45,7 @@ class Delegate extends HttpSimpleKeyValueService<string, GameIdentifier[], void,
 	}
 
 
-}// class
+}
 
 
 
@@ -65,9 +65,9 @@ export class HttpGamesOfScenarioBackEndService extends AbstractGamesOfScenarioBa
 	}
 
 
-	get(id: string): Observable<GameIdentifier[] | null> {
+	get(id: string): Observable<NamedUUID[] | null> {
 		return this.delegate.get(id);
 	}
 
-}// class
+}
 

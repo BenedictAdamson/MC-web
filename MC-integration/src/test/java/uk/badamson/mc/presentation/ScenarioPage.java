@@ -20,16 +20,17 @@ package uk.badamson.mc.presentation;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import uk.badamson.mc.GameIdentifier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.startsWith;
 
 /**
  * <p>
@@ -111,11 +112,14 @@ public final class ScenarioPage extends Page {
     }
 
     @Nullable
-    private WebElement findGameElement(@Nonnull String created) {
+    private WebElement findGameElement(@Nonnull UUID gameId) {
+        final String idText = gameId.toString();
         requireIsReady();
         final var elements = findGameElements();
         for (var element: elements) {
-            if (element.getText().contains(created)) {
+            final var linkElement = element.findElement(By.tagName("a"));
+            final String href = linkElement.getAttribute("href");
+            if (href.contains(idText)) {
                 return element;
             }
         }
@@ -145,17 +149,16 @@ public final class ScenarioPage extends Page {
         assertThat("path", path, startsWith(BASE));
     }
 
-    public GamePage navigateToGamePage(final GameIdentifier gameId) {
+    public GamePage navigateToGamePage(final UUID gameId) {
         requireIsReady();
-        final var created = gameId.getCreated();
-        final var gameElement = findGameElement(created.toString());
+        final var gameElement = findGameElement(gameId);
         if (gameElement == null) {
-            throw new IllegalStateException("No entry for game created " + created);
+            throw new IllegalStateException("No entry for game " + gameId);
         }
-        final var title = gameElement.getText();
         final var link = gameElement.findElement(By.tagName("a"));
+        final var creationTimeText = link.getText();
         link.click();
-        final var gamePage = new GamePage(this, title);
+        final var gamePage = new GamePage(this, creationTimeText);
         gamePage.awaitIsReady();
         return gamePage;
     }

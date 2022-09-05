@@ -1,13 +1,13 @@
 import { Observable } from 'rxjs';
-import { filter, first, map, mergeMap, tap } from 'rxjs/operators';
+import {distinctUntilChanged, filter, first, map, mergeMap, tap} from 'rxjs/operators';
 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { AbstractSelfService } from '../service/abstract.self.service';
-import { GameIdentifier } from '../game-identifier';
 import { GameService } from '../service/game.service';
 import { GamesOfScenarioService } from '../service/games-of-scenario.service';
+import {NamedUUID} from "../named-uuid";
 
 @Component({
    selector: 'app-scenario',
@@ -24,8 +24,8 @@ export class GamesComponent implements OnInit {
       private gamesOfScenarioService: GamesOfScenarioService
    ) { }
 
-   static getGamePagePath(game: GameIdentifier) {
-      return '/scenario/' + game.scenario + '/game/' + game.created;
+   static getGamePagePath(game: string) {
+      return '/game/' + game;
    }
 
    get scenario$(): Observable<string> {
@@ -35,14 +35,15 @@ export class GamesComponent implements OnInit {
       return this.route.parent.paramMap.pipe(
          map(params => params.get('scenario')),
          filter(scenario => !!scenario),
-         map((scenario: string | null) => scenario as string)
+         map((scenario: string | null) => scenario as string),
+         distinctUntilChanged()
       );
    }
 
-   get games$(): Observable<GameIdentifier[]> {
+   get games$(): Observable<NamedUUID[]> {
       return this.scenario$.pipe(
          mergeMap(scenario => this.gamesOfScenarioService.get(scenario)),
-         map((games: GameIdentifier[] | null) => {
+         map((games: NamedUUID[] | null) => {
             if (games) {
                return games;
             } else {
@@ -82,10 +83,9 @@ export class GamesComponent implements OnInit {
       this.scenario$.pipe(
          first(),// create only 1 game
          mergeMap(scenario => this.gameService.createGame(scenario)),
-         map(game => game.identifier),
-         tap(gameIdentifier => {
-            this.gamesOfScenarioService.update(gameIdentifier.scenario);
-            this.router.navigateByUrl(GamesComponent.getGamePagePath(gameIdentifier));
+         tap(game => {
+            this.gamesOfScenarioService.update(game.scenario);
+            this.router.navigateByUrl(GamesComponent.getGamePagePath(game.identifier));
          })
       ).subscribe();
    }

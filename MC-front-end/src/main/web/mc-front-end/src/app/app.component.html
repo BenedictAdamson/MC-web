@@ -9,7 +9,7 @@
    <ng-template #mayNotListUsers>
       <span id="users" class="disable">Users</span>
    </ng-template>
-   <a id="current-game" [routerLink]="['/scenario',currentGameScenario$ | async,'game',currentGameCreated$ | async]"
+   <a id="current-game" [routerLink]="['/game',currentGameId$ | async]"
       *ngIf="(currentGameId$ | async) !== null; else noCurrentGame">Current game</a>
    <ng-template #noCurrentGame>
       <span id="current-game" class="disable">Current game</span>

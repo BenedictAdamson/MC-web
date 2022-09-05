@@ -1,25 +1,25 @@
 import { Observable, of } from 'rxjs';
 
 import { AbstractGamesOfScenarioBackEndService } from '../abstract.games-of-scenario.back-end.service'
-import {GameIdentifier} from "../../game-identifier";
+import {NamedUUID} from "../../named-uuid";
 
 export class MockGamesOfScenarioBackEndService extends AbstractGamesOfScenarioBackEndService {
 
 	constructor(
 		private scenario: string,
-		private games: GameIdentifier[]
+		private games: NamedUUID[]
 	) {
 		super();
 	};
 
-	private copy(): Observable<GameIdentifier[]> {
-    const result: GameIdentifier[] = [];
+	private copy(): Observable<NamedUUID[]> {
+    const result: NamedUUID[] = [];
     this.games.forEach(game => result.push(game));
 		return of(result);
 	}
 
 
-	get(scenario: string): Observable<GameIdentifier[] | null> {
+	get(scenario: string): Observable<NamedUUID[] | null> {
 		if (scenario == this.scenario) {
 			return this.copy();
 		} else {

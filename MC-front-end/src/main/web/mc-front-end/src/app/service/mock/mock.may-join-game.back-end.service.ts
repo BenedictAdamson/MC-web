@@ -1,6 +1,5 @@
 import { Observable,  of } from 'rxjs';
 import { AbstractMayJoinGameBackEndService } from '../abstract.may-join-game.back-end.service';
-import { GameIdentifier } from '../../game-identifier'
 
 
 export class MockMayJoinGameBackEndService extends AbstractMayJoinGameBackEndService {
@@ -11,7 +10,7 @@ export class MockMayJoinGameBackEndService extends AbstractMayJoinGameBackEndSer
 		super();
 	}
 
-	get(_id: GameIdentifier): Observable<boolean | null> {
+	get(_id: string): Observable<boolean | null> {
 		return of(this.may);
 	}
 }

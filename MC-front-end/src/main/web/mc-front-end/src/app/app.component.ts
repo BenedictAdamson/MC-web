@@ -37,23 +37,7 @@ export class AppComponent {
 		return this.selfService.mayListUsers$;
 	}
 
-	get currentGameId$(): Observable<GameIdentifier|null> {
+	get currentGameId$(): Observable<string|null> {
 		return this.gameService.getCurrentGameId();
-	}
-
-	get currentGameScenario$(): Observable<string> {
-		return this.currentGameId$.pipe(
-			filter(id => !!id),
-			map(id => id as GameIdentifier),
-			map(id => id.scenario)
-		);
-	}
-
-	get currentGameCreated$(): Observable<string> {
-		return this.currentGameId$.pipe(
-			filter(id => !!id),
-			map(id => id as GameIdentifier),
-			map(id => id.created)
-		);
 	}
 }

@@ -41,11 +41,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
  * <p>
@@ -82,8 +83,11 @@ public class BeWithDbSubSystemIT {
 
                 response.expectStatus().isFound();
                 final var gameId = McBackEndContainer.parseCreateGameResponse(response);
-                final var gameIds = be.getGameIds(scenario, user).collect(toList());
-                assertThat(GameIdentifierResponse.convertToResponse(gameId), in(gameIds));
+                final var namedGameIds = be.getGameIds(scenario, user).toList();
+                final var gameIds = namedGameIds.stream()
+                        .map(NamedUUID::getId)
+                        .collect(Collectors.toUnmodifiableSet());
+                assertThat(gameId, in(gameIds));
             }
 
         }
@@ -368,7 +372,7 @@ public class BeWithDbSubSystemIT {
         assertThat("namedUUID", namedUUIDOptional.isPresent());
         final var scenario = namedUUIDOptional.get().getId();
         final var user = be.getAdministrator();
-        final var response = be.getGameCreationTimesResponse(scenario, user);
+        final var response = be.getGameIdsResponse(scenario, user);
         response.expectStatus().isOk();
         response.expectBodyList(GameIdentifierResponse.class).hasSize(0);
     }

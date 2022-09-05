@@ -5,11 +5,11 @@
 
    <ul id="games">
       <li *ngFor="let game of games$ | async">
-         <a [routerLink]="['/scenario',scenario$ | async,'game',game.created]"
+         <a [routerLink]="['/game', game.id]"
             *ngIf="mayExamineGame$ | async; else mayNotExamineGame">
-            {{game.created}}
+            {{game.title}}
          </a>
-         <ng-template #mayNotExamineGame>{{game}}</ng-template>
+         <ng-template #mayNotExamineGame>{{game.title}}</ng-template>
       </li>
    </ul>
 </nav>

@@ -119,7 +119,7 @@ public class McContainers extends BaseContainers {
         super.close();
     }
 
-    public GameIdentifier createGame(final UUID scenario) {
+    public UUID createGame(final UUID scenario) {
         return be.createGame(scenario);
     }
 

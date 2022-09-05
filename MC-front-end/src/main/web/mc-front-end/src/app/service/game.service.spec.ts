@@ -10,7 +10,6 @@ import {AbstractGameBackEndService} from './abstract.game.back-end.service';
 import {AbstractSelfService} from './abstract.self.service';
 import {EncodedGame, HttpGameBackEndService} from './http.game.back-end.service';
 import {Game} from '../game';
-import {GameIdentifier} from '../game-identifier';
 import {GameService} from './game.service';
 import {User} from '../user';
 import {UserDetails} from '../user-details';
@@ -29,15 +28,15 @@ describe('GameService', () => {
   const USER_ID_B: string = uuid();
   const CHARACTER_ID_A: string = uuid();
   const CHARACTER_ID_B: string = uuid();
-  const GAME_IDENTIFIER_A: GameIdentifier = {scenario: SCENARIO_A, created: CREATED_A};
-  const GAME_IDENTIFIER_B: GameIdentifier = {scenario: SCENARIO_B, created: CREATED_B};
+  const GAME_IDENTIFIER_A: string = uuid();
+  const GAME_IDENTIFIER_B: string = uuid();
   const USERS_A: Map<string, string> = new Map([
     [CHARACTER_ID_A, USER_ID_A],
     [CHARACTER_ID_B, USER_ID_B]
   ]);
   const USERS_B: Map<string, string> = new Map([]);
-  const GAME_A: Game = new Game(GAME_IDENTIFIER_A, 'WAITING_TO_START', true, USERS_A);
-  const GAME_B: Game = new Game(GAME_IDENTIFIER_B, 'RUNNING', false, USERS_B);
+  const GAME_A: Game = new Game(GAME_IDENTIFIER_A, SCENARIO_A, CREATED_A, 'WAITING_TO_START', true, USERS_A);
+  const GAME_B: Game = new Game(GAME_IDENTIFIER_B, SCENARIO_B, CREATED_B, 'RUNNING', false, USERS_B);
 
   const USER_DETAILS_A: UserDetails = {username: 'User A', password: 'passwordA', authorities: ['ROLE_PLAYER']};
   const USER_DETAILS_B: UserDetails = {
@@ -86,7 +85,7 @@ describe('GameService', () => {
   });
 
   const testCreateGame = (createdGame: Game) => {
-    const scenario: string = createdGame.identifier.scenario;
+    const scenario: string = createdGame.scenario;
     const service: GameService = setUp(USER_A);
 
     const result: Observable<Game> = service.createGame(scenario);
@@ -94,7 +93,7 @@ describe('GameService', () => {
     expect(result).withContext('result').not.toBeNull();// guard
     result.subscribe(game => {
       expect(game).withContext('Game').not.toBeNull();// guard
-      expect(game.identifier.scenario).withContext('Game.identifier.scenario').toEqual(scenario);
+      expect(game.scenario).withContext('Game.scenario').toEqual(scenario);
     });
 
     const request = httpTestingController.expectOne(GameService.getApiGamesOfScenarioPath(scenario));
@@ -112,8 +111,8 @@ describe('GameService', () => {
   });
 
 
-  const testStartGame = (done: any, identifier: GameIdentifier) => {
-    const game: Game = new Game(identifier, 'RUNNING', false, USERS_A);
+  const testStartGame = (done: any, identifier: string, scenario: string, created: string) => {
+    const game: Game = new Game(identifier, scenario, created, 'RUNNING', false, USERS_A);
     const service: GameService = setUp(USER_A);
 
     service.startGame(identifier);
@@ -136,16 +135,16 @@ describe('GameService', () => {
   };
 
   it('can start game [A]', (done) => {
-    testStartGame(done, GAME_IDENTIFIER_A);
+    testStartGame(done, GAME_IDENTIFIER_A, SCENARIO_A, CREATED_A);
   });
 
   it('can start game [B]', (done) => {
-    testStartGame(done, GAME_IDENTIFIER_B);
+    testStartGame(done, GAME_IDENTIFIER_B, SCENARIO_B, CREATED_B);
   });
 
 
-  const testStopGame = (done: any, identifier: GameIdentifier) => {
-    const game: Game = new Game(identifier, 'STOPPED', false, USERS_A);
+  const testStopGame = (done: any, identifier: string, scenario: string, created: string) => {
+    const game: Game = new Game(identifier, scenario, created, 'STOPPED', false, USERS_A);
     const service: GameService = setUp(USER_A);
 
     service.stopGame(identifier);
@@ -168,28 +167,30 @@ describe('GameService', () => {
   };
 
   it('can stop game [A]', (done) => {
-    testStopGame(done, GAME_IDENTIFIER_A);
+    testStopGame(done, GAME_IDENTIFIER_A, SCENARIO_A, CREATED_A);
   });
 
   it('can stop game [B]', (done) => {
-    testStopGame(done, GAME_IDENTIFIER_B);
+    testStopGame(done, GAME_IDENTIFIER_B, SCENARIO_B, CREATED_B);
   });
 
   const encode = (game: Game): EncodedGame => {
     const users = {};
     game.users.forEach((value, key) => users[key] = value);
-    return {identifier: game.identifier, runState: game.runState, recruiting: game.recruiting, users};
+    return {identifier: game.identifier, scenario: game.scenario, created: game.created, runState: game.runState, recruiting: game.recruiting, users};
   };
 
 
   const testJoinGame = (done: any, game0: Game, user: User) => {
-    const identifier: GameIdentifier = game0.identifier;
+    const identifier: string = game0.identifier;
     const expectedPath: string = HttpGameBackEndService.getApiJoinGamePath(identifier);
     const users: Map<string, string> = game0.users;
     users.set(CHARACTER_ID_A, user.id);
     // Tough test: the reply identifier is not the same object
     const game1: Game = new Game(
-      {scenario: identifier.scenario, created: identifier.created},
+      identifier,
+      game0.scenario,
+      game0.created,
       game0.runState,
       game0.recruiting,
       users
@@ -225,12 +226,14 @@ describe('GameService', () => {
 
 
   const testEndRecruitment = (done: any, game0: Game) => {
-    const identifier: GameIdentifier = game0.identifier;
+    const identifier: string = game0.identifier;
     const path: string = HttpGameBackEndService.getApiGameEndRecruitmentPath(identifier);
     const service: GameService = setUp(USER_B);
     // Tough test: the reply identifier is not the same object
     const gameReply: Game = new Game(
-      {scenario: identifier.scenario, created: identifier.created},
+      identifier,
+      game0.scenario,
+      game0.created,
       game0.runState,
       false,
       game0.users

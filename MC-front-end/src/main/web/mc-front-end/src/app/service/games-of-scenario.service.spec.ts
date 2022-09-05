@@ -8,7 +8,7 @@ import { HttpClientTestingModule, HttpTestingController, TestRequest } from '@an
 import { AbstractGamesOfScenarioBackEndService } from './abstract.games-of-scenario.back-end.service';
 import { HttpGamesOfScenarioBackEndService } from './http.games-of-scenario.back-end.service';
 import { GamesOfScenarioService, getApiGamesOfScenarioPath } from './games-of-scenario.service';
-import {GameIdentifier} from "../game-identifier";
+import {NamedUUID} from "../named-uuid";
 
 
 describe('GamesOfScenarioService', () => {
@@ -16,13 +16,15 @@ describe('GamesOfScenarioService', () => {
 
 	const SCENARIO_A: string = uuid();
 	const SCENARIO_B: string = uuid();
-	const CREATED_A: string = '1970-01-01T00:00:00.000Z';
-	const CREATED_B: string = '2020-12-31T23:59:59.999Z';
-  const ID_A1: GameIdentifier = {scenario: SCENARIO_A, created: CREATED_A};
-  const ID_A2: GameIdentifier = {scenario: SCENARIO_A, created: CREATED_B};
-	const ID_LIST_0: GameIdentifier[] = [];
-	const ID_LIST_1: GameIdentifier[] = [ID_A1];
-	const ID_LIST_2: GameIdentifier[] = [ID_A1, ID_A2];
+  const ID_A1: string = uuid();
+  const ID_A2: string = uuid();
+  const CREATED_A: string = '2022-09-01T00:00:00Z';
+  const CREATED_B: string = '2022-09-02T00:00:00Z';
+  const NAMED_ID_A: NamedUUID = {id: ID_A1, title: CREATED_A};
+  const NAMED_ID_B: NamedUUID = {id: ID_A2, title: CREATED_B};
+	const ID_LIST_0: NamedUUID[] = [];
+	const ID_LIST_1: NamedUUID[] = [NAMED_ID_A];
+	const ID_LIST_2: NamedUUID[] = [NAMED_ID_A, NAMED_ID_B];
 
 
 	const setUp = function(): GamesOfScenarioService {
@@ -42,7 +44,7 @@ describe('GamesOfScenarioService', () => {
 		expect(service).toBeTruthy();
 	});
 
-	const testGetGamesOfScenario = function(scenario: string, identifiers: GameIdentifier[]) {
+	const testGetGamesOfScenario = function(scenario: string, identifiers: NamedUUID[]) {
 		const service: GamesOfScenarioService = setUp();
 
 		service.get(scenario).subscribe(ids => expect(ids).toEqual(identifiers));
@@ -67,7 +69,7 @@ describe('GamesOfScenarioService', () => {
 
 
 
-	const testGetGamesOfScenarioAfterUpdateGamesOfScenario = function(scenario: string, identifiers: GameIdentifier[]) {
+	const testGetGamesOfScenarioAfterUpdateGamesOfScenario = function(scenario: string, identifiers: NamedUUID[]) {
 		const service: GamesOfScenarioService = setUp();
 
 		service.update(scenario);
@@ -90,7 +92,7 @@ describe('GamesOfScenarioService', () => {
 
 
 
-	const testUpdateGamesOfScenarioAfterGetGamesOfScenario = function(scenario: string, identifiers: GameIdentifier[]) {
+	const testUpdateGamesOfScenarioAfterGetGamesOfScenario = function(scenario: string, identifiers: NamedUUID[]) {
 		const service: GamesOfScenarioService = setUp();
 		const expectedPath: string = getApiGamesOfScenarioPath(scenario);
 
@@ -116,7 +118,7 @@ describe('GamesOfScenarioService', () => {
 
 
 
-	const testGetGamesOfScenarioForChangingValue = function(done: any, scenario: string, identifiers1: GameIdentifier[], identifiers2: GameIdentifier[]) {
+	const testGetGamesOfScenarioForChangingValue = function(done: any, scenario: string, identifiers1: NamedUUID[], identifiers2: NamedUUID[]) {
 		const service: GamesOfScenarioService = setUp();
 		const expectedPath: string = getApiGamesOfScenarioPath(scenario);
     let n: number = 0;
@@ -152,7 +154,7 @@ describe('GamesOfScenarioService', () => {
 
 
 
-	const testGetGamesOfScenarioForUnchangedUpdate = function(scenario: string, identifiers: GameIdentifier[]) {
+	const testGetGamesOfScenarioForUnchangedUpdate = function(scenario: string, identifiers: NamedUUID[]) {
 		const service: GamesOfScenarioService = setUp();
 		const expectedPath: string = getApiGamesOfScenarioPath(scenario);
     let n: number = 0;

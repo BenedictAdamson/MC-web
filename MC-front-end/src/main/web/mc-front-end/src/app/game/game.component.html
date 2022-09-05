@@ -1,6 +1,8 @@
 <section>
-   <h3><a id="game" [routerLink]="['/scenario/',(scenario$ | async),'game',(created$ | async)]">Game created
-         {{created$ | async}}</a></h3>
+  <header>
+    <h2><a id="scenario" [routerLink]="['/scenario/',(scenario$ | async)]">Scenario: {{scenarioTitle$ | async}}</a></h2>
+    <h3><a id="game" [routerLink]="['/game/',(identifier$ | async)]">Game created {{created$ | async}}</a></h3>
+  </header>
    <section>
       <p id="run-state">{{displayedRunState$ | async}}</p>
       <button id="start" *ngIf="mayStart$ | async" (click)="startGame()">Start</button>

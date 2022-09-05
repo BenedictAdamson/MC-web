@@ -2,7 +2,6 @@ package uk.badamson.mc.presentation
 
 import uk.badamson.mc.Authority
 import uk.badamson.mc.Game
-import uk.badamson.mc.GameIdentifier
 import uk.badamson.mc.NamedUUID
 import uk.badamson.mc.Scenario
 
@@ -37,7 +36,8 @@ class CurrentGameFESpec extends MockedBeSpecification {
   private static final def SCENARIO_TITLE = 'Squad assault'
   private static final def SCENARIO = new Scenario(SCENARIO_TITLE, 'Basic fire and movement tactics', CHARACTERS)
   private static final def GAME_CREATION_TIME = Instant.parse('2022-05-31T20:00:00Z')
-  private static final def GAME_ID = new GameIdentifier(SCENARIO_ID, GAME_CREATION_TIME)
+  private static final def GAME_ID = UUID.randomUUID()
+  private static final def NAMED_GAME_ID = new NamedUUID(GAME_ID, GAME_CREATION_TIME.toString())
   private static final def GAME_WAITING_TO_START =
           new Game(GAME_CREATION_TIME, Game.RunState.WAITING_TO_START, true, Map.of())
   static {
@@ -70,8 +70,8 @@ class CurrentGameFESpec extends MockedBeSpecification {
     def user = world.createUserWithRole(Authority.ROLE_PLAYER)
     def game = new Game(GAME_CREATION_TIME, Game.RunState.WAITING_TO_START, true, Map.of(CHARACTER_ID, user.id))
     game.setScenario(SCENARIO)
-    world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(GAME_ID))
-    world.backEnd.mockGetGame(GAME_ID, game)
+    world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(NAMED_GAME_ID))
+    world.backEnd.mockGetGame(GAME_ID, SCENARIO_ID, game)
     world.backEnd.mockCurrentGame(GAME_ID)
 
     when: "logged in as a user with the player role"
@@ -91,8 +91,8 @@ class CurrentGameFESpec extends MockedBeSpecification {
   private void hasAGame() {
     world.backEnd.mockGetAllScenarios(Set.of(new NamedUUID(SCENARIO_ID, SCENARIO_TITLE)))
     world.backEnd.mockGetScenario(SCENARIO_ID, SCENARIO)
-    world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(GAME_ID))
-    world.backEnd.mockGetGame(GAME_ID, GAME_WAITING_TO_START)
+    world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(NAMED_GAME_ID))
+    world.backEnd.mockGetGame(GAME_ID, SCENARIO_ID, GAME_WAITING_TO_START)
   }
 
 

@@ -6,7 +6,6 @@ import { ActivatedRoute } from '@angular/router';
 
 import { GameService } from '../service/game.service';
 import { AbstractSelfService } from '../service/abstract.self.service';
-import { GameIdentifier } from '../game-identifier';
 import { Game } from '../game';
 import { MayJoinGameService } from '../service/may-join-game.service';
 import { Scenario } from '../scenario';
@@ -18,33 +17,6 @@ import { ScenarioService } from '../service/scenario.service';
    styleUrls: ['./game-players.component.css']
 })
 export class GamePlayersComponent implements OnInit {
-
-   private get scenarioId$(): Observable<string> {
-      if (!this.route.parent) {
-         throw new Error('missing this.route.parent');
-      }
-      if (!this.route.parent.parent) {
-         throw new Error('missing this.route.parent.parent');
-      }
-      return this.route.parent.parent.paramMap.pipe(
-         map(params => params.get('scenario')),
-         filter(id => !!id),
-         map((id: string | null) => id as string),
-         distinctUntilChanged() // don't spam identical values
-      );
-   };
-
-   private get created$(): Observable<string> {
-      if (!this.route.parent) {
-         throw new Error('missing this.route.parent');
-      }
-      return this.route.parent.paramMap.pipe(
-         map(params => params.get('created')),
-         filter(created => !!created),
-         map((created: string | null) => created as string),
-         distinctUntilChanged() // don't spam identical values
-      );
-   };
 
    constructor(
       private route: ActivatedRoute,
@@ -59,23 +31,21 @@ export class GamePlayersComponent implements OnInit {
       return scenario.characters.filter(c => game.users.has(c.id)).map(c => c.title);
    }
 
-   private static createIdentifier(scenario: string, created: string) {
-      return { scenario, created };
-   }
-
    private static isEndRecruitmentDisabled(mayManageGames: boolean, game: Game): boolean {
       return !game || !game.recruiting || !mayManageGames;
    }
 
 
-   get identifier$(): Observable<GameIdentifier> {
-      return combineLatest([this.scenarioId$, this.created$]).pipe(
-         map(([scenario, created]) => GamePlayersComponent.createIdentifier(scenario, created)),
-         distinctUntilChanged() // don't spam identical values
-      );
+   get identifier$(): Observable<string> {
+     return this.route.paramMap.pipe(
+       map(params => params.get('game')),
+       filter(identifier => !!identifier),
+       map((identifier: string | null) => identifier as string),
+       distinctUntilChanged() // don't spam identical values
+     );
    };
 
-   get gamePlayers$(): Observable<Game> {
+   get game$(): Observable<Game> {
       return this.identifier$.pipe(
          mergeMap(identifier => this.gameService.get(identifier)),
          filter(gps => !!gps),
@@ -84,7 +54,9 @@ export class GamePlayersComponent implements OnInit {
    }
 
    get scenario$(): Observable<Scenario> {
-      return this.scenarioId$.pipe(
+      return this.game$.pipe(
+         map(game => game.scenario),
+         distinctUntilChanged(),
          mergeMap(id => this.scenarioService.get(id)),
          filter(scenario => !!scenario),
          map((scenario: Scenario | null) => scenario as Scenario)
@@ -100,7 +72,7 @@ export class GamePlayersComponent implements OnInit {
    }
 
    private get characterOfUser$(): Observable<string | null> {
-      return combineLatest([this.selfService.id$, this.gamePlayers$]).pipe(
+      return combineLatest([this.selfService.id$, this.game$]).pipe(
          map(([id, gamePlayers]) => id ? gamePlayers.characterOfUser(id) : null),
          distinctUntilChanged() // don't spam identical values
       );
@@ -123,7 +95,7 @@ export class GamePlayersComponent implements OnInit {
    }
 
    get isEndRecruitmentDisabled$(): Observable<boolean> {
-      return combineLatest([this.mayManageGames$, this.gamePlayers$]).pipe(
+      return combineLatest([this.mayManageGames$, this.game$]).pipe(
          map(([mayManageGames, gamePlayers]) => GamePlayersComponent.isEndRecruitmentDisabled(mayManageGames, gamePlayers))
       );
    }
@@ -138,13 +110,13 @@ export class GamePlayersComponent implements OnInit {
    }
 
    get recruiting$(): Observable<boolean> {
-      return this.gamePlayers$.pipe(
+      return this.game$.pipe(
          map(gps => gps.recruiting)
       );
    }
 
   get playedCharacters$(): Observable<string[]> {
-      return combineLatest([this.scenario$, this.gamePlayers$]).pipe(
+      return combineLatest([this.scenario$, this.game$]).pipe(
          map(([scenario, gamePlayers]) => GamePlayersComponent.playedCharacters(scenario, gamePlayers))
       );
    }

@@ -3,12 +3,10 @@ package uk.badamson.mc.presentation
 import org.mockserver.matchers.Times
 import uk.badamson.mc.Authority
 import uk.badamson.mc.Game
-import uk.badamson.mc.GameIdentifier
 import uk.badamson.mc.NamedUUID
 import uk.badamson.mc.Scenario
 
 import java.time.Instant
-
 /**
  * © Copyright Benedict Adamson 2020-22.
  *
@@ -41,7 +39,8 @@ class GameFESpec extends MockedBeSpecification {
             SCENARIO_TITLE, 'Basic fire and movement tactics', CHARACTERS
     )
     private static final def GAME_CREATION_TIME = Instant.parse('2022-05-31T20:00:00Z')
-    private static final def GAME_ID = new GameIdentifier(SCENARIO_ID, GAME_CREATION_TIME)
+    private static final def GAME_ID = UUID.randomUUID()
+    private static final def NAMED_GAME_ID = new NamedUUID(GAME_ID, GAME_CREATION_TIME.toString())
     private static final Map<UUID, UUID> NO_USERS = Map.of()
     private static final def GAME_WAITING_TO_START = new Game(
             GAME_CREATION_TIME, Game.RunState.WAITING_TO_START, true, NO_USERS
@@ -156,8 +155,8 @@ class GameFESpec extends MockedBeSpecification {
 
         when: "creating a game for the scenario"
         world.backEnd.mockCreateGameForScenario(SCENARIO_ID, GAME_ID)
-        world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(GAME_ID), Times.unlimited())
-        world.backEnd.mockGetGame(GAME_ID, GAME_WAITING_TO_START)
+        world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(NAMED_GAME_ID), Times.unlimited())
+        world.backEnd.mockGetGame(GAME_ID, SCENARIO_ID, GAME_WAITING_TO_START)
         world.backEnd.mockMayJoinGame(GAME_ID, true)
         def gamePage = scenarioPage0.createGame()
 
@@ -203,9 +202,9 @@ class GameFESpec extends MockedBeSpecification {
         hasAScenario()
         def game = new Game(GAME_CREATION_TIME, Game.RunState.WAITING_TO_START, true, NO_USERS)
         game.setScenario(SCENARIO)
-        world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(GAME_ID))
+        world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(NAMED_GAME_ID))
         world.backEnd.mockMayJoinGame(GAME_ID, false)
-        world.backEnd.mockGetGame(GAME_ID, game, Times.once())
+        world.backEnd.mockGetGame(GAME_ID, SCENARIO_ID, game, Times.once())
 
         and: "logged in as a user with the manage games role"
         def homePage = world.logInAsUserWithTheRole(Authority.ROLE_MANAGE_GAMES)
@@ -214,7 +213,7 @@ class GameFESpec extends MockedBeSpecification {
         def gamePage = examineGame(homePage)
         world.backEnd.mockEndRecruitment(GAME_ID)
         game.endRecruitment()
-        world.backEnd.mockGetGame(GAME_ID, game, Times.unlimited())
+        world.backEnd.mockGetGame(GAME_ID, SCENARIO_ID, game, Times.unlimited())
         gamePage.endRecruitement()
 
         then: "the game accepts ending recruitment"
@@ -266,8 +265,8 @@ class GameFESpec extends MockedBeSpecification {
         hasAScenario()
         def game = new Game(GAME_CREATION_TIME, Game.RunState.WAITING_TO_START, true, NO_USERS)
         game.setScenario(SCENARIO)
-        world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(GAME_ID))
-        world.backEnd.mockGetGame(GAME_ID, game, Times.once())
+        world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(NAMED_GAME_ID))
+        world.backEnd.mockGetGame(GAME_ID, SCENARIO_ID, game, Times.once())
         world.backEnd.mockMayJoinGame(GAME_ID, true)
 
         and: "logged in as a user with the player role who is not playing any game"
@@ -282,7 +281,7 @@ class GameFESpec extends MockedBeSpecification {
         when: "the user joins the game"
         world.backEnd.mockJoinGame(GAME_ID)
         game.addUser(CHARACTER_ID, user.id)
-        world.backEnd.mockGetGame(GAME_ID, game, Times.unlimited())
+        world.backEnd.mockGetGame(GAME_ID, SCENARIO_ID, game, Times.unlimited())
         gamePage.joinGame()
 
         then: "the game accepts joining"
@@ -317,10 +316,10 @@ class GameFESpec extends MockedBeSpecification {
     def "Start game"() {
         given: "a game is waiting to start"
         hasAScenario()
-        world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(GAME_ID))
+        world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(NAMED_GAME_ID))
         def game = new Game(GAME_CREATION_TIME, Game.RunState.WAITING_TO_START, true, NO_USERS)
         game.setScenario(SCENARIO)
-        world.backEnd.mockGetGame(GAME_ID, game, Times.once())
+        world.backEnd.mockGetGame(GAME_ID, SCENARIO_ID, game, Times.once())
 
         and: "logged in as a user with the manage games role"
         def homePage = world.logInAsUserWithTheRole(Authority.ROLE_MANAGE_GAMES)
@@ -331,7 +330,7 @@ class GameFESpec extends MockedBeSpecification {
         when: "user starts the game"
         world.backEnd.mockStartGame(GAME_ID)
         game.setRunState(Game.RunState.RUNNING)
-        world.backEnd.mockGetGame(GAME_ID, game)
+        world.backEnd.mockGetGame(GAME_ID, SCENARIO_ID, game)
         gamePage.startGame()
 
         then: "the game accepts starting"
@@ -359,10 +358,10 @@ class GameFESpec extends MockedBeSpecification {
     def "Stop game"() {
         given: "a game is running"
         hasAScenario()
-        world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(GAME_ID))
+        world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(NAMED_GAME_ID))
         def game = new Game(GAME_CREATION_TIME, Game.RunState.RUNNING, true, NO_USERS)
         game.setScenario(SCENARIO)
-        world.backEnd.mockGetGame(GAME_ID, game, Times.once())
+        world.backEnd.mockGetGame(GAME_ID, SCENARIO_ID, game, Times.once())
 
         and: "logged in as a user with the manage games role"
         def homePage = world.logInAsUserWithTheRole(Authority.ROLE_MANAGE_GAMES)
@@ -373,7 +372,7 @@ class GameFESpec extends MockedBeSpecification {
         when: "user stops the game"
         world.backEnd.mockStopGame(GAME_ID)
         game.setRunState(Game.RunState.STOPPED)
-        world.backEnd.mockGetGame(GAME_ID, game)
+        world.backEnd.mockGetGame(GAME_ID, SCENARIO_ID, game)
         gamePage.stopGame()
 
         then: "the game accepts stopping"
@@ -387,10 +386,10 @@ class GameFESpec extends MockedBeSpecification {
     def "Only a game manager may stop a game"() {
         given: "a game is running"
         hasAScenario()
-        world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(GAME_ID))
+        world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(NAMED_GAME_ID))
         def game = new Game(GAME_CREATION_TIME, Game.RunState.RUNNING, true, NO_USERS)
         game.setScenario(SCENARIO)
-        world.backEnd.mockGetGame(GAME_ID, game)
+        world.backEnd.mockGetGame(GAME_ID, SCENARIO_ID, game)
 
         and: "user has the player role but not the manage games role"
         def homePage = world.logInAsUserWithTheRole(Authority.ROLE_PLAYER)
@@ -408,8 +407,8 @@ class GameFESpec extends MockedBeSpecification {
 
     private void hasAGameWaitingToStart() {
         hasAScenario()
-        world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(GAME_ID))
-        world.backEnd.mockGetGame(GAME_ID, GAME_WAITING_TO_START)
+        world.backEnd.mockGetGameIDs(SCENARIO_ID, Set.of(NAMED_GAME_ID))
+        world.backEnd.mockGetGame(GAME_ID, SCENARIO_ID, GAME_WAITING_TO_START)
     }
 
 

@@ -10,7 +10,9 @@ import {GameIdentifier} from './game-identifier';
  */
 export class Game {
   constructor(
-    public identifier: GameIdentifier,
+    public identifier: string,
+    public scenario: string,
+    public created: string,
     public runState: string,
     public recruiting: boolean,
     /**

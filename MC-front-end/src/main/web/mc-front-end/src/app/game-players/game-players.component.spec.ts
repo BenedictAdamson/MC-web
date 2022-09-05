@@ -10,7 +10,6 @@ import {AbstractSelfService} from '../service/abstract.self.service';
 import {AbstractGameBackEndService} from '../service/abstract.game.back-end.service';
 import {AbstractMayJoinGameBackEndService} from '../service/abstract.may-join-game.back-end.service';
 import {AbstractScenarioBackEndService} from '../service/abstract.scenario.back-end.service';
-import {GameIdentifier} from '../game-identifier';
 import {Game} from '../game';
 import {GamePlayersComponent} from './game-players.component';
 import {GameService} from '../service/game.service';
@@ -57,18 +56,18 @@ describe('GamePlayersComponent', () => {
    );
    const USER_ADMIN: User = { id: USER_ID_A, username: 'Allan', password: null, authorities: ['ROLE_MANAGE_GAMES'] };
    const USER_NORMAL: User = { id: USER_ID_B, username: 'Benedict', password: null, authorities: [] };
-   const IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_ID_A, created: CREATED_A };
-   const IDENTIFIER_B: GameIdentifier = { scenario: SCENARIO_ID_B, created: CREATED_B };
+   const IDENTIFIER_A: string = uuid();
+   const IDENTIFIER_B: string = uuid();
    const USERS_A: Map<string, string> = new Map([
       [CHARACTER_ID_A, USER_ID_A],
       [CHARACTER_ID_B, USER_ID_B]
    ]);
    const USERS_B: Map<string, string> = new Map([]);
-   const GAME_A: Game = new Game(IDENTIFIER_A, 'WAITING_TO_START', true, USERS_A);
-   const GAME_B: Game = new Game(IDENTIFIER_B, 'WAITING_TO_START', false, USERS_B);
+   const GAME_A: Game = new Game(IDENTIFIER_A, SCENARIO_ID_A, CREATED_A, 'WAITING_TO_START', true, USERS_A);
+   const GAME_B: Game = new Game(IDENTIFIER_B, SCENARIO_ID_B, CREATED_B, 'WAITING_TO_START', false, USERS_B);
 
-   const getIdentifier = function(gp: GamePlayersComponent): GameIdentifier | null {
-      let identifier: GameIdentifier | null = null;
+   const getIdentifier = function(gp: GamePlayersComponent): string | null {
+      let identifier: string | null = null;
       gp.identifier$.subscribe({
          next: (i) => identifier = i,
          error: (err) => fail(err),
@@ -79,7 +78,7 @@ describe('GamePlayersComponent', () => {
 
    const getGamePlayers = function(gp: GamePlayersComponent): Game | null {
       let gamePlayers: Game | null = null;
-      gp.gamePlayers$.subscribe({
+      gp.game$.subscribe({
          next: (gps) => gamePlayers = gps,
          error: (err) => fail(err),
          complete: () => { }
@@ -131,9 +130,9 @@ describe('GamePlayersComponent', () => {
           SCENARIO_A.description,
          [character]
       );
-      const identifier: GameIdentifier = { scenario: scenario.identifier, created: IDENTIFIER_A.created };
+      const gameId: string = uuid();
       const users: Map<string, string> = new Map([[character.id, userId]]);
-      const game: Game = new Game(identifier, 'WAITING_TO_START', true, users);
+      const game: Game = new Game(gameId, scenario.identifier, CREATED_A, 'WAITING_TO_START', true, users);
 
       testPlayedCharacters(scenario, game, [character.title]);
    };
@@ -150,7 +149,7 @@ describe('GamePlayersComponent', () => {
 
    const setUp = function(game: Game, self: User, mayJoinGame: boolean, scenario: Scenario) {
       selfService = new MockSelfService(self);
-      const identifier: GameIdentifier = game.identifier;
+      const identifier: string = game.identifier;
       const gameBackEndService: AbstractGameBackEndService = new MockGameBackEndService([game], self.id);
       gameService = new GameService(selfService, gameBackEndService);
       const mayJoinGameBackEnd: AbstractMayJoinGameBackEndService = new MockMayJoinGameBackEndService(mayJoinGame);
@@ -163,22 +162,12 @@ describe('GamePlayersComponent', () => {
          providers: [{
             provide: ActivatedRoute,
             useValue: {
-               parent: {
-                  parent: {
-                     paramMap: of(convertToParamMap({ scenario: identifier.scenario }))
-                  },
-                  paramMap: of(convertToParamMap({ created: identifier.created }))
+                  paramMap: of(convertToParamMap({ game: identifier }))
                },
                snapshot: {
-                  parent: {
-                     parent: {
-                        paramMap: convertToParamMap({ scenario: identifier.scenario })
-                     },
-                     paramMap: convertToParamMap({ created: identifier.created })
-                  }
+                 paramMap: of(convertToParamMap({ game: identifier }))
                }
-            }
-         },
+          },
          { provide: GameService, useValue: gameService },
          { provide: MayJoinGameService, useValue: mayJoinGameService },
          { provide: AbstractSelfService, useValue: selfService },
@@ -317,9 +306,9 @@ describe('GamePlayersComponent', () => {
           SCENARIO_A.description,
           [character]
       );
-      const identifier: GameIdentifier = { scenario: scenario.identifier, created: IDENTIFIER_A.created };
+      const gameId: string = IDENTIFIER_A;
       const users: Map<string, string> = new Map([[character.id, user.id]]);
-      const game: Game = new Game(identifier, 'WAITING_TO_START', true, users);
+      const game: Game = new Game(gameId, scenario.identifier, CREATED_A, 'WAITING_TO_START', true, users);
       const expectedPlayedCharacters: string[] = [character.title];
 
       canCreate(game, self, true, scenario, expectedPlayedCharacters);
@@ -345,7 +334,7 @@ describe('GamePlayersComponent', () => {
 
 
    const canCreatePlaying = function(
-      identifier: GameIdentifier, selfId: string, character: NamedUUID
+      gameId: string, scenarioId: string, selfId: string, character: NamedUUID
    ) {
       const expectedPlayingText: string = 'You are playing this game as ' + character.title;
       const recruiting = false;
@@ -355,18 +344,20 @@ describe('GamePlayersComponent', () => {
          password: USER_NORMAL.password,
          authorities: ['ROLE_PLAYER']
       };
-      const scenario: Scenario = new Scenario(
-          identifier.scenario,
-          SCENARIO_A.title,
-          SCENARIO_A.description,
-         [character]
-      );
-      const game: Game = new Game(
-         identifier,
-         runState,
-         recruiting,
-         new Map([[character.id, selfId]])
-      );
+     const scenario: Scenario = new Scenario(
+       scenarioId,
+       SCENARIO_A.title,
+       SCENARIO_A.description,
+       [character]
+     );
+     const game: Game = new Game(
+       gameId,
+       scenarioId,
+       CREATED_A,
+       runState,
+       recruiting,
+       new Map([[character.id, selfId]])
+     );
 
       canCreate(game, self, false, scenario, [character.title]);
 
@@ -378,11 +369,11 @@ describe('GamePlayersComponent', () => {
    };
 
    it('displays the played character [A]', fakeAsync(() => {
-      canCreatePlaying(IDENTIFIER_A, USER_ID_A, CHARACTER_A);
+      canCreatePlaying(IDENTIFIER_A, SCENARIO_ID_A, USER_ID_A, CHARACTER_A);
    }));
 
    it('displays the played character [B]', fakeAsync(() => {
-      canCreatePlaying(IDENTIFIER_B, USER_ID_B, CHARACTER_B);
+      canCreatePlaying(IDENTIFIER_B, SCENARIO_ID_B, USER_ID_B, CHARACTER_B);
    }));
 
 

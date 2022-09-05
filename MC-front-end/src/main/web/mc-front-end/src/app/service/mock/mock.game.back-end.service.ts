@@ -2,7 +2,6 @@ import {Observable, of, throwError} from 'rxjs';
 
 import {AbstractGameBackEndService} from '../abstract.game.back-end.service';
 import {Game} from '../../game';
-import {GameIdentifier} from '../../game-identifier';
 import {v4 as uuid} from "uuid";
 
 
@@ -19,9 +18,9 @@ export class MockGameBackEndService extends AbstractGameBackEndService {
   }
 
 
-  get(id: GameIdentifier): Observable<Game | null> {
+  get(id: string): Observable<Game | null> {
     for (const game of this.games) {
-      if (game.identifier.scenario === id.scenario && game.identifier.created === id.created) {
+      if (game.identifier === id) {
         return of(game);
       }
     }
@@ -29,7 +28,7 @@ export class MockGameBackEndService extends AbstractGameBackEndService {
   }
 
   add(scenario: string): Observable<Game> {
-    const identifier: GameIdentifier = {scenario, created: '2021-01-01T00:00:00.' + ++this.created};
+    const identifier: string = uuid();
     const characterIdA: string = uuid();
     const characterIdB: string = uuid();
     const userIdA: string = uuid();
@@ -38,14 +37,14 @@ export class MockGameBackEndService extends AbstractGameBackEndService {
       [characterIdA, userIdA],
       [characterIdB, userIdB]
     ]);
-    const game: Game = new Game(identifier, 'WAITING_TO_START', true, users);
+    const game: Game = new Game(identifier, scenario, '2021-01-01T00:00:00.' + ++this.created, 'WAITING_TO_START', true, users);
     this.games.push(game);
     return of(game);
   }
 
-  startGame(id: GameIdentifier): Observable<Game> {
+  startGame(id: string): Observable<Game> {
     for (const game of this.games) {
-      if (game.identifier.scenario === id.scenario && game.identifier.created === id.created) {
+      if (game.identifier === id) {
         switch (game.runState) {
           case 'WAITING_TO_START':
             game.runState = 'RUNNING';
@@ -61,9 +60,9 @@ export class MockGameBackEndService extends AbstractGameBackEndService {
     return throwError('Not Found');
   }
 
-  stopGame(id: GameIdentifier): Observable<Game> {
+  stopGame(id: string): Observable<Game> {
     for (const game of this.games) {
-      if (game.identifier.scenario === id.scenario && game.identifier.created === id.created) {
+      if (game.identifier === id) {
         switch (game.runState) {
           case 'WAITING_TO_START':
           case 'RUNNING':
@@ -78,9 +77,9 @@ export class MockGameBackEndService extends AbstractGameBackEndService {
     return throwError('Not Found');
   }
 
-  joinGame(id: GameIdentifier): Observable<Game> {
+  joinGame(id: string): Observable<Game> {
     for (const game of this.games) {
-      if (game.identifier.scenario === id.scenario && game.identifier.created === id.created) {
+      if (game.identifier === id) {
         if (!game.isPlaying(this.selfId)) {
           game.users.set('FIXME', this.selfId);
         }
@@ -90,9 +89,9 @@ export class MockGameBackEndService extends AbstractGameBackEndService {
     return throwError('Not Found');
   }
 
-  endRecruitment(id: GameIdentifier): Observable<Game> {
+  endRecruitment(id: string): Observable<Game> {
     for (const game of this.games) {
-      if (game.identifier.scenario === id.scenario && game.identifier.created === id.created) {
+      if (game.identifier === id) {
         game.recruiting = false;
         return of(game);
       }
@@ -100,7 +99,7 @@ export class MockGameBackEndService extends AbstractGameBackEndService {
     return throwError('Not Found');
   }
 
-  getCurrentGameId(): Observable<GameIdentifier | null> {
+  getCurrentGameId(): Observable<string | null> {
     if (this.games.length == 0) {
       return of(null)
     } else {

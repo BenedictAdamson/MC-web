@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 
 import { AbstractGamesOfScenarioBackEndService } from './abstract.games-of-scenario.back-end.service';
 import { CachingKeyValueService } from './caching.key-value.service';
-import { GameIdentifier } from '../game-identifier';
+import {NamedUUID} from "../named-uuid";
 
 
 
@@ -14,7 +14,7 @@ export function getApiGamesOfScenarioPath(scenario: string): string {
 @Injectable({
 	providedIn: 'root'
 })
-export class GamesOfScenarioService extends CachingKeyValueService<string, GameIdentifier[], void> {
+export class GamesOfScenarioService extends CachingKeyValueService<string, NamedUUID[], void> {
 
 	constructor(
 		backEnd: AbstractGamesOfScenarioBackEndService
@@ -27,7 +27,7 @@ export class GamesOfScenarioService extends CachingKeyValueService<string, GameI
 		return id;
 	}
 
-	protected getKey(_value: GameIdentifier[]): undefined {
+	protected getKey(value: NamedUUID[]): undefined {
 		return undefined;
 	}
 

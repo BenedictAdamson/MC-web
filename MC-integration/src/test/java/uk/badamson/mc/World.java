@@ -91,7 +91,7 @@ public final class World implements AutoCloseable, TestLifecycleAware {
         containers.close();
     }
 
-    public GameIdentifier createGame(final UUID scenario) {
+    public UUID createGame(final UUID scenario) {
         return containers.createGame(scenario);
     }
 

@@ -6,7 +6,6 @@ import {ActivatedRoute, convertToParamMap, Router} from '@angular/router';
 import {AbstractGamesOfScenarioBackEndService} from '../service/abstract.games-of-scenario.back-end.service';
 import {AbstractSelfService} from '../service/abstract.self.service';
 import {Game} from '../game';
-import {GameIdentifier} from '../game-identifier';
 import {GameService} from '../service/game.service';
 import {GamesComponent} from './games.component';
 import {MockSelfService} from '../service/mock/mock.self.service';
@@ -16,6 +15,7 @@ import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing'
 import {RouterTestingModule} from '@angular/router/testing';
 
 import {MockGamesOfScenarioBackEndService} from '../service/mock/mock.games-of-scenario.back-end.service';
+import {NamedUUID} from "../named-uuid";
 
 
 describe('GamesComponent', () => {
@@ -43,12 +43,14 @@ describe('GamesComponent', () => {
     [CHARACTER_ID_B, USER_ID_B]
   ]);
   const USERS_B: Map<string, string> = new Map([]);
-  const GAME_IDENTIFIER_A1: GameIdentifier = {scenario: SCENARIO_A, created: CREATED_A};
-  const GAME_IDENTIFIER_A2: GameIdentifier = {scenario: SCENARIO_A, created: CREATED_B};
-  const GAME_A: Game = new Game(GAME_IDENTIFIER_A1, 'WAITING_TO_START', true, USERS_A);
-  const GAME_B: Game = new Game(GAME_IDENTIFIER_A2, 'RUNNING', false, USERS_B);
-  const GAMES_0: GameIdentifier[] = [];
-  const GAMES_2: GameIdentifier[] = [GAME_IDENTIFIER_A1, GAME_IDENTIFIER_A2];
+  const GAME_IDENTIFIER_A1: string = uuid();
+  const GAME_IDENTIFIER_A2: string = uuid();
+  const GAME_A: Game = new Game(GAME_IDENTIFIER_A1, SCENARIO_A, CREATED_A, 'WAITING_TO_START', true, USERS_A);
+  const GAME_B: Game = new Game(GAME_IDENTIFIER_A2, SCENARIO_A, CREATED_B, 'RUNNING', false, USERS_B);
+  const NAMED_ID_A1: NamedUUID = {id: GAME_IDENTIFIER_A1, title: CREATED_A};
+  const NAMED_ID_A2: NamedUUID = {id: GAME_IDENTIFIER_A2, title: CREATED_B};
+  const GAMES_0: NamedUUID[] = [];
+  const GAMES_2: NamedUUID[] = [NAMED_ID_A1, NAMED_ID_A2];
 
   const getScenario = (gc: GamesComponent): string | null => {
     let scenario: string | null = null;
@@ -61,8 +63,8 @@ describe('GamesComponent', () => {
     return scenario;
   };
 
-  const getGames = (gc: GamesComponent): GameIdentifier[] | null => {
-    let games: GameIdentifier[] | null = null;
+  const getGames = (gc: GamesComponent): NamedUUID[] | null => {
+    let games: NamedUUID[] | null = null;
     gc.games$.subscribe({
       next: (g) => games = g,
       error: (err) => fail(err),
@@ -72,7 +74,7 @@ describe('GamesComponent', () => {
     return games;
   };
 
-  const setUpForNgInit = (self: User, scenario: string, gamesOfScenario: GameIdentifier[]) => {
+  const setUpForNgInit = (self: User, scenario: string, gamesOfScenario: NamedUUID[]) => {
     gameServiceSpy = null;
     gamesOfScenarioBackEndService = new MockGamesOfScenarioBackEndService(scenario, gamesOfScenario);
 
@@ -139,7 +141,7 @@ describe('GamesComponent', () => {
   };
 
 
-  const testNgInit = (self: User, scenario: string, gamesOfScenario: GameIdentifier[]) => {
+  const testNgInit = (self: User, scenario: string, gamesOfScenario: NamedUUID[]) => {
     const expectHasGameLinks: boolean = self.authorities.includes('ROLE_MANAGE_GAMES') || self.authorities.includes('ROLE_PLAYER');
     setUpForNgInit(self, scenario, gamesOfScenario);
 
@@ -155,13 +157,11 @@ describe('GamesComponent', () => {
       const gameEntries: NodeListOf<HTMLLIElement> = gamesList.querySelectorAll('li');
       expect(gameEntries.length).withContext('number of game entries').toBe(gamesOfScenario.length);
       for (let i = 0; i < gameEntries.length; i++) {
-        const expectedGame: GameIdentifier = gamesOfScenario[i];
-        const expectedGameCreationTime: string = expectedGame.created;
         const entry: HTMLLIElement = gameEntries.item(i);
         if (expectHasGameLinks) {
           const link: HTMLAnchorElement | null = entry.querySelector('a');
           const linkText: string | null = link ? link.textContent : null;
-          expect(linkText).withContext('entry link text contains game creation time').toContain(expectedGameCreationTime);
+          expect(linkText).withContext('entry link text').toBeTruthy();
         }
       }
     }
@@ -178,7 +178,7 @@ describe('GamesComponent', () => {
 
 
   const setUpForCreateGame = (game: Game) => {
-    const scenario: string = game.identifier.scenario;
+    const scenario: string = game.scenario;
     const userServiceStub = new MockGamesOfScenarioBackEndService(scenario, []);
 
     gameServiceSpy = jasmine.createSpyObj('GameService', ['createGame']);

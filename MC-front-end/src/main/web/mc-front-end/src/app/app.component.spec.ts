@@ -6,7 +6,6 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { AbstractGameBackEndService } from './service/abstract.game.back-end.service';
 import { AbstractSelfService } from './service/abstract.self.service';
 import { AppComponent } from './app.component';
-import { GameIdentifier } from './game-identifier';
 import { Game } from './game';
 import { GameService } from './service/game.service';
 import { HomeComponent } from './home/home.component';
@@ -20,15 +19,15 @@ describe('AppComponent', () => {
 
    const SCENARIO_ID_A: string = uuid();
    const CREATED_A = '1970-01-01T00:00:00.000Z';
-   const GAME_IDENTIFIER_A: GameIdentifier = { scenario: SCENARIO_ID_A, created: CREATED_A };
+   const GAME_IDENTIFIER_A: string = uuid();
 
    let component: AppComponent;
    let fixture: ComponentFixture<AppComponent>;
    let selfService: AbstractSelfService;
 
-   const setUp = (authorities: string[], currentGame: GameIdentifier | null) => {
+   const setUp = (authorities: string[], currentGame: string | null) => {
       const self: User = { id: uuid(), username: 'Benedict', password: null, authorities };
-      const game: Game | null = currentGame ? new Game(currentGame, 'WAITING_TO_START', true, new Map([[uuid(), self.id]])) : null;
+      const game: Game | null = currentGame ? new Game(currentGame, SCENARIO_ID_A, CREATED_A, 'WAITING_TO_START', true, new Map([[uuid(), self.id]])) : null;
       selfService = new MockSelfService(self);
       const gameBackEndService: AbstractGameBackEndService = new MockGameBackEndService(game?[game]:[], self.id);
       const gameService: GameService = new GameService(selfService, gameBackEndService);
@@ -51,7 +50,7 @@ describe('AppComponent', () => {
       component = fixture.componentInstance;
    };
 
-   const testSetUp = (authorities: string[], expectMayListUsers: boolean, currentGame: GameIdentifier | null) => {
+   const testSetUp = (authorities: string[], expectMayListUsers: boolean, currentGame: string | null) => {
       setUp(authorities, currentGame);
       fixture.detectChanges();
 

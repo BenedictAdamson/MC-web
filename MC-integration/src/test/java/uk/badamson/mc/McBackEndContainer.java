@@ -34,7 +34,6 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
 import org.testcontainers.utility.DockerImageName;
-import uk.badamson.mc.rest.GameIdentifierResponse;
 import uk.badamson.mc.rest.Paths;
 
 import java.net.URI;
@@ -90,7 +89,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
         }
     }
 
-    static GameIdentifier parseCreateGameResponse(final ResponseSpec response) {
+    static UUID parseCreateGameResponse(final ResponseSpec response) {
         Objects.requireNonNull(response, "response");
 
         try {
@@ -98,7 +97,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
                     .getResponseHeaders().getLocation();
             Objects.requireNonNull(location, "Has Location header");
             final var uriComponents = GAME_URI_TEMPLATE.match(location.getPath());
-            return Paths.parseGameIdentifier(uriComponents.get("game"));
+            return UUID.fromString(uriComponents.get("game"));
         } catch (final NullPointerException e) {
             throw new IllegalArgumentException("Invalid response", e);
         }
@@ -199,7 +198,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
         return request;
     }
 
-    public GameIdentifier createGame(final UUID scenario) {
+    public UUID createGame(final UUID scenario) {
         Objects.requireNonNull(scenario, "scenario");
 
         final var cookies = login(administrator);
@@ -219,7 +218,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
                 .headers(headers -> headers.setBasicAuth(username, password));
     }
 
-    private RequestBodySpec createJoinGameRequest(final GameIdentifier game,
+    private RequestBodySpec createJoinGameRequest(final UUID game,
                                                   final User user, final MultiValueMap<String, HttpCookie> cookies) {
         Objects.requireNonNull(game, "game");
         Objects.requireNonNull(user, "user");
@@ -233,7 +232,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
         return request;
     }
 
-    private RequestBodySpec createStartGameRequest(final GameIdentifier game,
+    private RequestBodySpec createStartGameRequest(final UUID game,
                                                    final User user, final MultiValueMap<String, HttpCookie> cookies) {
         Objects.requireNonNull(game, "game");
         Objects.requireNonNull(user, "user");
@@ -251,13 +250,14 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
         return administrator;
     }
 
-    public Stream<GameIdentifierResponse> getGameIds(final UUID scenario, User user) {
-        final var response = getGameCreationTimesResponse(scenario, user);
+    public Stream<NamedUUID> getGameIds(final UUID scenario, User user) {
+        final var response = getGameIdsResponse(scenario, user);
         response.expectStatus().isOk();
-        return response.returnResult(GameIdentifierResponse.class).getResponseBody().toStream();
+        return response.returnResult(uk.badamson.mc.rest.NamedUUID.class).getResponseBody().toStream()
+                .map(ni -> new NamedUUID(ni.getId(), ni.getTitle()));
     }
 
-    ResponseSpec getGameCreationTimesResponse(final UUID scenario, User user) {
+    ResponseSpec getGameIdsResponse(final UUID scenario, User user) {
         return getJsonAsAdministrator(Paths.createPathForGamesOfScenario(scenario));
     }
 
@@ -283,7 +283,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
                 .getResponseBody().toStream().map(ni -> new NamedUUID(ni.getId(), ni.getTitle()));
     }
 
-    public void joinGame(final GameIdentifier game, final User user) {
+    public void joinGame(final UUID game, final User user) {
         Objects.requireNonNull(game, "game");
         Objects.requireNonNull(user, "user");
 
@@ -321,7 +321,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
         response.expectStatus().is2xxSuccessful();
     }
 
-    public void startGame(final GameIdentifier game) {
+    public void startGame(final UUID game) {
         Objects.requireNonNull(game, "game");
 
         final var cookies = login(administrator);

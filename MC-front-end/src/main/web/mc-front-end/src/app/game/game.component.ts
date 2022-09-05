@@ -6,8 +6,9 @@ import { ActivatedRoute } from '@angular/router';
 
 import { AbstractSelfService } from '../service/abstract.self.service';
 import { Game } from '../game';
-import { GameIdentifier } from '../game-identifier';
 import { GameService } from '../service/game.service';
+import {ScenarioService} from "../service/scenario.service";
+import {Scenario} from "../scenario";
 
 @Component({
    selector: 'app-game',
@@ -19,6 +20,7 @@ export class GameComponent implements OnInit {
    constructor(
       private route: ActivatedRoute,
       private gameService: GameService,
+      private scenarioService: ScenarioService,
       private selfService: AbstractSelfService
    ) { }
 
@@ -32,35 +34,13 @@ export class GameComponent implements OnInit {
       return '?';// never happens
    }
 
-
-   get scenario$(): Observable<string> {
-      if (!this.route.parent) { throw new Error('missing this.route.parent'); }
-      return this.route.parent.paramMap.pipe(
-         map(params => params.get('scenario')),
-         filter(scenario => !!scenario),
-         map((id: string | null) => id as string)
-      );
-   };
-
-   get created$(): Observable<string> {
-      if (!this.route) { throw new Error('missing this.route.parent'); }
-      return this.route.paramMap.pipe(
-         map(params => params.get('created')),
-         filter(created => !!created),
-         map((created: string | null) => created as string)
-      );
-   };
-
-   private static createIdentifier(scenario: string, created: string): GameIdentifier {
-      return { scenario, created };
-   }
-
-   get identifier$(): Observable<GameIdentifier> {
-      return combineLatest([this.scenario$, this.created$]).pipe(
-         map(([scenario, created]) => GameComponent.createIdentifier(scenario, created)),
-         distinctUntilChanged() // don't spam identical values
-      );
-   };
+  get identifier$(): Observable<string> {
+    return this.route.paramMap.pipe(
+      map(params => params.get('game')),
+      filter(identifier => !!identifier),
+      map((identifier: string | null) => identifier as string)
+    );
+  };
 
 
    get game$(): Observable<Game> {
@@ -70,6 +50,30 @@ export class GameComponent implements OnInit {
          map((game: Game | null) => game as Game)
       );
    }
+
+  get scenario$(): Observable<string> {
+    return this.game$.pipe(
+      map(game => game.scenario),
+      distinctUntilChanged() // don't spam identical values
+    );
+  };
+
+  get scenarioTitle$(): Observable<string> {
+    return this.scenario$.pipe(
+      mergeMap(identifier => this.scenarioService.get(identifier)),
+      filter(scenario => !!scenario),
+      map((scenario: Scenario | null) => scenario as Scenario),
+      map(scenario => scenario.title),
+      distinctUntilChanged() // don't spam identical values
+    );
+  };
+
+  get created$(): Observable<string> {
+    return this.game$.pipe(
+      map(game => game.created),
+      distinctUntilChanged() // don't spam identical values
+    );
+  };
 
    private get runState$(): Observable<string> {
       return this.game$.pipe(

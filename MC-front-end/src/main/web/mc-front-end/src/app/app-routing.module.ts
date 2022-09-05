@@ -13,30 +13,30 @@ import { UserComponent } from './user/user.component';
 import { UsersComponent } from './users/users.component';
 
 const routes: Routes = [
+  {
+    path: 'game/:game',
+    component: GameComponent,
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        component: GamePlayersComponent
+      }
+    ]
+  },
 	{
 		path: 'scenario',
 		children: [
 			{
 				path: ':scenario',
 				component: ScenarioComponent,
-				children: [
-					{
-						path: 'game/:created',
-						component: GameComponent,
-						children: [
-							{
-								path: '',
-								pathMatch: 'full',
-								component: GamePlayersComponent
-							}
-						]
-					},
-					{
-						path: '',
-						pathMatch: 'full',
-						component: GamesComponent
-					}
-				]
+        children: [
+          {
+            path: '',
+            pathMatch: 'full',
+            component: GamesComponent
+          }
+        ]
 			},
 			{
 				path: '',

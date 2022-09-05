@@ -5,16 +5,15 @@ import {Injectable} from '@angular/core';
 import {AbstractGameBackEndService} from './abstract.game.back-end.service';
 import {CachingKeyValueService} from './caching.key-value.service';
 import {Game} from '../game';
-import {GameIdentifier} from '../game-identifier';
 import {AbstractSelfService} from "./abstract.self.service";
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class GameService extends CachingKeyValueService<GameIdentifier, Game, string> {
+export class GameService extends CachingKeyValueService<string, Game, string> {
 
-  private currentId: ReplaySubject<GameIdentifier | null> | null = null;
+  private currentId: ReplaySubject<string | null> | null = null;
 
   constructor(
     private readonly selfService: AbstractSelfService,
@@ -33,14 +32,14 @@ export class GameService extends CachingKeyValueService<GameIdentifier, Game, st
     return '/api/scenario/' + scenario + '/games';
   }
 
-  static getApiGamePath(id: GameIdentifier): string {
-    return '/api/game/' + id.scenario + '@' + id.created;
+  static getApiGamePath(id: string): string {
+    return '/api/game/' + id;
   }
-  static getApiJoinGamePath(game: GameIdentifier): string {
+  static getApiJoinGamePath(game: string): string {
     return GameService.getApiGamePath(game) + '?join';
   }
 
-  static getApiGameEndRecruitmentPath(game: GameIdentifier): string {
+  static getApiGameEndRecruitmentPath(game: string): string {
     return GameService.getApiGamePath(game) + '?endRecruitment';
   }
 
@@ -61,7 +60,7 @@ export class GameService extends CachingKeyValueService<GameIdentifier, Game, st
     return this.add(scenario) as Observable<Game>;
   }
 
-  startGame(game: GameIdentifier): void {
+  startGame(game: string): void {
     this.gameBackEndService.startGame(game).subscribe(
       g => {
         this.setValue(g);
@@ -69,7 +68,7 @@ export class GameService extends CachingKeyValueService<GameIdentifier, Game, st
     );
   }
 
-  stopGame(game: GameIdentifier): void {
+  stopGame(game: string): void {
     this.gameBackEndService.stopGame(game).subscribe(
       g => {
         this.setValue(g);
@@ -92,7 +91,7 @@ export class GameService extends CachingKeyValueService<GameIdentifier, Game, st
    * @param game
    * The unique ID of the game to join.
    */
-  joinGame(game: GameIdentifier): void {
+  joinGame(game: string): void {
     this.gameBackEndService.joinGame(game).subscribe(
       gps => {
         this.setValue(gps);
@@ -104,7 +103,7 @@ export class GameService extends CachingKeyValueService<GameIdentifier, Game, st
     );
   }
 
-  getCurrentGameId(): Observable<GameIdentifier | null> {
+  getCurrentGameId(): Observable<string | null> {
     if (!this.currentId) {
       this.currentId = new ReplaySubject(1);
       this.updateCurrentGameIdRS(this.currentId);
@@ -137,21 +136,21 @@ export class GameService extends CachingKeyValueService<GameIdentifier, Game, st
    * @param game
    * The unique ID of the game for which to end recuitment.
    */
-  endRecruitment(game: GameIdentifier): void {
+  endRecruitment(game: string): void {
     this.gameBackEndService.endRecruitment(game).subscribe(
       gps => this.setValue(gps)
     );
   }
 
-  protected createKeyString(id: GameIdentifier): string {
-    return id.scenario + '/' + id.created;
+  protected createKeyString(id: string): string {
+    return id;
   }
 
-  protected getKey(value: Game): GameIdentifier {
+  protected getKey(value: Game): string {
     return value.identifier;
   }
 
-  private updateCurrentGameIdRS(currentGameId: ReplaySubject<GameIdentifier | null>): void {
+  private updateCurrentGameIdRS(currentGameId: ReplaySubject<string | null>): void {
     this.gameBackEndService.getCurrentGameId().subscribe(
       g => currentGameId.next(g)
     );
