@@ -324,7 +324,8 @@ public final class MockMcBackEndContainer extends MockServerContainer {
                 .withBody(encodeAsJson(UserResponse.convertToResponse(user)));
     }
 
-    private static final DockerImageName MOCKSERVER_IMAGE = DockerImageName.parse("mockserver/mockserver:5.13.2");
+    private static final DockerImageName MOCKSERVER_IMAGE =
+            DockerImageName.parse("mockserver/mockserver:5.14.0");
     private static final ObjectMapper MAPPER;
 
     static {
