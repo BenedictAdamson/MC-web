@@ -60,23 +60,49 @@
             </configuration>
          </plugin>
          <plugin>
-            <groupId>com.spotify</groupId>
-            <artifactId>dockerfile-maven-plugin</artifactId>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <configuration>
+               <images>
+                  <image>
+                     <name>index.docker.io/benedictadamson/awaitport:${project.version}</name>
+                     <build>
+                        <from>alpine:3</from>
+                        <assembly>
+                           <inline>
+                              <files>
+                                 <file>
+                                    <source>src/main/docker/awaitport/awaitport</source>
+                                    <destName>bin/awaitport</destName>
+                                 </file>
+                              </files>
+                           </inline>
+                        </assembly>
+                        <entryPoint>
+                           <exec>
+                              <arg>/bin/awaitport</arg>
+                           </exec>
+                        </entryPoint>
+                     </build>
+                  </image>
+               </images>
+            </configuration>
             <executions>
                <execution>
-                  <id>default</id>
+                  <id>build image</id>
+                  <phase>package</phase>
                   <goals>
                      <goal>build</goal>
+                  </goals>
+               </execution>
+               <execution>
+                  <id>deploy image</id>
+                  <phase>deploy</phase>
+                  <goals>
                      <goal>push</goal>
                   </goals>
                </execution>
             </executions>
-            <configuration>
-               <repository>index.docker.io/benedictadamson/awaitport</repository>
-               <tag>${project.version}</tag>
-               <useMavenSettingsForAuth>true</useMavenSettingsForAuth>
-               <contextDirectory>src/main/docker/awaitport</contextDirectory>
-            </configuration>
          </plugin>
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
