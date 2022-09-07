@@ -8,6 +8,7 @@
       <version>3.0.1-SNAPSHOT</version>
    </parent>
    <artifactId>MC-front-end</artifactId>
+   <packaging>pom</packaging>
    <build>
       <resources>
          <resource>
@@ -100,16 +101,10 @@
                <execution>
                   <phase>process-resources</phase>
                   <goals>
-                     <goal>copy-resources</goal>
+                     <goal>resources</goal>
                   </goals>
                   <configuration>
-                     <outputDirectory>${project.build.directory}/docker</outputDirectory>
-                     <resources>
-                        <resource>
-                           <directory>src/main/docker</directory>
-                           <filtering>false</filtering>
-                        </resource>
-                     </resources>
+                     <outputDirectory>${project.build.directory}</outputDirectory>
                   </configuration>
                </execution>
             </executions>
@@ -125,9 +120,10 @@
                   </goals>
                   <configuration>
                      <deb>${project.build.directory}/missioncommand-fe_${debian-package.version}_all.deb</deb>
+                     <skipPOMs>false</skipPOMs>
                      <dataSet>
                         <data>
-                           <src>${project.build.directory}/classes/etc/nginx/conf.d</src>
+                           <src>${project.build.directory}/etc/nginx/conf.d</src>
                            <type>directory</type>
                            <mapper>
                               <type>perm</type>
