@@ -252,20 +252,16 @@
          </plugin>
       </plugins>
    </reporting>
-   <dependencyManagement>
-      <dependencies>
-         <dependency>
-            <groupId>uk.badamson.mc</groupId>
-            <artifactId>MC-core</artifactId>
-         </dependency>
-         <dependency>
-            <groupId>uk.badamson.mc</groupId>
-            <artifactId>MC-REST</artifactId>
-            <version>${project.parent.version}</version>
-         </dependency>
-      </dependencies>
-   </dependencyManagement>
    <dependencies>
+      <dependency>
+         <groupId>uk.badamson.mc</groupId>
+         <artifactId>MC-core</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>uk.badamson.mc</groupId>
+         <artifactId>MC-REST</artifactId>
+         <version>${project.parent.version}</version>
+      </dependency>
       <!-- Third-party dependencies: -->
       <dependency>
          <groupId>com.fasterxml.jackson.datatype</groupId>
