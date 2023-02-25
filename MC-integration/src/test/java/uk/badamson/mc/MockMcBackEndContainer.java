@@ -325,7 +325,7 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static final DockerImageName MOCKSERVER_IMAGE =
-            DockerImageName.parse("mockserver/mockserver:5.14.0");
+            DockerImageName.parse("mockserver/mockserver:5.15.0");
     private static final ObjectMapper MAPPER;
 
     static {
