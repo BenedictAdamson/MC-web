@@ -15,6 +15,7 @@
 	<rule ref="category/java/bestpractices.xml/UnusedPrivateField" />
 	<rule ref="category/java/bestpractices.xml/UnusedPrivateMethod" />
 
+
 	<rule ref="category/java/codestyle.xml/EmptyControlStatement" />
 	<rule ref="category/java/codestyle.xml/ExtendsObject" />
 	<rule ref="category/java/codestyle.xml/ForLoopShouldBeWhileLoop" />
@@ -23,6 +24,7 @@
 	<rule ref="category/java/codestyle.xml/UnnecessaryImport" />
 	<rule ref="category/java/codestyle.xml/UnnecessaryModifier" />
 	<rule ref="category/java/codestyle.xml/UnnecessaryReturn" />
+	<rule ref="category/java/codestyle.xml/UnnecessarySemicolon" />
 	<rule ref="category/java/codestyle.xml/UselessParentheses" />
 	<rule ref="category/java/codestyle.xml/UselessQualifiedThis" />
 
@@ -44,7 +46,6 @@
 	<rule
 		ref="category/java/errorprone.xml/DontUseFloatTypeForLoopIndices" />
 	<rule ref="category/java/errorprone.xml/EmptyCatchBlock" />
-	<rule ref="category/java/errorprone.xml/EmptyStatementNotInLoop" />
 	<rule ref="category/java/errorprone.xml/JumbledIncrementer" />
 	<rule ref="category/java/errorprone.xml/MisplacedNullCheck" />
 	<rule
