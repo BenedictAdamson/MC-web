@@ -9,7 +9,6 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.lifecycle.Startable;
 import org.testcontainers.lifecycle.TestDescription;
 import org.testcontainers.lifecycle.TestLifecycleAware;
-import org.testcontainers.utility.DockerImageName;
 import uk.badamson.mc.presentation.McFrontEndContainer;
 
 import javax.annotation.Nonnull;
@@ -25,7 +24,6 @@ import java.util.stream.Stream;
 
 abstract class BaseContainers implements Startable, TestLifecycleAware {
     private static final String FE_HOST = "fe";
-    private static final DockerImageName BROWSER_IMAGE_NAME = DockerImageName.parse("selenium/standalone-firefox:4.1.4");
     @Nullable
     private final Path failureRecordingDirectory;
     private final Network network = Network.newNetwork();
@@ -49,7 +47,7 @@ abstract class BaseContainers implements Startable, TestLifecycleAware {
     private static BrowserWebDriverContainer<?> createBrowserContainer(
             @Nonnull Network network,
             @Nullable final Path failureRecordingDirectory) {
-        final var browser = new BrowserWebDriverContainer<>(BROWSER_IMAGE_NAME);
+        final var browser = new BrowserWebDriverContainer<>();
         browser.withCreateContainerCmdModifier(cmd -> Objects.requireNonNull(cmd.getHostConfig())
                 .withCpuCount(2L));
         browser.withCapabilities(
