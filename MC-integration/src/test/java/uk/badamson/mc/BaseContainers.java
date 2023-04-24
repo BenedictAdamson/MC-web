@@ -30,7 +30,7 @@ abstract class BaseContainers implements Startable, TestLifecycleAware {
     private final McFrontEndContainer frontEnd;
     private final BrowserWebDriverContainer<?> browser;
 
-    public BaseContainers(@Nullable Path failureRecordingDirectory) {
+    protected BaseContainers(@Nullable Path failureRecordingDirectory) {
         this.failureRecordingDirectory = failureRecordingDirectory;
         if (failureRecordingDirectory != null) {
             try {
@@ -44,6 +44,7 @@ abstract class BaseContainers implements Startable, TestLifecycleAware {
         browser = createBrowserContainer(network, failureRecordingDirectory);
     }
 
+    @Nonnull
     private static BrowserWebDriverContainer<?> createBrowserContainer(
             @Nonnull Network network,
             @Nullable final Path failureRecordingDirectory) {

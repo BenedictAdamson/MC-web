@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2019-22.
+ * © Copyright Benedict Adamson 2019-23.
  *
  * This file is part of MC.
  *
@@ -22,24 +22,18 @@ import org.testcontainers.containers.GenericContainer;
 import uk.badamson.mc.presentation.McReverseProxyContainer;
 import uk.badamson.mc.repository.McDatabaseContainer;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.UUID;
-import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-/**
- * <p>
- * An assembly of Testcontainers Docker containers for integration testing the
- * MC software.
- * </p>
- */
 public class McContainers extends BaseContainers {
 
-    public static final String ADMINISTRATOR_PASSWORD = "secret4";
+    private static final String ADMINISTRATOR_PASSWORD = "secret4";
     private static final String BE_HOST = "be";
     private static final String DB_HOST = "db";
     private static final String REVERSE_PROXY_HOST = "in";
@@ -58,7 +52,7 @@ public class McContainers extends BaseContainers {
      *                                  verbose information about failed test cases. Or {@code null} if
      *                                  no such records are to be made.
      */
-    public McContainers(final Path failureRecordingDirectory) {
+    public McContainers(@Nullable final Path failureRecordingDirectory) {
         super(failureRecordingDirectory);
         db = new McDatabaseContainer(
                 DB_ROOT_PASSWORD, DB_USER_PASSWORD).withNetwork(getNetwork())
@@ -80,23 +74,9 @@ public class McContainers extends BaseContainers {
         return BASE_PRIVATE_NETWORK_URI.resolve(path);
     }
 
-    /**
-     * <p>
-     * Add a user in the database, through the back-end, using the API of the
-     * back-end.
-     * </p>
-     * <p>
-     * As this does not use the front-end, it is more suitable for setting up
-     * test-cases.
-     * </p>
-     *
-     * @param userDetails The details of the user to add.
-     * @return the unique ID of the added user
-     * @throws NullPointerException If {@code userDetails} is null
-     * @throws RuntimeException     If the addition was rejected by the back-end.
-     */
-    public UUID addUser(final BasicUserDetails userDetails) {
-        return be.addUser(userDetails);
+    @Nonnull
+    public final McBackEndContainer getBackEnd() {
+        return be;
     }
 
     public void assertThatNoErrorMessagesLogged() {
@@ -119,10 +99,7 @@ public class McContainers extends BaseContainers {
         super.close();
     }
 
-    public UUID createGame(final UUID scenario) {
-        return be.createGame(scenario);
-    }
-
+    @Nonnull
     public URI createUriFromPath(final HttpServer server, final String path) {
         GenericContainer<?> container = switch (server) {
             case BACK_END -> be;
@@ -132,10 +109,6 @@ public class McContainers extends BaseContainers {
         final var base = URI.create("http://" + container.getHost() + ":"
                 + container.getFirstMappedPort());
         return base.resolve(path);
-    }
-
-    public Stream<NamedUUID> getScenarios() {
-        return be.getScenarios();
     }
 
     @Override

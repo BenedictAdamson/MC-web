@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2020-22.
+ * © Copyright Benedict Adamson 2020-23.
  *
  * This file is part of MC.
  *
@@ -22,6 +22,7 @@ import org.testcontainers.lifecycle.TestDescription;
 import org.testcontainers.lifecycle.TestLifecycleAware;
 import uk.badamson.mc.presentation.HomePage;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.nio.file.Path;
@@ -92,13 +93,18 @@ public final class World implements AutoCloseable, TestLifecycleAware {
     }
 
     public UUID createGame(final UUID scenario) {
-        return containers.createGame(scenario);
+        return containers.getBackEnd().createGame(scenario);
     }
 
     private User createUser(final Set<Authority> authorities) {
         final var userDetails = generateBasicUserDetails(authorities);
-        final var id = containers.addUser(userDetails);
+        final var id = addUser(userDetails);
         return new User(id, userDetails);
+    }
+
+    @Nonnull
+    private UUID addUser(final BasicUserDetails userDetails) {
+        return containers.getBackEnd().addUser(userDetails);
     }
 
     public User currentUserHasRoles(final Set<Authority> included,
@@ -134,8 +140,9 @@ public final class World implements AutoCloseable, TestLifecycleAware {
         return homePage;
     }
 
+    @Nonnull
     public Stream<NamedUUID> getScenarios() {
-        return containers.getScenarios();
+        return containers.getBackEnd().getScenarios();
     }
 
     /**
