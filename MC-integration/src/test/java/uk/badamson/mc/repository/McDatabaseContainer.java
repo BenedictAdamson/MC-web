@@ -1,6 +1,6 @@
 package uk.badamson.mc.repository;
 /*
- * © Copyright Benedict Adamson 2019-20,22.
+ * © Copyright Benedict Adamson 2019-23.
  *
  * This file is part of MC.
  *
@@ -28,22 +28,17 @@ import uk.badamson.mc.Version;
 
 import java.time.Duration;
 
-/**
- * <p>
- * A Testcontainers Docker container for the MC-database.
- * </p>
- */
 public final class McDatabaseContainer
         extends GenericContainer<McDatabaseContainer> {
 
-    public static final String VERSION = Version.VERSION;
+    private static final String VERSION = Version.VERSION;
 
-    public static final DockerImageName IMAGE = DockerImageName
+    private static final DockerImageName IMAGE = DockerImageName
             .parse("index.docker.io/benedictadamson/mc-database:" + VERSION);
 
-    public static final int PORT = 27017;
+    private static final int PORT = 27017;
 
-    public static final String AUTHENTICATION_DB = "admin";
+    private static final String AUTHENTICATION_DB = "admin";
 
     private static final String NORMAL_USER = "mc";
 
@@ -55,17 +50,13 @@ public final class McDatabaseContainer
             .withStrategy(Wait.forListeningPort())
             .withStartupTimeout(STARTUP_TIME);
 
-    public final MongoCredential userCredentials;
-
-    public final MongoCredential rootCredentials;
-
     @SuppressWarnings("resource")
     public McDatabaseContainer(final String rootPassword,
                                final String userPassword) {
         super(IMAGE);
-        userCredentials = MongoCredential.createCredential(NORMAL_USER,
+        MongoCredential.createCredential(NORMAL_USER,
                 AUTHENTICATION_DB, userPassword.toCharArray());
-        rootCredentials = MongoCredential.createCredential(ROOT_USER,
+        MongoCredential.createCredential(ROOT_USER,
                 AUTHENTICATION_DB, rootPassword.toCharArray());
         addExposedPort(PORT);
         withEnv("MONGO_INITDB_ROOT_PASSWORD", rootPassword);

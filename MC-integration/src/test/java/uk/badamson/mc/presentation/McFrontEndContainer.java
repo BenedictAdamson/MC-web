@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-20.
+ * © Copyright Benedict Adamson 2019-23.
  *
  * This file is part of MC.
  *
@@ -23,19 +23,14 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 import uk.badamson.mc.Version;
 
-/**
- * <p>
- * A Testcontainers Docker container for the MC-front-end server.
- * </p>
- */
 public final class McFrontEndContainer
         extends GenericContainer<McFrontEndContainer> {
 
-    public static final String VERSION = Version.VERSION;
+    private static final String VERSION = Version.VERSION;
 
-    public static final int PORT = 80;
+    private static final int PORT = 80;
 
-    public static final DockerImageName IMAGE = DockerImageName.parse(
+    private static final DockerImageName IMAGE = DockerImageName.parse(
             "index.docker.io/benedictadamson/mc-front-end-srv:" + VERSION);
 
     public McFrontEndContainer() {
