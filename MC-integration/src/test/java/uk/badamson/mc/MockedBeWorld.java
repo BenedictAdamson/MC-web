@@ -1,31 +1,21 @@
 package uk.badamson.mc;
 
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.testcontainers.lifecycle.Startable;
-import org.testcontainers.lifecycle.TestDescription;
-import org.testcontainers.lifecycle.TestLifecycleAware;
 import uk.badamson.mc.presentation.HomePage;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.EnumSet;
+import java.util.Set;
+import java.util.UUID;
 
-public final class MockedBeWorld implements Startable, TestLifecycleAware {
-    private static final Path DEFAULT_FAILURE_RECORDING_DIRECTORY = Path.of(".", "target", "test-logs");
+public final class MockedBeWorld extends BaseWorld {
 
     private final MockedBeContainers containers;
-    private final Path failureRecordingDirectory;
-    private RemoteWebDriver webDriver;
-    private int nUsers;
-    private User currentLoggedInUser;
 
     public MockedBeWorld(@Nullable final Path failureRecordingDirectory) {
+        super(failureRecordingDirectory);
         containers = new MockedBeContainers(failureRecordingDirectory);
-        this.failureRecordingDirectory = failureRecordingDirectory;
     }
 
     public MockedBeWorld() {
@@ -36,83 +26,7 @@ public final class MockedBeWorld implements Startable, TestLifecycleAware {
         return containers.getBackEnd();
     }
 
-    @Override
-    public void close() {
-        stop();
-        containers.close();
-    }
-
-    public User createUserWithRole(Authority role) {
-        return createUser(EnumSet.of(role));
-    }
-
-    private User createUser(final Set<Authority> authorities) {
-        final BasicUserDetails userDetails = generateBasicUserDetails(authorities);
-        final UUID id = UUID.randomUUID();
-        return new User(id, userDetails);
-    }
-
-    @Override
-    public void start() {
-        containers.start();
-        webDriver = containers.getBrowser().getWebDriver();
-    }
-
-    private void retainScreenshot(@Nonnull final String baseFileName) {
-        if (failureRecordingDirectory != null) {
-            final String leafName = baseFileName + ".png";
-            final Path path = failureRecordingDirectory.resolve(leafName);
-            try {
-                final var bytes = webDriver.getScreenshotAs(OutputType.BYTES);
-                Files.write(path, bytes);
-            } catch (final Exception e) {
-                throw new RuntimeException(e);
-            }
-
-        }
-    }
-
-    @Override
-    public void stop() {
-        containers.stop();
-    }
-
-    @Override
-    public void beforeTest(final TestDescription description) {
-        webDriver.manage().deleteAllCookies();
-        containers.beforeTest(description);
-    }
-
-    @Override
-    public void afterTest(final TestDescription description, final Optional<Throwable> throwable) {
-        containers.afterTest(description, throwable);
-        if (failureRecordingDirectory != null) {
-            String baseFileName = description.getFilesystemFriendlyName();
-            retainScreenshot(baseFileName);
-        }
-    }
-
-    private BasicUserDetails generateBasicUserDetails(final Set<Authority> authorities) {
-        final var sequenceId = ++nUsers;
-        final var username = "User " + sequenceId;
-        final var password = "password" + sequenceId;
-        return new BasicUserDetails(username, password, authorities,
-                true, true, true, true);
-    }
-
-    public HomePage getHomePage() {
-        final HomePage homePage = new HomePage(getWebDriver());
-        homePage.get();
-        return homePage;
-    }
-
-    private WebDriver getWebDriver() {
-        Objects.requireNonNull(webDriver, "webDriver");
-        return webDriver;
-    }
-
     public void notLoggedIn() {
-        currentLoggedInUser = null;
         getBackEnd().mockGetSelfUnauthenticated();
     }
 
@@ -126,11 +40,22 @@ public final class MockedBeWorld implements Startable, TestLifecycleAware {
     }
 
     public HomePage logInAsUser(final User user) {
-        currentLoggedInUser = user;
         getBackEnd().mockLogin(user, UUID.randomUUID().toString(), UUID.randomUUID().toString());
-        getBackEnd().mockGetSelf(currentLoggedInUser);
+        getBackEnd().mockGetSelf(user);
         HomePage homePage = getHomePage();
         homePage.awaitIsReady();
         return homePage;
+    }
+
+    @Nonnull
+    @Override
+    public MockedBeContainers getContainers() {
+        return containers;
+    }
+
+    @Nonnull
+    @Override
+    protected UUID addUser(@Nonnull BasicUserDetails userDetails) {
+        return UUID.randomUUID();
     }
 }

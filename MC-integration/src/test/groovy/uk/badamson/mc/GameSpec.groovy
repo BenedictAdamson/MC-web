@@ -6,7 +6,7 @@ import uk.badamson.mc.presentation.HomePage
 import javax.annotation.Nonnull
 
 /**
- * © Copyright Benedict Adamson 2020-22.
+ * © Copyright Benedict Adamson 2020-23.
  *
  * This file is part of MC.
  *
@@ -126,7 +126,7 @@ class GameSpec extends UnmockedSpecification {
     }
 
     private HomePage loginAsUserWithRole(@Nonnull final Authority role) {
-        def user = world.currentUserHasRoles(Set.of(role), Set.of())
+        def user = world.createUserWithRoles(Set.of(role), Set.of())
         def homePage = world.getHomePage()
         final var loginPage = homePage.navigateToLoginPage()
         loginPage.submitLoginForm(user.getUsername(), user.getPassword())

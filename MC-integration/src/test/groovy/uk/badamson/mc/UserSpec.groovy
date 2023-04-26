@@ -1,6 +1,6 @@
 package uk.badamson.mc
 /**
- * © Copyright Benedict Adamson 2019-20,22.
+ * © Copyright Benedict Adamson 2019-23.
  *
  * This file is part of MC.
  *
@@ -29,7 +29,7 @@ class UserSpec extends UnmockedSpecification {
 
   def "Login"() {
     given: "user with any role"
-    def user = world.currentUserHasRoles(Set.of(Authority.ROLE_PLAYER), Set.of())
+    def user = world.createUserWithRoles(Set.of(Authority.ROLE_PLAYER), Set.of())
 
     and: "not logged in"
     def homePage = world.getHomePage()
@@ -56,7 +56,7 @@ class UserSpec extends UnmockedSpecification {
 
   def "Logout"() {
     given: "logged in as user with any role"
-    def user = world.currentUserHasRoles(Set.of(Authority.ROLE_PLAYER), Set.of())
+    def user = world.createUserWithRoles(Set.of(Authority.ROLE_PLAYER), Set.of())
     def homePage = world.getHomePage()
     def loginPage = homePage.navigateToLoginPage()
     loginPage.submitLoginForm(user.getUsername(), user.getPassword())
