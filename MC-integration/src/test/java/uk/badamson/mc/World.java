@@ -42,13 +42,18 @@ public final class World extends BaseWorld {
     }
 
     public UUID createGame(final UUID scenario) {
-        return containers.getBackEnd().createGame(scenario);
+        return createBackEndClient().createGame(scenario);
+    }
+
+    @Nonnull
+    private McBackEndClient createBackEndClient() {
+        return containers.getBackEnd().createClient();
     }
 
     @Override
     @Nonnull
     protected UUID addUser(@Nonnull final BasicUserDetails userDetails) {
-        return containers.getBackEnd().addUser(userDetails);
+        return createBackEndClient().addUser(userDetails);
     }
 
     public User createUserWithRoles(final Set<Authority> included,
@@ -69,7 +74,7 @@ public final class World extends BaseWorld {
 
     @Nonnull
     public Stream<NamedUUID> getScenarios() {
-        return containers.getBackEnd().getScenarios();
+        return createBackEndClient().getScenarios();
     }
 
     @Nonnull
