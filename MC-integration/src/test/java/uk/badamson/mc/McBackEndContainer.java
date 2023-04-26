@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2019-20,22.
+ * © Copyright Benedict Adamson 2019-23.
  *
  * This file is part of MC.
  *
@@ -29,7 +29,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriTemplate;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.output.WaitingConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
@@ -41,8 +40,6 @@ import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -58,8 +55,6 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
     public static final String SESSION_COOKIE_NAME = "JSESSIONID";
 
-    public static final String HEALTHCHECK_PATH = "/actuator/health";
-
     public static final int PORT = 8080;
 
     public static final String VERSION = Version.VERSION;
@@ -73,10 +68,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
             .withStartupTimeout(Duration.ofSeconds(20))
             .withStrategy(Wait.forLogMessage(".*" + STARTED_MESSAGE + ".*", 1));
 
-    public static final String CONNECTION_MESSAGE = "successfully connected to server";
-
-    private static final UriTemplate USER_URI_TEMPLATE = new UriTemplate(
-            "/api/user/{user}");
+    private static final UriTemplate USER_URI_TEMPLATE = new UriTemplate(Paths.USER_PATH_PATTERN);
 
     private static final UriTemplate GAME_URI_TEMPLATE = new UriTemplate(Paths.GAME_PATH_PATTERN);
 
@@ -151,7 +143,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
                     .getResponseHeaders().getLocation();
             assertNotNull(location, "response has Location header");// guard
             final var id = UUID.fromString(
-                    USER_URI_TEMPLATE.match(location.toString()).get("user"));
+                    USER_URI_TEMPLATE.match(location.toString()).get("id"));
             logout(administrator, cookies);
             return id;
         } catch (final Exception e) {
@@ -159,28 +151,13 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
         }
     }
 
-    void assertHealthCheckOk() {
-        getJson(HEALTHCHECK_PATH).expectStatus().isOk();
-    }
-
-    void awaitLogMessage(final String message) throws TimeoutException {
-        final var consumer = new WaitingConsumer();
-        followOutput(consumer);
-        consumer.waitUntil(frame -> frame.getUtf8String().contains(message), 30,
-                TimeUnit.SECONDS);
-    }
-
     public WebTestClient connectWebTestClient(final String path) {
-        return connectWebTestClient(path, null);
-    }
-
-    private WebTestClient connectWebTestClient(final String path, final String query) {
         final var scheme = "http";
         final var host = getHost();
         final int port = getMappedPort(PORT);
         final URI uri;
         try {
-            uri = new URI(scheme, null, host, port, path, query, null);
+            uri = new URI(scheme, null, host, port, path, null, null);
         } catch (final URISyntaxException e) {
             throw new IllegalArgumentException(e);
         }
@@ -218,81 +195,10 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
                 .headers(headers -> headers.setBasicAuth(username, password));
     }
 
-    private RequestBodySpec createJoinGameRequest(final UUID game,
-                                                  final User user, final MultiValueMap<String, HttpCookie> cookies) {
-        Objects.requireNonNull(game, "game");
-        Objects.requireNonNull(user, "user");
-        Objects.requireNonNull(cookies, "cookies");
-
-        final var path = Paths.createPathForGame(game);
-        final var query = "join";
-        final var request = connectWebTestClient(path, query).post()
-                .accept(MediaType.APPLICATION_JSON);
-        secure(request, user, cookies);
-        return request;
-    }
-
-    private RequestBodySpec createStartGameRequest(final UUID game,
-                                                   final User user, final MultiValueMap<String, HttpCookie> cookies) {
-        Objects.requireNonNull(game, "game");
-        Objects.requireNonNull(user, "user");
-        Objects.requireNonNull(cookies, "cookies");
-
-        final var path = Paths.createPathForGame(game);
-        final var query = "start";
-        final var request = connectWebTestClient(path, query).post()
-                .accept(MediaType.APPLICATION_JSON);
-        secure(request, user, cookies);
-        return request;
-    }
-
-    public User getAdministrator() {
-        return administrator;
-    }
-
-    public Stream<NamedUUID> getGameIds(final UUID scenario, User user) {
-        final var response = getGameIdsResponse(scenario, user);
-        response.expectStatus().isOk();
-        return response.returnResult(uk.badamson.mc.rest.NamedUUID.class).getResponseBody().toStream()
-                .map(ni -> new NamedUUID(ni.getId(), ni.getTitle()));
-    }
-
-    ResponseSpec getGameIdsResponse(final UUID scenario, User user) {
-        return getJsonAsAdministrator(Paths.createPathForGamesOfScenario(scenario));
-    }
-
-    private WebTestClient.ResponseSpec getJson(final String path) {
-        return connectWebTestClient(path).get().accept(MediaType.APPLICATION_JSON)
-                .exchange();
-    }
-
-    public WebTestClient.ResponseSpec getJsonAsAdministrator(final String path) {
-        return getJsonAsUser(path, administrator);
-    }
-
-    public WebTestClient.ResponseSpec getJsonAsUser(final String path, User user) {
-        return connectWebTestClient(path).get().accept(MediaType.APPLICATION_JSON)
-                .headers(headers -> headers.setBasicAuth(
-                        user.getUsername(),
-                        user.getPassword()))
-                .exchange();
-    }
-
     public Stream<NamedUUID> getScenarios() {
-        return getJson("/api/scenario").returnResult(uk.badamson.mc.rest.NamedUUID.class)
+        return connectWebTestClient("/api/scenario").get().accept(MediaType.APPLICATION_JSON)
+                .exchange().returnResult(uk.badamson.mc.rest.NamedUUID.class)
                 .getResponseBody().toStream().map(ni -> new NamedUUID(ni.getId(), ni.getTitle()));
-    }
-
-    public void joinGame(final UUID game, final User user) {
-        Objects.requireNonNull(game, "game");
-        Objects.requireNonNull(user, "user");
-
-        final var cookies = login(user);
-        final var request = createJoinGameRequest(game, user, cookies);
-        final var response = request.exchange();
-        logout(user, cookies);
-
-        response.expectStatus().isFound();
     }
 
     MultiValueMap<String, HttpCookie> login(final BasicUserDetails user) {
@@ -321,14 +227,4 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
         response.expectStatus().is2xxSuccessful();
     }
 
-    public void startGame(final UUID game) {
-        Objects.requireNonNull(game, "game");
-
-        final var cookies = login(administrator);
-        final var request = createStartGameRequest(game, administrator, cookies);
-        final var response = request.exchange();
-        logout(administrator, cookies);
-
-        response.expectStatus().isFound();
-    }
 }
