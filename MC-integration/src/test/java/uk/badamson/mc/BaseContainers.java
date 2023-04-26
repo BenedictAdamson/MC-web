@@ -1,5 +1,6 @@
 package uk.badamson.mc;
 
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.containers.BrowserWebDriverContainer;
@@ -23,6 +24,8 @@ import java.util.stream.Stream;
 
 abstract class BaseContainers implements Startable, TestLifecycleAware {
     private static final String FE_HOST = "fe";
+    private static final Capabilities CAPABILITIES = new FirefoxOptions().addPreference("security.insecure_field_warning.contextual.enabled", false);
+
     @Nullable
     private final Path failureRecordingDirectory;
     private final Network network = Network.newNetwork();
@@ -50,9 +53,7 @@ abstract class BaseContainers implements Startable, TestLifecycleAware {
         final var browser = new BrowserWebDriverContainer<>();
         browser.withCreateContainerCmdModifier(cmd -> Objects.requireNonNull(cmd.getHostConfig())
                 .withCpuCount(2L));
-        browser.withCapabilities(
-                new FirefoxOptions().addPreference("security.insecure_field_warning.contextual.enabled", false)
-        );
+        browser.withCapabilities(CAPABILITIES);
         browser.withNetwork(network);
         if (failureRecordingDirectory != null) {
             browser.withRecordingMode(BrowserWebDriverContainer.VncRecordingMode.RECORD_ALL, failureRecordingDirectory.toFile());
@@ -89,7 +90,6 @@ abstract class BaseContainers implements Startable, TestLifecycleAware {
     @OverridingMethodsMustInvokeSuper
     @Override
     public void beforeTest(final TestDescription description) {
-        getWebDriver().manage().deleteAllCookies();
         getBrowser().beforeTest(description);
     }
 
@@ -115,8 +115,8 @@ abstract class BaseContainers implements Startable, TestLifecycleAware {
     }
 
     @Nonnull
-    public final RemoteWebDriver getWebDriver() {
-        return getBrowser().getWebDriver();
+    public final RemoteWebDriver createWebDriver() {
+        return new RemoteWebDriver(getBrowser().getSeleniumAddress(), CAPABILITIES);
     }
 
     @Nonnull

@@ -47,7 +47,9 @@ public abstract class BaseWorld implements Startable, TestLifecycleAware {
 
     @Override
     public final void start() {
-        getContainers().start();
+        var containers = getContainers();
+        containers.start();
+        webDriver = containers.createWebDriver();
     }
 
     @Override
@@ -57,7 +59,9 @@ public abstract class BaseWorld implements Startable, TestLifecycleAware {
 
     @Override
     public final void beforeTest(final TestDescription description) {
-        webDriver = getContainers().getWebDriver();
+        if (webDriver == null) {
+            throw new IllegalStateException("not started");
+        }
         webDriver.manage().deleteAllCookies();
         getContainers().beforeTest(description);
     }

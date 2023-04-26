@@ -52,7 +52,7 @@ abstract class UnmockedSpecification extends Specification {
     void setupSpec() {
         testIndex = 0
         world = new World(FAILURE_RECORDING_DIRECTORY)
-        world.open()
+        world.start()
     }
 
     void setup() {

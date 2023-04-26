@@ -7,7 +7,7 @@ import spock.lang.Specification
 import uk.badamson.mc.MockedBeWorld
 
 /**
- * © Copyright Benedict Adamson 2019-22.
+ * © Copyright Benedict Adamson 2019-23.
  *
  * This file is part of MC.
  *
