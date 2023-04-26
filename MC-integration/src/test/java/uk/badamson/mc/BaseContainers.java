@@ -1,6 +1,5 @@
 package uk.badamson.mc;
 
-import org.openqa.selenium.OutputType;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testcontainers.containers.BrowserWebDriverContainer;
@@ -101,7 +100,6 @@ abstract class BaseContainers implements Startable, TestLifecycleAware {
         if (getFailureRecordingDirectory() != null) {
             final var prefix = description.getFilesystemFriendlyName();
             retainLogFiles(prefix);
-            retainScreenshot(prefix);
         }
     }
 
@@ -109,19 +107,6 @@ abstract class BaseContainers implements Startable, TestLifecycleAware {
     protected void retainLogFiles(final String prefix) {
         assert getFailureRecordingDirectory() != null;
         retainLogFile(getFailureRecordingDirectory(), prefix, FE_HOST, frontEnd);
-    }
-
-    private void retainScreenshot(@Nonnull final String prefix) {
-        if (getFailureRecordingDirectory() != null) {
-            final String leafName = prefix + ".png";
-            final Path path = getFailureRecordingDirectory().resolve(leafName);
-            try {
-                final var bytes = getWebDriver().getScreenshotAs(OutputType.BYTES);
-                Files.write(path, bytes);
-            } catch (final Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 
     @Nullable
