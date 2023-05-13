@@ -130,7 +130,7 @@ class GameSpec extends UnmockedSpecification {
         def homePage = world.navigateToHomePage()
         final var loginPage = homePage.navigateToLoginPage()
         loginPage.submitLoginForm(user.getUsername(), user.getPassword())
-        homePage.awaitIsReadyOrErrorMessage()
+        homePage.awaitIsReady()
         homePage
     }
 

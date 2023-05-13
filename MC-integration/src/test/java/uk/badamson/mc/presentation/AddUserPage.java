@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-20,22.
+ * © Copyright Benedict Adamson 2019-23.
  *
  * This file is part of MC.
  *
@@ -68,7 +68,7 @@ public final class AddUserPage extends Page {
         getBody().findElement(By.xpath("//button[@type='submit']")).submit();
 
         /* Must either transition to the Users' Page, or report an error. */
-        usersPage.awaitIsReadyOrErrorMessage();
+        usersPage.awaitIsReady();
         if (usersPage.isCurrentPath()) {
             return usersPage;
         } else {

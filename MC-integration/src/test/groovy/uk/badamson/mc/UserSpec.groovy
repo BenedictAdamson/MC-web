@@ -37,7 +37,7 @@ class UserSpec extends UnmockedSpecification {
     when: "log in using correct password"
     final var loginPage = homePage.navigateToLoginPage()
     loginPage.submitLoginForm(user.getUsername(), user.getPassword())
-    homePage.awaitIsReadyOrErrorMessage()
+    homePage.awaitIsReady()
 
     then: "redirected to home-page"
     homePage.requireIsReady()
@@ -60,7 +60,7 @@ class UserSpec extends UnmockedSpecification {
     def homePage = world.navigateToHomePage()
     def loginPage = homePage.navigateToLoginPage()
     loginPage.submitLoginForm(user.getUsername(), user.getPassword())
-    homePage.awaitIsReadyOrErrorMessage()
+    homePage.awaitIsReady()
 
     when: "request logout"
     homePage.logout()

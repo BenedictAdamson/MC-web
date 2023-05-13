@@ -8,7 +8,7 @@ import uk.badamson.mc.Scenario
 
 import java.time.Instant
 /**
- * © Copyright Benedict Adamson 2020-22.
+ * © Copyright Benedict Adamson 2020-23.
  *
  * This file is part of MC.
  *
@@ -420,10 +420,10 @@ class GameFESpec extends MockedBeSpecification {
     private GamePage examineGame(final HomePage homePage) {
         def scenarioPage = homePage.navigateToScenariosPage()
                 .navigateToScenario(0)
-        scenarioPage.awaitIsReadyOrErrorMessage()
+        scenarioPage.awaitIsReady()
         scenarioPage.requireIsReady()
         def gamePage = scenarioPage.navigateToGamePage(GAME_ID)
-        gamePage.awaitIsReadyOrErrorMessage()
+        gamePage.awaitIsReady()
         gamePage
     }
 }

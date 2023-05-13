@@ -91,7 +91,7 @@ class UserFESpec extends MockedBeSpecification {
     world.backEnd.mockLogin(user, UUID.randomUUID().toString(), UUID.randomUUID().toString())
     world.backEnd.mockGetSelf(user)
     loginPage.submitLoginForm(user.getUsername(), user.getPassword())
-    homePage.awaitIsReadyOrErrorMessage()
+    homePage.awaitIsReady()
 
     then: "redirected to home-page"
     homePage.requireIsReady()

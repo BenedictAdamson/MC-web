@@ -328,17 +328,6 @@ public abstract class Page {
         }
     }
 
-    public final void awaitIsReadyOrErrorMessage() throws IllegalStateException {
-        try {
-            new WebDriverWait(webDriver, WAIT_UNTIL_READY_TIMEOUT, WAIT_UNTIL_READY_POLL_INTERVAL)
-                    .until(driver -> isReady(driver, isA(WebElement.class))
-                            || HAS_ERROR_ELEMENT
-                            .matches(driver.findElement(BODY_LOCATOR)));
-        } catch (final Exception e) {// give better diagnostics
-            throw new NotReadyException(e);
-        }
-    }
-
     public final void awaitIsReadyAndErrorMessage() throws IllegalStateException {
         try {
             new WebDriverWait(webDriver, WAIT_UNTIL_READY_TIMEOUT, WAIT_UNTIL_READY_POLL_INTERVAL)
