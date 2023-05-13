@@ -31,7 +31,7 @@ import java.time.Duration;
 public final class McDatabaseContainer
         extends GenericContainer<McDatabaseContainer> {
 
-    private static final String VERSION = Version.VERSION;
+    private static final String VERSION = Version.MC_WEB_VERSION;
 
     private static final DockerImageName IMAGE = DockerImageName
             .parse("index.docker.io/benedictadamson/mc-database:" + VERSION);

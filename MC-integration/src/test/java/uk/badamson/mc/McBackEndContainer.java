@@ -36,7 +36,7 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
 
     private static final int PORT = 8080;
 
-    private static final String VERSION = Version.VERSION;
+    private static final String VERSION = Version.MC_BACK_END_VERSION;
 
     private static final DockerImageName IMAGE = DockerImageName
             .parse("index.docker.io/benedictadamson/mc-back-end:" + VERSION);

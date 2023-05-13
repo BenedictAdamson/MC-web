@@ -1,7 +1,7 @@
 // Jenkinsfile for the MC project
 
 /* 
- * © Copyright Benedict Adamson 2018-22.
+ * © Copyright Benedict Adamson 2018-23.
  * 
  * This file is part of MC.
  *
@@ -96,7 +96,6 @@ pipeline {
                 	javaDoc(),
                 	mavenConsole(),
                 	pmdParser(pattern: '**/target/pmd.xml'),
-					spotBugs(pattern: '**/target/spotbugsXml.xml')
 					]
             }
             junit 'MC-*/target/*-reports/**/TEST-*.xml'

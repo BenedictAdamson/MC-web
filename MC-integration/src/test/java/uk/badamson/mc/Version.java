@@ -1,6 +1,6 @@
 package uk.badamson.mc;
 /*
- * © Copyright Benedict Adamson 2019-20,22.
+ * © Copyright Benedict Adamson 2019-23.
  *
  * This file is part of MC.
  *
@@ -18,42 +18,38 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import javax.annotation.Nonnull;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
-/**
- * <p>
- * The version of the SUT
- * </p>
- */
 public final class Version {
 
-    public static final String VERSION = getVersion();
+    private static final Properties APPLICATION_PROPERTIES = loadApplicationProperties();
+    public static final String MC_WEB_VERSION = getApplicationProperty("build.version");
+    public static final String MC_BACK_END_VERSION = getApplicationProperty("MC.backend.version");
 
-    private static Properties getApplicationProperties() throws IOException {
+    private static Properties loadApplicationProperties() {
         final var stream = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("application.properties");
-        if (stream == null) {
-            throw new FileNotFoundException(
-                    "resource application.properties not found");
+        final Properties properties;
+        try {
+            if (stream == null) {
+                throw new FileNotFoundException(
+                        "resource application.properties not found");
+            }
+            properties = new Properties();
+            properties.load(stream);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
-        final var properties = new Properties();
-        properties.load(stream);
         return properties;
     }
 
-    private static String getVersion() {
-        String version;
-        try {
-            version = getApplicationProperties().getProperty("build.version");
-        } catch (final IOException e) {
-            throw new IllegalStateException(
-                    "unable to read application.properties resource", e);
-        }
+    private static String getApplicationProperty(@Nonnull String key) {
+        final String version = APPLICATION_PROPERTIES.getProperty(key);
         if (version == null || version.isEmpty()) {
-            throw new IllegalStateException(
-                    "missing build.version property in application.properties resource");
+            throw new IllegalStateException("missing property in application.properties resource");
         }
         return version;
     }

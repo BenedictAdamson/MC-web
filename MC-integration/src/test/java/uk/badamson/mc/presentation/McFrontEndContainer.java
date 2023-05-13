@@ -26,7 +26,7 @@ import uk.badamson.mc.Version;
 public final class McFrontEndContainer
         extends GenericContainer<McFrontEndContainer> {
 
-    private static final String VERSION = Version.VERSION;
+    private static final String VERSION = Version.MC_WEB_VERSION;
 
     private static final int PORT = 80;
 

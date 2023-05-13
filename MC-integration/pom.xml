@@ -224,11 +224,6 @@
    <dependencies>
       <dependency>
          <groupId>uk.badamson.mc</groupId>
-         <artifactId>MC-back-end</artifactId>
-         <version>${project.parent.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>uk.badamson.mc</groupId>
          <artifactId>MC-database</artifactId>
          <type>pom</type>
          <version>${project.parent.version}</version>
@@ -241,13 +236,8 @@
       </dependency>
       <dependency>
          <groupId>uk.badamson.mc</groupId>
-         <artifactId>MC-model</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>uk.badamson.mc</groupId>
          <artifactId>MC-REST</artifactId>
-         <version>${project.parent.version}</version>
+         <scope>test</scope>
       </dependency>
       <!-- Third-party dependencies: -->
       <dependency>
@@ -275,6 +265,11 @@
          <artifactId>reactor-netty</artifactId>
          <scope>test</scope>
          <!-- Because use Spring WebTestClient -->
+      </dependency>
+      <dependency>
+         <groupId>javax.annotation</groupId>
+         <artifactId>javax.annotation-api</artifactId>
+         <scope>test</scope>
       </dependency>
       <dependency>
          <groupId>org.codehaus.groovy</groupId>
