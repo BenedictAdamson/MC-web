@@ -121,9 +121,10 @@ public abstract class BaseWorld implements Startable, TestLifecycleAware {
                 true, true, true, true);
     }
 
-    public final HomePage getHomePage() {
+    public final HomePage navigateToHomePage() {
         final var homePage = new HomePage(getWebDriver());
         homePage.get();
+        homePage.awaitIsReady();
         return homePage;
     }
 

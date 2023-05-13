@@ -6,7 +6,7 @@ import uk.badamson.mc.BasicUserDetails
 import uk.badamson.mc.User
 
 /**
- * © Copyright Benedict Adamson 2019-20,22.
+ * © Copyright Benedict Adamson 2019-23.
  *
  * This file is part of MC.
  *
@@ -84,7 +84,7 @@ class UserFESpec extends MockedBeSpecification {
     and: "not logged in"
     world.backEnd.mockGetSelfUnauthenticated(Times.once())
     world.backEnd.mockNoCurrentGame()
-    def homePage = world.getHomePage()
+    def homePage = world.navigateToHomePage()
 
     when: "log in using correct password"
     final var loginPage = homePage.navigateToLoginPage()
@@ -129,7 +129,7 @@ class UserFESpec extends MockedBeSpecification {
     def user = world.createUserWithRole(Authority.ROLE_PLAYER)
 
     when: "try to login"
-    final var loginPage = world.getHomePage().navigateToLoginPage()
+    final var loginPage = world.navigateToHomePage().navigateToLoginPage()
     loginPage.submitLoginForm(user.getUsername(), user.getPassword())
     loginPage.awaitIsReadyAndErrorMessage()
 

@@ -11,7 +11,7 @@ import java.time.Instant
 
 import static org.hamcrest.Matchers.contains
 import static spock.util.matcher.HamcrestSupport.expect
-/** © Copyright Benedict Adamson 2019,20,22.
+/** © Copyright Benedict Adamson 2019-23.
  *
  * This file is part of MC.
  *
@@ -63,7 +63,7 @@ class ScenarioFESpec extends MockedBeSpecification {
         world.notLoggedIn()
 
         when: "examine scenarios"
-        def scenariosPage = world.getHomePage().navigateToScenariosPage()
+        def scenariosPage = world.navigateToHomePage().navigateToScenariosPage()
 
         then: "the response is the list of scenarios"
         scenariosPage.assertInvariants()
@@ -83,7 +83,7 @@ class ScenarioFESpec extends MockedBeSpecification {
         world.notLoggedIn()
 
         when: "examine the scenario"
-        final def scenarioPage = world.getHomePage()
+        final def scenarioPage = world.navigateToHomePage()
                 .navigateToScenariosPage()
                 .navigateToScenario(0)
 

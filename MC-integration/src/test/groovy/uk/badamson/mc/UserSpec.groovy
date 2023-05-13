@@ -32,7 +32,7 @@ class UserSpec extends UnmockedSpecification {
     def user = world.createUserWithRoles(Set.of(Authority.ROLE_PLAYER), Set.of())
 
     and: "not logged in"
-    def homePage = world.getHomePage()
+    def homePage = world.navigateToHomePage()
 
     when: "log in using correct password"
     final var loginPage = homePage.navigateToLoginPage()
@@ -57,7 +57,7 @@ class UserSpec extends UnmockedSpecification {
   def "Logout"() {
     given: "logged in as user with any role"
     def user = world.createUserWithRoles(Set.of(Authority.ROLE_PLAYER), Set.of())
-    def homePage = world.getHomePage()
+    def homePage = world.navigateToHomePage()
     def loginPage = homePage.navigateToLoginPage()
     loginPage.submitLoginForm(user.getUsername(), user.getPassword())
     homePage.awaitIsReadyOrErrorMessage()
@@ -76,7 +76,7 @@ class UserSpec extends UnmockedSpecification {
     def user = world.currentUserIsUnknownUser()
 
     when: "try to login"
-    final var loginPage = world.getHomePage().navigateToLoginPage()
+    final var loginPage = world.navigateToHomePage().navigateToLoginPage()
     loginPage.submitLoginForm(user.getUsername(), user.getPassword())
     loginPage.awaitIsReadyAndErrorMessage()
 

@@ -1,6 +1,6 @@
 package uk.badamson.mc
 /**
- * © Copyright Benedict Adamson 2019-22.
+ * © Copyright Benedict Adamson 2019-23.
  *
  * This file is part of MC.
  *
@@ -35,7 +35,7 @@ class HomePageSpec extends UnmockedSpecification {
         and: "not resuming a session"
         // do nothing
         when: "the potential user gives the obvious URL https://example.com/ to a web browser"
-        def homePage = world.getHomePage()
+        def homePage = world.navigateToHomePage()
         then: "MC serves the home page"
         homePage.assertInvariants()
         and: "the home page title includes the name of the game"

@@ -42,8 +42,7 @@ public final class MockedBeWorld extends BaseWorld {
     public HomePage logInAsUser(final User user) {
         getBackEnd().mockLogin(user, UUID.randomUUID().toString(), UUID.randomUUID().toString());
         getBackEnd().mockGetSelf(user);
-        HomePage homePage = getHomePage();
-        homePage.awaitIsReady();
+        HomePage homePage = navigateToHomePage();
         return homePage;
     }
 

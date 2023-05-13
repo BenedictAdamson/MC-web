@@ -127,7 +127,7 @@ class GameSpec extends UnmockedSpecification {
 
     private HomePage loginAsUserWithRole(@Nonnull final Authority role) {
         def user = world.createUserWithRoles(Set.of(role), Set.of())
-        def homePage = world.getHomePage()
+        def homePage = world.navigateToHomePage()
         final var loginPage = homePage.navigateToLoginPage()
         loginPage.submitLoginForm(user.getUsername(), user.getPassword())
         homePage.awaitIsReadyOrErrorMessage()
