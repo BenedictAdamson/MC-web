@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-22.
+ * © Copyright Benedict Adamson 2019-23.
  *
  * This file is part of MC.
  *
@@ -24,7 +24,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.opentest4j.MultipleFailuresError;
 import org.springframework.web.util.UriTemplate;
-import uk.badamson.mc.rest.Paths;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
@@ -64,7 +63,7 @@ public final class GamePage extends Page {
             "You are playing this game as ");
     private static final Matcher<String> INDICATES_IS_RUNNING = matchesPattern(
             "[Rr]unning");
-    private static final Matcher<String> INDICATES_JOINING_NFORMATION = anyOf(
+    private static final Matcher<String> INDICATES_JOINING_INFORMATION = anyOf(
             INDICATES_IS_JOINABLE, INDICATES_IS_NOT_JOINABLE);
 
     private static final By SCENARIO_LINK_LOCATOR = By.id("scenario");
@@ -80,7 +79,7 @@ public final class GamePage extends Page {
     private static final By PLAYED_CHARACTERS_ELEMENT_LOCATOR = By
             .id("played-characters");
 
-    private static final Matcher<WebElement> HAS_ENDED_RECUITMENT = new WebElementMatcher() {
+    private static final Matcher<WebElement> HAS_ENDED_RECRUITMENT = new WebElementMatcher() {
 
         @Override
         protected boolean matchesSafely(final WebElement body,
@@ -116,17 +115,29 @@ public final class GamePage extends Page {
 
     };
 
+    private static final Matcher<WebElement> IS_NOT_RUNNING = new WebElementMatcher() {
+
+        @Override
+        protected boolean matchesSafely(final WebElement body,
+                                        final Description mismatchDescription) {
+            final var elements = body.findElements(RUN_STATE_ELEMENT_LOCATOR);
+            return elements.size() == 1
+                    && !INDICATES_IS_RUNNING.matches(elements.get(0).getText());
+        }
+
+    };
+
     private final ScenarioPage scenarioPage;
 
     private final Matcher<String> includesCreationTime;
 
-    private final Matcher<String> includesScenarioTitile;
+    private final Matcher<String> includesScenarioTitle;
 
     public GamePage(final HomePage homePage) {
         super(homePage);
         this.scenarioPage = null;
         includesCreationTime = null;
-        includesScenarioTitile = isA(String.class);
+        includesScenarioTitle = isA(String.class);
     }
 
     public GamePage(final ScenarioPage scenarioPage, final String creationTime) {
@@ -134,7 +145,7 @@ public final class GamePage extends Page {
         this.scenarioPage = scenarioPage;
         includesCreationTime = creationTime == null ? null
                 : containsString(creationTime);
-        includesScenarioTitile = containsString(scenarioPage.getScenarioTitle());
+        includesScenarioTitle = containsString(scenarioPage.getScenarioTitle());
     }
 
     public void assertDoesNotIndicateWhichCharactersPlayedByOtherUsers() {
@@ -162,7 +173,7 @@ public final class GamePage extends Page {
 
     public void assertIncludesScenarioTitle() {
         assertThat("includes scenario title", getBody().getText(),
-                includesScenarioTitile);
+                includesScenarioTitle);
     }
 
     public void assertIndicatesGameHasNoPlayedCharacters() {
@@ -277,7 +288,7 @@ public final class GamePage extends Page {
     private void assertIndicatesWhetherUserMayJoinGame(final WebElement body) {
         final var joinable = assertHasJoinableElement(body);
         assertThat("Indicates whether the user may join this game",
-                joinable.getText(), INDICATES_JOINING_NFORMATION);
+                joinable.getText(), INDICATES_JOINING_INFORMATION);
     }
 
     public void assertIndicatesWhichCharacterIfAnyUserIsPlaying() {
@@ -319,7 +330,7 @@ public final class GamePage extends Page {
                                      final String bodyText) throws MultipleFailuresError {
         final var universalConstraints = allOf(INDICATES_IS_A_GAME,
                 INDICATES_WHETHER_RECRUITING_PLAYERS,
-                INDICATES_JOINING_NFORMATION, includesScenarioTitile);
+                INDICATES_JOINING_INFORMATION, includesScenarioTitle);
         final var optionalConstraints = includesCreationTime == null
                 ? any(String.class)
                 : includesCreationTime;
@@ -337,7 +348,7 @@ public final class GamePage extends Page {
                     "Button [" + button + "] is not enabled");
         }
         button.click();
-        awaitIsReady(HAS_ENDED_RECUITMENT);
+        awaitIsReady(HAS_ENDED_RECRUITMENT);
     }
 
     public boolean isEndRecruitmentEnabled() {
@@ -408,6 +419,6 @@ public final class GamePage extends Page {
                     "Button [" + button + "] is not enabled");
         }
         button.click();
-        awaitIsReady(IS_RUNNING);
+        awaitIsReady(IS_NOT_RUNNING);
     }
 }
