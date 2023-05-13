@@ -23,7 +23,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
-public final class Version {
+public final class SutVersions {
 
     private static final Properties APPLICATION_PROPERTIES = loadApplicationProperties();
     public static final String MC_WEB_VERSION = getApplicationProperty("build.version");

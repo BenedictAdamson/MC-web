@@ -24,14 +24,14 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.containers.wait.strategy.WaitStrategy;
 import org.testcontainers.utility.DockerImageName;
-import uk.badamson.mc.Version;
+import uk.badamson.mc.SutVersions;
 
 import java.time.Duration;
 
 public final class McDatabaseContainer
         extends GenericContainer<McDatabaseContainer> {
 
-    private static final String VERSION = Version.MC_WEB_VERSION;
+    private static final String VERSION = SutVersions.MC_WEB_VERSION;
 
     private static final DockerImageName IMAGE = DockerImageName
             .parse("index.docker.io/benedictadamson/mc-database:" + VERSION);

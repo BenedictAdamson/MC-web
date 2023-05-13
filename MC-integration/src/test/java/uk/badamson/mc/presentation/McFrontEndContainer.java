@@ -21,12 +21,12 @@ package uk.badamson.mc.presentation;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
-import uk.badamson.mc.Version;
+import uk.badamson.mc.SutVersions;
 
 public final class McFrontEndContainer
         extends GenericContainer<McFrontEndContainer> {
 
-    private static final String VERSION = Version.MC_WEB_VERSION;
+    private static final String VERSION = SutVersions.MC_WEB_VERSION;
 
     private static final int PORT = 80;
 
