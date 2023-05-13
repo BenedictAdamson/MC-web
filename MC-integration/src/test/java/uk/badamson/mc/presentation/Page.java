@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 public abstract class Page {
 
     private static final Duration WAIT_UNTIL_READY_TIMEOUT = Duration.ofSeconds(30);
-    private static final Duration WAIT_UNTIL_READY_POLL_INTERVAL = Duration.ofMillis(111);
+    private static final Duration WAIT_UNTIL_READY_POLL_INTERVAL = Duration.ofMillis(317);
     private static final Duration READY_QUERY_PAUSE = Duration.ofMillis(10);
 
     public final class NotReadyException extends IllegalStateException {
