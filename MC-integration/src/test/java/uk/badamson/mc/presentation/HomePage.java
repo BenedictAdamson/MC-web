@@ -1,6 +1,6 @@
 package uk.badamson.mc.presentation;
 /*
- * © Copyright Benedict Adamson 2019-22.
+ * © Copyright Benedict Adamson 2019-23.
  *
  * This file is part of MC.
  *
@@ -47,14 +47,13 @@ public final class HomePage extends Page {
 
     private static final String PATH = "/";
 
-    private static final By LOGOUT_BUTTON_LOCATOR = By
-            .xpath("//button[@id='logout']");
+    private static final By LOGOUT_ELEMENT_LOCATOR = By.id("logout");
 
-    private static final By LOGIN_LINK_LOCATOR = By.id("login");
+    private static final By LOGIN_ELEMENT_LOCATOR = By.id("login");
 
-    private static final By SELF_LINK_LOCATOR = By.xpath("//a[@id='self']");
+    private static final By SELF_ELEMENT_LOCATOR = By.id("self");
 
-    private static final By USERS_LINK_LOCATOR = By.xpath("//a[@id='users']");
+    private static final By USERS_ELEMENT_LOCATOR = By.id("users");
 
     private static final By CURRENT_GAME_LINK_LOCATOR = By
             .xpath("//a[@id='current-game']");
@@ -129,23 +128,35 @@ public final class HomePage extends Page {
     }
 
     public boolean hasExamineCurrentUserLink() {
-        return !getBody().findElements(SELF_LINK_LOCATOR).isEmpty();
+        return getBody().findElements(SELF_ELEMENT_LOCATOR).stream()
+                .anyMatch(element -> element.getTagName().equals("a"));
     }
 
     public boolean hasUsersLink() {
-        return !getBody().findElements(USERS_LINK_LOCATOR).isEmpty();
+        return getBody().findElements(USERS_ELEMENT_LOCATOR).stream()
+                .anyMatch(element -> element.getTagName().equals("a"));
     }
 
     public boolean isLoginEnabled() {
-        return isEnabled(getBody().findElement(LOGIN_LINK_LOCATOR));
+        return isEnabled(findLoginElement());
+    }
+
+    private WebElement findLoginElement() {
+        return getBody().findElement(LOGIN_ELEMENT_LOCATOR);
     }
 
     public boolean isLogoutButtonEnabled() {
-        return isEnabled(getBody().findElement(LOGOUT_BUTTON_LOCATOR));
+        return isEnabled(findLogoutButton());
+    }
+
+    private WebElement findLogoutButton() {
+        return getBody().findElements(LOGOUT_ELEMENT_LOCATOR).stream()
+                .filter(element -> element.getTagName().equals("button"))
+                .findFirst().orElseThrow(() -> new NoSuchElementException("button not found"));
     }
 
     public boolean isLogoutEnabled() {
-        return isEnabled(getBody().findElement(LOGOUT_BUTTON_LOCATOR));
+        return isEnabled(getBody().findElement(LOGOUT_ELEMENT_LOCATOR));
     }
 
     @Override
@@ -154,7 +165,7 @@ public final class HomePage extends Page {
     }
 
     public void logout() {
-        final var button = getBody().findElement(LOGOUT_BUTTON_LOCATOR);
+        final var button = getBody().findElement(LOGOUT_ELEMENT_LOCATOR);
         button.click();
         awaitIsReady();
     }
@@ -177,7 +188,7 @@ public final class HomePage extends Page {
 
     public LoginPage navigateToLoginPage() {
         requireIsReady();
-        getBody().findElement(LOGIN_LINK_LOCATOR).click();
+        findLoginElement().click();
         final var loginPage = new LoginPage(this);
         loginPage.awaitIsReady();
         return loginPage;
@@ -195,7 +206,7 @@ public final class HomePage extends Page {
         final WebElement usersLink;
         try {
             requireIsReady();
-            usersLink = getBody().findElement(USERS_LINK_LOCATOR);
+            usersLink = getBody().findElement(USERS_ELEMENT_LOCATOR);
         } catch (IllegalStateException | NoSuchElementException e) {
             throw new IllegalStateException("Not ready to navigate to users page",
                     e);
