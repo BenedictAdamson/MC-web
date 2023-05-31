@@ -224,6 +224,11 @@
    <dependencies>
       <dependency>
          <groupId>uk.badamson.mc</groupId>
+         <artifactId>MC-model</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>uk.badamson.mc</groupId>
          <artifactId>MC-database</artifactId>
          <type>pom</type>
          <version>${project.parent.version}</version>
