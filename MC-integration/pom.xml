@@ -232,7 +232,6 @@
          <groupId>uk.badamson.mc</groupId>
          <artifactId>MC-front-end</artifactId>
          <classifier>client</classifier>
-         <version>${project.parent.version}</version>
       </dependency>
       <dependency>
          <groupId>uk.badamson.mc</groupId>

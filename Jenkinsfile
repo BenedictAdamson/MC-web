@@ -99,12 +99,10 @@ pipeline {
 					]
             }
             junit 'MC-*/target/*-reports/**/TEST-*.xml'
-            junit 'MC-*/target/karma-reports/*.xml'  
         }
         success {
             archiveArtifacts artifacts: 'MC-*/target/*.deb', fingerprint: true
             archiveArtifacts artifacts: 'MC-*/target/*.jar', fingerprint: true
-            archiveArtifacts artifacts: 'MC-*/target/*.tgz', fingerprint: true
         }
     }
 }

@@ -28,6 +28,7 @@ public final class SutVersions {
     private static final Properties APPLICATION_PROPERTIES = loadApplicationProperties();
     public static final String MC_WEB_VERSION = getApplicationProperty("build.version");
     public static final String MC_BACK_END_VERSION = getApplicationProperty("MC.backend.version");
+    public static final String MC_FRONT_END_VERSION = getApplicationProperty("MC.frontend.version");
 
     private static Properties loadApplicationProperties() {
         final var stream = Thread.currentThread().getContextClassLoader()
