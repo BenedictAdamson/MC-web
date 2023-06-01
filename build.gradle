@@ -2,6 +2,7 @@ tasks.register('loginDockerHub', Exec) {
     def credentials = providers.credentials(PasswordCredentials, 'dockerhub').get()
     standardInput = new ByteArrayInputStream(credentials.password.bytes)
     commandLine 'docker', 'login', '--username', credentials.username, '--password-stdin'
+    shouldRunAfter buildDockerImages
 }
 tasks.register('buildDockerImages') {
     group = 'Publishing'
@@ -9,4 +10,5 @@ tasks.register('buildDockerImages') {
 tasks.register('pushDockerImages') {
     group = 'Publishing'
     dependsOn 'loginDockerHub'
+    shouldRunAfter buildDockerImages
 }
