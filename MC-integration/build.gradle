@@ -69,7 +69,7 @@ tasks.register('buildAwaitportDockerImage', Exec) {
 tasks.register('pushAwaitportDockerImage', Exec) {
     group = 'Publishing'
     dependsOn ':MC-integration:buildAwaitportDockerImage'
-    dependsOn 'loginDockerHub'
+    dependsOn rootProject.loginDockerHub
     commandLine 'docker', 'image', 'push', awaitPortDockerImage
 }
 
