@@ -30,6 +30,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -38,6 +39,7 @@ public abstract class BaseWorld implements Startable, TestLifecycleAware {
     protected static final Path DEFAULT_FAILURE_RECORDING_DIRECTORY = Path.of(".", "target", "test-logs");
 
     private final Path failureRecordingDirectory;
+    @Nullable
     private RemoteWebDriver webDriver;
     private int nUsers;
 
@@ -104,9 +106,10 @@ public abstract class BaseWorld implements Startable, TestLifecycleAware {
             final String leafName = baseFileName + ".png";
             final Path path = failureRecordingDirectory.resolve(leafName);
             try {
+                assert webDriver != null;
                 final var bytes = webDriver.getScreenshotAs(OutputType.BYTES);
                 Files.write(path, bytes);
-            } catch (final Exception e) {
+            } catch (final IOException e) {
                 throw new RuntimeException(e);
             }
 

@@ -78,13 +78,12 @@ rootProject.pushDockerImages.dependsOn pushAwaitportDockerImage
 spotbugs {
     effort = 'Max'
     reportLevel = 'Low'
+    excludeFilter = file('src/test/resources/spotbugs-exclude.xml')
 }
-spotbugsTest.enabled = false
 
 pmd {
     ruleSetConfig = resources.text.fromFile('src/test/resources/pmd-ruleset.xml')
 }
-pmdTest.enabled = false
 
 processTestResources {
     exclude 'application.properties'

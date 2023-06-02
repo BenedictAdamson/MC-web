@@ -7,7 +7,6 @@
         PMD ruleset for MC-back-end
     </description>
 
-	<rule ref="category/java/bestpractices.xml/AvoidUsingHardCodedIP" />
 	<rule ref="category/java/bestpractices.xml/CheckResultSet" />
 	<rule ref="category/java/bestpractices.xml/PrimitiveWrapperInstantiation" />
 	<rule ref="category/java/bestpractices.xml/UnusedFormalParameter" />
@@ -30,7 +29,6 @@
 
 	<rule ref="category/java/design.xml/CollapsibleIfStatements" />
 	<rule ref="category/java/design.xml/SimplifiedTernary" />
-	<rule ref="category/java/design.xml/UselessOverridingMethod" />
 
 	<rule
 		ref="category/java/errorprone.xml/AvoidBranchingStatementAsLastInLoop" />

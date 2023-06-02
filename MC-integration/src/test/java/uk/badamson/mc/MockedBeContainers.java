@@ -18,6 +18,7 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.testcontainers.lifecycle.TestDescription;
 import uk.badamson.mc.presentation.McReverseProxyContainer;
 
@@ -33,8 +34,10 @@ public final class MockedBeContainers extends BaseContainers {
 
     public MockedBeContainers(@Nullable final Path failureRecordingDirectory) {
         super(failureRecordingDirectory);
-        ms.withNetwork(getNetwork()).withNetworkAliases(MS_HOST);
-        ingress.withNetwork(getNetwork()).withNetworkAliases(INGRESS_HOST);
+        ms.withNetwork(getNetwork());
+        ms.withNetworkAliases(MS_HOST);
+        ingress.withNetwork(getNetwork());
+        ingress.withNetworkAliases(INGRESS_HOST);
     }
 
     @Override
@@ -76,6 +79,7 @@ public final class MockedBeContainers extends BaseContainers {
         ms.reset();
     }
 
+    @SuppressFBWarnings(value="EI_EXPOSE_REP", justification="an aggregate")
     public MockMcBackEndContainer getBackEnd() {
         return ms;
     }
