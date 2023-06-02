@@ -86,7 +86,6 @@ pipeline {
         }
         success {
             archiveArtifacts artifacts: 'MC-*/build/distributions/*.deb', fingerprint: true
-            archiveArtifacts artifacts: 'MC-*/build/libs/*.jar', fingerprint: true
         }
     }
 }
