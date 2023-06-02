@@ -44,7 +44,6 @@ dependencies {
 description = 'MC-integration'
 
 java {
-    withJavadocJar()
 }
 
 test {

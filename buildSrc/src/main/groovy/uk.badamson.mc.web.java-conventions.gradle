@@ -8,7 +8,7 @@
  */
 
 plugins {
-    id 'java-library'
+    id 'java'
     id 'maven-publish'
 }
 
@@ -32,42 +32,6 @@ group = 'uk.badamson.mc'
 version = '3.3.2-SNAPSHOT'
 java.sourceCompatibility = JavaVersion.VERSION_17
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from(components.java)
-            pom {
-                organization {
-                    name = 'Benedict Adamson'
-                }
-                licenses {
-                    license {
-                        name = 'GNU Affero General Public License, Version 3'
-                        url = 'https://www.gnu.org/licenses/agpl.html'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:git@github.com:BenedictAdamson/MC-web.git'
-                    developerConnection = 'scm:git:git@github.com:BenedictAdamson/MC-web.git'
-                    url = 'https://github.com/BenedictAdamson/MC-web'
-                }
-            }
-        }
-    }
-    repositories {
-        maven {
-            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-            allowInsecureProtocol = true
-            credentials(PasswordCredentials)
-        }
-    }
-}
-
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
-}
-
-tasks.withType(Javadoc).configureEach {
-    options.encoding = 'UTF-8'
-    (options as StandardJavadocDocletOptions).addBooleanOption('Xdoclint:all,-missing', true)
 }
