@@ -26,6 +26,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import javax.annotation.Nonnull;
 import java.time.Duration;
+import java.util.Objects;
 
 /**
  * <p>
@@ -47,13 +48,23 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
             .withStartupTimeout(Duration.ofSeconds(20))
             .withStrategy(Wait.forLogMessage(".*" + STARTED_MESSAGE + ".*", 1));
 
+    @Nonnull
+    private final String mongoDbHost;
+    @Nonnull
+    private final String mongoDbPassword;
+    @Nonnull
     private final String administratorPassword;
 
     @SuppressWarnings("resource")
-    McBackEndContainer(final String mongoDbHost, final String mongoDbPassword,
-                       final String administratorPassword) {
+    McBackEndContainer(
+            @Nonnull final String mongoDbHost,
+            @Nonnull final String mongoDbPassword,
+            @Nonnull final String administratorPassword
+    ) {
         super(IMAGE);
-        this.administratorPassword = administratorPassword;
+        this.mongoDbHost = Objects.requireNonNull(mongoDbHost);
+        this.mongoDbPassword = Objects.requireNonNull(mongoDbPassword);
+        this.administratorPassword = Objects.requireNonNull(administratorPassword);
         waitingFor(WAIT_STRATEGY);
         withEnv("SPRING_DATA_MONGODB_PASSWORD", mongoDbPassword);
         withEnv("ADMINISTRATOR_PASSWORD", administratorPassword);
@@ -64,6 +75,26 @@ final class McBackEndContainer extends GenericContainer<McBackEndContainer> {
     @Nonnull
     McBackEndClient createClient() {
         return new McBackEndClient(getHost(), getMappedPort(PORT), administratorPassword);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        McBackEndContainer that = (McBackEndContainer) o;
+
+        return mongoDbHost.equals(that.mongoDbHost) &&
+                mongoDbPassword.equals(that.mongoDbPassword) &&
+                administratorPassword.equals(that.administratorPassword);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mongoDbHost.hashCode();
+        result = 31 * result + mongoDbPassword.hashCode();
+        result = 31 * result + administratorPassword.hashCode();
+        return result;
     }
 
 }

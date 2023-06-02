@@ -19,6 +19,7 @@ package uk.badamson.mc;
  */
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -32,6 +33,7 @@ import uk.badamson.mc.rest.Paths;
 
 import javax.annotation.Nonnegative;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Objects;
@@ -81,6 +83,7 @@ final class McBackEndClient {
         }
     }
 
+    @SuppressFBWarnings(value="DCN_NULLPOINTER_EXCEPTION", justification="exception translation")
     private static UUID parseCreateGameResponse(final ResponseSpec response) {
         Objects.requireNonNull(response, "response");
 
@@ -95,16 +98,19 @@ final class McBackEndClient {
         }
     }
 
-    private static void secure(final RequestBodySpec request,
-                               final BasicUserDetails user,
-                               final MultiValueMap<String, HttpCookie> cookies) {
+    @SuppressFBWarnings(value="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification="SpotBugs itself buggy")
+    private static void secure(
+            @Nonnull final RequestBodySpec request,
+            @Nullable final BasicUserDetails user,
+            @Nonnull final MultiValueMap<String, HttpCookie> cookies
+    ) {
         Objects.requireNonNull(request, "request");
         Objects.requireNonNull(cookies, "cookies");
 
-        final var sessionCookie = cookies.getFirst(SESSION_COOKIE_NAME);
-        final var xsrfCookie = cookies.getFirst(XSRF_TOKEN_COOKIE_NAME);
-        Objects.requireNonNull(sessionCookie, "sessionCookie");
-        Objects.requireNonNull(xsrfCookie, "xsrfCookie");
+        @Nonnull
+        final var sessionCookie = Objects.requireNonNull(cookies.getFirst(SESSION_COOKIE_NAME));
+        @Nonnull
+        final var xsrfCookie = Objects.requireNonNull(cookies.getFirst(XSRF_TOKEN_COOKIE_NAME));
         if (user != null) {
             request.headers(headers -> headers.setBasicAuth(user.getUsername(), user.getPassword()));
         }
@@ -150,8 +156,11 @@ final class McBackEndClient {
         return WebTestClient.bindToServer().baseUrl(uri.toString()).build();
     }
 
-    private RequestBodySpec createCreateGameRequest(final UUID scenario, final User user,
-                                                    final MultiValueMap<String, HttpCookie> cookies) {
+    private RequestBodySpec createCreateGameRequest(
+            @Nonnull final UUID scenario,
+            @Nullable final User user,
+            @Nonnull final MultiValueMap<String, HttpCookie> cookies
+    ) {
         Objects.requireNonNull(cookies, "cookies");
 
         final var path = Paths.createPathForGamesOfScenario(scenario);
@@ -187,6 +196,7 @@ final class McBackEndClient {
                 .getResponseBody().toStream().map(ni -> new NamedUUID(ni.getId(), ni.getTitle()));
     }
 
+    @Nonnull
     private MultiValueMap<String, HttpCookie> login(final BasicUserDetails user) {
         final var request = createGetSelfRequest(user.getUsername(),
                 user.getPassword());
@@ -205,8 +215,10 @@ final class McBackEndClient {
         return result;
     }
 
-    private void logout(final User user,
-                        final MultiValueMap<String, HttpCookie> cookies) {
+    private void logout(
+            @Nullable final User user,
+            @Nonnull final MultiValueMap<String, HttpCookie> cookies
+    ) {
         final var request = connectWebTestClient("/logout").post();
         secure(request, user, cookies);
         final var response = request.exchange();

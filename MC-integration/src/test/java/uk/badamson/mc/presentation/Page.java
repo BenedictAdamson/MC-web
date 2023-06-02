@@ -52,14 +52,40 @@ public abstract class Page {
     private static final Duration WAIT_UNTIL_READY_POLL_INTERVAL = Duration.ofMillis(317);
     private static final Duration READY_QUERY_PAUSE = Duration.ofMillis(10);
 
-    public final class NotReadyException extends IllegalStateException {
+    public static final class NotReadyException extends IllegalStateException {
 
         public NotReadyException(final String message) {
             super(message);
         }
 
-        public NotReadyException(final Throwable cause) {
-            super(createNotReadyMessage(), cause);
+        public NotReadyException(@Nonnull Page page, final Throwable cause) {
+            super(page.createNotReadyMessage(), cause);
+        }
+
+    }
+
+    private static final class IsReadyMatcher extends TypeSafeDiagnosingMatcher<WebElement> {
+        @Nonnull
+        private final By elementLocator;
+
+        public IsReadyMatcher(@Nonnull By elementLocator) {
+            this.elementLocator = Objects.requireNonNull(elementLocator);
+        }
+
+        @Override
+        protected boolean matchesSafely(WebElement body, Description mismatchDescription) {
+            final var element = body.findElement(elementLocator);
+            if (isEnabled(element)) {
+                return true;
+            } else {
+                mismatchDescription.appendText("Element [" + element + "] is not enabled");
+                return false;
+            }
+        }
+
+        @Override
+        public void describeTo(Description description) {
+            description.appendText("Require element to be ready");
         }
 
     }
@@ -294,23 +320,7 @@ public abstract class Page {
     }
 
     protected final void awaitElementIsEnabled(@Nonnull By elementLocator) {
-        awaitIsReady(new TypeSafeDiagnosingMatcher<>() {
-            @Override
-            protected boolean matchesSafely(WebElement body, Description mismatchDescription) {
-                final var element = body.findElement(elementLocator);
-                if (isEnabled(element)) {
-                    return true;
-                } else {
-                    mismatchDescription.appendText("Element [" + element + "] is not enabled");
-                    return false;
-                }
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("Require element to be ready");
-            }
-        });
+        awaitIsReady(new IsReadyMatcher(elementLocator));
     }
 
     protected final void awaitIsReady(
@@ -324,7 +334,7 @@ public abstract class Page {
             // if still not ready
             // OK, the final check was OK, so *just* became ready in time
         } catch (final Exception e) {// give better diagnostics
-            throw new NotReadyException(e);
+            throw new NotReadyException(this, e);
         }
     }
 
@@ -335,7 +345,7 @@ public abstract class Page {
                             && HAS_ERROR_ELEMENT
                             .matches(driver.findElement(BODY_LOCATOR)));
         } catch (final Exception e) {// give better diagnostics
-            throw new NotReadyException(e);
+            throw new NotReadyException(this, e);
         }
     }
 
@@ -428,7 +438,7 @@ public abstract class Page {
             assertValidBody(webDriver.findElement(BODY_LOCATOR));
             Thread.sleep(READY_QUERY_PAUSE.toMillis());
         } catch (AssertionError | InterruptedException e) {
-            throw new NotReadyException(e);
+            throw new NotReadyException(this, e);
         }
     }
 

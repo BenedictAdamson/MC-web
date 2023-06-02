@@ -18,6 +18,7 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -84,6 +85,7 @@ public class PristineIT implements AutoCloseable {
         assertHttpStatusOk(HttpServer.INGRESS);
     }
 
+    @SuppressFBWarnings(value="DCN_NULLPOINTER_EXCEPTION", justification="exception translation")
     private int getRootHttpResponseCode(final HttpServer server) {
         try {
             final var localUrl = containers.createUriFromPath(server, "");

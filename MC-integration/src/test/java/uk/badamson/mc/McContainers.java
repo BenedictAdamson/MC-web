@@ -18,6 +18,7 @@ package uk.badamson.mc;
  * along with MC.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.testcontainers.containers.GenericContainer;
 import uk.badamson.mc.presentation.McReverseProxyContainer;
 import uk.badamson.mc.repository.McDatabaseContainer;
@@ -55,13 +56,16 @@ public class McContainers extends BaseContainers {
     public McContainers(@Nullable final Path failureRecordingDirectory) {
         super(failureRecordingDirectory);
         db = new McDatabaseContainer(
-                DB_ROOT_PASSWORD, DB_USER_PASSWORD).withNetwork(getNetwork())
-                .withNetworkAliases(DB_HOST);
+                DB_ROOT_PASSWORD, DB_USER_PASSWORD);
+        db.withNetwork(getNetwork());
+        db.withNetworkAliases(DB_HOST);
         be = new McBackEndContainer(DB_HOST,
-                DB_USER_PASSWORD, ADMINISTRATOR_PASSWORD).withNetwork(getNetwork())
-                .withNetworkAliases(BE_HOST);
-        in = McReverseProxyContainer.createWithRealBe()
-                .withNetwork(getNetwork()).withNetworkAliases(REVERSE_PROXY_HOST);
+                DB_USER_PASSWORD, ADMINISTRATOR_PASSWORD);
+        be.withNetwork(getNetwork());
+        be.withNetworkAliases(BE_HOST);
+        in = McReverseProxyContainer.createWithRealBe();
+        in.withNetwork(getNetwork());
+        in.withNetworkAliases(REVERSE_PROXY_HOST);
     }
 
     private static void assertThatNoErrorMessagesLogged(final String container,
@@ -74,6 +78,7 @@ public class McContainers extends BaseContainers {
         return BASE_PRIVATE_NETWORK_URI.resolve(path);
     }
 
+    @SuppressFBWarnings(value="EI_EXPOSE_REP", justification="an aggregate")
     @Nonnull
     public final McBackEndContainer getBackEnd() {
         return be;

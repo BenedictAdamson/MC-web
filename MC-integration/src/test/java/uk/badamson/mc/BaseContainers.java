@@ -1,5 +1,6 @@
 package uk.badamson.mc;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -22,6 +23,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+@SuppressFBWarnings(value="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification="SpotBugs itself buggy")
 abstract class BaseContainers implements Startable, TestLifecycleAware {
     private static final String FE_HOST = "fe";
     private static final Capabilities CAPABILITIES = new FirefoxOptions().addPreference("security.insecure_field_warning.contextual.enabled", false);
@@ -41,8 +43,9 @@ abstract class BaseContainers implements Startable, TestLifecycleAware {
                 throw new IllegalArgumentException(e);
             }
         }
-        frontEnd = new McFrontEndContainer()
-                .withNetwork(getNetwork()).withNetworkAliases(FE_HOST);
+        frontEnd = new McFrontEndContainer();
+        frontEnd.withNetwork(getNetwork());
+        frontEnd.withNetworkAliases(FE_HOST);
         browser = createBrowserContainer(network, failureRecordingDirectory);
     }
 
@@ -51,7 +54,7 @@ abstract class BaseContainers implements Startable, TestLifecycleAware {
             @Nonnull Network network,
             @Nullable final Path failureRecordingDirectory) {
         final var browser = new BrowserWebDriverContainer<>();
-        browser.withCreateContainerCmdModifier(cmd -> Objects.requireNonNull(cmd.getHostConfig())
+        browser.withCreateContainerCmdModifier(cmd -> Objects.requireNonNull(Objects.requireNonNull(cmd).getHostConfig())
                 .withCpuCount(2L));
         browser.withCapabilities(CAPABILITIES);
         browser.withNetwork(network);

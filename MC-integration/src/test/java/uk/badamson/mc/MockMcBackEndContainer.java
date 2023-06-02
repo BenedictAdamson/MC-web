@@ -1,8 +1,27 @@
 package uk.badamson.mc;
+/*
+ * © Copyright Benedict Adamson 2019-23.
+ *
+ * This file is part of MC.
+ *
+ * MC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * MC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with MC.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.matchers.Times;
 import org.mockserver.model.*;
@@ -30,6 +49,18 @@ public final class MockMcBackEndContainer extends MockServerContainer {
 
     public MockMcBackEndContainer() {
         super(MOCKSERVER_IMAGE);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 
     @Override
@@ -216,7 +247,7 @@ public final class MockMcBackEndContainer extends MockServerContainer {
     }
 
     private static HttpResponse getAllScenariosResponse(@Nonnull final Set<NamedUUID> scenarios) {
-        final var dto = scenarios.stream().map(ni -> new uk.badamson.mc.rest.NamedUUID(ni.getId(), ni.getTitle())).collect(Collectors.toUnmodifiableSet());
+        final var dto = scenarios.stream().map(ni -> new NamedUUID(ni.getId(), ni.getTitle())).collect(Collectors.toUnmodifiableSet());
         return jsonResponse(dto);
     }
 
@@ -335,6 +366,7 @@ public final class MockMcBackEndContainer extends MockServerContainer {
 
     private MockServerClient mockServerClient;
 
+    @SuppressFBWarnings(value="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD", justification="actually used by Jackson")
     final private static class MinimalUserDetails {
         public MinimalUserDetails(@Nonnull final BasicUserDetails userDetails) {
             this.username = userDetails.getUsername();
