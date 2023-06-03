@@ -23,9 +23,6 @@ tasks.register('packageDeb', Deb) {
 
     preInstall file('src/main/deb/preinst')
     postInstall file('src/main/deb/postinst')
-    preUninstall file('src/main/deb/prerm')
-
-    requires('mongodb-org-server')
 
     into '/usr/share/missioncommand-db'
 
