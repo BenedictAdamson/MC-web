@@ -10,7 +10,7 @@ def mcFrontendVersion = libs.versions.mc.frontend.get()
 
 dependencies {
     testImplementation project(':MC-database')
-    testImplementation "uk.badamson.mc:MC-front-end:${mcBackendVersion}:client"
+    testImplementation "uk.badamson.mc:MC-front-end:${mcFrontendVersion}:client"
     testImplementation libs.mc.model
     testImplementation libs.mc.rest
 
