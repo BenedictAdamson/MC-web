@@ -1,7 +1,6 @@
 plugins {
-    id 'uk.badamson.mc.web.java-conventions'
+    id 'uk.badamson.mc.web.base-conventions'
     id 'com.netflix.nebula.deb' version '11.3.0'
-
 }
 
 apply plugin: 'com.netflix.nebula.deb'
