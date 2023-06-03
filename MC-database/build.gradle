@@ -2,12 +2,9 @@ plugins {
     id 'uk.badamson.mc.web.base-conventions'
     id 'com.netflix.nebula.deb' version '11.3.0'
 }
-
 apply plugin: 'com.netflix.nebula.deb'
 
 description = 'MC-database'
-def dockerImage = "benedictadamson/mc-database:${project.version}"
-
 
 tasks.register('packageDeb', Deb) {
     group = 'Publishing'
@@ -54,6 +51,8 @@ tasks.register('packageDeb', Deb) {
     }
 }
 
+def buildContextDir = "${project.buildDir}/docker/context"
+def dockerImage = "benedictadamson/mc-database:${project.version}"
 tasks.register('prepareDbDockerBuildContext', Copy) {
     group = 'Publishing'
     dependsOn ':MC-database:packageDeb'
@@ -62,12 +61,12 @@ tasks.register('prepareDbDockerBuildContext', Copy) {
         include '*.deb'
         rename 'missioncommand-db_.*_all.deb', 'missioncommand-db.deb'
     }
-    into "${project.buildDir}/docker/context"
+    into buildContextDir
 }
 tasks.register('buildDbDockerImage', Exec) {
     group = 'Publishing'
     dependsOn ':MC-database:prepareDbDockerBuildContext'
-    commandLine 'docker', 'build', '--tag', dockerImage, "${project.buildDir}/docker/context"
+    commandLine 'docker', 'build', '--tag', dockerImage, buildContextDir
 }
 tasks.register('pushDbDockerImage', Exec) {
     group = 'Publishing'
