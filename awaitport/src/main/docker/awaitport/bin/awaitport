@@ -15,7 +15,6 @@
 # the port number of the port
 
 # Parse command-line
-ME="$0"
 DELAY="$1"
 INTERVAL="$2"
 HOST="$3"

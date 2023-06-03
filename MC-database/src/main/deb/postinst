@@ -8,11 +8,12 @@ configure) # preinst was successful and files have been unpacked
   if [ $# -gt 0 ]; then
     # upgrading, or installing from the "Config Files" state
     # (package was installed, then removed, but not purged)
-    OLD_VERSION="$1"
+    # OLD_VERSION="$1"
     shift
-    HAVE_CONFIG_FILES=Y
+    # HAVE_CONFIG_FILES=Y
   else
-    HAVE_CONFIG_FILES=N
+    # HAVE_CONFIG_FILES=N
+    :
   fi
   if which systemctl > /dev/null; then
     # a systemd installation (rather than Docker)
@@ -24,12 +25,12 @@ configure) # preinst was successful and files have been unpacked
   fi
   ;;
 abort-upgrade) # "prerm upgrade" failed during an upgrade
-  NEW_VERSION="$1"
+  # NEW_VERSION="$1"
   shift
   # Do nothing
   ;;
 abort-remove) # "prerm remove" failed during a remove or remove+purge
-  NEW_VERSION="$1"
+  # NEW_VERSION="$1"
   shift
   # Do nothing
   ;;
