@@ -1,0 +1,26 @@
+plugins {
+    id 'uk.badamson.mc.web.base-conventions'
+}
+
+description = 'awaitport'
+
+def awaitPortDockerImage = "benedictadamson/awaitport:${project.version}"
+def awaitPortDockerContext = "${project.buildDir}/docker/context"
+tasks.register('prepareAwaitportDockerBuildContext', Copy) {
+    group = 'Publishing'
+    from 'src/main/docker/awaitport'
+    into awaitPortDockerContext
+}
+tasks.register('buildAwaitportDockerImage', Exec) {
+    group = 'Publishing'
+    dependsOn ':awaitport:prepareAwaitportDockerBuildContext'
+    commandLine 'docker', 'build', '--tag', awaitPortDockerImage, awaitPortDockerContext
+}
+tasks.register('pushAwaitportDockerImage', Exec) {
+    group = 'Publishing'
+    dependsOn ':awaitport:buildAwaitportDockerImage'
+    dependsOn ':loginDockerHub'
+    commandLine 'docker', 'image', 'push', awaitPortDockerImage
+}
+rootProject.buildDockerImages.dependsOn buildAwaitportDockerImage
+rootProject.pushDockerImages.dependsOn pushAwaitportDockerImage

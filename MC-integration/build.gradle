@@ -52,27 +52,6 @@ test {
     }
 }
 
-def awaitPortDockerImage = "benedictadamson/awaitport:${project.version}"
-def awaitPortDockerContext = "${project.buildDir}/docker/context"
-tasks.register('prepareAwaitportDockerBuildContext', Copy) {
-    group = 'Publishing'
-    from 'src/main/docker/awaitport'
-    into awaitPortDockerContext
-}
-tasks.register('buildAwaitportDockerImage', Exec) {
-    group = 'Publishing'
-    dependsOn ':MC-integration:prepareAwaitportDockerBuildContext'
-    commandLine 'docker', 'build', '--tag', awaitPortDockerImage, awaitPortDockerContext
-}
-tasks.register('pushAwaitportDockerImage', Exec) {
-    group = 'Publishing'
-    dependsOn ':MC-integration:buildAwaitportDockerImage'
-    dependsOn ':loginDockerHub'
-    commandLine 'docker', 'image', 'push', awaitPortDockerImage
-}
-rootProject.buildDockerImages.dependsOn buildAwaitportDockerImage
-rootProject.pushDockerImages.dependsOn pushAwaitportDockerImage
-
 spotbugs {
     effort = 'Max'
     reportLevel = 'Low'
