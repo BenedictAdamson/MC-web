@@ -18,6 +18,8 @@ tasks.register('packageDeb', Deb) {
     maintainer = 'Benedict Adamson <badamson@spamcop.net>'
     description = 'database of the MC game server'
     distribution = 'stable'
+    requires 'mongodb-org-server'
+    recommends 'mongodb-org'
 
     preInstall file('src/deb/control/preinst')
     postInstall file('src/deb/control/postinst')
