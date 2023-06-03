@@ -21,9 +21,9 @@ tasks.register('packageDeb', Deb) {
     requires 'mongodb-org-server'
     recommends 'mongodb-org'
 
-    preInstall file('src/deb/control/preinst')
-    postInstall file('src/deb/control/postinst')
-    preUninstall file('src/deb/control/prerm')
+    preInstall file('src/main/deb/preinst')
+    postInstall file('src/main/deb/postinst')
+    preUninstall file('src/main/deb/prerm')
 
     requires('mongodb-org-server')
 
