@@ -70,7 +70,6 @@ tasks.register('pushAwaitportDockerImage', Exec) {
     dependsOn ':loginDockerHub'
     commandLine 'docker', 'image', 'push', awaitPortDockerImage
 }
-
 rootProject.buildDockerImages.dependsOn buildAwaitportDockerImage
 rootProject.pushDockerImages.dependsOn pushAwaitportDockerImage
 
