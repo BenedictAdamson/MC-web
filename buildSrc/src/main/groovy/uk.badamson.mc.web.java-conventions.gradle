@@ -8,6 +8,7 @@
  */
 
 plugins {
+    id 'uk.badamson.mc.web.base-conventions'
     id 'java'
     id 'maven-publish'
 }
@@ -28,8 +29,6 @@ repositories {
     mavenCentral()
 }
 
-group = 'uk.badamson.mc'
-version = '3.3.2-SNAPSHOT'
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 tasks.withType(JavaCompile).configureEach {

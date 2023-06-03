@@ -1,0 +1,10 @@
+/**
+ * uk.badamson.mc.web.base-conventions.gradle
+ * Gradle conventions for sub projects in the MC-web project.
+ */
+
+plugins {
+}
+
+group = 'uk.badamson.mc'
+version = '3.3.2-SNAPSHOT'
