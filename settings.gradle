@@ -9,7 +9,7 @@ dependencyResolutionManagement {
             })
             version('junit', {
                 strictly '[5.9, 5.10['
-                prefer '5.9.2'
+                prefer '5.9.3'
             })
             version('logback', {
                 strictly '[1.2, 1.3['
