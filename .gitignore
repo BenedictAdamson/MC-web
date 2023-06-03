@@ -5,3 +5,5 @@ target/
 *.lock
 packer_cache/
 /.idea
+build/
+.gradle/
