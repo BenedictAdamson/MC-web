@@ -79,3 +79,5 @@ dependencyResolutionManagement {
 
 include(':MC-database')
 include(':MC-integration')
+include 'awaitport'
+
