@@ -8,7 +8,7 @@ remove) # removal or removal+purge
   # Do nothing
   ;;
 upgrade)
-  NEW_VERSION="$1"
+  # NEW_VERSION="$1"
   shift
   # Do nothing
   ;;
