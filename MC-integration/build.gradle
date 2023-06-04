@@ -27,7 +27,6 @@ dependencies {
     testImplementation libs.opentest4j
     testImplementation libs.mockserver.client.java
     testImplementation libs.mongodb.driver.sync
-    testImplementation libs.postgresql
     testImplementation libs.selenium.firefox.driver
     testImplementation libs.selenium.remote.driver
     testImplementation libs.selenium.support
