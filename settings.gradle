@@ -20,8 +20,8 @@ dependencyResolutionManagement {
                 strictly '2.3-groovy-3.0'
             })
             version('springframework', {
-                strictly '[5.3, 5.4['
-                prefer '5.3.26'
+                strictly '[5.3, 6.1['
+                prefer '6.0.9'
             })
             version('testcontainers', {
                 strictly '[1.18, 1.19['
