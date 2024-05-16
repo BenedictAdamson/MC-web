@@ -28,12 +28,12 @@ dependencyResolutionManagement {
                 prefer '1.18.0'
             })
 
-            version('mc-backend', '3.2.8')
+            version('mc-backend', '3.2.9')
             version('mc-core', {
                 strictly '[3.2, 3.3['
                 prefer '3.2.6'
             })
-            version('mc-frontend', '3.3.1')
+            version('mc-frontend', '3.3.2')
 
             library('mc-rest',  'uk.badamson.mc', 'MC-REST').versionRef ('mc-backend')
             library('mc-model',  'uk.badamson.mc', 'MC-model').versionRef('mc-core')
