@@ -56,7 +56,7 @@ dependencyResolutionManagement {
             library('junit-jupiter-engine', 'org.junit.jupiter', 'junit-jupiter-engine').versionRef('junit')
             library('junit-platform-console', 'org.junit.platform:junit-platform-console:1.9.3')
             library('mockserver-client-java', 'org.mock-server:mockserver-client-java:5.15.0')
-            library('mongodb-driver-sync', 'org.mongodb:mongodb-driver-sync:4.9.1')
+            library('mongodb-driver-sync', 'org.mongodb:mongodb-driver-sync:4.6.1')
             library('opentest4j', 'org.opentest4j:opentest4j:1.2.0')
             library('postgresql', 'org.postgresql:postgresql:42.3.8')
             library('reactor-netty', 'io.projectreactor.netty:reactor-netty:1.0.30')
