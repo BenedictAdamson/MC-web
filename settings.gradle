@@ -58,6 +58,7 @@ dependencyResolutionManagement {
             library('mockserver-client-java', 'org.mock-server:mockserver-client-java:5.15.0')
             library('mongodb-driver-sync', 'org.mongodb:mongodb-driver-sync:4.9.1')
             library('opentest4j', 'org.opentest4j:opentest4j:1.2.0')
+            library('postgresql', 'org.postgresql:postgresql:42.3.8')
             library('reactor-netty', 'io.projectreactor.netty:reactor-netty:1.0.30')
             library('spock-core', 'org.spockframework', 'spock-core').versionRef('spock')
             library('spock-spring', 'org.spockframework', 'spock-spring').versionRef('spock')
