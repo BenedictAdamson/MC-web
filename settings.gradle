@@ -4,8 +4,8 @@ dependencyResolutionManagement {
     versionCatalogs {
         libs {
             version('jackson', {
-                strictly '[2.13, 2.15['
-                prefer '2.14.3'
+                strictly '[2.13, 2.14['
+                prefer '2.13.5'
             })
             version('junit', {
                 strictly '[5.9, 5.10['
