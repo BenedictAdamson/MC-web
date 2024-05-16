@@ -15,7 +15,7 @@ dependencyResolutionManagement {
                 strictly '[1.2, 1.5['
                 prefer '1.4.7'
             })
-            version('selenium', '4.9.1')
+            version('selenium', '4.1.4')
             version('spock', {
                 strictly '2.3-groovy-3.0'
             })
